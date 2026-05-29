@@ -1,0 +1,21 @@
+{
+  "name": "Dog Blis Club",
+  "short_name": "Blis Club",
+  "description": "Súper App interactiva para dueños de perros - Nutrición, entrenamiento y seguimiento",
+  "start_url": "/guau/app",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
