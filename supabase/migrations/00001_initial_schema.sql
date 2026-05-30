@@ -2,14 +2,11 @@
 -- Dog Blis Club - Schema inicial (20 tablas + RLS + triggers)
 -- ============================================================
 
--- EXTENSIONES
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- ============================================================
 -- 1. PROFILES (se crea automaticamente al registrarse)
 -- ============================================================
 CREATE TABLE profiles (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
   display_name TEXT,
   avatar_url TEXT,
@@ -44,7 +41,7 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
 -- 2. DOGS
 -- ============================================================
 CREATE TABLE dogs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   owner_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   nombre TEXT NOT NULL,
   raza TEXT NOT NULL,
@@ -77,7 +74,7 @@ CREATE POLICY "Usuarios eliminan sus propios perros"
 -- 3. DAILY_LOGS (registro diario original)
 -- ============================================================
 CREATE TABLE daily_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   dog_id UUID NOT NULL REFERENCES dogs(id) ON DELETE CASCADE,
   fecha DATE NOT NULL DEFAULT CURRENT_DATE,
   nivel_estres INT CHECK (nivel_estres >= 1 AND nivel_estres <= 5),
@@ -102,7 +99,7 @@ CREATE POLICY "Usuarios crean logs de sus perros"
 CREATE TYPE activity_level AS ENUM ('sedentario', 'moderado', 'activo', 'atletico');
 
 CREATE TABLE dog_metabolic_profiles (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   dog_id UUID NOT NULL UNIQUE REFERENCES dogs(id) ON DELETE CASCADE,
   activity_level activity_level DEFAULT 'moderado',
   allergies TEXT[] DEFAULT '{}',
@@ -137,7 +134,7 @@ CREATE TYPE recipe_category AS ENUM ('diario', 'snack', 'helado', 'pastel');
 CREATE TYPE recipe_difficulty AS ENUM ('facil', 'medio', 'avanzado');
 
 CREATE TABLE nutrition_recipes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
   category recipe_category DEFAULT 'diario',
@@ -165,7 +162,7 @@ CREATE POLICY "Recetas visibles para todos los usuarios"
 CREATE TYPE ingredient_type AS ENUM ('proteina', 'hueso', 'viscera', 'vegetal', 'suplemento', 'otro');
 
 CREATE TABLE recipe_ingredients (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   recipe_id UUID NOT NULL REFERENCES nutrition_recipes(id) ON DELETE CASCADE,
   ingredient_name TEXT NOT NULL,
   quantity_per_serving_g INT NOT NULL,
@@ -182,7 +179,7 @@ CREATE POLICY "Ingredientes visibles para todos"
 -- 7. NUTRITION_LOGS
 -- ============================================================
 CREATE TABLE nutrition_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   dog_id UUID NOT NULL REFERENCES dogs(id) ON DELETE CASCADE,
   recipe_id UUID REFERENCES nutrition_recipes(id) ON DELETE SET NULL,
   gramos_servidos INT NOT NULL,
@@ -206,7 +203,7 @@ CREATE POLICY "Usuarios crean logs de nutricion de sus perros"
 CREATE TYPE traffic_light AS ENUM ('green', 'yellow', 'red');
 
 CREATE TABLE walks (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   dog_id UUID NOT NULL REFERENCES dogs(id) ON DELETE CASCADE,
   start_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   end_time TIMESTAMPTZ,
@@ -237,7 +234,7 @@ CREATE POLICY "Usuarios actualizan paseos de sus perros"
 -- 9. DIGESTIVE_LOGS
 -- ============================================================
 CREATE TABLE digestive_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   dog_id UUID NOT NULL REFERENCES dogs(id) ON DELETE CASCADE,
   fecha DATE NOT NULL DEFAULT CURRENT_DATE,
   stool_type INT CHECK (stool_type >= 1 AND stool_type <= 7),
@@ -259,7 +256,7 @@ CREATE POLICY "Usuarios crean logs digestivos de sus perros"
 -- 10. AGILITY_SESSIONS
 -- ============================================================
 CREATE TABLE agility_sessions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   dog_id UUID NOT NULL REFERENCES dogs(id) ON DELETE CASCADE,
   fecha DATE NOT NULL DEFAULT CURRENT_DATE,
   activity_type TEXT NOT NULL,
@@ -283,7 +280,7 @@ CREATE POLICY "Usuarios crean sesiones agility de sus perros"
 -- 11. STAGES (Etapas de la Academia)
 -- ============================================================
 CREATE TABLE stages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
   "order" INT NOT NULL UNIQUE,
@@ -301,7 +298,7 @@ CREATE POLICY "Etapas visibles para todos"
 -- 12. MODULES (Modulos de la Academia)
 -- ============================================================
 CREATE TABLE modules (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   stage_id UUID NOT NULL REFERENCES stages(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT,
@@ -323,7 +320,7 @@ CREATE POLICY "Modulos visibles para todos"
 CREATE TYPE lesson_type AS ENUM ('theory', 'minigame_reflejos', 'minigame_diccionario', 'practice_timer');
 
 CREATE TABLE lessons (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   module_id UUID NOT NULL REFERENCES modules(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   type lesson_type DEFAULT 'theory',
@@ -343,7 +340,7 @@ CREATE POLICY "Lecciones visibles para todos"
 -- 14. USER_PROGRESS (Progreso en lecciones)
 -- ============================================================
 CREATE TABLE user_progress (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   lesson_id UUID NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
   completed BOOLEAN DEFAULT false,
@@ -373,7 +370,7 @@ CREATE POLICY "Usuarios modifican su propio progreso"
 CREATE TYPE badge_type AS ENUM ('academia', 'tracker', 'streak');
 
 CREATE TABLE badges (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   description TEXT,
   icon_url TEXT,
@@ -392,7 +389,7 @@ CREATE POLICY "Insignias visibles para todos"
 -- 16. USER_BADGES
 -- ============================================================
 CREATE TABLE user_badges (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   badge_id UUID NOT NULL REFERENCES badges(id) ON DELETE CASCADE,
   earned_at TIMESTAMPTZ DEFAULT NOW(),
@@ -413,7 +410,7 @@ CREATE POLICY "Usuarios ganan insignias"
 -- 17. USER_STREAKS (Rachas)
 -- ============================================================
 CREATE TABLE user_streaks (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   streak_type TEXT NOT NULL DEFAULT 'walk',
   current_streak INT DEFAULT 0,
@@ -439,7 +436,7 @@ CREATE POLICY "Usuarios actualizan sus rachas"
 CREATE TYPE severity_level AS ENUM ('bajo', 'medio', 'alto', 'mortal');
 
 CREATE TABLE toxic_foods (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL UNIQUE,
   is_toxic BOOLEAN DEFAULT true,
   severity severity_level DEFAULT 'medio',
@@ -458,7 +455,7 @@ CREATE POLICY "Alimentos toxicos visibles para todos"
 -- 19. DETOX_DAYS
 -- ============================================================
 CREATE TABLE detox_days (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   day_number INT NOT NULL UNIQUE CHECK (day_number >= 1 AND day_number <= 14),
   title TEXT NOT NULL,
   instructions TEXT NOT NULL,
@@ -476,7 +473,7 @@ CREATE POLICY "Dias detox visibles para todos"
 -- 20. DETOX_PROGRESS
 -- ============================================================
 CREATE TABLE detox_progress (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   dog_id UUID NOT NULL REFERENCES dogs(id) ON DELETE CASCADE,
   day_number INT NOT NULL,
   completed BOOLEAN DEFAULT false,
@@ -499,7 +496,7 @@ CREATE POLICY "Usuarios actualizan progreso detox de sus perros"
 -- 21. WEEKLY_CHALLENGES
 -- ============================================================
 CREATE TABLE weekly_challenges (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
   fecha_inicio DATE NOT NULL,
@@ -518,7 +515,7 @@ CREATE POLICY "Retos visibles para todos"
 -- 22. USER_CHALLENGES
 -- ============================================================
 CREATE TABLE user_challenges (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   challenge_id UUID NOT NULL REFERENCES weekly_challenges(id) ON DELETE CASCADE,
   completed BOOLEAN DEFAULT false,
@@ -541,7 +538,7 @@ CREATE POLICY "Usuarios completan retos"
 -- 23. NOTIFICATIONS
 -- ============================================================
 CREATE TABLE notifications (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   mensaje TEXT NOT NULL,
   leida BOOLEAN DEFAULT false,
@@ -562,7 +559,7 @@ CREATE POLICY "Usuarios marcan notificaciones como leidas"
 -- 24. PLANS (Suscripciones)
 -- ============================================================
 CREATE TABLE plans (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   price_cents INT NOT NULL,
   izipay_price_id TEXT,
@@ -583,7 +580,7 @@ CREATE POLICY "Planes visibles para todos"
 CREATE TYPE subscription_status AS ENUM ('active', 'canceled', 'past_due', 'trialing');
 
 CREATE TABLE subscriptions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   plan_id UUID NOT NULL REFERENCES plans(id),
   status subscription_status DEFAULT 'active',
@@ -603,7 +600,7 @@ CREATE POLICY "Usuarios ven su suscripcion"
 -- 26. SHOPPING_LIST
 -- ============================================================
 CREATE TABLE shopping_list (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   ingredient_name TEXT NOT NULL,
   quantity_g INT,
