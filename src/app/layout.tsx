@@ -3,14 +3,14 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dog Blis Club",
-  description: "Súper App para dueños de perros — Nutrición, entrenamiento y seguimiento",
+  title: "Blis Club",
+  description: "Tu ecosistema de apps para mascotas",
   manifest: "/manifest.json",
   appleWebApp: { capable: true, title: "Blis Club", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2563eb",
+  themeColor: "#5956e9",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

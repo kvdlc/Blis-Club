@@ -24,7 +24,7 @@ export default function AppNav() {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-56 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 p-4 z-40">
         <Link href="/guau/app" className="flex items-center gap-2 px-3 py-2 mb-8">
-          <span className="text-xl font-bold text-primary-600 dark:text-primary-400">Dog Blis Club</span>
+          <span className="text-xl font-bold text-primary-600 dark:text-primary-400">Blis Club</span>
         </Link>
         <nav className="flex flex-col gap-1 flex-1">
           {tabs.map((tab) => {

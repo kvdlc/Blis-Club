@@ -4,10 +4,10 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
       <h1 className="text-5xl font-bold text-primary-600 dark:text-primary-400 mb-4">
-        Dog Blis Club
+        Blis Club
       </h1>
       <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-md mb-8">
-        La súper app para dueños de perros. Nutrición natural, entrenamiento y seguimiento de progreso en un solo lugar.
+        Tu ecosistema de apps para mascotas. Nutrición, entrenamiento y seguimiento en un solo lugar.
       </p>
       <div className="flex flex-col sm:flex-row gap-3">
         <Link

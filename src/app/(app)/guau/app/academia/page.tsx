@@ -113,46 +113,46 @@ export default async function AcademiaPage() {
                   const isModUnlocked = isUnlocked && (modIdx === 0 || (modIdx > 0 && stageModules[modIdx - 1] && lessons.filter(l => l.module_id === stageModules[modIdx - 1].id).every(l => completedLessonIds.has(l.id))));
                   const completedCount = modLessons.filter((l) => completedLessonIds.has(l.id)).length;
 
-                  return (
-                    <Link
-                      key={mod.id}
-                      href={isModUnlocked && firstLesson ? `/guau/app/academia/${firstLesson.id}` : "#"}
-                      className={`block rounded-xl border p-4 transition-all ${
-                        isModUnlocked
-                          ? "border-primary-200 dark:border-primary-800 bg-white dark:bg-zinc-900 hover:shadow-md active:scale-[0.98]"
-                          : "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 opacity-60"
-                      }`}
-                      onClick={(e) => { if (!isModUnlocked) e.preventDefault(); }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          isModUnlocked ? "bg-primary-100 dark:bg-primary-950 text-primary-600" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
-                        }`}>
-                          {isModUnlocked ? (
-                            completedCount === modLessons.length ? (
-                              <CheckCircle className="w-5 h-5 text-secondary-500" />
-                            ) : (
-                              <Play className="w-5 h-5" />
-                            )
+                  const href = isModUnlocked && firstLesson ? `/guau/app/academia/${firstLesson.id}` : null;
+                  const cls = `block rounded-xl border p-4 transition-all ${
+                    isModUnlocked
+                      ? "border-primary-200 dark:border-primary-800 bg-white dark:bg-zinc-900 hover:shadow-md active:scale-[0.98]"
+                      : "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 opacity-60"
+                  }`;
+                  const inner = (
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        isModUnlocked ? "bg-primary-100 dark:bg-primary-950 text-primary-600" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+                      }`}>
+                        {isModUnlocked ? (
+                          completedCount === modLessons.length ? (
+                            <CheckCircle className="w-5 h-5 text-secondary-500" />
                           ) : (
-                            <Lock className="w-5 h-5" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className={`text-sm font-semibold truncate ${isModUnlocked ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-400"}`}>
-                            Módulo {stage.order}.{mod.order}: {mod.title}
-                          </h4>
-                          {mod.description && (
-                            <p className="text-xs text-zinc-500 truncate mt-0.5">{mod.description}</p>
-                          )}
-                        </div>
-                        {isModUnlocked && completedCount > 0 && (
-                          <span className="text-xs font-medium text-secondary-600 dark:text-secondary-400">
-                            {completedCount}/{modLessons.length}
-                          </span>
+                            <Play className="w-5 h-5" />
+                          )
+                        ) : (
+                          <Lock className="w-5 h-5" />
                         )}
                       </div>
-                    </Link>
+                      <div className="flex-1 min-w-0">
+                        <h4 className={`text-sm font-semibold truncate ${isModUnlocked ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-400"}`}>
+                          Módulo {stage.order}.{mod.order}: {mod.title}
+                        </h4>
+                        {mod.description && (
+                          <p className="text-xs text-zinc-500 truncate mt-0.5">{mod.description}</p>
+                        )}
+                      </div>
+                      {isModUnlocked && completedCount > 0 && (
+                        <span className="text-xs font-medium text-secondary-600 dark:text-secondary-400">
+                          {completedCount}/{modLessons.length}
+                        </span>
+                      )}
+                    </div>
+                  );
+                  return href ? (
+                    <Link key={mod.id} href={href} className={cls}>{inner}</Link>
+                  ) : (
+                    <div key={mod.id} className={cls}>{inner}</div>
                   );
                 })}
               </div>

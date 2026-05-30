@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import type { Dog, Walk, DailyLog } from "@/types/database";
-import { Activity, UtensilsCrossed, GraduationCap, TrendingUp, PawPrint } from "lucide-react";
+import { Activity, UtensilsCrossed, GraduationCap, TrendingUp, PawPrint, Plus } from "lucide-react";
+import { AddDogForm } from "./AddDogForm";
 
 async function getDashboardData(userId: string) {
   const supabase = await createClient();
@@ -43,27 +44,29 @@ export default async function DashboardPage() {
 
   const { dog, logs, walks } = await getDashboardData(user.id);
 
+  const last7Walks = walks.slice(0, 7).reverse();
+  const greenCount = walks.filter((w) => w.traffic_light === "green").length;
+  const walkTotal = walks.length || 1;
+  const greenPct = Math.round((greenCount / walkTotal) * 100);
   const todayWalks = walks.filter((w) => {
     const d = new Date(w.start_time);
     const t = new Date();
     return d.toDateString() === t.toDateString();
   });
 
-  const last7Walks = walks.slice(0, 7).reverse();
-  const greenCount = walks.filter((w) => w.traffic_light === "green").length;
-  const walkTotal = walks.length || 1;
-  const greenPct = Math.round((greenCount / walkTotal) * 100);
-
   if (!dog) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
         <PawPrint className="w-16 h-16 text-primary-300 dark:text-primary-700" />
-        <h2 className="text-xl font-semibold text-zinc-700 dark:text-zinc-300">
-          ¡Bienvenido a Dog Blis Club!
-        </h2>
-        <p className="text-zinc-500 max-w-sm">
-          Registra tu primer perro para empezar a usar la calculadora de nutrición, el tracker de paseos y la academia de entrenamiento.
-        </p>
+        <div>
+          <h2 className="text-xl font-semibold text-zinc-700 dark:text-zinc-300">
+            ¡Bienvenido a Blis Club!
+          </h2>
+          <p className="text-zinc-500 mt-2 max-w-sm">
+            Registra tu primer perro para empezar a usar la calculadora de nutrición, el tracker de paseos y la academia de entrenamiento.
+          </p>
+        </div>
+        <AddDogForm userId={user.id} />
       </div>
     );
   }
@@ -108,35 +111,35 @@ export default async function DashboardPage() {
       </div>
 
       {/* Mini Heatmap */}
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-5">
-        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">
-          Últimos 7 paseos
-        </h3>
-        <div className="flex gap-1.5">
-          {last7Walks.map((w, i) => (
-            <div
-              key={i}
-              className={`flex-1 h-8 rounded-lg ${getTrafficColor(w.traffic_light)}`}
-              title={`${w.traffic_light ?? "sin datos"} - ${new Date(w.start_time).toLocaleDateString("es", { weekday: "short" })}`}
-            />
-          ))}
-          {Array.from({ length: 7 - last7Walks.length }).map((_, i) => (
-            <div key={`e-${i}`} className="flex-1 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800" />
-          ))}
+      {last7Walks.length > 0 && (
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-5">
+          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">
+            Últimos 7 paseos
+          </h3>
+          <div className="flex gap-1.5">
+            {last7Walks.map((w, i) => (
+              <div
+                key={i}
+                className={`flex-1 h-8 rounded-lg ${getTrafficColor(w.traffic_light)}`}
+                title={`${w.traffic_light ?? "sin datos"} - ${new Date(w.start_time).toLocaleDateString("es", { weekday: "short" })}`}
+              />
+            ))}
+            {Array.from({ length: 7 - last7Walks.length }).map((_, i) => (
+              <div key={`e-${i}`} className="flex-1 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800" />
+            ))}
+          </div>
+          <p className="text-xs text-zinc-500 mt-2">
+            {greenPct}% de paseos en verde · {todayWalks.length} paseo{todayWalks.length === 1 ? "" : "s"} hoy
+          </p>
         </div>
-        <p className="text-xs text-zinc-500 mt-2">
-          {greenPct}% de paseos en verde · {todayWalks.length} paseo{todayWalks.length === 1 ? "" : "s"} hoy
-        </p>
-      </div>
+      )}
 
       {/* Latest Logs */}
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-5">
-        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">
-          Últimos registros
-        </h3>
-        {logs.length === 0 ? (
-          <p className="text-sm text-zinc-400">Sin registros aún.</p>
-        ) : (
+      {logs.length > 0 && (
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-5">
+          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">
+            Últimos registros
+          </h3>
           <div className="space-y-3">
             {logs.map((log) => (
               <div key={log.id} className="flex items-center gap-3 text-sm">
@@ -157,8 +160,8 @@ export default async function DashboardPage() {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

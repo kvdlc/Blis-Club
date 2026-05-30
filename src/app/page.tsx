@@ -6,10 +6,10 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-primary-600 dark:text-primary-400">
-            Dog Blis Club
+            Blis Club
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400">
-            La súper app para dueños de perros
+            Tu ecosistema de apps para mascotas
           </p>
         </div>
         <LoginForm />
