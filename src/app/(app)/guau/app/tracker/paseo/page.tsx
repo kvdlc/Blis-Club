@@ -3,11 +3,20 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Droplets, BadgeCheck, Flag } from "lucide-react";
+import { Droplets, BadgeCheck, Flag, PawPrint, PenLine } from "lucide-react";
 
 type Phase = "active" | "evaluate" | "triggers" | "digestive" | "done";
 
-const TRIGGER_TAGS = ["Otros Perros", "Motos", "Gatos", "Ruidos Fuertes", "Gente", "Bicicletas", "Niños"];
+const TRIGGER_OPTIONS = [
+  { tag: "Otros Perros", emoji: "🐕" },
+  { tag: "Motos", emoji: "🛵" },
+  { tag: "Gatos", emoji: "🐱" },
+  { tag: "Ruidos Fuertes", emoji: "🔊" },
+  { tag: "Gente", emoji: "🚶" },
+  { tag: "Bicicletas", emoji: "🚲" },
+  { tag: "Niños", emoji: "👶" },
+  { tag: "Coches", emoji: "🚗" },
+];
 
 export default function WalkPage() {
   const router = useRouter();
@@ -19,12 +28,26 @@ export default function WalkPage() {
   const [popoCount, setPopoCount] = useState(0);
   const [trafficLight, setTrafficLight] = useState<string | null>(null);
   const [triggers, setTriggers] = useState<string[]>([]);
+  const [customTrigger, setCustomTrigger] = useState("");
+  const [showCustomTrigger, setShowCustomTrigger] = useState(false);
   const [stoolRating, setStoolRating] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [dogName, setDogName] = useState<string>("");
+
   const startTime = useRef(new Date());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    // Cargar nombre del perro
+    const loadDog = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: dog } = await supabase.from("dogs").select("nombre").eq("owner_id", user.id).limit(1).single();
+        if (dog) setDogName((dog as { nombre: string }).nombre);
+      }
+    };
+    loadDog();
+
     intervalRef.current = setInterval(() => {
       setSeconds(Math.floor((Date.now() - startTime.current.getTime()) / 1000));
     }, 1000);
@@ -39,7 +62,6 @@ export default function WalkPage() {
   const handleTrafficSelect = async (light: string) => {
     setTrafficLight(light);
     if (light === "green") {
-      // Skip triggers, go to digestive if popo
       if (popoCount > 0) { setPhase("digestive"); }
       else { await saveWalk(light, [], null); }
     } else {
@@ -49,6 +71,15 @@ export default function WalkPage() {
 
   const toggleTrigger = (tag: string) => {
     setTriggers((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
+  };
+
+  const addCustomTrigger = () => {
+    const trimmed = customTrigger.trim();
+    if (trimmed && !triggers.includes(trimmed)) {
+      setTriggers((prev) => [...prev, trimmed]);
+    }
+    setCustomTrigger("");
+    setShowCustomTrigger(false);
   };
 
   const handleTriggersDone = () => {
@@ -67,13 +98,13 @@ export default function WalkPage() {
     const durationSec = Math.floor((endTime.getTime() - startTime.current.getTime()) / 1000);
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { setSaving(false); return; }
 
     const { data: dog } = await supabase.from("dogs").select("id").eq("owner_id", user.id).limit(1).single();
-    if (!dog) return;
+    if (!dog) { setSaving(false); return; }
 
     await supabase.from("walks").insert({
-      dog_id: dog.id,
+      dog_id: (dog as { id: string }).id,
       start_time: startTime.current.toISOString(),
       end_time: endTime.toISOString(),
       duration_sec: durationSec,
@@ -86,43 +117,36 @@ export default function WalkPage() {
 
     if (stool) {
       await supabase.from("digestive_logs").insert({
-        dog_id: dog.id,
+        dog_id: (dog as { id: string }).id,
         fecha: new Date().toISOString().slice(0, 10),
         stool_type: stool,
       });
     }
 
-    // Update streak
     const today = new Date().toISOString().slice(0, 10);
     const { data: streak } = await supabase.from("user_streaks").select("*").eq("user_id", user.id).eq("streak_type", "walk").maybeSingle();
 
     if (streak) {
-      const lastDate = (streak as { last_activity_date: string }).last_activity_date;
+      const s = streak as { id: string; last_activity_date: string; current_streak: number; longest_streak: number };
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().slice(0, 10);
 
-      if (lastDate === today) {
-        // Already logged today, no change
-      } else if (lastDate === yesterdayStr) {
+      if (s.last_activity_date === today) {
+        // Already logged today
+      } else if (s.last_activity_date === yesterdayStr) {
+        const newStreak = s.current_streak + 1;
         await supabase.from("user_streaks").update({
-          current_streak: (streak as { current_streak: number }).current_streak + 1,
-          longest_streak: Math.max((streak as { longest_streak: number }).longest_streak, (streak as { current_streak: number }).current_streak + 1),
+          current_streak: newStreak,
+          longest_streak: Math.max(s.longest_streak, newStreak),
           last_activity_date: today,
-        }).eq("id", (streak as { id: string }).id);
+        }).eq("id", s.id);
       } else {
-        await supabase.from("user_streaks").update({
-          current_streak: 1,
-          last_activity_date: today,
-        }).eq("id", (streak as { id: string }).id);
+        await supabase.from("user_streaks").update({ current_streak: 1, last_activity_date: today }).eq("id", s.id);
       }
     } else {
       await supabase.from("user_streaks").insert({
-        user_id: user.id,
-        streak_type: "walk",
-        current_streak: 1,
-        longest_streak: 1,
-        last_activity_date: today,
+        user_id: user.id, streak_type: "walk", current_streak: 1, longest_streak: 1, last_activity_date: today,
       });
     }
 
@@ -134,16 +158,38 @@ export default function WalkPage() {
   const secs = seconds % 60;
 
   return (
-    <div className="flex flex-col min-h-[80vh]">
+    <div className="flex flex-col min-h-[80vh] relative">
+      {/* ═══ LOADING OVERLAY ═══ */}
+      {saving && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-2xl">
+          <div className="flex flex-col items-center gap-5 text-center px-8">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-primary-500/20 flex items-center justify-center">
+                <PawPrint className="w-10 h-10 text-white animate-pulse" />
+              </div>
+              <div className="absolute inset-0 rounded-full border-2 border-primary-400 border-t-transparent animate-spin" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-white">Analizando resultados...</p>
+              {dogName && <p className="text-sm text-white/70">Guardando paseo de {dogName}</p>}
+            </div>
+            <div className="flex gap-1">
+              <div className="w-2 h-2 rounded-full bg-white animate-bounce" style={{ animationDelay: "0ms" }} />
+              <div className="w-2 h-2 rounded-full bg-white animate-bounce" style={{ animationDelay: "150ms" }} />
+              <div className="w-2 h-2 rounded-full bg-white animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ PHASE: ACTIVE ═══ */}
       {phase === "active" && (
         <>
-          {/* Chronometer */}
           <div className="flex-1 flex flex-col items-center justify-center space-y-8">
             <p className="text-6xl font-bold tabular-nums text-primary-600 dark:text-primary-400">
               {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
             </p>
 
-            {/* Quick buttons */}
             <div className="flex gap-6">
               <button
                 onClick={() => setPipiCount((c) => c + 1)}
@@ -168,7 +214,6 @@ export default function WalkPage() {
             </div>
           </div>
 
-          {/* End walk button */}
           <button
             onClick={handleEndWalk}
             className="w-full bg-danger-600 hover:bg-danger-700 text-white rounded-2xl py-4 font-bold text-lg transition-colors active:scale-[0.98]"
@@ -179,6 +224,7 @@ export default function WalkPage() {
         </>
       )}
 
+      {/* ═══ PHASE: EVALUATE ═══ */}
       {phase === "evaluate" && (
         <div className="flex-1 flex flex-col items-center justify-center space-y-6">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">¿Cómo estuvo el paseo?</h2>
@@ -201,26 +247,76 @@ export default function WalkPage() {
         </div>
       )}
 
+      {/* ═══ PHASE: TRIGGERS (rediseñado con tarjetas + emojis) ═══ */}
       {phase === "triggers" && (
-        <div className="flex-1 flex flex-col space-y-6">
+        <div className="flex-1 flex flex-col space-y-6 overflow-auto">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 text-center">
             ¿Qué causó la reacción?
           </h2>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {TRIGGER_TAGS.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => toggleTrigger(tag)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  triggers.includes(tag)
-                    ? "bg-warning-500 text-white"
-                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
+          <div className="grid grid-cols-3 gap-3 px-2">
+            {TRIGGER_OPTIONS.map((opt) => {
+              const selected = triggers.includes(opt.tag);
+              return (
+                <button
+                  key={opt.tag}
+                  onClick={() => toggleTrigger(opt.tag)}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${
+                    selected
+                      ? "border-primary-400 bg-primary-50 dark:bg-primary-950/50 shadow-sm"
+                      : "border-zinc-100 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40"
+                  }`}
+                >
+                  <span className="text-3xl">{opt.emoji}</span>
+                  <span className={`text-[10px] font-semibold leading-tight text-center ${selected ? "text-primary-700 dark:text-primary-300" : "text-zinc-600 dark:text-zinc-400"}`}>
+                    {opt.tag}
+                  </span>
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setShowCustomTrigger(!showCustomTrigger)}
+              className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${
+                showCustomTrigger
+                  ? "border-primary-400 bg-primary-50 dark:bg-primary-950/50 shadow-sm"
+                  : "border-dashed border-zinc-300 dark:border-zinc-700 bg-white/40 dark:bg-zinc-900/20"
+              }`}
+            >
+              <span className="text-3xl">✏️</span>
+              <span className="text-[10px] font-semibold text-zinc-500 leading-tight text-center">Otro</span>
+            </button>
           </div>
+
+          {showCustomTrigger && (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customTrigger}
+                onChange={(e) => setCustomTrigger(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addCustomTrigger()}
+                placeholder="Describe qué más causó la reacción..."
+                className="flex-1 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                autoFocus
+              />
+              <button
+                onClick={addCustomTrigger}
+                className="rounded-xl bg-primary-600 text-white px-4 py-3 text-sm font-bold active:scale-95 transition-transform"
+              >
+                <PenLine className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {triggers.filter((t) => !TRIGGER_OPTIONS.some((o) => o.tag === t)).length > 0 && (
+            <div className="flex flex-wrap gap-2 justify-center">
+              {triggers.filter((t) => !TRIGGER_OPTIONS.some((o) => o.tag === t)).map((t) => (
+                <span key={t} className="flex items-center gap-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-xs px-3 py-1.5 rounded-full">
+                  {t}
+                  <button onClick={() => setTriggers((prev) => prev.filter((x) => x !== t))} className="ml-1 text-primary-400 hover:text-danger-500">×</button>
+                </span>
+              ))}
+            </div>
+          )}
+
           <button
             onClick={handleTriggersDone}
             className="w-full bg-primary-600 hover:bg-primary-700 text-white rounded-2xl py-4 font-bold text-lg"
@@ -230,6 +326,7 @@ export default function WalkPage() {
         </div>
       )}
 
+      {/* ═══ PHASE: DIGESTIVE ═══ */}
       {phase === "digestive" && (
         <div className="flex-1 flex flex-col items-center justify-center space-y-6">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 text-center">
@@ -238,7 +335,7 @@ export default function WalkPage() {
           <div className="flex gap-2">
             {[
               { n: 1, e: "💎", l: "Dura" },
-              { n: 2, e: "🟤", l: "Con forma" },
+              { n: 2, e: "🟤", l: "Forma" },
               { n: 3, e: "✅", l: "Normal" },
               { n: 4, e: "💩", l: "Blanda" },
               { n: 5, e: "💧", l: "Líquida" },
@@ -260,6 +357,7 @@ export default function WalkPage() {
         </div>
       )}
 
+      {/* ═══ PHASE: DONE ═══ */}
       {phase === "done" && (
         <div className="flex-1 flex flex-col items-center justify-center space-y-6 text-center">
           <div className="w-20 h-20 rounded-full bg-secondary-100 dark:bg-secondary-950 flex items-center justify-center">

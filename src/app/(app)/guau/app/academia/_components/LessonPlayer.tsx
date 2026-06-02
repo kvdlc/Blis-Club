@@ -15,6 +15,7 @@ interface LessonPlayerProps {
   completedLessonIds: string[];
   moduleId: string;
   moduleLessons: { id: string; order: number }[];
+  stageSlug: string;
 }
 
 type Phase = "theory" | "check" | "complete" | "badge" | "done";
@@ -28,6 +29,7 @@ export function LessonPlayer({
   completedLessonIds,
   moduleId,
   moduleLessons,
+  stageSlug,
 }: LessonPlayerProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -194,7 +196,7 @@ export function LessonPlayer({
   // Reflex mini-game
   if (lesson.type === "minigame_reflejos") {
     if (phase === "complete" || phase === "done") {
-      return <CompletionScreen nextLessonId={nextLessonId} router={router} celebration={celebration} />;
+      return <CompletionScreen nextLessonId={nextLessonId} router={router} celebration={celebration} stageSlug={stageSlug} />;
     }
 
     const handleReflexStart = () => {
@@ -382,7 +384,7 @@ export function LessonPlayer({
 
   // Completion screen
   if (phase === "complete") {
-    return <CompletionScreen nextLessonId={nextLessonId} router={router} celebration={celebration} />;
+    return <CompletionScreen nextLessonId={nextLessonId} router={router} celebration={celebration} stageSlug={stageSlug} />;
   }
 
   // Already done
@@ -393,7 +395,7 @@ export function LessonPlayer({
         <p className="text-lg font-semibold text-secondary-600">¡Lección completada!</p>
         {nextLessonId && (
           <button
-            onClick={() => router.push(`/guau/app/academia/${nextLessonId}`)}
+            onClick={() => router.push(`/guau/app/academia/${stageSlug}/lesson/${nextLessonId}`)}
             className="rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 font-semibold"
           >
             Siguiente lección
@@ -410,10 +412,12 @@ function CompletionScreen({
   nextLessonId,
   router,
   celebration,
+  stageSlug,
 }: {
   nextLessonId: string | null;
   router: ReturnType<typeof useRouter>;
   celebration: { message?: string };
+  stageSlug: string;
 }) {
   return (
     <div className="flex flex-col min-h-[70vh] items-center justify-center text-center space-y-4 px-4">
@@ -427,14 +431,14 @@ function CompletionScreen({
       <div className="flex gap-3">
         {nextLessonId && (
           <button
-            onClick={() => router.push(`/guau/app/academia/${nextLessonId}`)}
+            onClick={() => router.push(`/guau/app/academia/${stageSlug}/lesson/${nextLessonId}`)}
             className="rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 font-semibold"
           >
             Siguiente <ArrowRight className="w-4 h-4 inline ml-1" />
           </button>
         )}
         <button
-          onClick={() => router.push("/guau/app/academia")}
+          onClick={() => router.push(`/guau/app/academia/${stageSlug}`)}
           className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-6 py-3 font-semibold"
         >
           Volver al mapa

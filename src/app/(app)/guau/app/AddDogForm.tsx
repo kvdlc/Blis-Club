@@ -45,7 +45,7 @@ export function AddDogForm({ userId }: { userId: string }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded-2xl bg-primary-600 hover:bg-primary-700 text-white px-6 py-3.5 font-semibold text-sm transition-colors"
+        className="flex items-center gap-2 rounded-[1.25rem] bg-primary-600 hover:bg-primary-700 text-white px-7 py-4 font-bold text-sm transition-all active:scale-[0.97] shadow-lg shadow-primary-600/25"
       >
         <Plus className="w-5 h-5" />
         Registrar mi perro
@@ -54,13 +54,15 @@ export function AddDogForm({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="w-full max-w-sm mx-auto bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 space-y-4 text-left">
+    <div className="w-full max-w-sm mx-auto bg-white dark:bg-zinc-900 rounded-[1.5rem] shadow-lg border border-zinc-100 dark:border-zinc-800 p-6 space-y-4 text-left">
       <div className="flex items-center gap-3">
-        <PawPrint className="w-6 h-6 text-primary-600" />
-        <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">Nuevo perro</h3>
+        <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-950 flex items-center justify-center">
+          <PawPrint className="w-5 h-5 text-primary-600" />
+        </div>
+        <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-lg">Nuevo perro</h3>
       </div>
       {error && (
-        <p className="text-sm text-danger-600 bg-danger-50 dark:bg-danger-950 rounded-lg p-3">{error}</p>
+        <p className="text-sm text-danger-600 bg-danger-50 dark:bg-danger-950/40 rounded-xl p-3">{error}</p>
       )}
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
@@ -68,14 +70,14 @@ export function AddDogForm({ userId }: { userId: string }) {
           placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
         />
         <input
           required
           placeholder="Raza (ej: American Bully)"
           value={raza}
           onChange={(e) => setRaza(e.target.value)}
-          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
         />
         <div className="grid grid-cols-2 gap-3">
           <input
@@ -84,7 +86,7 @@ export function AddDogForm({ userId }: { userId: string }) {
             placeholder="Edad (meses)"
             value={edadMeses}
             onChange={(e) => setEdadMeses(e.target.value)}
-            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
           />
           <input
             required
@@ -93,13 +95,13 @@ export function AddDogForm({ userId }: { userId: string }) {
             placeholder="Peso (kg)"
             value={pesoKg}
             onChange={(e) => setPesoKg(e.target.value)}
-            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
           />
         </div>
         <select
           value={objetivo}
           onChange={(e) => setObjetivo(e.target.value)}
-          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
         >
           <option>Obediencia básica</option>
           <option>Control de reactividad</option>
@@ -107,18 +109,18 @@ export function AddDogForm({ userId }: { userId: string }) {
           <option>Nutrición natural</option>
           <option>Socialización</option>
         </select>
-        <div className="flex gap-2">
+        <div className="flex gap-2 pt-1">
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-3 text-sm font-semibold disabled:opacity-50"
+            className="flex-1 rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-3 text-sm font-bold disabled:opacity-50 transition-all active:scale-[0.98]"
           >
             {saving ? "Guardando..." : "Guardar"}
           </button>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded-xl bg-zinc-100 dark:bg-zinc-800 px-4 py-3 text-sm font-semibold"
+            className="rounded-xl bg-zinc-100 dark:bg-zinc-800 px-5 py-3 text-sm font-semibold transition-colors"
           >
             Cancelar
           </button>

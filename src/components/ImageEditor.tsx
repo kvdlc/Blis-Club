@@ -1,0 +1,213 @@
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from "react";
+import { X, RotateCw, RotateCcw, ZoomIn, ZoomOut, Check, Move } from "lucide-react";
+
+interface Props {
+  open: boolean;
+  onClose: () => void;
+  onSave: (dataUrl: string) => void;
+  imageUrl: string;
+  circleSize?: number;
+}
+
+export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200 }: Props) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [rotation, setRotation] = useState(0);
+  const [zoom, setZoom] = useState(1);
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!open || !imageUrl) return;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      imgRef.current = img;
+      setImgLoaded(true);
+      // Reset transforms
+      setRotation(0);
+      setZoom(1);
+      setOffsetX(0);
+      setOffsetY(0);
+    };
+    img.src = imageUrl;
+  }, [open, imageUrl]);
+
+  useEffect(() => {
+    if (!imgLoaded || !canvasRef.current || !imgRef.current) return;
+    renderPreview();
+  }, [rotation, zoom, offsetX, offsetY, imgLoaded]);
+
+  const renderPreview = useCallback(() => {
+    const canvas = canvasRef.current;
+    const img = imgRef.current;
+    if (!canvas || !img) return;
+
+    const size = circleSize * 2; // High res
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, size, size);
+
+    // Draw circle clip
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    ctx.clip();
+
+    // Calculate image dimensions
+    const imgW = img.width * zoom;
+    const imgH = img.height * zoom;
+    const cx = size / 2 + offsetX * 2;
+    const cy = size / 2 + offsetY * 2;
+
+    // Apply rotation
+    ctx.translate(cx, cy);
+    ctx.rotate((rotation * Math.PI) / 180);
+    ctx.translate(-cx, -cy);
+
+    ctx.drawImage(img, cx - imgW / 2, cy - imgH / 2, imgW, imgH);
+    ctx.restore();
+
+    // Circle border
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255,255,255,0.8)";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }, [rotation, zoom, offsetX, offsetY, circleSize]);
+
+  const handleSave = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+    onSave(dataUrl);
+    onClose();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setDragging(true);
+    setDragStart({ x: e.clientX - offsetX, y: e.clientY - offsetY });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!dragging) return;
+    setOffsetX(e.clientX - dragStart.x);
+    setOffsetY(e.clientY - dragStart.y);
+  };
+
+  const handleMouseUp = () => setDragging(false);
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!dragging || !e.touches[0]) return;
+    setOffsetX(e.touches[0].clientX - dragStart.x);
+    setOffsetY(e.touches[0].clientY - dragStart.y);
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      <div className="bg-zinc-900 rounded-[2rem] p-6 max-w-md w-full space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-bold text-white">Editar Foto</h3>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors">
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
+        {/* Preview */}
+        <div className="flex justify-center">
+          <div className="relative" style={{ width: circleSize, height: circleSize }}>
+            <canvas
+              ref={canvasRef}
+              style={{ width: circleSize, height: circleSize }}
+              className="rounded-full"
+            />
+            {/* Drag overlay */}
+            <div
+              className="absolute inset-0 rounded-full cursor-grab active:cursor-grabbing"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={(e) => {
+                if (e.touches[0]) {
+                  setDragging(true);
+                  setDragStart({ x: e.touches[0].clientX - offsetX, y: e.touches[0].clientY - offsetY });
+                }
+              }}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={() => setDragging(false)}
+            >
+              <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full p-1.5">
+                <Move className="w-4 h-4 text-white/70" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-zinc-400">
+          Arrastra para posicionar · Gira y haz zoom
+        </p>
+
+        {/* Controls */}
+        <div className="flex items-center justify-center gap-4">
+          {/* Rotate */}
+          <button
+            onClick={() => setRotation((r) => r - 90)}
+            className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors active:scale-95"
+          >
+            <RotateCcw className="w-5 h-5 text-white" />
+          </button>
+
+          {/* Zoom out */}
+          <button
+            onClick={() => setZoom((z) => Math.max(0.3, z - 0.15))}
+            className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors active:scale-95"
+          >
+            <ZoomOut className="w-5 h-5 text-white" />
+          </button>
+
+          {/* Zoom indicator */}
+          <span className="text-sm font-bold text-white min-w-[3rem] text-center">
+            {Math.round(zoom * 100)}%
+          </span>
+
+          {/* Zoom in */}
+          <button
+            onClick={() => setZoom((z) => Math.min(3, z + 0.15))}
+            className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors active:scale-95"
+          >
+            <ZoomIn className="w-5 h-5 text-white" />
+          </button>
+
+          {/* Rotate right */}
+          <button
+            onClick={() => setRotation((r) => r + 90)}
+            className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors active:scale-95"
+          >
+            <RotateCw className="w-5 h-5 text-white" />
+          </button>
+        </div>
+
+        {/* Save */}
+        <button
+          onClick={handleSave}
+          className="w-full bg-primary-600 hover:bg-primary-500 text-white rounded-xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors active:scale-[0.98]"
+        >
+          <Check className="w-4 h-4" />
+          Guardar Foto
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -198,9 +198,9 @@ ON CONFLICT DO NOTHING;
 -- ============================================================
 -- PLANES DE SUSCRIPCION
 -- ============================================================
-INSERT INTO plans (name, price_cents, izipay_price_id, max_dogs, features) VALUES
-('Free', 0, NULL, 1, ARRAY['1 perro', 'Recetario básico', 'Calculadora BARF', 'Tracker de paseos', '1 etapa Academia']),
-('Pro', 1500, 'izipay_pro_monthly', 999, ARRAY['Perros ilimitados', 'Recetario completo (150 recetas)', 'Generador de menús', 'Reto Detox 14 días', 'Todas las etapas Academia', 'Gráficos avanzados', 'Soporte prioritario'])
+INSERT INTO plans (name, price_cents, izipay_price_id, max_dogs, features, billing_interval) VALUES
+('Pro Mensual', 1000, 'izipay_pro_monthly', 999, ARRAY['Perros ilimitados', 'Recetario completo (150 recetas)', 'Generador de menús', 'Reto Detox 14 días', 'Todas las etapas Academia', 'Gráficos avanzados', 'Soporte prioritario'], 'month'),
+('Pro Anual', 9900, 'izipay_pro_annual', 999, ARRAY['Perros ilimitados', 'Recetario completo (150 recetas)', 'Generador de menús', 'Reto Detox 14 días', 'Todas las etapas Academia', 'Gráficos avanzados', 'Soporte prioritario'], 'year')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================

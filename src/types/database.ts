@@ -8,12 +8,18 @@ export type TrafficLight = "green" | "yellow" | "red";
 export type BadgeTypeVal = "academia" | "tracker" | "streak";
 export type SeverityLevel = "bajo" | "medio" | "alto" | "mortal";
 export type SubscriptionStatus = "active" | "canceled" | "past_due" | "trialing";
+export type MedicationStatus = "active" | "completed" | "cancelled";
 
 export interface Profile {
   id: string;
   email: string;
   display_name: string | null;
   avatar_url: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  country: string | null;
+  whatsapp: string | null;
+  timezone: string | null;
   created_at: string;
 }
 
@@ -23,10 +29,20 @@ export interface Dog {
   nombre: string;
   raza: string;
   edad_meses: number;
+  fecha_nacimiento: string | null;
   peso_kg: number;
   objetivo_principal: string | null;
   foto_url: string | null;
+  breed_image_url: string | null;
   created_at: string;
+  is_lost?: boolean;
+  lost_since?: string | null;
+  lost_location?: string | null;
+  lost_notes?: string | null;
+  poster_title?: string | null;
+  poster_photo_url?: string | null;
+  poster_contact?: string | null;
+  poster_reward_amount?: string | null;
 }
 
 export interface DailyLog {
@@ -235,4 +251,208 @@ export interface UserStreak {
   current_streak: number;
   longest_streak: number;
   last_activity_date: string | null;
+}
+
+export interface RecipeStep {
+  id: string;
+  recipe_id: string;
+  step_number: number;
+  instruction: string;
+  image_url: string | null;
+  duration_min: number | null;
+  created_at: string;
+}
+
+export interface RecipeNutritionFacts {
+  id: string;
+  recipe_id: string;
+  protein_g: number | null;
+  fat_g: number | null;
+  carbs_g: number | null;
+  fiber_g: number | null;
+  moisture_g: number | null;
+  ash_g: number | null;
+  calcium_mg: number | null;
+  phosphorus_mg: number | null;
+  iron_mg: number | null;
+  zinc_mg: number | null;
+  vitamin_a_ui: number | null;
+  vitamin_d_ui: number | null;
+  vitamin_e_mg: number | null;
+  omega3_g: number | null;
+  omega6_g: number | null;
+  created_at: string;
+}
+
+export interface DogMealSlot {
+  id: string;
+  dog_id: string;
+  slot_index: number;
+  label: string;
+  time_of_day: string;
+  active: boolean;
+  created_at: string;
+}
+
+export type MealStatus = "scheduled" | "fed" | "skipped" | "suggested";
+
+export interface MealSchedule {
+  id: string;
+  dog_id: string;
+  recipe_id: string | null;
+  fecha: string;
+  meal_slot_index: number;
+  status: MealStatus;
+  gramos: number | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DogVaccine {
+  id: string;
+  dog_id: string;
+  vaccine_name: string;
+  vaccine_group: string;
+  dose_number: number;
+  date_administered: string | null;
+  next_due_date: string | null;
+  brand: string | null;
+  cost_usd: number | null;
+  vet_id: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface DogVetVisit {
+  id: string;
+  dog_id: string;
+  fecha: string;
+  motivo: string;
+  diagnostico: string | null;
+  vet_name: string | null;
+  vet_id: string | null;
+  peso_kg: number | null;
+  vet_rating: number | null;
+  notas: string | null;
+  created_at: string;
+}
+
+export interface DogMedication {
+  id: string;
+  dog_id: string;
+  medication_name: string;
+  dosage: string | null;
+  start_date: string;
+  end_date: string | null;
+  doses_per_day: number;
+  dose_hours: string[];
+  status: MedicationStatus;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface DogMedicationLog {
+  id: string;
+  medication_id: string;
+  scheduled_time: string;
+  taken: boolean;
+  taken_at: string | null;
+  skipped_reason: string | null;
+  created_at: string;
+}
+
+export interface DogWeightHistory {
+  id: string;
+  dog_id: string;
+  peso_kg: number;
+  fecha: string;
+  notas: string | null;
+  foto_url: string | null;
+  created_at: string;
+}
+
+export interface TrustedVet {
+  id: string;
+  user_id: string;
+  name: string;
+  clinic_name: string | null;
+  phone: string | null;
+  address: string | null;
+  specialty: string | null;
+  notes: string | null;
+  avg_rating: number;
+  total_visits: number;
+  created_at: string;
+}
+
+export interface ShortLink {
+  id: string;
+  slug: string;
+  target_url: string;
+  created_at: string;
+}
+
+export interface Referral {
+  id: string;
+  referrer_user_id: string;
+  referred_user_id: string | null;
+  referral_code: string;
+  status: string;
+  level: number;
+  reward_granted: boolean;
+  cash_reward_usd: number;
+  subscription_id: string | null;
+  created_at: string;
+  paid_at: string | null;
+}
+
+export interface ReferralCommission {
+  id: string;
+  user_id: string;
+  referral_id: string;
+  level: number;
+  commission_cents: number;
+  status: string;
+  created_at: string;
+}
+
+export interface ReferralNode {
+  id: string;
+  referralCode: string;
+  level: number;
+  status: string;
+  cashRewardUsd: number;
+  createdAt: string;
+  paidAt: string | null;
+  endedAt: string | null;
+  user: {
+    id: string;
+    code: string;
+    displayName: string;
+    email: string;
+    avatarUrl: string | null;
+  } | null;
+  subscription: {
+    status: string;
+    periodEnd: string | null;
+  } | null;
+  children?: ReferralNode[];
+}
+
+export interface CommissionsSummary {
+  level1Cents: number;
+  level2Cents: number;
+  level3Cents: number;
+  totalCents: number;
+}
+
+export interface UserApp {
+  id: string;
+  user_id: string;
+  app_slug: string;
+  status: string;
+  trial_ends_at: string | null;
+  current_period_end: string | null;
+  created_at: string;
 }
