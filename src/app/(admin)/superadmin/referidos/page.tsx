@@ -154,6 +154,12 @@ export default function ReferidosPage() {
 
   useEffect(() => { load(); }, []);
 
+  useEffect(() => {
+    if (activeTab === "tree" && trees.length === 0 && !treeLoading) {
+      loadTree();
+    }
+  }, [activeTab, trees.length]);
+
   const handleMarkPaid = async () => {
     if (selectedCommissions.size === 0) return;
     if (!confirm(`¿Marcar ${selectedCommissions.size} comision(es) como pagadas?`)) return;
