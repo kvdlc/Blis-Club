@@ -5,7 +5,7 @@ export async function GET() {
   const supabase = createServiceClient();
 
   // 1. Obtener todas las comisiones con info de usuario
-  const { data: commissions, error: commissionsError } = await supabase
+  const { data: commissionsRaw, error: commissionsError } = await supabase
     .from("referral_commissions")
     .select("*, referrer:profiles!user_id(id, email, display_name, first_name, last_name), referral:referrals!referral_id(referred_user_id, referrer_user_id, referred:profiles!referred_user_id(email, display_name))")
     .order("created_at", { ascending: false });
@@ -13,6 +13,16 @@ export async function GET() {
   if (commissionsError) {
     return NextResponse.json({ error: commissionsError.message }, { status: 500 });
   }
+
+  // Fallback: if available_after is null, calculate it as created_at + 14 days
+  const commissions = (commissionsRaw || []).map((c: any) => {
+    if (!c.available_after && c.created_at) {
+      const created = new Date(c.created_at);
+      created.setDate(created.getDate() + 14);
+      c.available_after = created.toISOString();
+    }
+    return c;
+  });
 
   // 2. Obtener todas las billeteras
   const { data: wallets, error: walletsError } = await supabase

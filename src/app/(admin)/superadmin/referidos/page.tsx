@@ -83,17 +83,36 @@ export default function ReferidosPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const [referralsRes, withdrawalsRes] = await Promise.all([
-        fetch("/api/admin/referrals"),
-        fetch("/api/admin/withdrawals"),
-      ]);
-      const referralsJson = await referralsRes.json();
-      const withdrawalsJson = await withdrawalsRes.json();
+      // Fetch referrals endpoint (commissions, wallets, summary)
+      let referralsData: any = {};
+      try {
+        const referralsRes = await fetch("/api/admin/referrals");
+        if (referralsRes.ok) {
+          referralsData = await referralsRes.json();
+        } else {
+          console.error("Referrals endpoint error:", referralsRes.status);
+        }
+      } catch (e) {
+        console.error("Referrals fetch error:", e);
+      }
 
-      setSummary(referralsJson.summary || null);
-      setCommissions(referralsJson.commissions || []);
-      setWallets(referralsJson.wallets || []);
-      setWithdrawals(withdrawalsJson.withdrawals || []);
+      // Fetch withdrawals endpoint separately so one failure doesn't break the other
+      let withdrawalsData: any = { withdrawals: [] };
+      try {
+        const withdrawalsRes = await fetch("/api/admin/withdrawals");
+        if (withdrawalsRes.ok) {
+          withdrawalsData = await withdrawalsRes.json();
+        } else {
+          console.error("Withdrawals endpoint error:", withdrawalsRes.status);
+        }
+      } catch (e) {
+        console.error("Withdrawals fetch error:", e);
+      }
+
+      setSummary(referralsData.summary || null);
+      setCommissions(referralsData.commissions || []);
+      setWallets(referralsData.wallets || []);
+      setWithdrawals(withdrawalsData.withdrawals || []);
     } catch (e) {
       console.error("Error loading admin data:", e);
     }

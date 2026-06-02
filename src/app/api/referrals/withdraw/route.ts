@@ -79,21 +79,47 @@ export async function POST(request: Request) {
     }
 
     // Create withdrawal request
-    const { data: withdrawal, error: withdrawalError } = await supabase
-      .from("withdrawal_requests")
-      .insert({
-        user_id: user.id,
-        amount_usd: amountCents,
-        method: method,
-        withdrawal_method: method,
-        withdrawal_details: withdrawalDetails,
-        billing_profile_id: billingProfile.id,
-        fee_cents: feeCents,
-        net_amount_cents: netCents,
-        status: "pending",
-      })
-      .select()
-      .single();
+    // Build payload defensively: some columns may not exist if migration hasn't run
+    const basePayload: any = {
+      user_id: user.id,
+      amount_usd: amountCents,
+      method: method,
+      status: "pending",
+      account_info: withdrawalDetails, // legacy column that stores payment details
+    };
+
+    // Try insert with new columns first
+    let withdrawal: any = null;
+    let withdrawalError: any = null;
+
+    try {
+      const result = await supabase
+        .from("withdrawal_requests")
+        .insert({
+          ...basePayload,
+          withdrawal_method: method,
+          billing_profile_id: billingProfile.id,
+          fee_cents: feeCents,
+          net_amount_cents: netCents,
+        })
+        .select()
+        .single();
+      withdrawal = result.data;
+      withdrawalError = result.error;
+    } catch (e: any) {
+      // If new columns don't exist, fallback to legacy insert
+      if (e.message?.includes("does not exist") || e.message?.includes("column")) {
+        const result = await supabase
+          .from("withdrawal_requests")
+          .insert(basePayload)
+          .select()
+          .single();
+        withdrawal = result.data;
+        withdrawalError = result.error;
+      } else {
+        throw e;
+      }
+    }
 
     if (withdrawalError) {
       // Rollback: return the reserved balance
