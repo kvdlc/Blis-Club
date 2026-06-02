@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { NutritionRecipe, RecipeIngredient, Dog, DogMetabolicProfile, RecipeStep, RecipeNutritionFacts } from "@/types/database";
-import { ChefHat, ShoppingCart, ArrowLeft, Check, Heart, Clock, Flame, Star, ChevronDown, ChevronUp, Bone, Beef, Carrot, Pill, CircleHelp, CalendarDays, Plus } from "lucide-react";
+import { ChefHat, ShoppingCart, ArrowLeft, Check, Heart, Clock, Flame, Star, ChevronDown, ChevronUp, Bone, Beef, Carrot, Pill, CircleHelp, CalendarDays, Plus, Play } from "lucide-react";
 import { ScheduleMealModal } from "./ScheduleMealModal";
+import VideoEmbed from "@/components/VideoEmbed";
 
 interface Props {
   recipe: NutritionRecipe;
@@ -113,7 +114,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
 
         {/* Centered image */}
         <div className="relative z-10 flex flex-col items-center pt-6">
-          <div className="w-28 h-28 rounded-full bg-white/20 backdrop-blur-md border-4 border-white/30 flex items-center justify-center overflow-hidden shadow-xl">
+          <div className="w-28 h-28 rounded-2xl bg-white/20 backdrop-blur-md border-4 border-white/30 flex items-center justify-center overflow-hidden shadow-xl">
             {recipe.image_url ? (
               <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover" />
             ) : (
@@ -151,6 +152,17 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </div>
         </div>
       </div>
+
+      {/* Video */}
+      {recipe.video_url && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Play className="w-4 h-4 text-accent-500" />
+            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Video explicativo</h3>
+          </div>
+          <VideoEmbed url={recipe.video_url} />
+        </div>
+      )}
 
       {/* Ingredients */}
       <div className="space-y-3">

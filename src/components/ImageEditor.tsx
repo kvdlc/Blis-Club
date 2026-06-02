@@ -9,9 +9,11 @@ interface Props {
   onSave: (dataUrl: string) => void;
   imageUrl: string;
   circleSize?: number;
+  mode?: "circle" | "square";
+  cornerRadius?: number;
 }
 
-export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200 }: Props) {
+export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200, mode = "circle", cornerRadius = 24 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rotation, setRotation] = useState(0);
   const [zoom, setZoom] = useState(1);
@@ -61,11 +63,29 @@ export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200 
 
     ctx.clearRect(0, 0, size, size);
 
-    // Draw circle clip
     ctx.save();
-    ctx.beginPath();
-    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-    ctx.clip();
+
+    if (mode === "square") {
+      // Rounded rectangle clip
+      const r = cornerRadius * 2; // scale for high-res canvas
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.lineTo(size - r, 0);
+      ctx.quadraticCurveTo(size, 0, size, r);
+      ctx.lineTo(size, size - r);
+      ctx.quadraticCurveTo(size, size, size - r, size);
+      ctx.lineTo(r, size);
+      ctx.quadraticCurveTo(0, size, 0, size - r);
+      ctx.lineTo(0, r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.closePath();
+      ctx.clip();
+    } else {
+      // Circle clip (default)
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      ctx.clip();
+    }
 
     // Calculate image dimensions
     const imgW = img.width * zoom;
@@ -81,13 +101,31 @@ export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200 
     ctx.drawImage(img, cx - imgW / 2, cy - imgH / 2, imgW, imgH);
     ctx.restore();
 
-    // Circle border
-    ctx.beginPath();
-    ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(255,255,255,0.8)";
-    ctx.lineWidth = 3;
-    ctx.stroke();
-  }, [rotation, zoom, offsetX, offsetY, circleSize]);
+    // Border
+    if (mode === "square") {
+      const r = cornerRadius * 2;
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.lineTo(size - r, 0);
+      ctx.quadraticCurveTo(size, 0, size, r);
+      ctx.lineTo(size, size - r);
+      ctx.quadraticCurveTo(size, size, size - r, size);
+      ctx.lineTo(r, size);
+      ctx.quadraticCurveTo(0, size, 0, size - r);
+      ctx.lineTo(0, r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.closePath();
+      ctx.strokeStyle = "rgba(255,255,255,0.8)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255,255,255,0.8)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+  }, [rotation, zoom, offsetX, offsetY, circleSize, mode, cornerRadius]);
 
   const handleSave = () => {
     const canvas = canvasRef.current;
@@ -135,11 +173,11 @@ export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200 
             <canvas
               ref={canvasRef}
               style={{ width: circleSize, height: circleSize }}
-              className="rounded-full"
+              className={mode === "square" ? "rounded-2xl" : "rounded-full"}
             />
             {/* Drag overlay */}
             <div
-              className="absolute inset-0 rounded-full cursor-grab active:cursor-grabbing"
+              className={`absolute inset-0 cursor-grab active:cursor-grabbing ${mode === "square" ? "rounded-2xl" : "rounded-full"}`}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -153,7 +191,7 @@ export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200 
               onTouchMove={handleTouchMove}
               onTouchEnd={() => setDragging(false)}
             >
-              <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full p-1.5">
+              <div className={`absolute top-2 right-2 bg-white/20 backdrop-blur-sm p-1.5 ${mode === "square" ? "rounded-lg" : "rounded-full"}`}>
                 <Move className="w-4 h-4 text-white/70" />
               </div>
             </div>

@@ -4,7 +4,8 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Lesson, UserProgress } from "@/types/database";
-import { ArrowRight, Check, Trophy, Timer, Zap } from "lucide-react";
+import { ArrowRight, Check, Trophy, Timer, Zap, Play } from "lucide-react";
+import VideoEmbed from "@/components/VideoEmbed";
 
 interface LessonPlayerProps {
   lesson: Lesson & { content_json: Record<string, unknown> };
@@ -111,7 +112,17 @@ export function LessonPlayer({
   if (phase === "theory" && lesson.type === "theory") {
     return (
       <div className="flex flex-col min-h-[70vh]">
-        <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 text-center space-y-4">
+          {/* Video */}
+          {lesson.video_url && (
+            <div className="w-full max-w-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Play className="w-4 h-4 text-accent-500" />
+                <span className="text-xs font-bold text-zinc-500">Video explicativo</span>
+              </div>
+              <VideoEmbed url={lesson.video_url} />
+            </div>
+          )}
           <div className="w-full max-w-sm" onClick={() => cardIdx < cards.length - 1 ? setCardIdx(cardIdx + 1) : setPhase("check")}>
             <div className="bg-primary-50 dark:bg-primary-950 rounded-3xl p-8 min-h-[280px] flex flex-col items-center justify-center">
               <p className="text-lg text-primary-900 dark:text-primary-100 leading-relaxed">

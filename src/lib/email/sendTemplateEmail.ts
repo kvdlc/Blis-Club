@@ -9,6 +9,12 @@
  * - factura_emitida: confirmación de pago
  * - pago_vencido: aviso de suscripción por vencer
  * - invitacion: invitación a la plataforma
+ * - commission_available: comisión lista para retirar
+ * - withdrawal_requested: solicitud de retiro recibida
+ * - withdrawal_processing: retiro en procesamiento
+ * - withdrawal_completed: retiro completado
+ * - withdrawal_failed: retiro fallido (saldo devuelto)
+ * - withdrawal_rejected: retiro rechazado por admin
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -72,6 +78,107 @@ function buildGenericHTML(vars: Record<string, string>, title: string, body: str
       <h1 style="font-size:22px;font-weight:800;color:#4a47d4;text-align:center;">${title}</h1>
       <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
       <p style="text-align:center;color:#374151;">${body}</p>
+    </div>
+    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
+  </div>`;
+}
+
+function buildCommissionAvailableHTML(vars: Record<string, string>): string {
+  const nombre = vars.nombre || vars.display_name || "Usuario";
+  const monto = vars.monto || "$0.00";
+  const referido = vars.referido || "un referido";
+  return `
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
+    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+      <h1 style="font-size:22px;font-weight:800;color:#4a47d4;text-align:center;">¡Comisión Disponible!</h1>
+      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
+      <p style="text-align:center;color:#374151;">Tu comisión de <strong>${monto}</strong> por ${referido} ya está disponible para retirar.</p>
+      <div style="text-align:center;margin:32px 0;">
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/guau/app/perfil/billetera" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Ir a mi Billetera →</a>
+      </div>
+    </div>
+    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
+  </div>`;
+}
+
+function buildWithdrawalRequestedHTML(vars: Record<string, string>): string {
+  const nombre = vars.nombre || vars.display_name || "Usuario";
+  const monto = vars.monto || "$0.00";
+  const metodo = vars.metodo || "Binance Pay";
+  return `
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
+    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+      <h1 style="font-size:22px;font-weight:800;color:#4a47d4;text-align:center;">Solicitud de Retiro Recibida</h1>
+      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
+      <p style="text-align:center;color:#374151;">Hemos recibido tu solicitud de retiro por <strong>${monto}</strong> vía <strong>${metodo}</strong>.</p>
+      <p style="text-align:center;color:#6b7280;font-size:14px;margin-top:16px;">Los retiros se procesan del <strong>1 al 5 de cada mes</strong>. Tu solicitud quedará en cola y será ejecutada en la siguiente ventana de pago.</p>
+    </div>
+    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
+  </div>`;
+}
+
+function buildWithdrawalProcessingHTML(vars: Record<string, string>): string {
+  const nombre = vars.nombre || vars.display_name || "Usuario";
+  const monto = vars.monto || "$0.00";
+  return `
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
+    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+      <h1 style="font-size:22px;font-weight:800;color:#4a47d4;text-align:center;">Retiro en Procesamiento</h1>
+      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
+      <p style="text-align:center;color:#374151;">Tu retiro de <strong>${monto}</strong> está siendo procesado. Te enviaremos otro email cuando se complete.</p>
+    </div>
+    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
+  </div>`;
+}
+
+function buildWithdrawalCompletedHTML(vars: Record<string, string>): string {
+  const nombre = vars.nombre || vars.display_name || "Usuario";
+  const monto = vars.monto || "$0.00";
+  const referencia = vars.referencia || "—";
+  return `
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
+    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+      <h1 style="font-size:22px;font-weight:800;color:#4a47d4;text-align:center;">¡Retiro Completado!</h1>
+      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
+      <p style="text-align:center;color:#374151;">Tu retiro de <strong>${monto}</strong> ha sido completado exitosamente.</p>
+      <p style="text-align:center;color:#6b7280;font-size:14px;margin-top:16px;"><strong>Referencia / TX ID:</strong> <span style="font-family:monospace;">${referencia}</span></p>
+    </div>
+    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
+  </div>`;
+}
+
+function buildWithdrawalFailedHTML(vars: Record<string, string>): string {
+  const nombre = vars.nombre || vars.display_name || "Usuario";
+  const monto = vars.monto || "$0.00";
+  const razon = vars.razon || "Error técnico";
+  return `
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
+    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+      <h1 style="font-size:22px;font-weight:800;color:#dc2626;text-align:center;">Retiro Fallido</h1>
+      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
+      <p style="text-align:center;color:#374151;">Lamentamos informarte que tu retiro de <strong>${monto}</strong> no pudo completarse.</p>
+      <p style="text-align:center;color:#6b7280;font-size:14px;margin-top:16px;"><strong>Motivo:</strong> ${razon}</p>
+      <p style="text-align:center;color:#374151;margin-top:16px;">El saldo ha sido devuelto a tu billetera. Puedes intentar nuevamente.</p>
+      <div style="text-align:center;margin:32px 0;">
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/guau/app/perfil/billetera" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Ir a mi Billetera →</a>
+      </div>
+    </div>
+    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
+  </div>`;
+}
+
+function buildWithdrawalRejectedHTML(vars: Record<string, string>): string {
+  const nombre = vars.nombre || vars.display_name || "Usuario";
+  const monto = vars.monto || "$0.00";
+  const razon = vars.razon || "Verificación de seguridad";
+  return `
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
+    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+      <h1 style="font-size:22px;font-weight:800;color:#dc2626;text-align:center;">Retiro Rechazado</h1>
+      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
+      <p style="text-align:center;color:#374151;">Tu solicitud de retiro de <strong>${monto}</strong> ha sido rechazada por nuestro equipo de seguridad.</p>
+      <p style="text-align:center;color:#6b7280;font-size:14px;margin-top:16px;"><strong>Motivo:</strong> ${razon}</p>
+      <p style="text-align:center;color:#374151;margin-top:16px;">El saldo ha sido devuelto a tu billetera. Si crees que esto es un error, contacta a soporte.</p>
     </div>
     <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
   </div>`;
@@ -202,6 +309,12 @@ function getSubjectForEvent(evento: string): string {
     invitacion: "Te han invitado a Blis Club",
     receta_semanal: "Receta semanal — Blis Club",
     recordatorio_entrenamiento: "Recordatorio de entrenamiento — Blis Club",
+    commission_available: "¡Tu comisión está disponible! — Blis Club",
+    withdrawal_requested: "Solicitud de retiro recibida — Blis Club",
+    withdrawal_processing: "Tu retiro está siendo procesado — Blis Club",
+    withdrawal_completed: "¡Retiro completado! — Blis Club",
+    withdrawal_failed: "Tu retiro no pudo completarse — Blis Club",
+    withdrawal_rejected: "Tu retiro fue rechazado — Blis Club",
   };
   return subjects[evento] || "Blis Club";
 }
@@ -218,6 +331,18 @@ function buildFallbackForEvent(evento: string, vars: Record<string, string>): st
       return buildGenericHTML(vars, "Suscripción por vencer", "Tu suscripción está por vencer. Renueva para seguir disfrutando de Blis Club.");
     case "suscripcion_expirada":
       return buildGenericHTML(vars, "Suscripción Expirada", "Tu período de prueba ha finalizado. Suscríbete para continuar.");
+    case "commission_available":
+      return buildCommissionAvailableHTML(vars);
+    case "withdrawal_requested":
+      return buildWithdrawalRequestedHTML(vars);
+    case "withdrawal_processing":
+      return buildWithdrawalProcessingHTML(vars);
+    case "withdrawal_completed":
+      return buildWithdrawalCompletedHTML(vars);
+    case "withdrawal_failed":
+      return buildWithdrawalFailedHTML(vars);
+    case "withdrawal_rejected":
+      return buildWithdrawalRejectedHTML(vars);
     default:
       return buildGenericHTML(vars, "Blis Club", "Tienes una notificación de Blis Club.");
   }

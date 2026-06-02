@@ -5,8 +5,10 @@ import AdminGuard from "@/components/admin/AdminGuard";
 import {
   Plus, Edit, Trash2, GraduationCap, Save, X,
   ChevronDown, ChevronRight, BookOpen, Layers,
-  Pencil, FileText, Timer, Zap, BookMarked
+  Pencil, FileText, Timer, Zap, BookMarked, Sparkles
 } from "lucide-react";
+import LessonContentEditor from "@/components/admin/LessonContentEditor";
+import AIGenerateModal from "@/components/admin/AIGenerateModal";
 
 interface Stage {
   id: string;
@@ -32,6 +34,7 @@ interface Lesson {
   type: string;
   order: number;
   content_json: any;
+  video_url: string | null;
 }
 
 interface StageForm {
@@ -56,7 +59,8 @@ interface LessonForm {
   title: string;
   type: string;
   order: number;
-  content_json_raw: string;
+  content_json: any;
+  video_url: string;
 }
 
 const STAGE_COLORS = ["#5956E9", "#209F89", "#F97316", "#EF4444", "#A855F7", "#3B82F6", "#EC4899", "#14B8A6"];
@@ -88,6 +92,7 @@ export default function AcademiaPage() {
 
   const [moduleForm, setModuleForm] = useState<ModuleForm | null>(null);
   const [lessonForm, setLessonForm] = useState<LessonForm | null>(null);
+  const [showLessonAIModal, setShowLessonAIModal] = useState(false);
 
   const appSlug = typeof window !== "undefined" ? (localStorage.getItem("blis_active_app_slug") || "guau") : "guau";
 
@@ -272,7 +277,8 @@ export default function AcademiaPage() {
       title: "",
       type: "theory",
       order: lessonsCount,
-      content_json_raw: JSON.stringify(defaultContentForType("theory"), null, 2),
+      content_json: defaultContentForType("theory"),
+      video_url: "",
     });
   };
 
@@ -283,21 +289,13 @@ export default function AcademiaPage() {
       title: lesson.title,
       type: lesson.type,
       order: lesson.order,
-      content_json_raw: lesson.content_json
-        ? JSON.stringify(lesson.content_json, null, 2)
-        : JSON.stringify(defaultContentForType(lesson.type), null, 2),
+      content_json: lesson.content_json || defaultContentForType(lesson.type),
+      video_url: lesson.video_url || "",
     });
   };
 
   const handleSaveLesson = async () => {
     if (!lessonForm) return;
-    let contentJson: any;
-    try {
-      contentJson = JSON.parse(lessonForm.content_json_raw);
-    } catch {
-      alert("El JSON de contenido no es válido. Corrígelo antes de guardar.");
-      return;
-    }
 
     if (lessonForm.editingId) {
       await fetch("/api/admin/lessons", {
@@ -308,7 +306,8 @@ export default function AcademiaPage() {
           title: lessonForm.title,
           type: lessonForm.type,
           order: lessonForm.order,
-          content_json: contentJson,
+          content_json: lessonForm.content_json,
+          video_url: lessonForm.video_url || null,
         }),
       });
     } else {
@@ -320,7 +319,8 @@ export default function AcademiaPage() {
           title: lessonForm.title,
           type: lessonForm.type,
           order: lessonForm.order,
-          content_json: contentJson,
+          content_json: lessonForm.content_json,
+          video_url: lessonForm.video_url || null,
         }),
       });
     }
@@ -339,7 +339,7 @@ export default function AcademiaPage() {
     setLessonForm({
       ...lessonForm,
       type,
-      content_json_raw: JSON.stringify(defaultContentForType(type), null, 2),
+      content_json: defaultContentForType(type),
     });
   };
 
@@ -770,25 +770,26 @@ export default function AcademiaPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">
-                  Content JSON ({getLessonTypeLabel(lessonForm.type)})
-                </label>
-                <textarea
-                  value={lessonForm.content_json_raw}
-                  onChange={(e) => setLessonForm({ ...lessonForm, content_json_raw: e.target.value })}
-                  rows={12}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                  placeholder='{ "cards": [{ "title": "", "body": "", "image": "" }] }'
-                />
-              </div>
+              <LessonContentEditor
+                type={lessonForm.type}
+                value={lessonForm.content_json}
+                onChange={(val) => setLessonForm({ ...lessonForm, content_json: val })}
+                videoUrl={lessonForm.video_url}
+                onVideoUrlChange={(url) => setLessonForm({ ...lessonForm, video_url: url })}
+              />
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={handleSaveLesson}
                   className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all"
                 >
                   <Save className="w-4 h-4" /> {lessonForm.editingId ? "Actualizar" : "Crear"}
+                </button>
+                <button
+                  onClick={() => setShowLessonAIModal(true)}
+                  className="flex items-center gap-2 bg-accent-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-accent-700 active:scale-[0.97] transition-all"
+                >
+                  <Sparkles className="w-4 h-4" /> Generar con AI
                 </button>
                 <button
                   onClick={() => setLessonForm(null)}
@@ -801,6 +802,21 @@ export default function AcademiaPage() {
           </div>
         )}
       </div>
+
+      {/* AI Lesson Generate Modal */}
+      {lessonForm && (
+        <AIGenerateModal
+          isOpen={showLessonAIModal}
+          onClose={() => setShowLessonAIModal(false)}
+          onGenerate={(content_json) => {
+            setLessonForm({ ...lessonForm, content_json });
+            setShowLessonAIModal(false);
+          }}
+          mode="lesson"
+          lessonType={lessonForm.type}
+          moduleTitle={modules.find(m => m.id === lessonForm.moduleId)?.title || "General"}
+        />
+      )}
     </AdminGuard>
   );
 }

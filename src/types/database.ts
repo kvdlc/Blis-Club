@@ -129,6 +129,7 @@ export interface Lesson {
   type: LessonType;
   order: number;
   content_json: Record<string, unknown>;
+  video_url: string | null;
 }
 
 export interface UserProgress {

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import BilleteraClient from "./BilleteraClient";
-import { generateReferralCode, getCommissionsSummary, getReferralTree } from "@/lib/referrals";
+import { generateReferralCode, getCommissionsSummary, getReferralTree, maturePendingCommissions } from "@/lib/referrals";
 import type { ReferralNode, CommissionsSummary } from "@/types/database";
 
 export default async function BilleteraPage() {
@@ -54,12 +54,43 @@ export default async function BilleteraPage() {
   const tree: ReferralNode[] = await getReferralTree(user.id);
   const summary: CommissionsSummary = await getCommissionsSummary(user.id);
 
+  // Auto-mature pending commissions
+  await maturePendingCommissions(user.id);
+
   // Obtener retiros
   const { data: withdrawals } = await supabase
     .from("withdrawal_requests")
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
+
+  // Obtener perfil de facturación
+  const { data: billingProfile } = await supabase
+    .from("billing_profiles")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  // Obtener comisiones
+  const { data: commissions } = await supabase
+    .from("referral_commissions")
+    .select(`
+      *,
+      referral:referral_id(
+        referred_user_id,
+        referred:referred_user_id(id, email, first_name, display_name)
+      )
+    `)
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  // Obtener ledger
+  const { data: ledger } = await supabase
+    .from("user_reward_transactions")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(50);
 
   // Obtener historial de cobros
   const { data: payments } = await supabase
@@ -87,6 +118,9 @@ export default async function BilleteraPage() {
       referralCode={referralCode}
       userId={user.id}
       isSubscriptionActive={isSubscriptionActive}
+      billingProfile={billingProfile}
+      commissions={(commissions ?? []) as any[]}
+      ledger={(ledger ?? []) as any[]}
     />
   );
 }

@@ -2,9 +2,11 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Wallet, DollarSign, Users, AlertTriangle, Check, Share2, Clock, BadgeCheck, Receipt, FileText, Filter, TrendingUp, TrendingDown, Minus, Crown, Gift, Zap, Network } from "lucide-react";
+import { ArrowLeft, Wallet, DollarSign, Users, AlertTriangle, Check, Share2, Clock, BadgeCheck, Receipt, FileText, Filter, TrendingUp, TrendingDown, Minus, Crown, Gift, Zap, Network, Lock, Unlock, RotateCcw, History } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ReferralTree from "@/components/ReferralTree";
+import BillingProfileModal from "@/components/BillingProfileModal";
+import WithdrawForm from "@/components/WithdrawForm";
 import type { ReferralNode, CommissionsSummary } from "@/types/database";
 
 /* ─── Local types ─── */
@@ -35,7 +37,11 @@ interface Withdrawal {
   id: string;
   amount_usd: number;
   method: string;
+  withdrawal_method?: string;
   status: string;
+  payment_reference?: string | null;
+  fee_cents?: number;
+  net_amount_cents?: number;
   created_at: string;
 }
 interface Payment {
@@ -61,6 +67,9 @@ interface Props {
   referralCode: string;
   userId: string;
   isSubscriptionActive: boolean;
+  billingProfile: any | null;
+  commissions: any[];
+  ledger: any[];
 }
 
 /* ─── Constants ─── */
@@ -76,8 +85,9 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 };
 const WITHDRAWAL_STATUS: Record<string, { label: string; color: string }> = {
   pending: { label: "Pendiente", color: "text-warning-600" },
-  approved: { label: "Aprobado", color: "text-primary-600" },
-  paid: { label: "Pagado", color: "text-secondary-600" },
+  processing: { label: "Procesando", color: "text-primary-600" },
+  completed: { label: "Completado", color: "text-secondary-600" },
+  failed: { label: "Fallido", color: "text-danger-600" },
   rejected: { label: "Rechazado", color: "text-danger-600" },
 };
 
@@ -94,53 +104,43 @@ function getSubStatusLabel(sub: ReferredSubscription | null) {
 /* ─── Main ─── */
 export default function BilleteraClient({
   rewards, referrals, tree, summary, withdrawals, payments, referralCode, userId, isSubscriptionActive,
+  billingProfile, commissions, ledger,
 }: Props) {
   const router = useRouter();
-  const [tab, setTab] = useState<"billetera" | "red">("billetera");
-  const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [withdrawMethod, setWithdrawMethod] = useState("yape");
-  const [withdrawAccount, setWithdrawAccount] = useState("");
-  const [showWithdrawForm, setShowWithdrawForm] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [tab, setTab] = useState<"billetera" | "comisiones" | "movimientos" | "red">("billetera");
   const [copied, setCopied] = useState(false);
+  const [showBillingModal, setShowBillingModal] = useState(false);
+  const [currentBillingProfile, setCurrentBillingProfile] = useState(billingProfile);
   const [paymentFilter, setPaymentFilter] = useState<string>("all");
+  const [withdrawMessage, setWithdrawMessage] = useState("");
 
   const availableCents = rewards?.available_cash_usd ?? 0;
   const totalCents = rewards?.total_cash_usd ?? summary.totalCents;
   const referralCount = tree.length;
   const activeReferralCount = tree.filter((n) => n.status === "paid" && !n.endedAt).length;
 
-  const handleWithdraw = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
-    try {
-      const res = await fetch("/api/referrals/withdraw", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amountUsd: parseFloat(withdrawAmount),
-          method: withdrawMethod,
-          accountInfo: { account: withdrawAccount },
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setMessage("Solicitud enviada. Te contactaremos pronto.");
-        setShowWithdrawForm(false);
-        setWithdrawAmount(""); setWithdrawAccount("");
-      } else {
-        setMessage(data.error || "Error al solicitar retiro");
-      }
-    } catch { setMessage("Error de conexión"); }
-    finally { setLoading(false); }
-  };
-
   const handleShareLink = () => {
     navigator.clipboard.writeText(`https://blis.club/guau/webg?ref=${referralCode}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleWithdrawRequest = async (amountUsd: number, method: string) => {
+    try {
+      const res = await fetch("/api/referrals/withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amountUsd, method }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setWithdrawMessage("Solicitud enviada. Será procesada del 1 al 5 del mes.");
+        return { success: true };
+      }
+      return { success: false, error: data.error || "Error al solicitar retiro" };
+    } catch {
+      return { success: false, error: "Error de conexión" };
+    }
   };
 
   const filteredPayments = useMemo(() => {
@@ -175,15 +175,17 @@ export default function BilleteraClient({
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-1">
+      <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-1 overflow-x-auto">
         {[
           { key: "billetera" as const, label: "Billetera", icon: Wallet },
-          { key: "red" as const, label: "Red de Referidos", icon: Network },
+          { key: "comisiones" as const, label: "Comisiones", icon: DollarSign },
+          { key: "movimientos" as const, label: "Movimientos", icon: History },
+          { key: "red" as const, label: "Red", icon: Network },
         ].map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-xs font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
               tab === t.key ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm" : "text-zinc-500"
             }`}
           >
@@ -200,13 +202,13 @@ export default function BilleteraClient({
           <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-950/40 dark:to-accent-950/40 border border-primary-100 dark:border-primary-800/30">
             <div className="flex items-center gap-2 mb-1">
               <Zap className="w-4 h-4 text-primary-500" />
-              <span className="text-[10px] font-bold uppercase text-primary-600 dark:text-primary-400">Crédito interno</span>
+              <span className="text-[10px] font-bold uppercase text-primary-600 dark:text-primary-400">Crédito disponible</span>
             </div>
             <p className="text-3xl font-extrabold text-zinc-900 dark:text-white">
               ${(availableCents / 100).toFixed(2)} <span className="text-sm font-normal text-zinc-400">USD</span>
             </p>
             <p className="text-xs text-zinc-500 mt-1">
-              Úsalo para pagar tu suscripción o retíralo cuando gustes.
+              Total ganado: ${(totalCents / 100).toFixed(2)} USD
             </p>
           </div>
 
@@ -242,8 +244,15 @@ export default function BilleteraClient({
             </div>
           </div>
 
-          {/* Withdrawal section */}
-          {!isSubscriptionActive && availableCents >= 1000 && (
+          {/* Withdrawal form */}
+          {isSubscriptionActive ? (
+            <WithdrawForm
+              availableCents={availableCents}
+              billingProfile={currentBillingProfile}
+              onRequestWithdraw={handleWithdrawRequest}
+              onOpenBillingProfile={() => setShowBillingModal(true)}
+            />
+          ) : (
             <div className="card-soft rounded-[1.25rem] p-4 flex items-center gap-3 bg-warning-50/50 dark:bg-warning-950/20 border border-warning-200 dark:border-warning-800">
               <AlertTriangle className="w-5 h-5 text-warning-500 shrink-0" />
               <p className="text-xs text-warning-700 dark:text-warning-300">
@@ -252,58 +261,11 @@ export default function BilleteraClient({
             </div>
           )}
 
-          {isSubscriptionActive && availableCents >= 1000 && (
-            <button
-              onClick={() => setShowWithdrawForm(!showWithdrawForm)}
-              className="w-full rounded-xl bg-secondary-600 hover:bg-secondary-700 text-white py-3 font-bold text-sm transition-colors active:scale-[0.98]"
-            >
-              {showWithdrawForm ? "Cancelar retiro" : "Solicitar retiro de efectivo"}
-            </button>
-          )}
-
-          {isSubscriptionActive && availableCents < 1000 && availableCents > 0 && (
-            <div className="card-soft rounded-[1.25rem] p-4 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/40">
-              <BadgeCheck className="w-5 h-5 text-zinc-400 shrink-0" />
-              <p className="text-xs text-zinc-500">
-                Necesitas ${((1000 - availableCents) / 100).toFixed(2)} más para solicitar un retiro (mínimo $10.00 USD).
-              </p>
+          {withdrawMessage && (
+            <div className="card-soft rounded-[1.25rem] p-4 flex items-center gap-3 bg-secondary-50/50 dark:bg-secondary-950/20 border border-secondary-200 dark:border-secondary-800">
+              <Check className="w-5 h-5 text-secondary-500 shrink-0" />
+              <p className="text-xs text-secondary-700 dark:text-secondary-300">{withdrawMessage}</p>
             </div>
-          )}
-
-          {/* Withdraw form */}
-          {showWithdrawForm && (
-            <form onSubmit={handleWithdraw} className="card-soft rounded-[1.25rem] p-4 space-y-3">
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Solicitar retiro</h3>
-              <p className="text-[11px] text-zinc-400">Mínimo: $10.00 USD · Disponible: ${(availableCents / 100).toFixed(2)}</p>
-              <div>
-                <label className="text-xs text-zinc-500 block mb-1">Monto (USD)</label>
-                <input type="number" min="10" max={availableCents / 100} step="0.01" value={withdrawAmount}
-                  onChange={(e) => setWithdrawAmount(e.target.value)}
-                  className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm" placeholder="10.00" required />
-              </div>
-              <div>
-                <label className="text-xs text-zinc-500 block mb-1">Método</label>
-                <select value={withdrawMethod} onChange={(e) => setWithdrawMethod(e.target.value)}
-                  className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm">
-                  <option value="yape">Yape</option>
-                  <option value="plin">Plin</option>
-                  <option value="transfer">Transferencia bancaria</option>
-                  <option value="paypal">PayPal</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs text-zinc-500 block mb-1">Cuenta / Número</label>
-                <input type="text" value={withdrawAccount} onChange={(e) => setWithdrawAccount(e.target.value)}
-                  className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm" placeholder="999 888 777" required />
-              </div>
-              <button type="submit" disabled={loading}
-                className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-2.5 text-sm font-bold transition-colors disabled:opacity-50">
-                {loading ? "Enviando..." : "Enviar solicitud"}
-              </button>
-              {message && (
-                <p className={`text-xs text-center ${message.toLowerCase().includes("error") ? "text-danger-600" : "text-secondary-600"}`}>{message}</p>
-              )}
-            </form>
           )}
 
           {/* Payment History */}
@@ -354,24 +316,6 @@ export default function BilleteraClient({
             </div>
           )}
 
-          {/* Magic Link */}
-          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-accent-50 to-primary-50 dark:from-accent-900/20 dark:to-primary-900/20 border border-accent-100 dark:border-accent-800/30">
-            <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-2">Tu enlace mágico</h4>
-            <p className="text-[11px] text-zinc-500 mb-3">
-              Comparte este enlace. Cuando alguien entre y se registre, se vincula automáticamente a ti. Sin necesidad de que ingresen ningún código.
-            </p>
-            <button onClick={handleShareLink}
-              className="w-full flex items-center justify-between rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 mb-2">
-              <span className="text-[11px] font-mono text-zinc-600 dark:text-zinc-400 truncate pr-2">blis.club/guau/app?ref={referralCode}</span>
-              <span className="text-xs font-semibold text-primary-600 flex items-center gap-1 shrink-0">
-                {copied ? <><Check className="w-3 h-3" /> Copiado</> : <><Share2 className="w-3 h-3" /> Copiar</>}
-              </span>
-            </button>
-            <p className="text-[10px] text-zinc-400 text-center">
-              Válido por 60 días desde que la persona hace clic. Si se registra dentro de ese tiempo, ganas tu recompensa.
-            </p>
-          </div>
-
           {/* Withdrawals History */}
           {withdrawals.length > 0 && (
             <div className="space-y-3">
@@ -380,27 +324,206 @@ export default function BilleteraClient({
                 {withdrawals.map((w) => {
                   const s = WITHDRAWAL_STATUS[w.status] || WITHDRAWAL_STATUS.pending;
                   return (
-                    <div key={w.id} className="card-soft rounded-xl p-3 flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">${(w.amount_usd / 100).toFixed(2)} USD</p>
-                        <p className="text-[10px] text-zinc-400 capitalize">{w.method}</p>
+                    <div key={w.id} className="card-soft rounded-xl p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">${(w.amount_usd / 100).toFixed(2)} USD</p>
+                          <p className="text-[10px] text-zinc-400 capitalize">{w.withdrawal_method || w.method}</p>
+                        </div>
+                        <div className="text-right">
+                          <span className={`text-[10px] font-bold ${s.color}`}>{s.label}</span>
+                          {w.payment_reference && (
+                            <p className="text-[10px] text-zinc-400 font-mono mt-0.5 truncate max-w-[100px]">{w.payment_reference}</p>
+                          )}
+                        </div>
                       </div>
-                      <span className={`text-[10px] font-bold ${s.color}`}>{s.label}</span>
+                      {w.fee_cents !== undefined && w.fee_cents > 0 && (
+                        <div className="flex justify-between text-[10px] text-zinc-400 mt-1 pt-1 border-t border-zinc-100 dark:border-zinc-800">
+                          <span>Fee: ${(w.fee_cents / 100).toFixed(2)}</span>
+                          <span>Neto: ${((w.net_amount_cents || w.amount_usd) / 100).toFixed(2)}</span>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
               </div>
             </div>
           )}
+
+          {/* Magic Link */}
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-accent-50 to-primary-50 dark:from-accent-900/20 dark:to-primary-900/20 border border-accent-100 dark:border-accent-800/30">
+            <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-2">Tu enlace mágico</h4>
+            <p className="text-[11px] text-zinc-500 mb-3">
+              Comparte este enlace. Cuando alguien entre y se registre, se vincula automáticamente a ti.
+            </p>
+            <button onClick={handleShareLink}
+              className="w-full flex items-center justify-between rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 mb-2">
+              <span className="text-[11px] font-mono text-zinc-600 dark:text-zinc-400 truncate pr-2">blis.club/guau/webg?ref={referralCode}</span>
+              <span className="text-xs font-semibold text-primary-600 flex items-center gap-1 shrink-0">
+                {copied ? <><Check className="w-3 h-3" /> Copiado</> : <><Share2 className="w-3 h-3" /> Copiar</>}
+              </span>
+            </button>
+            <p className="text-[10px] text-zinc-400 text-center">
+              Válido por 60 días desde que la persona hace clic.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ══════ TAB: COMISIONES ══════ */}
+      {tab === "comisiones" && (
+        <div className="space-y-4 animate-fade-in">
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-950/40 dark:to-accent-950/40 border border-primary-100 dark:border-primary-800/30">
+            <div className="flex items-center gap-2 mb-1">
+              <DollarSign className="w-4 h-4 text-primary-500" />
+              <span className="text-[10px] font-bold uppercase text-primary-600 dark:text-primary-400">Tus comisiones</span>
+            </div>
+            <p className="text-2xl font-extrabold text-zinc-900 dark:text-white">
+              {commissions.length} <span className="text-sm font-normal text-zinc-400">totales</span>
+            </p>
+            <p className="text-xs text-zinc-500 mt-1">
+              Las comisiones tardan 14 días en estar disponibles para retirar.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            {commissions.length === 0 && (
+              <div className="text-center py-8 text-zinc-400 text-sm">
+                Aún no tienes comisiones. ¡Invita a más amigos!
+              </div>
+            )}
+            {commissions.map((c: any) => (
+              <div key={c.id} className="card-soft rounded-xl p-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      c.status === "available"
+                        ? "bg-secondary-100 text-secondary-600"
+                        : c.status === "pending"
+                        ? "bg-warning-100 text-warning-600"
+                        : "bg-danger-100 text-danger-600"
+                    }`}>
+                      {c.status === "available" ? <Unlock className="w-4 h-4" /> : c.status === "pending" ? <Lock className="w-4 h-4" /> : <RotateCcw className="w-4 h-4" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                        {c.referred_name || "Usuario"}
+                      </p>
+                      <p className="text-[10px] text-zinc-400">
+                        Nivel {c.level} · ${(c.commission_cents / 100).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${
+                      c.status === "available"
+                        ? "bg-secondary-100 text-secondary-700"
+                        : c.status === "pending"
+                        ? "bg-warning-100 text-warning-700"
+                        : "bg-danger-100 text-danger-700"
+                    }`}>
+                      {c.status === "available" ? "Disponible" : c.status === "pending" ? "En hold" : "Reversada"}
+                    </span>
+                  </div>
+                </div>
+                {c.status === "pending" && c.days_remaining > 0 && (
+                  <div className="mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                    <p className="text-[10px] text-zinc-400">
+                      Disponible en {c.days_remaining} día{c.days_remaining !== 1 ? "s" : ""}
+                    </p>
+                    <div className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full mt-1 overflow-hidden">
+                      <div
+                        className="h-full bg-warning-400 rounded-full transition-all"
+                        style={{ width: `${Math.max(0, 100 - (c.days_remaining / 14) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {c.reversal_reason && (
+                  <p className="text-[10px] text-danger-500 mt-1">{c.reversal_reason}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ══════ TAB: MOVIMIENTOS ══════ */}
+      {tab === "movimientos" && (
+        <div className="space-y-4 animate-fade-in">
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-accent-50 to-primary-50 dark:from-accent-950/40 dark:to-primary-950/40 border border-accent-100 dark:border-accent-800/30">
+            <div className="flex items-center gap-2 mb-1">
+              <History className="w-4 h-4 text-accent-500" />
+              <span className="text-[10px] font-bold uppercase text-accent-600 dark:text-accent-400">Movimientos</span>
+            </div>
+            <p className="text-xs text-zinc-500">
+              Historial completo de comisiones y retiros.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            {ledger.length === 0 && (
+              <div className="text-center py-8 text-zinc-400 text-sm">
+                No hay movimientos registrados aún.
+              </div>
+            )}
+            {ledger.map((t: any) => (
+              <div key={t.id} className="card-soft rounded-xl p-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      t.amount_cents > 0
+                        ? "bg-secondary-100 text-secondary-600"
+                        : t.amount_cents < 0
+                        ? "bg-danger-100 text-danger-600"
+                        : "bg-zinc-100 text-zinc-500"
+                    }`}>
+                      {t.amount_cents > 0 ? <TrendingUp className="w-4 h-4" /> : t.amount_cents < 0 ? <TrendingDown className="w-4 h-4" /> : <Minus className="w-4 h-4" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{t.type_label || t.type}</p>
+                      <p className="text-[10px] text-zinc-400">
+                        {new Date(t.created_at).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-sm font-extrabold ${
+                      t.amount_cents > 0 ? "text-secondary-600" : t.amount_cents < 0 ? "text-danger-600" : "text-zinc-400"
+                    }`}>
+                      {t.amount_cents > 0 ? "+" : ""}{(t.amount_cents / 100).toFixed(2)}
+                    </p>
+                    <p className="text-[10px] text-zinc-400">
+                      Saldo: ${(t.balance_after_cents / 100).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                {t.description && t.description !== t.type && (
+                  <p className="text-[10px] text-zinc-400 mt-1.5 pt-1.5 border-t border-zinc-100 dark:border-zinc-800">{t.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* ══════ TAB: RED DE REFERIDOS ══════ */}
       {tab === "red" && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-fade-in">
           <ReferralTree userId={userId} />
         </div>
       )}
+
+      {/* Billing Profile Modal */}
+      <BillingProfileModal
+        isOpen={showBillingModal}
+        onClose={() => setShowBillingModal(false)}
+        onSave={(profile) => {
+          setCurrentBillingProfile(profile);
+          setWithdrawMessage("Perfil de facturación actualizado");
+        }}
+        existingProfile={currentBillingProfile}
+      />
     </div>
   );
 }

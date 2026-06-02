@@ -2,12 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
-import { Plus, Edit, Trash2, UtensilsCrossed, Save, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Edit, Trash2, UtensilsCrossed, Save, X, ChevronDown, ChevronUp, Sparkles, Camera, Image as ImageIcon, Loader2 } from "lucide-react";
+import AIGenerateModal from "@/components/admin/AIGenerateModal";
+import { ImageEditor } from "@/components/ImageEditor";
+import { uploadRecipeImage } from "@/lib/storage";
 
 // ─── Tipos ───
 interface Recipe {
   id: string; title: string; description: string; category: string;
-  image_url: string; is_therapeutic: boolean; health_tags: string[];
+  image_url: string; video_url: string | null; is_therapeutic: boolean; health_tags: string[];
   prep_time_min: number; difficulty: string; kcal_per_100g: number;
   is_detox: boolean; source_book: string;
 }
@@ -20,7 +23,7 @@ const DIFFICULTIES = ["facil", "medio", "avanzado"];
 const INGREDIENT_TYPES = ["proteina", "hueso", "viscera", "vegetal", "suplemento", "otro"];
 const TAG_OPTIONS = ["sin gluten", "sin lacteos", "hipoalergenico", "alto en proteina", "bajo en grasa", "renal", "hepatico", "diabetico", "cardiaco", "digestivo", "articular"];
 
-const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "" };
+const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", video_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "" };
 const emptyFacts: NutritionFact = { recipe_id: "", protein_g: 0, fat_g: 0, carbs_g: 0, fiber_g: 0, moisture_g: 0, ash_g: 0, calcium_mg: 0, phosphorus_mg: 0, iron_mg: 0, zinc_mg: 0, vitamin_a_ui: 0, vitamin_d_ui: 0, vitamin_e_mg: 0, omega3_g: 0, omega6_g: 0 };
 
 export default function NutricionPage() {
@@ -37,6 +40,12 @@ export default function NutricionPage() {
   const [newIngredient, setNewIngredient] = useState({ ingredient_name: "", quantity_per_serving_g: 0, ingredient_type: "otro" });
   const [newStep, setNewStep] = useState({ instruction: "", duration_min: 0 });
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [showAIModal, setShowAIModal] = useState(false);
+
+  // Image generation / editor
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [showImageEditor, setShowImageEditor] = useState(false);
+  const [imageEditorUrl, setImageEditorUrl] = useState("");
 
   const appSlug = () => { try { return localStorage.getItem("blis_active_app_slug") || "guau"; } catch { return "guau"; } };
 
@@ -107,9 +116,78 @@ export default function NutricionPage() {
 
   const handleEdit = (r: Recipe) => {
     setEditing(r);
-    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min || 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g || 0, is_detox: r.is_detox, source_book: r.source_book || "" });
+    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min || 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g || 0, is_detox: r.is_detox, source_book: r.source_book || "" });
     setShowNew(false);
     loadSubEntities(r.id);
+  };
+
+  const handleAIGenerate = (recipe: any) => {
+    setForm({
+      title: recipe.title || "",
+      description: recipe.description || "",
+      category: recipe.category || "diario",
+      image_url: recipe.image_url || "",
+      video_url: recipe.video_url || "",
+      is_therapeutic: recipe.is_therapeutic || false,
+      health_tags: recipe.health_tags || [],
+      prep_time_min: recipe.prep_time_min || 15,
+      difficulty: recipe.difficulty || "facil",
+      kcal_per_100g: recipe.kcal_per_100g || 0,
+      is_detox: recipe.is_detox || false,
+      source_book: recipe.source_book || "",
+    });
+    // Save recipe first to get an ID, then add sub-entities
+    handleSave();
+  };
+
+  const handleGenerateImage = async () => {
+    if (!form.title) return alert("Guarda la receta primero (título obligatorio)");
+    // Ensure recipe exists so we have an ID for storage path
+    let recipeId = editing?.id;
+    if (!recipeId) {
+      const appId = await getAppId();
+      if (!appId) return;
+      const r = await fetch("/api/admin/recipes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, application_id: appId }) });
+      const j = await r.json();
+      if (!j.data?.id) return alert("Error guardando receta");
+      recipeId = j.data.id;
+      setEditing(j.data);
+      setForm(j.data);
+    }
+
+    setGeneratingImage(true);
+    try {
+      const prompt = `Professional food photography of ${form.title}. ${form.description}. Appetizing, well-lit, top-down or 45-degree angle, white background, square format 1024x1024.`;
+      const res = await fetch("/api/ai/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, model: "flux-2-pro" }),
+      });
+      const data = await res.json();
+      if (data.imageUrl) {
+        setImageEditorUrl(data.imageUrl);
+        setShowImageEditor(true);
+      } else {
+        alert(data.error || "Error generando imagen");
+      }
+    } catch (e) {
+      alert("Error generando imagen");
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
+
+  const handleImageEditorSave = async (dataUrl: string) => {
+    if (!editing?.id) return;
+    const url = await uploadRecipeImage(dataUrl, editing.id);
+    if (url) {
+      setForm(f => ({ ...f, image_url: url }));
+      // Also persist immediately to DB
+      await fetch("/api/admin/recipes", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editing.id, image_url: url }) });
+    } else {
+      alert("Error subiendo imagen");
+    }
+    setShowImageEditor(false);
   };
 
   const toggleTag = (tag: string) => {
@@ -121,10 +199,16 @@ export default function NutricionPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div><h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Nutrición</h1><p className="text-sm text-zinc-500 mt-1">Gestiona recetas, ingredientes, pasos y tabla nutricional</p></div>
-          <button onClick={() => { setEditing(null); setShowNew(true); setForm(emptyRecipe); setIngredients([]); setSteps([]); setFacts(emptyFacts); }}
-            className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all">
-            <Plus className="w-4 h-4" /> Nueva Receta
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => { setEditing(null); setShowNew(true); setForm(emptyRecipe); setIngredients([]); setSteps([]); setFacts(emptyFacts); }}
+              className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all">
+              <Plus className="w-4 h-4" /> Nueva Receta
+            </button>
+            <button onClick={() => setShowAIModal(true)}
+              className="flex items-center gap-2 bg-accent-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-accent-700 active:scale-[0.97] transition-all">
+              <Sparkles className="w-4 h-4" /> Generar con AI
+            </button>
+          </div>
         </div>
 
         {/* ─── RECIPE LIST ─── */}
@@ -173,8 +257,39 @@ export default function NutricionPage() {
                   <input type="number" value={form.prep_time_min} onChange={e => setForm({...form, prep_time_min: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
                 <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Kcal/100g</label>
                   <input type="number" value={form.kcal_per_100g} onChange={e => setForm({...form, kcal_per_100g: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
-                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">URL Imagen</label>
-                  <input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Imagen de la Receta</label>
+                  <div className="flex items-center gap-3">
+                    {form.image_url ? (
+                      <button onClick={() => { setImageEditorUrl(form.image_url); setShowImageEditor(true); }} className="relative group shrink-0">
+                        <img src={form.image_url} alt="Preview" className="w-16 h-16 rounded-2xl object-cover border border-zinc-200 dark:border-zinc-700" />
+                        <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Edit className="w-4 h-4 text-white" />
+                        </div>
+                      </button>
+                    ) : (
+                      <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+                        <ImageIcon className="w-6 h-6 text-zinc-400" />
+                      </div>
+                    )}
+                    <div className="flex-1 space-y-2">
+                      <input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} placeholder="https://..." className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                      <div className="flex gap-2">
+                        <button onClick={handleGenerateImage} disabled={generatingImage}
+                          className="flex items-center gap-1.5 bg-accent-600 text-white rounded-lg px-3 py-1.5 text-xs font-bold hover:bg-accent-700 disabled:opacity-50 transition-all">
+                          {generatingImage ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                          Generar con AI
+                        </button>
+                        <button onClick={() => { setImageEditorUrl(form.image_url || "https://placehold.co/400x400/EEE/999?text=Imagen"); setShowImageEditor(true); }}
+                          className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg px-3 py-1.5 text-xs font-bold hover:bg-zinc-200 transition-all">
+                          <Camera className="w-3 h-3" /> Subir / Editar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">URL Video (YouTube/Vimeo)</label>
+                  <input value={form.video_url || ""} onChange={e => setForm({...form, video_url: e.target.value})} placeholder="https://youtube.com/watch?v=..." className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => setForm(f => ({...f, is_therapeutic: !f.is_therapeutic}))}
@@ -270,6 +385,29 @@ export default function NutricionPage() {
             )}
           </div>
         )}
+
+        {/* AI Generate Modal */}
+        <AIGenerateModal
+          isOpen={showAIModal}
+          onClose={() => setShowAIModal(false)}
+          onGenerate={(recipe) => {
+            setShowNew(true);
+            setEditing(null);
+            handleAIGenerate(recipe);
+          }}
+          mode="recipe"
+        />
+
+        {/* Image Editor Modal */}
+        <ImageEditor
+          open={showImageEditor}
+          onClose={() => setShowImageEditor(false)}
+          onSave={handleImageEditorSave}
+          imageUrl={imageEditorUrl}
+          circleSize={200}
+          mode="square"
+          cornerRadius={24}
+        />
       </div>
     </AdminGuard>
   );
