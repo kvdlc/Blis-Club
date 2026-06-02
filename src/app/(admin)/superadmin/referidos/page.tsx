@@ -81,7 +81,7 @@ export default function ReferidosPage() {
   const [wallets, setWallets] = useState<WalletData[]>([]);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "pending" | "available" | "users" | "withdrawals" | "tree">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "pending" | "available" | "users" | "withdrawals" | "tree">("tree");
   const [selectedCommissions, setSelectedCommissions] = useState<Set<string>>(new Set());
   const [trees, setTrees] = useState<TreeNode[]>([]);
   const [treeApps, setTreeApps] = useState<{id: string; slug: string; name: string}[]>([]);
@@ -332,12 +332,12 @@ export default function ReferidosPage() {
         {/* Tabs */}
         <div className="flex gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-1 overflow-x-auto">
           {([
+            { key: "tree" as const, label: "Red", onClick: () => { if (trees.length === 0) loadTree(); } },
             { key: "overview" as const, label: "Resumen" },
             { key: "pending" as const, label: `En Espera (${pendingCommissions.length})` },
             { key: "available" as const, label: `Disponibles (${availableCommissions.length})` },
             { key: "users" as const, label: "Usuarios" },
             { key: "withdrawals" as const, label: `Retiros (${withdrawals.filter(w => w.status === "pending").length})` },
-            { key: "tree" as const, label: "Árbol", onClick: () => { if (trees.length === 0) loadTree(); } },
           ]).map((tab) => (
             <button
               key={tab.key}

@@ -44,13 +44,15 @@ function flattenNodes(node: TreeNode): TreeNode[] {
 export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRefresh, totalMembers, totalEarnings }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const [zoom, setZoom] = useState(1);
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
+  const draggingRef = useRef(false);
   const [dragging, setDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const panStartRef = useRef({ x: 0, y: 0 });
 
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
@@ -91,29 +93,49 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
   };
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.target === canvasRef.current || (e.target as HTMLElement).closest("[data-tree-canvas]")) {
-      setDragging(true);
-      setDragStart({ x: e.clientX, y: e.clientY });
-      setPanStart({ x: panX, y: panY });
+    const target = e.target as HTMLElement;
+    // Don't drag if clicking on a node, button, or any interactive element inside the tree
+    if (target.closest("[data-tree-node]") || target.closest("button") || target.closest("input") || target.closest("select") || target.closest("a")) {
+      return;
     }
+    draggingRef.current = true;
+    setDragging(true);
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    panStartRef.current = { x: panX, y: panY };
   }, [panX, panY]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!dragging) return;
-    setPanX(panStart.x + (e.clientX - dragStart.x));
-    setPanY(panStart.y + (e.clientY - dragStart.y));
-  }, [dragging, dragStart, panStart]);
+    if (!draggingRef.current) return;
+    setPanX(panStartRef.current.x + (e.clientX - dragStartRef.current.x));
+    setPanY(panStartRef.current.y + (e.clientY - dragStartRef.current.y));
+  }, []);
 
   const handleMouseUp = useCallback(() => {
+    draggingRef.current = false;
     setDragging(false);
   }, []);
 
-  // Wheel zoom
+  // Wheel zoom towards mouse pointer
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoom((z) => Math.max(0.3, Math.min(3, z + delta)));
-  }, []);
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    // Use direction only for consistent zoom speed across browsers
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.max(0.3, Math.min(3, zoom * zoomFactor));
+
+    // Zoom towards mouse position
+    const scaleRatio = newZoom / zoom;
+    const newPanX = mouseX - (mouseX - panX) * scaleRatio;
+    const newPanY = mouseY - (mouseY - panY) * scaleRatio;
+
+    setZoom(newZoom);
+    setPanX(newPanX);
+    setPanY(newPanY);
+  }, [zoom, panX, panY]);
 
   const toggleNode = (nodeId: string) => {
     setExpandedNodes((prev) => {
@@ -146,21 +168,71 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
         n.profile?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         n.profile?.email?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    if (found) {
-      setHighlightedNode(found.id);
-      setSelectedNode(found);
-      // Ensure path is expanded
-      const newExpanded = new Set(expandedNodes);
-      // Expand all nodes in path (simplified: expand all)
-      allNodes.forEach((n) => newExpanded.add(n.id));
-      setExpandedNodes(newExpanded);
-      setTimeout(() => setHighlightedNode(null), 3000);
-    }
+    if (!found) return;
+
+    setHighlightedNode(found.id);
+    setSelectedNode(found);
+    // Expand all nodes so the found one is visible
+    const newExpanded = new Set(expandedNodes);
+    allNodes.forEach((n) => newExpanded.add(n.id));
+    setExpandedNodes(newExpanded);
+
+    // After DOM update, center viewport on the found node
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = document.querySelector(`[data-tree-node="${found.id}"]`) as HTMLElement | null;
+        if (el && contentRef.current && containerRef.current) {
+          const contentRect = contentRef.current.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+          const containerRect = containerRef.current.getBoundingClientRect();
+          // Position of node center relative to content, in content space
+          const nodeCenterX = (elRect.left + elRect.width / 2 - contentRect.left);
+          const nodeCenterY = (elRect.top + elRect.height / 2 - contentRect.top);
+          // Center container viewport on that node
+          setPanX(containerRect.width / 2 / zoom - nodeCenterX);
+          setPanY(containerRect.height / 2 / zoom - nodeCenterY);
+        }
+      });
+    });
+
+    setTimeout(() => setHighlightedNode(null), 3000);
   };
 
   const handleExport = () => {
-    // Placeholder for export functionality
-    alert("Exportar como PNG - Funcion en desarrollo");
+    if (!mapBounds || nodePositions.size === 0) return;
+    const padding = 40;
+    const contentW = Math.max(mapBounds.maxX - mapBounds.minX, 1);
+    const contentH = Math.max(mapBounds.maxY - mapBounds.minY, 1);
+    const svgW = contentW + padding * 2;
+    const svgH = contentH + padding * 2;
+
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">`;
+    svg += `<rect width="100%" height="100%" fill="white"/>`;
+    // Lines
+    svgLines.forEach((line) => {
+      const match = line.d.match(/M ([\d.-]+) ([\d.-]+) L ([\d.-]+) ([\d.-]+) L ([\d.-]+) ([\d.-]+) L ([\d.-]+) ([\d.-]+)/);
+      if (!match) return;
+      const [, x1, y1, x2, y2, x3, y3, x4, y4] = match;
+      svg += `<polyline points="${parseFloat(x1) + padding - mapBounds.minX},${parseFloat(y1) + padding - mapBounds.minY} ${parseFloat(x2) + padding - mapBounds.minX},${parseFloat(y2) + padding - mapBounds.minY} ${parseFloat(x3) + padding - mapBounds.minX},${parseFloat(y3) + padding - mapBounds.minY} ${parseFloat(x4) + padding - mapBounds.minX},${parseFloat(y4) + padding - mapBounds.minY}" fill="none" stroke="#d4d4d8" stroke-width="2" stroke-linejoin="round"/>`;
+    });
+    // Nodes
+    nodePositions.forEach((pos, id) => {
+      const node = trees.flatMap(flattenNodes).find((n) => n.id === id);
+      const name = node?.profile?.display_name || "Usuario";
+      const cx = pos.x + padding - mapBounds.minX;
+      const cy = pos.y + padding - mapBounds.minY;
+      svg += `<circle cx="${cx}" cy="${cy}" r="6" fill="#6366f1"/>`;
+      svg += `<text x="${cx}" y="${cy + 18}" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#27272a">${name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</text>`;
+    });
+    svg += `</svg>`;
+
+    const blob = new Blob([svg], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `red-referidos-${new Date().toISOString().slice(0, 10)}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleSuspend = async (userId: string, action: "suspend" | "reactivate") => {
@@ -218,23 +290,35 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
     return true;
   };
 
+  // Compute node position relative to content container using offsetLeft/offsetTop chain
+  function getNodePosition(el: HTMLElement, container: HTMLElement) {
+    let x = 0, y = 0;
+    let curr: HTMLElement | null = el;
+    while (curr && curr !== container) {
+      x += curr.offsetLeft;
+      y += curr.offsetTop;
+      curr = curr.offsetParent as HTMLElement | null;
+    }
+    return { x, y };
+  }
+
   // Measure node positions and build SVG connector lines
   const updateSvgLines = useCallback(() => {
-    if (!canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const canvasRect = canvas.getBoundingClientRect();
+    if (!contentRef.current) return;
+    const container = contentRef.current;
 
-    // Gather all node positions (in content coordinates, accounting for zoom/pan)
     const positions = new Map<string, { x: number; y: number; bottom: number; top: number }>();
-    canvas.querySelectorAll("[data-tree-node]").forEach((el) => {
+    container.querySelectorAll("[data-tree-node]").forEach((el) => {
       const id = el.getAttribute("data-tree-node");
       if (!id) return;
-      const rect = el.getBoundingClientRect();
+      const pos = getNodePosition(el as HTMLElement, container);
+      const w = (el as HTMLElement).offsetWidth;
+      const h = (el as HTMLElement).offsetHeight;
       positions.set(id, {
-        x: (rect.left + rect.width / 2 - canvasRect.left - panX) / zoom,
-        y: (rect.top + rect.height / 2 - canvasRect.top - panY) / zoom,
-        bottom: (rect.bottom - canvasRect.top - panY) / zoom,
-        top: (rect.top - canvasRect.top - panY) / zoom,
+        x: pos.x + w / 2,
+        y: pos.y + h / 2,
+        bottom: pos.y + h,
+        top: pos.y,
       });
     });
 
@@ -257,7 +341,6 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
         const childPos = positions.get(child.id);
         if (childPos) {
           const midY = parentPos.bottom + (childPos.top - parentPos.bottom) / 2;
-          // Elbow connector: parent bottom → midY → child top (horizontal at midY)
           const path = `M ${parentPos.x} ${parentPos.bottom} L ${parentPos.x} ${midY} L ${childPos.x} ${midY} L ${childPos.x} ${childPos.top}`;
           lines.push({ id: `${node.id}-${child.id}`, d: path });
         }
@@ -268,26 +351,19 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
     setSvgLines(lines);
     setNodePositions(posMap);
     setMapBounds(positions.size > 0 ? { minX, minY, maxX, maxY } : null);
-  }, [trees, panX, panY, zoom]);
+  }, [trees]);
 
-  // Update lines when tree structure or viewport changes
+  // Update lines when tree structure changes (not zoom/pan — those don't change relative positions)
   useEffect(() => {
-    // Delay slightly to ensure DOM layout is complete
     const timer = setTimeout(updateSvgLines, 50);
     return () => clearTimeout(timer);
-  }, [updateSvgLines]);
+  }, [updateSvgLines, expandedNodes, filter]);
 
-  // Continuously update lines during drag for smooth rendering
+  // Debounced update after zoom changes (DOM layout may settle differently)
   useEffect(() => {
-    if (!dragging) return;
-    let raf: number;
-    const loop = () => {
-      updateSvgLines();
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [dragging, updateSvgLines]);
+    const timer = setTimeout(updateSvgLines, 150);
+    return () => clearTimeout(timer);
+  }, [zoom, updateSvgLines]);
 
   return (
     <div className="flex flex-col h-full" ref={containerRef}>
@@ -348,7 +424,7 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
             transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
           }}
         >
-          <div className="p-20 min-w-max relative">
+          <div className="p-20 min-w-max relative" ref={contentRef}>
             {/* SVG Connector Lines Layer */}
             <svg
               className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible"
