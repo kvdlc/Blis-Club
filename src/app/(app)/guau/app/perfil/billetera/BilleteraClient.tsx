@@ -422,7 +422,7 @@ export default function BilleteraClient({
                         ? "bg-warning-100 text-warning-700"
                         : "bg-danger-100 text-danger-700"
                     }`}>
-                      {c.status === "available" ? "Disponible" : c.status === "pending" ? "En hold" : "Reversada"}
+                      {c.status === "available" ? "Disponible" : c.status === "pending" ? "En espera" : "Reversada"}
                     </span>
                   </div>
                 </div>

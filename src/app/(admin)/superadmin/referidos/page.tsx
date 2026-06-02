@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
 import {
   DollarSign, Check, X, Users, TrendingUp, Wallet, Clock, AlertCircle,
-  Lock, Unlock, RotateCcw, Send, Ban, ArrowRight, Eye, Package, TreePine, CircleDollarSign
+  Lock, Unlock, RotateCcw, Send, Ban, ArrowRight, Eye, Package, TreePine, CircleDollarSign,
+  ChevronDown, ChevronRight, RefreshCw, Loader2, UserPlus
 } from "lucide-react";
 
 interface Commission {
@@ -56,21 +57,10 @@ interface Summary {
 
 interface TreeNode {
   id: string;
-  referred_user_id: string;
-  code: string;
-  status: string;
-  created_at: string;
-  paid_at: string | null;
-  cash_reward_usd: number;
   profile: { id: string; display_name: string; email: string; avatar_url: string } | null;
   subscription: { status: string; current_period_end: string } | null;
-  commissions: { total: number; level1: number; level2: number; level3: number; pending: number; available: number };
-}
-
-interface TreeParent {
-  referrer_id: string;
-  referrer_profile: { id: string; display_name: string; email: string; avatar_url: string } | null;
-  direct_count: number;
+  commissions: { total: number; pending: number; available: number; paid_out: number; count: number };
+  referral_count: number;
   children: TreeNode[];
 }
 
@@ -92,8 +82,12 @@ export default function ReferidosPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "pending" | "available" | "users" | "withdrawals" | "tree">("overview");
   const [selectedCommissions, setSelectedCommissions] = useState<Set<string>>(new Set());
-  const [tree, setTree] = useState<TreeParent[]>([]);
+  const [trees, setTrees] = useState<TreeNode[]>([]);
+  const [treeApps, setTreeApps] = useState<{id: string; slug: string; name: string}[]>([]);
+  const [selectedTreeApp, setSelectedTreeApp] = useState("guau");
   const [treeLoading, setTreeLoading] = useState(false);
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [selectedTreeUser, setSelectedTreeUser] = useState<TreeNode | null>(null);
   const [processing, setProcessing] = useState(false);
   const [withdrawalFilter, setWithdrawalFilter] = useState("all");
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
@@ -141,13 +135,18 @@ export default function ReferidosPage() {
     setLoading(false);
   };
 
-  const loadTree = async () => {
+  const loadTree = async (appSlug?: string) => {
     setTreeLoading(true);
     try {
-      const res = await fetch("/api/admin/referrals/tree");
+      const slug = appSlug || selectedTreeApp;
+      const res = await fetch(`/api/admin/referrals/tree?app=${slug}`);
       if (res.ok) {
         const data = await res.json();
-        setTree(data.tree || []);
+        setTrees(data.trees || []);
+        setTreeApps(data.apps || []);
+        // Auto-expand first level
+        const rootIds = (data.trees || []).map((t: TreeNode) => t.id);
+        setExpandedNodes(new Set(rootIds));
       } else {
         console.error("Tree endpoint error:", res.status);
       }
@@ -155,6 +154,15 @@ export default function ReferidosPage() {
       console.error("Tree fetch error:", e);
     }
     setTreeLoading(false);
+  };
+
+  const toggleNode = (nodeId: string) => {
+    setExpandedNodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) next.delete(nodeId);
+      else next.add(nodeId);
+      return next;
+    });
   };
 
   useEffect(() => { load(); }, []);
@@ -256,6 +264,103 @@ export default function ReferidosPage() {
 
   const formatMoney = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
+  const countNodes = (node: TreeNode): number => {
+    if (!node) return 0;
+    return 1 + node.children.reduce((sum, child) => sum + countNodes(child), 0);
+  };
+
+  const renderTreeNode = (node: TreeNode, depth: number) => {
+    const isExpanded = expandedNodes.has(node.id);
+    const hasChildren = node.children && node.children.length > 0;
+    const levelColors = ["border-primary-400", "border-accent-400", "border-warning-400", "border-zinc-400"];
+    const levelBg = ["bg-primary-50", "bg-accent-50", "bg-warning-50", "bg-zinc-50"];
+
+    return (
+      <div key={node.id} className="flex flex-col items-center">
+        {/* Node Card */}
+        <div
+          onClick={() => { setSelectedTreeUser(node); }}
+          className={`relative cursor-pointer group transition-all hover:scale-105 ${
+            selectedTreeUser?.id === node.id ? "ring-2 ring-primary-500 ring-offset-2" : ""
+          }`}
+        >
+          <div className={`w-40 bg-white dark:bg-zinc-800 rounded-2xl border-2 ${levelColors[Math.min(depth, 3)]} shadow-sm hover:shadow-md transition-all p-3 text-center`}>
+            {/* Avatar */}
+            <div className={`w-14 h-14 rounded-full mx-auto mb-2 overflow-hidden border-2 ${levelColors[Math.min(depth, 3)]} ${levelBg[Math.min(depth, 3)]} flex items-center justify-center`}>
+              {node.profile?.avatar_url ? (
+                <img src={node.profile.avatar_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-lg font-bold text-zinc-500">
+                  {(node.profile?.display_name || "?").charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            {/* Info */}
+            <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 truncate px-1">
+              {node.profile?.display_name || "Usuario"}
+            </p>
+            <p className="text-[10px] text-zinc-400 truncate px-1">{node.profile?.email}</p>
+            {/* Level Badge */}
+            <div className="mt-2 flex items-center justify-center gap-1">
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                depth === 0 ? "bg-primary-100 text-primary-700" :
+                depth === 1 ? "bg-accent-100 text-accent-700" :
+                depth === 2 ? "bg-warning-100 text-warning-700" :
+                "bg-zinc-100 text-zinc-600"
+              }`}>
+                Nivel {depth}
+              </span>
+              {node.subscription?.status === "active" && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-secondary-100 text-secondary-700">
+                  Activo
+                </span>
+              )}
+            </div>
+            {/* Earnings mini */}
+            {node.commissions.total > 0 && (
+              <p className="text-[10px] font-semibold text-primary-600 mt-1.5">
+                +{formatMoney(node.commissions.total)}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Expand/Collapse Button */}
+        {hasChildren && (
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleNode(node.id); }}
+            className="mt-1 mb-1 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center hover:bg-zinc-200 transition-colors"
+          >
+            {isExpanded ? <ChevronDown className="w-3 h-3 text-zinc-500" /> : <ChevronRight className="w-3 h-3 text-zinc-500" />}
+          </button>
+        )}
+
+        {/* Children */}
+        {isExpanded && hasChildren && (
+          <div className="relative pt-4">
+            {/* Vertical connector from parent to horizontal line */}
+            <div className="absolute top-0 left-1/2 w-0.5 h-4 bg-zinc-200 dark:bg-zinc-700 -translate-x-1/2" />
+            {/* Horizontal line */}
+            <div className="relative flex items-start gap-6">
+              {/* Horizontal connector line */}
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-zinc-200 dark:bg-zinc-700" style={{
+                width: `${(node.children.length - 1) * 176 + 160}px`,
+                marginLeft: `${80 - ((node.children.length - 1) * 176 + 160) / 2}px`
+              }} />
+              {node.children.map((child) => (
+                <div key={child.id} className="relative">
+                  {/* Vertical connector to child */}
+                  <div className="absolute -top-4 left-1/2 w-0.5 h-4 bg-zinc-200 dark:bg-zinc-700 -translate-x-1/2" />
+                  {renderTreeNode(child, depth + 1)}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const filteredWithdrawals = withdrawals.filter((w) => {
     if (withdrawalFilter === "all") return true;
     return w.status === withdrawalFilter;
@@ -287,7 +392,7 @@ export default function ReferidosPage() {
             <div className="card-soft rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Lock className="w-4 h-4 text-warning-500" />
-                <span className="text-xs font-semibold text-zinc-500">En Hold</span>
+                <span className="text-xs font-semibold text-zinc-500">En Espera</span>
               </div>
               <p className="text-xl font-extrabold text-zinc-900">{formatMoney(summary.totalPending)}</p>
             </div>
@@ -333,11 +438,11 @@ export default function ReferidosPage() {
         <div className="flex gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-1 overflow-x-auto">
           {([
             { key: "overview" as const, label: "Resumen" },
-            { key: "pending" as const, label: `En Hold (${pendingCommissions.length})` },
+            { key: "pending" as const, label: `En Espera (${pendingCommissions.length})` },
             { key: "available" as const, label: `Disponibles (${availableCommissions.length})` },
             { key: "users" as const, label: "Usuarios" },
             { key: "withdrawals" as const, label: `Retiros (${withdrawals.filter(w => w.status === "pending").length})` },
-            { key: "tree" as const, label: "Árbol", onClick: () => { if (tree.length === 0) loadTree(); } },
+            { key: "tree" as const, label: "Árbol", onClick: () => { if (trees.length === 0) loadTree(); } },
           ]).map((tab) => (
             <button
               key={tab.key}
@@ -474,7 +579,7 @@ export default function ReferidosPage() {
                 </table>
               </div>
               {pendingCommissions.length === 0 && (
-                <div className="text-center py-8 text-zinc-500">No hay comisiones en hold</div>
+                <div className="text-center py-8 text-zinc-500">No hay comisiones en espera</div>
               )}
             </div>
           </div>
@@ -745,114 +850,144 @@ export default function ReferidosPage() {
 
         {/* TREE TAB */}
         {activeTab === "tree" && (
-          <div className="space-y-6">
-            {treeLoading ? (
-              <div className="text-center py-12 text-zinc-500">Cargando árbol de referidos...</div>
-            ) : tree.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500 card-soft rounded-[1.25rem]">No hay datos de referidos aún</div>
-            ) : (
-              <div className="space-y-6">
-                {tree.map((parent) => (
-                  <div key={parent.referrer_id} className="card-soft rounded-[1.25rem] overflow-hidden">
-                    {/* Parent Header */}
-                    <div className="p-4 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-950/30 dark:to-accent-950/30 border-b border-zinc-100 dark:border-zinc-800">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-white dark:bg-zinc-800 border-2 border-primary-200 dark:border-primary-800 flex items-center justify-center overflow-hidden shrink-0">
-                          {parent.referrer_profile?.avatar_url ? (
-                            <img src={parent.referrer_profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <Users className="w-6 h-6 text-primary-500" />
-                          )}
+          <div className="flex gap-6 h-[calc(100vh-200px)] min-h-[600px]">
+            {/* Left: Tree Visualization */}
+            <div className="flex-1 flex flex-col min-w-0">
+              {/* App Selector + Controls */}
+              <div className="flex items-center justify-between mb-4 shrink-0">
+                <div className="flex items-center gap-3">
+                  <select
+                    value={selectedTreeApp}
+                    onChange={(e) => { setSelectedTreeApp(e.target.value); loadTree(e.target.value); }}
+                    className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  >
+                    <option value="">Todas las apps</option>
+                    {treeApps.map((app) => (
+                      <option key={app.id} value={app.slug}>{app.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => loadTree()}
+                    className="flex items-center gap-1.5 bg-primary-600 text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-primary-700 transition-colors"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Actualizar
+                  </button>
+                </div>
+                <div className="text-xs text-zinc-500">
+                  {trees.length} raíz(es) · {trees.reduce((acc, t) => acc + countNodes(t), 0)} miembros
+                </div>
+              </div>
+
+              {/* Tree Canvas */}
+              <div className="flex-1 overflow-auto card-soft rounded-[1.25rem] p-6">
+                {treeLoading ? (
+                  <div className="flex items-center justify-center h-full text-zinc-500">
+                    <Loader2 className="w-8 h-8 animate-spin mr-2" /> Cargando árbol...
+                  </div>
+                ) : trees.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-zinc-500 space-y-3">
+                    <TreePine className="w-16 h-16 text-zinc-300" />
+                    <p>No hay datos de referidos para esta app</p>
+                    <p className="text-xs">Los usuarios deben referir a otros usando su código de invitación</p>
+                  </div>
+                ) : (
+                  <div className="space-y-8 min-w-max">
+                    {trees.map((root) => (
+                      <div key={root.id} className="inline-block">
+                        {renderTreeNode(root, 0)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right: User Details Panel */}
+            <div className="w-80 shrink-0">
+              {selectedTreeUser ? (
+                <div className="card-soft rounded-[1.25rem] p-5 space-y-4 sticky top-4">
+                  {/* User Header */}
+                  <div className="text-center">
+                    <div className="w-20 h-20 rounded-full bg-zinc-100 dark:bg-zinc-800 border-4 border-white dark:border-zinc-700 mx-auto overflow-hidden shadow-lg">
+                      {selectedTreeUser.profile?.avatar_url ? (
+                        <img src={selectedTreeUser.profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-primary-100 text-primary-600 text-xl font-bold">
+                          {(selectedTreeUser.profile?.display_name || "?").charAt(0).toUpperCase()}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
-                            {parent.referrer_profile?.display_name || parent.referrer_profile?.email || "Usuario"}
-                          </p>
-                          <p className="text-xs text-zinc-500">{parent.referrer_profile?.email}</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-xs font-semibold text-primary-600">{parent.direct_count} referido(s)</p>
-                        </div>
+                      )}
+                    </div>
+                    <h3 className="font-bold text-zinc-900 dark:text-white mt-3 text-sm">
+                      {selectedTreeUser.profile?.display_name || "Usuario"}
+                    </h3>
+                    <p className="text-xs text-zinc-500">{selectedTreeUser.profile?.email}</p>
+                    {selectedTreeUser.subscription ? (
+                      <span className={`inline-flex items-center gap-1 mt-2 text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                        selectedTreeUser.subscription.status === "active"
+                          ? "bg-secondary-100 text-secondary-700"
+                          : "bg-zinc-100 text-zinc-500"
+                      }`}>
+                        <CircleDollarSign className="w-3 h-3" />
+                        {selectedTreeUser.subscription.status === "active" ? "Suscripción Activa" : "Inactiva"}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-500">
+                        Sin suscripción
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Stats */}
+                  <div className="space-y-2">
+                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-3">
+                      <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Red</p>
+                      <div className="flex items-baseline gap-1 mt-0.5">
+                        <p className="text-xl font-extrabold text-zinc-900 dark:text-white">{selectedTreeUser.referral_count}</p>
+                        <p className="text-xs text-zinc-500">referidos directos</p>
+                      </div>
+                      <p className="text-xs text-zinc-500 mt-1">{countNodes(selectedTreeUser) - 1} total en la red</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-warning-50 dark:bg-warning-950/20 rounded-xl p-3">
+                        <p className="text-[10px] text-warning-600 uppercase tracking-wide">En Espera</p>
+                        <p className="text-lg font-extrabold text-warning-700">{formatMoney(selectedTreeUser.commissions.pending)}</p>
+                      </div>
+                      <div className="bg-secondary-50 dark:bg-secondary-950/20 rounded-xl p-3">
+                        <p className="text-[10px] text-secondary-600 uppercase tracking-wide">Disponible</p>
+                        <p className="text-lg font-extrabold text-secondary-700">{formatMoney(selectedTreeUser.commissions.available)}</p>
+                      </div>
+                      <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-3">
+                        <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Total Ganado</p>
+                        <p className="text-lg font-extrabold text-zinc-700 dark:text-zinc-300">{formatMoney(selectedTreeUser.commissions.total)}</p>
+                      </div>
+                      <div className="bg-accent-50 dark:bg-accent-950/20 rounded-xl p-3">
+                        <p className="text-[10px] text-accent-600 uppercase tracking-wide">Pagado</p>
+                        <p className="text-lg font-extrabold text-accent-700">{formatMoney(selectedTreeUser.commissions.paid_out)}</p>
                       </div>
                     </div>
 
-                    {/* Children */}
-                    <div className="p-4 space-y-3">
-                      {parent.children.map((child, idx) => (
-                        <div key={child.id} className="flex items-start gap-3 p-3 rounded-xl bg-white dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700/50">
-                          {/* Connector line */}
-                          <div className="flex flex-col items-center gap-1 shrink-0">
-                            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
-                              {child.profile?.avatar_url ? (
-                                <img src={child.profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                              ) : (
-                                <span className="text-xs font-bold text-zinc-500">{idx + 1}</span>
-                              )}
-                            </div>
-                            <div className="w-0.5 h-8 bg-zinc-200 dark:bg-zinc-700 rounded-full" />
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="font-semibold text-zinc-800 dark:text-zinc-200 text-sm">
-                                  {child.profile?.display_name || child.profile?.email || "Usuario"}
-                                </p>
-                                <p className="text-[10px] text-zinc-400">{child.profile?.email}</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {child.subscription ? (
-                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                    child.subscription.status === "active"
-                                      ? "bg-secondary-100 text-secondary-700"
-                                      : "bg-zinc-100 text-zinc-500"
-                                  }`}>
-                                    {child.subscription.status === "active" ? "Activo" : child.subscription.status}
-                                  </span>
-                                ) : (
-                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500">Sin suscripción</span>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-2 mt-2">
-                              <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-2 text-center">
-                                <p className="text-[10px] text-zinc-400">Generado</p>
-                                <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">{formatMoney(child.commissions.total)}</p>
-                              </div>
-                              <div className="bg-warning-50 dark:bg-warning-950/20 rounded-lg p-2 text-center">
-                                <p className="text-[10px] text-warning-600">En Hold</p>
-                                <p className="text-xs font-bold text-warning-700">{formatMoney(child.commissions.pending)}</p>
-                              </div>
-                              <div className="bg-secondary-50 dark:bg-secondary-950/20 rounded-lg p-2 text-center">
-                                <p className="text-[10px] text-secondary-600">Disponible</p>
-                                <p className="text-xs font-bold text-secondary-700">{formatMoney(child.commissions.available)}</p>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-3 mt-2 text-[10px] text-zinc-400">
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {formatDate(child.created_at)}
-                              </span>
-                              {child.paid_at && (
-                                <span className="flex items-center gap-1 text-secondary-600">
-                                  <CircleDollarSign className="w-3 h-3" />
-                                  Pagado
-                                </span>
-                              )}
-                              {child.cash_reward_usd > 0 && (
-                                <span className="font-semibold text-primary-600">+{formatMoney(child.cash_reward_usd)}</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-3">
+                      <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Comisiones</p>
+                      <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mt-1">{selectedTreeUser.commissions.count} generadas</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  <button
+                    onClick={() => setSelectedTreeUser(null)}
+                    className="w-full py-2 text-xs font-semibold text-zinc-500 hover:text-zinc-700 transition-colors"
+                  >
+                    Cerrar panel
+                  </button>
+                </div>
+              ) : (
+                <div className="card-soft rounded-[1.25rem] p-8 text-center text-zinc-500 sticky top-4">
+                  <Users className="w-12 h-12 mx-auto mb-3 text-zinc-300" />
+                  <p className="text-sm font-semibold">Selecciona un usuario</p>
+                  <p className="text-xs mt-1">Haz click en cualquier nodo del árbol para ver sus detalles</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
