@@ -12,14 +12,14 @@ interface Badge {
   icon_url: string;
 }
 
-const BADGE_TYPES = ["achievement", "progress", "special", "event"];
+const BADGE_TYPES = ["academia", "tracker", "streak"];
 
 export default function BadgesPage() {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Badge | null>(null);
   const [showNew, setShowNew] = useState(false);
-  const [form, setForm] = useState({ name: "", description: "", badge_type: "achievement", icon_url: "" });
+  const [form, setForm] = useState({ name: "", description: "", badge_type: "academia", icon_url: "" });
 
   const load = async () => {
     setLoading(true);
@@ -55,7 +55,7 @@ export default function BadgesPage() {
     }
     setEditing(null);
     setShowNew(false);
-    setForm({ name: "", description: "", badge_type: "achievement", icon_url: "" });
+    setForm({ name: "", description: "", badge_type: "academia", icon_url: "" });
     load();
   };
 
@@ -74,7 +74,7 @@ export default function BadgesPage() {
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona insignias y logros</p>
           </div>
           <button
-            onClick={() => { setEditing(null); setShowNew(true); setForm({ name: "", description: "", badge_type: "achievement", icon_url: "" }); }}
+            onClick={() => { setEditing(null); setShowNew(true); setForm({ name: "", description: "", badge_type: "academia", icon_url: "" }); }}
             className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all"
           >
             <Plus className="w-4 h-4" /> Nuevo Badge

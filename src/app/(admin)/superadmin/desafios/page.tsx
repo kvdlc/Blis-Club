@@ -7,6 +7,7 @@ import { Plus, Edit, Trash2, Trophy, Save, X } from "lucide-react";
 interface Challenge {
   id: string;
   title: string;
+  description: string;
   fecha_inicio: string;
   fecha_fin: string;
   link_whatsapp: string;
@@ -17,7 +18,7 @@ export default function DesafiosPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Challenge | null>(null);
   const [showNew, setShowNew] = useState(false);
-  const [form, setForm] = useState({ title: "", fecha_inicio: "", fecha_fin: "", link_whatsapp: "" });
+  const [form, setForm] = useState({ title: "", description: "", fecha_inicio: "", fecha_fin: "", link_whatsapp: "" });
 
   const load = async () => {
     setLoading(true);
@@ -53,7 +54,7 @@ export default function DesafiosPage() {
     }
     setEditing(null);
     setShowNew(false);
-    setForm({ title: "", fecha_inicio: "", fecha_fin: "", link_whatsapp: "" });
+    setForm({ title: "", description: "", fecha_inicio: "", fecha_fin: "", link_whatsapp: "" });
     load();
   };
 
@@ -77,7 +78,7 @@ export default function DesafiosPage() {
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona desafíos y competencias</p>
           </div>
           <button
-            onClick={() => { setEditing(null); setShowNew(true); setForm({ title: "", fecha_inicio: "", fecha_fin: "", link_whatsapp: "" }); }}
+            onClick={() => { setEditing(null); setShowNew(true); setForm({ title: "", description: "", fecha_inicio: "", fecha_fin: "", link_whatsapp: "" }); }}
             className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all"
           >
             <Plus className="w-4 h-4" /> Nuevo Desafío
@@ -97,6 +98,11 @@ export default function DesafiosPage() {
             <div>
               <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Título</label>
               <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+                className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Descripción</label>
+              <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2}
                 className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
             </div>
             <div className="grid md:grid-cols-2 gap-4">
@@ -143,7 +149,7 @@ export default function DesafiosPage() {
                   Activo
                 </span>
                 <div className="flex gap-1">
-                  <button onClick={() => { setEditing(c); setForm({ title: c.title, fecha_inicio: c.fecha_inicio || "", fecha_fin: c.fecha_fin || "", link_whatsapp: c.link_whatsapp || "" }); }}
+                  <button onClick={() => { setEditing(c); setForm({ title: c.title, description: c.description || "", fecha_inicio: c.fecha_inicio || "", fecha_fin: c.fecha_fin || "", link_whatsapp: c.link_whatsapp || "" }); }}
                     className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors">
                     <Edit className="w-4 h-4" />
                   </button>

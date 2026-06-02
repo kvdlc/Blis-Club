@@ -1,56 +1,273 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
-import { Plus, Edit, Trash2, UtensilsCrossed, Save, X } from "lucide-react";
+import { Plus, Edit, Trash2, UtensilsCrossed, Save, X, ChevronDown, ChevronUp } from "lucide-react";
+
+// ─── Tipos ───
+interface Recipe {
+  id: string; title: string; description: string; category: string;
+  image_url: string; is_therapeutic: boolean; health_tags: string[];
+  prep_time_min: number; difficulty: string; kcal_per_100g: number;
+  is_detox: boolean; source_book: string;
+}
+interface Ingredient { id: string; recipe_id: string; ingredient_name: string; quantity_per_serving_g: number; ingredient_type: string; }
+interface Step { id: string; recipe_id: string; step_number: number; instruction: string; duration_min: number; image_url: string; }
+interface NutritionFact { id?: string; recipe_id: string; protein_g: number; fat_g: number; carbs_g: number; fiber_g: number; moisture_g: number; ash_g: number; calcium_mg: number; phosphorus_mg: number; iron_mg: number; zinc_mg: number; vitamin_a_ui: number; vitamin_d_ui: number; vitamin_e_mg: number; omega3_g: number; omega6_g: number; }
+
+const CATEGORIES = ["diario", "snack", "helado", "pastel"];
+const DIFFICULTIES = ["facil", "medio", "avanzado"];
+const INGREDIENT_TYPES = ["proteina", "hueso", "viscera", "vegetal", "suplemento", "otro"];
+const TAG_OPTIONS = ["sin gluten", "sin lacteos", "hipoalergenico", "alto en proteina", "bajo en grasa", "renal", "hepatico", "diabetico", "cardiaco", "digestivo", "articular"];
+
+const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "" };
+const emptyFacts: NutritionFact = { recipe_id: "", protein_g: 0, fat_g: 0, carbs_g: 0, fiber_g: 0, moisture_g: 0, ash_g: 0, calcium_mg: 0, phosphorus_mg: 0, iron_mg: 0, zinc_mg: 0, vitamin_a_ui: 0, vitamin_d_ui: 0, vitamin_e_mg: 0, omega3_g: 0, omega6_g: 0 };
 
 export default function NutricionPage() {
-  const [recipes, setRecipes] = useState<any[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<Recipe | null>(null);
+  const [showNew, setShowNew] = useState(false);
+  const [form, setForm] = useState(emptyRecipe);
 
-  useEffect(() => {
-    fetch("/api/admin/recipes?app=guau").then(r => r.json()).then(j => { setRecipes(j.data || []); setLoading(false); });
+  // Sub-entities
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [steps, setSteps] = useState<Step[]>([]);
+  const [facts, setFacts] = useState<NutritionFact>(emptyFacts);
+  const [newIngredient, setNewIngredient] = useState({ ingredient_name: "", quantity_per_serving_g: 0, ingredient_type: "otro" });
+  const [newStep, setNewStep] = useState({ instruction: "", duration_min: 0 });
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+
+  const appSlug = () => { try { return localStorage.getItem("blis_active_app_slug") || "guau"; } catch { return "guau"; } };
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const r = await fetch(`/api/admin/recipes?app=${appSlug()}`);
+    const j = await r.json();
+    setRecipes(j.data || []);
+    setLoading(false);
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Eliminar esta receta?")) return;
-    await fetch(`/api/admin/recipes?id=${id}`, { method: "DELETE" });
-    setRecipes(recipes.filter(r => r.id !== id));
+  useEffect(() => { load(); }, [load]);
+
+  const loadSubEntities = async (recipeId: string) => {
+    const [ingR, stepR, factR] = await Promise.all([
+      fetch(`/api/admin/recipe-ingredients?recipe_id=${recipeId}`).then(r => r.json()),
+      fetch(`/api/admin/recipe-steps?recipe_id=${recipeId}`).then(r => r.json()),
+      fetch(`/api/admin/recipe-nutrition?recipe_id=${recipeId}`).then(r => r.json()),
+    ]);
+    setIngredients(ingR.data || []);
+    setSteps(stepR.data || []);
+    setFacts(factR.data || { ...emptyFacts, recipe_id: recipeId });
+  };
+
+  const getAppId = async () => {
+    const r = await fetch("/api/admin/applications");
+    const j = await r.json();
+    return j.data?.find((a: any) => a.slug === appSlug())?.id;
+  };
+
+  const handleSave = async () => {
+    const appId = await getAppId();
+    if (!appId) return;
+
+    if (editing) {
+      await fetch("/api/admin/recipes", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editing.id, ...form }) });
+    } else {
+      const r = await fetch("/api/admin/recipes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, application_id: appId }) });
+      const j = await r.json();
+      if (j.data) {
+        setEditing(j.data);
+        setForm(j.data);
+        loadSubEntities(j.data.id);
+      }
+    }
+    setShowNew(false);
+    load();
+  };
+
+  const addIngredient = async () => {
+    if (!editing || !newIngredient.ingredient_name) return;
+    await fetch("/api/admin/recipe-ingredients", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...newIngredient, recipe_id: editing.id }) });
+    setNewIngredient({ ingredient_name: "", quantity_per_serving_g: 0, ingredient_type: "otro" });
+    loadSubEntities(editing.id);
+  };
+
+  const addStep = async () => {
+    if (!editing || !newStep.instruction) return;
+    await fetch("/api/admin/recipe-steps", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...newStep, recipe_id: editing.id, step_number: steps.length + 1 }) });
+    setNewStep({ instruction: "", duration_min: 0 });
+    loadSubEntities(editing.id);
+  };
+
+  const saveFacts = async () => {
+    if (!editing) return;
+    await fetch("/api/admin/recipe-nutrition", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...facts, recipe_id: editing.id }) });
+  };
+
+  const handleEdit = (r: Recipe) => {
+    setEditing(r);
+    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min || 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g || 0, is_detox: r.is_detox, source_book: r.source_book || "" });
+    setShowNew(false);
+    loadSubEntities(r.id);
+  };
+
+  const toggleTag = (tag: string) => {
+    setForm(f => ({ ...f, health_tags: f.health_tags.includes(tag) ? f.health_tags.filter(t => t !== tag) : [...f.health_tags, tag] }));
   };
 
   return (
     <AdminGuard>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Nutrición</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona recetas y alimentos tóxicos</p>
-          </div>
-          <button className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all">
+          <div><h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Nutrición</h1><p className="text-sm text-zinc-500 mt-1">Gestiona recetas, ingredientes, pasos y tabla nutricional</p></div>
+          <button onClick={() => { setEditing(null); setShowNew(true); setForm(emptyRecipe); setIngredients([]); setSteps([]); setFacts(emptyFacts); }}
+            className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all">
             <Plus className="w-4 h-4" /> Nueva Receta
           </button>
         </div>
-        {loading ? (
-          <div className="text-center py-12 text-zinc-500">Cargando...</div>
-        ) : (
-          <div className="grid gap-4">
-            {recipes.slice(0, 20).map((r: any) => (
-              <div key={r.id} className="card-soft rounded-[1.25rem] p-5 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-warning-100 dark:bg-warning-950 flex items-center justify-center text-warning-600">
-                  <UtensilsCrossed className="w-6 h-6" />
-                </div>
+
+        {/* ─── RECIPE LIST ─── */}
+        {!editing && !showNew && (
+          loading ? <div className="text-center py-12 text-zinc-500">Cargando...</div> :
+          <div className="grid gap-3">
+            {recipes.map(r => (
+              <div key={r.id} className="card-soft rounded-[1.25rem] p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onClick={() => handleEdit(r)}>
+                <div className="w-12 h-12 rounded-2xl bg-warning-100 dark:bg-warning-950 flex items-center justify-center text-warning-600"><UtensilsCrossed className="w-6 h-6" /></div>
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">{r.title}</p>
-                  <p className="text-sm text-zinc-500 truncate">{r.category} · {r.difficulty} · {r.prep_time_min}min</p>
+                  <div className="flex gap-2 mt-1 flex-wrap">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.category}</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.difficulty}</span>
+                    {r.prep_time_min ? <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.prep_time_min}min</span> : null}
+                    {r.is_therapeutic && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary-100 text-secondary-700">Terapéutica</span>}
+                  </div>
                 </div>
-                <div className="flex gap-1">
-                  <button className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50"
-                    onClick={() => handleDelete(r.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                <button onClick={(e) => { e.stopPropagation(); if(confirm("¿Eliminar?")) fetch(`/api/admin/recipes?id=${r.id}`,{method:"DELETE"}).then(load); }}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* ─── RECIPE EDITOR ─── */}
+        {(editing || showNew) && (
+          <div className="space-y-6">
+            <button onClick={() => { setEditing(null); setShowNew(false); load(); }} className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-700"><X className="w-4 h-4" /> Cerrar editor</button>
+
+            {/* Basic fields */}
+            <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
+              <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">{editing ? `Editando: ${editing.title}` : "Nueva Receta"}</h2>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="md:col-span-2"><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Título</label>
+                  <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Categoría</label>
+                  <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">{CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+              </div>
+              <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Descripción</label>
+                <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={2} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+              <div className="grid md:grid-cols-4 gap-4">
+                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Dificultad</label>
+                  <select value={form.difficulty} onChange={e => setForm({...form, difficulty: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">{DIFFICULTIES.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
+                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Tiempo (min)</label>
+                  <input type="number" value={form.prep_time_min} onChange={e => setForm({...form, prep_time_min: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Kcal/100g</label>
+                  <input type="number" value={form.kcal_per_100g} onChange={e => setForm({...form, kcal_per_100g: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">URL Imagen</label>
+                  <input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => setForm(f => ({...f, is_therapeutic: !f.is_therapeutic}))}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-full border-2 transition-all ${form.is_therapeutic ? "border-secondary-400 bg-secondary-50 text-secondary-700" : "border-zinc-200 text-zinc-500"}`}>🏥 Terapéutica</button>
+                <button onClick={() => setForm(f => ({...f, is_detox: !f.is_detox}))}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-full border-2 transition-all ${form.is_detox ? "border-accent-400 bg-accent-50 text-accent-700" : "border-zinc-200 text-zinc-500"}`}>🧪 Detox</button>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Health Tags</label>
+                <div className="flex flex-wrap gap-1.5">{TAG_OPTIONS.map(t => (
+                  <button key={t} onClick={() => toggleTag(t)}
+                    className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-all ${form.health_tags.includes(t) ? "border-primary-400 bg-primary-50 text-primary-700" : "border-zinc-200 text-zinc-500"}`}>{t}</button>
+                ))}</div>
+              </div>
+              <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Libro fuente</label>
+                <input value={form.source_book} onChange={e => setForm({...form, source_book: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+              <button onClick={handleSave} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all"><Save className="w-4 h-4" /> Guardar Receta</button>
+            </div>
+
+            {/* ═══ INGREDIENTS ═══ */}
+            {editing && (
+              <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
+                <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">Ingredientes ({ingredients.length})</h2>
+                <div className="flex gap-2 flex-wrap">
+                  <input placeholder="Nombre" value={newIngredient.ingredient_name} onChange={e => setNewIngredient({...newIngredient, ingredient_name: e.target.value})}
+                    className="flex-1 min-w-[120px] rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  <input type="number" placeholder="Gramos" value={newIngredient.quantity_per_serving_g || ""} onChange={e => setNewIngredient({...newIngredient, quantity_per_serving_g: parseInt(e.target.value)||0})}
+                    className="w-24 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  <select value={newIngredient.ingredient_type} onChange={e => setNewIngredient({...newIngredient, ingredient_type: e.target.value})}
+                    className="w-32 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">{INGREDIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
+                  <button onClick={addIngredient} className="bg-primary-600 text-white rounded-xl px-4 py-2 text-sm font-bold"><Plus className="w-4 h-4" /></button>
+                </div>
+                <div className="space-y-1">
+                  {ingredients.map(i => (
+                    <div key={i.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/50 dark:bg-zinc-800/30 text-sm">
+                      <span className="font-semibold flex-1">{i.ingredient_name}</span>
+                      <span className="text-xs text-zinc-500">{i.quantity_per_serving_g}g</span>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800">{i.ingredient_type}</span>
+                      <button onClick={() => { fetch(`/api/admin/recipe-ingredients?id=${i.id}`,{method:"DELETE"}).then(() => loadSubEntities(editing.id)); }}
+                        className="text-zinc-400 hover:text-danger-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ═══ STEPS ═══ */}
+            {editing && (
+              <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
+                <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">Pasos ({steps.length})</h2>
+                <div className="flex gap-2">
+                  <input placeholder="Instrucción del paso..." value={newStep.instruction} onChange={e => setNewStep({...newStep, instruction: e.target.value})}
+                    className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  <input type="number" placeholder="Min" value={newStep.duration_min || ""} onChange={e => setNewStep({...newStep, duration_min: parseInt(e.target.value)||0})}
+                    className="w-20 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  <button onClick={addStep} className="bg-primary-600 text-white rounded-xl px-4 py-2 text-sm font-bold"><Plus className="w-4 h-4" /></button>
+                </div>
+                <div className="space-y-2">
+                  {steps.map((s, i) => (
+                    <div key={s.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/50 dark:bg-zinc-800/30">
+                      <span className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i+1}</span>
+                      <p className="flex-1 text-sm text-zinc-700 dark:text-zinc-300">{s.instruction}</p>
+                      {s.duration_min ? <span className="text-xs text-zinc-500 shrink-0">{s.duration_min}min</span> : null}
+                      <button onClick={() => { fetch(`/api/admin/recipe-steps?id=${s.id}`,{method:"DELETE"}).then(() => loadSubEntities(editing.id)); }}
+                        className="text-zinc-400 hover:text-danger-500 shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ═══ NUTRITION FACTS ═══ */}
+            {editing && (
+              <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
+                <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">Tabla Nutricional</h2>
+                <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                  {[
+                    { k: "protein_g", l: "Proteína (g)" }, { k: "fat_g", l: "Grasa (g)" }, { k: "carbs_g", l: "Carbs (g)" },
+                    { k: "fiber_g", l: "Fibra (g)" }, { k: "moisture_g", l: "Humedad (g)" }, { k: "ash_g", l: "Ceniza (g)" },
+                    { k: "calcium_mg", l: "Calcio (mg)" }, { k: "phosphorus_mg", l: "Fósforo (mg)" },
+                    { k: "iron_mg", l: "Hierro (mg)" }, { k: "zinc_mg", l: "Zinc (mg)" },
+                    { k: "vitamin_a_ui", l: "Vit A (UI)" }, { k: "vitamin_d_ui", l: "Vit D (UI)" },
+                    { k: "vitamin_e_mg", l: "Vit E (mg)" }, { k: "omega3_g", l: "Omega 3 (g)" }, { k: "omega6_g", l: "Omega 6 (g)" },
+                  ].map(({k,l}) => (
+                    <div key={k}><label className="block text-[10px] font-semibold text-zinc-500 mb-1">{l}</label>
+                      <input type="number" step="0.01" value={(facts as any)[k] || 0}
+                        onChange={e => setFacts({...facts, [k]: parseFloat(e.target.value)||0})}
+                        className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                  ))}
+                </div>
+                <button onClick={saveFacts} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all"><Save className="w-4 h-4" /> Guardar Nutrición</button>
+              </div>
+            )}
           </div>
         )}
       </div>

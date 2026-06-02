@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, GraduationCap, UtensilsCrossed, BadgeCheck,
-  DollarSign, Trophy, Image, Syringe, Layers, Users,
-  Globe, Settings, Shield, ChevronDown, LogOut, Dog,
+  DollarSign, Trophy, Image, Syringe, Users,
+  Globe, Settings, Shield, ChevronDown, LogOut, Mail, ArrowUpCircle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -22,9 +22,12 @@ const sections = [
   { href: "/superadmin/desafios", icon: Trophy, label: "Desafíos" },
   { href: "/superadmin/imagenes", icon: Image, label: "Imágenes" },
   { divider: true },
+  { href: "/superadmin/email", icon: Mail, label: "Email" },
+  { href: "/superadmin/referidos", icon: ArrowUpCircle, label: "Referidos" },
   { href: "/superadmin/configuracion", icon: Settings, label: "Configuración" },
+  { href: "/superadmin/seguridad", icon: Shield, label: "Seguridad" },
+  { divider: true },
   { href: "/superadmin/aplicaciones", icon: Globe, label: "Aplicaciones", global: true },
-  { href: "/superadmin/seguridad", icon: Shield, label: "Seguridad", global: true },
 ];
 
 interface AppInfo {
@@ -36,29 +39,43 @@ interface AppInfo {
 
 export default function AdminNav({ userRole, userName }: { userRole: string; userName: string }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [apps, setApps] = useState<AppInfo[]>([]);
   const [activeApp, setActiveApp] = useState<AppInfo | null>(null);
   const [showAppSwitcher, setShowAppSwitcher] = useState(false);
+  const switcherRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.from("applications").select("id, name, slug, is_active").order("name")
-      .then(({ data }) => {
-        if (data) {
-          setApps(data);
-          const stored = localStorage.getItem("blis_active_app_slug");
-          const slug = stored || "guau";
-          const found = data.find((a: AppInfo) => a.slug === slug);
-          setActiveApp(found || data[0] || null);
-        }
-      });
+    const load = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from("applications").select("id, name, slug, is_active").order("name");
+      if (data) {
+        setApps(data);
+        let stored = "";
+        try { stored = localStorage.getItem("blis_active_app_slug") || ""; } catch {}
+        const slug = stored || "guau";
+        const found = data.find((a: AppInfo) => a.slug === slug);
+        setActiveApp(found || data[0] || null);
+      }
+    };
+    load();
   }, []);
 
+  // Click outside to close
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
+        setShowAppSwitcher(false);
+      }
+    };
+    if (showAppSwitcher) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showAppSwitcher]);
+
   const switchApp = (app: AppInfo) => {
-    localStorage.setItem("blis_active_app_slug", app.slug);
+    try { localStorage.setItem("blis_active_app_slug", app.slug); } catch {}
     setActiveApp(app);
     setShowAppSwitcher(false);
+    window.location.reload();
   };
 
   const isActive = (href: string, exact = false) => {
@@ -70,10 +87,10 @@ export default function AdminNav({ userRole, userName }: { userRole: string; use
     <>
       <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-60 bg-white/85 dark:bg-zinc-950/85 backdrop-blur-xl border-r border-zinc-100 dark:border-zinc-800/60 p-4 z-40">
         {/* App Switcher */}
-        <div className="relative mb-6">
+        <div className="relative mb-6" ref={switcherRef}>
           <button
             onClick={() => setShowAppSwitcher(!showAppSwitcher)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-primary-50 dark:bg-primary-950/40 border border-primary-100 dark:border-primary-900/50 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-primary-50 dark:bg-primary-950/40 border border-primary-100 dark:border-primary-900/50 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors cursor-pointer"
           >
             <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
               {activeApp?.name?.charAt(0) || "B"}
@@ -83,21 +100,21 @@ export default function AdminNav({ userRole, userName }: { userRole: string; use
                 {activeApp?.name || "Seleccionar app"}
               </p>
               <p className="text-[10px] text-primary-500 dark:text-primary-400">
-                Administrador
+                {activeApp?.slug ? `/${activeApp.slug}` : "Admin"}
               </p>
             </div>
-            <ChevronDown className="w-4 h-4 text-primary-500 shrink-0" />
+            <ChevronDown className={`w-4 h-4 text-primary-500 shrink-0 transition-transform ${showAppSwitcher ? "rotate-180" : ""}`} />
           </button>
 
           {showAppSwitcher && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-lg py-1 z-50">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-xl py-1 z-50 overflow-hidden">
               {apps.map((app) => (
                 <button
                   key={app.id}
                   onClick={() => switchApp(app)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors ${
                     activeApp?.id === app.id
-                      ? "bg-primary-50 dark:bg-primary-950/40 text-primary-700 dark:text-primary-300"
+                      ? "bg-primary-50 dark:bg-primary-950/40 text-primary-700 dark:text-primary-300 font-bold"
                       : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
                   }`}
                 >
@@ -105,8 +122,17 @@ export default function AdminNav({ userRole, userName }: { userRole: string; use
                     {app.name.charAt(0)}
                   </div>
                   <span className="font-medium truncate">{app.name}</span>
+                  {activeApp?.id === app.id && (
+                    <span className="ml-auto w-2 h-2 rounded-full bg-primary-500" />
+                  )}
                 </button>
               ))}
+              <div className="border-t border-zinc-100 dark:border-zinc-800 mt-1 pt-1 px-3 pb-2">
+                <Link href="/superadmin/aplicaciones" onClick={() => setShowAppSwitcher(false)}
+                  className="flex items-center gap-2 text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline">
+                  <Globe className="w-3 h-3" /> Gestionar aplicaciones
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -151,8 +177,6 @@ export default function AdminNav({ userRole, userName }: { userRole: string; use
           </div>
         </div>
       </aside>
-
-      {/* Mobile: simple overlay when sidebar items are needed */}
     </>
   );
 }
