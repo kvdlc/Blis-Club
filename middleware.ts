@@ -4,7 +4,6 @@ import { getSecurityConfig } from "@/lib/security-config";
 import { getCountryFromRequest, checkGeoBlock } from "@/lib/geoblock";
 import { matchRateLimit, checkInMemory } from "@/lib/rate-limit";
 import { injectHeaders } from "@/lib/security-headers";
-import { checkAlerts, dispatchAlerts } from "@/lib/security-alerts";
 import { logSecurityEvent } from "@/lib/access-logs";
 
 const SUPABASE_TIMEOUT_MS = 3000;
@@ -42,73 +41,63 @@ export async function middleware(request: NextRequest) {
   const ip = getClientIP(request);
   const ua = request.headers.get("user-agent") || "";
 
+  const isAuthCallback = path.startsWith("/auth/callback");
+  const isAppRoute = path.startsWith("/guau/app");
+  const isAdminRoute = path.startsWith("/superadmin");
+  const isProtected = isAppRoute || isAdminRoute;
+
   // ═══════════════════════════════════════════
-  // 1. SECURITY: Cargar config (con timeout)
+  // 1. PUBLIC ROUTE PASS-THROUGH (no auth, no security config)
   // ═══════════════════════════════════════════
-  let secConfig: Awaited<ReturnType<typeof getSecurityConfig>>;
-  try {
-    secConfig = await Promise.race([
-      getSecurityConfig(),
-      new Promise<ReturnType<typeof getSecurityConfig>>((_, reject) =>
-        setTimeout(() => reject(new Error("timeout")), SUPABASE_TIMEOUT_MS)
-      ),
-    ]);
-  } catch {
-    secConfig = { geobloqueo: null, security_headers: null, rate_limiting: null, alerts: null };
+  if (isAuthCallback) return supabaseResponse;
+
+  const authCookie = request.cookies.get("sb-access-token") || request.cookies.get("sb-refresh-token");
+
+  if (!isProtected && !authCookie) {
+    return supabaseResponse;
   }
 
   // ═══════════════════════════════════════════
-  // 2. GEOBLOCK (always runs, fallback hardcoded if no DB config)
+  // 2. SECURITY: Cargar config (solo para rutas protegidas)
   // ═══════════════════════════════════════════
-  const country = getCountryFromRequest(request);
-  if (country) {
-    const geoResult = checkGeoBlock(country, secConfig.geobloqueo);
-    if (geoResult.blocked) {
-      logSecurityEvent({
-        ip,
-        pais: geoResult.country || country,
-        ruta: path,
-        metodo: method,
-        motivo: "geobloqueo",
-        user_agent: ua,
-      });
+  let secConfig: Awaited<ReturnType<typeof getSecurityConfig>> = {
+    geobloqueo: null, security_headers: null, rate_limiting: null, alerts: null,
+  };
 
-      if (secConfig.alerts) {
-        const disparos = checkAlerts("geobloqueo", geoResult.country || country, ip, path, secConfig.alerts);
-        if (disparos) dispatchAlerts(disparos, secConfig.alerts);
-      }
-
-      const msg = secConfig.geobloqueo?.mensaje_bloqueo || "Acceso denegado desde tu ubicación";
-      return new NextResponse(msg, { status: 403 });
+  if (isProtected) {
+    try {
+      secConfig = await Promise.race([
+        getSecurityConfig(),
+        new Promise<typeof secConfig>((_, reject) =>
+          setTimeout(() => reject(new Error("timeout")), SUPABASE_TIMEOUT_MS)
+        ),
+      ]);
+    } catch {
+      // fallback vacío, sigue sin bloquear
     }
   }
 
   // ═══════════════════════════════════════════
-  // 3. RATE LIMITING
+  // 3. GEOBLOCK (solo rutas protegidas)
   // ═══════════════════════════════════════════
-  if (secConfig.rate_limiting) {
-    const matchedRule = matchRateLimit(secConfig.rate_limiting, path, method);
-    if (matchedRule) {
-      const result = checkInMemory(ip, path, method, matchedRule.limite, matchedRule.ventana_segundos);
-      if (!result.allowed) {
-        logSecurityEvent({
-          ip,
-          pais: "",
-          ruta: path,
-          metodo: method,
-          motivo: "rate_limit",
-          user_agent: ua,
-        });
+  if (isProtected) {
+    const country = getCountryFromRequest(request);
+    if (country) {
+      const geoResult = checkGeoBlock(country, secConfig.geobloqueo);
+      if (geoResult.blocked) {
+        logSecurityEvent({ ip, pais: geoResult.country || country, ruta: path, metodo: method, motivo: "geobloqueo", user_agent: ua });
+        return new NextResponse(secConfig.geobloqueo?.mensaje_bloqueo || "Acceso denegado", { status: 403 });
+      }
+    }
 
-        if (secConfig.alerts) {
-          const disparos = checkAlerts("rate_limit", "", ip, path, secConfig.alerts);
-          if (disparos) dispatchAlerts(disparos, secConfig.alerts);
+    if (secConfig.rate_limiting) {
+      const matchedRule = matchRateLimit(secConfig.rate_limiting, path, method);
+      if (matchedRule) {
+        const result = checkInMemory(ip, path, method, matchedRule.limite, matchedRule.ventana_segundos);
+        if (!result.allowed) {
+          logSecurityEvent({ ip, pais: "", ruta: path, metodo: method, motivo: "rate_limit", user_agent: ua });
+          return new NextResponse(secConfig.rate_limiting.mensaje_limite, { status: 429, headers: { "Retry-After": String(Math.ceil(result.resetMs / 1000)) } });
         }
-
-        return new NextResponse(secConfig.rate_limiting.mensaje_limite, {
-          status: 429,
-          headers: { "Retry-After": String(Math.ceil(result.resetMs / 1000)) },
-        });
       }
     }
   }
@@ -120,18 +109,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthCallback = path.startsWith("/auth/callback");
-  const isAppRoute = path.startsWith("/guau/app");
-  const isAdminRoute = path.startsWith("/superadmin");
-
-  if (isAuthCallback) {
-    if (secConfig.security_headers) {
-      injectHeaders(supabaseResponse, secConfig.security_headers);
-    }
-    return supabaseResponse;
-  }
-
-  if (!user && (isAppRoute || isAdminRoute)) {
+  if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
