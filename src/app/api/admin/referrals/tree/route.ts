@@ -5,23 +5,30 @@ export async function GET(request: Request) {
   try {
     const supabase = createServiceClient();
     const { searchParams } = new URL(request.url);
-    const appSlug = searchParams.get("app") || "guau";
+    const appSlug = searchParams.get("app") || "";
 
-    // 1. Get app id
-    const { data: app } = await supabase
-      .from("applications")
-      .select("id")
-      .eq("slug", appSlug)
-      .single();
+    // 1. Get app id if slug provided
+    let appId: string | null = null;
+    if (appSlug) {
+      const { data: app } = await supabase
+        .from("applications")
+        .select("id")
+        .eq("slug", appSlug)
+        .single();
+      appId = app?.id || null;
+    }
 
-    const appId = app?.id;
-
-    // 2. Get all referrals for this app (or all if no app filter)
-    let query = supabase
+    // 2. Get all referrals - filter by appId only if referrals actually have application_id set
+    // First, check if any referrals have application_id
+    const { count: withAppCount } = await supabase
       .from("referrals")
-      .select("*");
+      .select("*", { count: "exact", head: true })
+      .not("application_id", "is", null);
 
-    if (appId) {
+    let query = supabase.from("referrals").select("*");
+    
+    // Only filter by app if (a) appId exists AND (b) some referrals have application_id set
+    if (appId && (withAppCount || 0) > 0) {
       query = query.eq("application_id", appId);
     }
 
@@ -62,14 +69,16 @@ export async function GET(request: Request) {
 
     const subMap = Object.fromEntries((subscriptions || []).map((s: any) => [s.user_id, s]));
 
-    // 6. Build tree nodes
+    // 6. Build tree nodes recursively
     function buildNode(userId: string, depth: number, maxDepth = 3): any {
       const profile = profileMap[userId];
       const userComms = userCommissions[userId] || [];
       const sub = subMap[userId];
 
       // Find direct referrals where this user is the referrer
-      const directReferrals = (referrals || []).filter((r: any) => r.referrer_user_id === userId && r.referred_user_id);
+      const directReferrals = (referrals || []).filter((r: any) => 
+        r.referrer_user_id === userId && r.referred_user_id
+      );
 
       const children = depth < maxDepth
         ? directReferrals.map((r: any) => buildNode(r.referred_user_id, depth + 1, maxDepth))
@@ -104,17 +113,29 @@ export async function GET(request: Request) {
     const referrerIds = new Set((referrals || []).map((r: any) => r.referrer_user_id).filter(Boolean));
     const rootIds = Array.from(referrerIds).filter((id: any) => !referredIds.has(id));
 
+    // If no clear roots (circular or all referred), use all unique referrer IDs
+    const finalRootIds = rootIds.length > 0 ? rootIds : Array.from(referrerIds);
+
     // Build tree for each root
-    const trees = rootIds.map((id: any) => buildNode(id, 0));
+    const trees = finalRootIds.map((id: any) => buildNode(id, 0));
 
     // 7. Get list of all apps for filtering
     const { data: apps } = await supabase.from("applications").select("id, slug, name").order("name");
+
+    // Count total members across all trees
+    const countNodes = (node: any): number => {
+      if (!node) return 0;
+      return 1 + (node.children || []).reduce((sum: number, child: any) => sum + countNodes(child), 0);
+    };
+    const totalMembers = trees.reduce((sum, tree) => sum + countNodes(tree), 0);
 
     return NextResponse.json({
       trees,
       apps: apps || [],
       totalUsers: userIds.size,
       totalReferrals: (referrals || []).length,
+      totalRoots: trees.length,
+      totalMembers,
     });
   } catch (error) {
     console.error("[Admin Referral Tree] Error:", error);
