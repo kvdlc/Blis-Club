@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
 import {
   DollarSign, Check, X, Users, TrendingUp, Wallet, Clock, AlertCircle,
-  Lock, Unlock, RotateCcw, Send, Ban, ArrowRight, Eye, Package
+  Lock, Unlock, RotateCcw, Send, Ban, ArrowRight, Eye, Package, TreePine, CircleDollarSign
 } from "lucide-react";
 
 interface Commission {
@@ -54,6 +54,26 @@ interface Summary {
   totalUsersWithEarnings: number;
 }
 
+interface TreeNode {
+  id: string;
+  referred_user_id: string;
+  code: string;
+  status: string;
+  created_at: string;
+  paid_at: string | null;
+  cash_reward_usd: number;
+  profile: { id: string; display_name: string; email: string; avatar_url: string } | null;
+  subscription: { status: string; current_period_end: string } | null;
+  commissions: { total: number; level1: number; level2: number; level3: number; pending: number; available: number };
+}
+
+interface TreeParent {
+  referrer_id: string;
+  referrer_profile: { id: string; display_name: string; email: string; avatar_url: string } | null;
+  direct_count: number;
+  children: TreeNode[];
+}
+
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-warning-100 text-warning-700",
   processing: "bg-primary-100 text-primary-700",
@@ -70,8 +90,10 @@ export default function ReferidosPage() {
   const [wallets, setWallets] = useState<WalletData[]>([]);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "pending" | "available" | "users" | "withdrawals">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "pending" | "available" | "users" | "withdrawals" | "tree">("overview");
   const [selectedCommissions, setSelectedCommissions] = useState<Set<string>>(new Set());
+  const [tree, setTree] = useState<TreeParent[]>([]);
+  const [treeLoading, setTreeLoading] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [withdrawalFilter, setWithdrawalFilter] = useState("all");
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
@@ -117,6 +139,22 @@ export default function ReferidosPage() {
       console.error("Error loading admin data:", e);
     }
     setLoading(false);
+  };
+
+  const loadTree = async () => {
+    setTreeLoading(true);
+    try {
+      const res = await fetch("/api/admin/referrals/tree");
+      if (res.ok) {
+        const data = await res.json();
+        setTree(data.tree || []);
+      } else {
+        console.error("Tree endpoint error:", res.status);
+      }
+    } catch (e) {
+      console.error("Tree fetch error:", e);
+    }
+    setTreeLoading(false);
   };
 
   useEffect(() => { load(); }, []);
@@ -299,10 +337,14 @@ export default function ReferidosPage() {
             { key: "available" as const, label: `Disponibles (${availableCommissions.length})` },
             { key: "users" as const, label: "Usuarios" },
             { key: "withdrawals" as const, label: `Retiros (${withdrawals.filter(w => w.status === "pending").length})` },
+            { key: "tree" as const, label: "Árbol", onClick: () => { if (tree.length === 0) loadTree(); } },
           ]).map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => {
+                setActiveTab(tab.key);
+                if ((tab as any).onClick) (tab as any).onClick();
+              }}
               className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors whitespace-nowrap ${
                 activeTab === tab.key
                   ? "bg-white dark:bg-zinc-800 text-primary-600 border-b-2 border-primary-600"
@@ -698,6 +740,119 @@ export default function ReferidosPage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* TREE TAB */}
+        {activeTab === "tree" && (
+          <div className="space-y-6">
+            {treeLoading ? (
+              <div className="text-center py-12 text-zinc-500">Cargando árbol de referidos...</div>
+            ) : tree.length === 0 ? (
+              <div className="text-center py-12 text-zinc-500 card-soft rounded-[1.25rem]">No hay datos de referidos aún</div>
+            ) : (
+              <div className="space-y-6">
+                {tree.map((parent) => (
+                  <div key={parent.referrer_id} className="card-soft rounded-[1.25rem] overflow-hidden">
+                    {/* Parent Header */}
+                    <div className="p-4 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-950/30 dark:to-accent-950/30 border-b border-zinc-100 dark:border-zinc-800">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-white dark:bg-zinc-800 border-2 border-primary-200 dark:border-primary-800 flex items-center justify-center overflow-hidden shrink-0">
+                          {parent.referrer_profile?.avatar_url ? (
+                            <img src={parent.referrer_profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <Users className="w-6 h-6 text-primary-500" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
+                            {parent.referrer_profile?.display_name || parent.referrer_profile?.email || "Usuario"}
+                          </p>
+                          <p className="text-xs text-zinc-500">{parent.referrer_profile?.email}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs font-semibold text-primary-600">{parent.direct_count} referido(s)</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Children */}
+                    <div className="p-4 space-y-3">
+                      {parent.children.map((child, idx) => (
+                        <div key={child.id} className="flex items-start gap-3 p-3 rounded-xl bg-white dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700/50">
+                          {/* Connector line */}
+                          <div className="flex flex-col items-center gap-1 shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
+                              {child.profile?.avatar_url ? (
+                                <img src={child.profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-xs font-bold text-zinc-500">{idx + 1}</span>
+                              )}
+                            </div>
+                            <div className="w-0.5 h-8 bg-zinc-200 dark:bg-zinc-700 rounded-full" />
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-semibold text-zinc-800 dark:text-zinc-200 text-sm">
+                                  {child.profile?.display_name || child.profile?.email || "Usuario"}
+                                </p>
+                                <p className="text-[10px] text-zinc-400">{child.profile?.email}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {child.subscription ? (
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                    child.subscription.status === "active"
+                                      ? "bg-secondary-100 text-secondary-700"
+                                      : "bg-zinc-100 text-zinc-500"
+                                  }`}>
+                                    {child.subscription.status === "active" ? "Activo" : child.subscription.status}
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500">Sin suscripción</span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-2 mt-2">
+                              <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-2 text-center">
+                                <p className="text-[10px] text-zinc-400">Generado</p>
+                                <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">{formatMoney(child.commissions.total)}</p>
+                              </div>
+                              <div className="bg-warning-50 dark:bg-warning-950/20 rounded-lg p-2 text-center">
+                                <p className="text-[10px] text-warning-600">En Hold</p>
+                                <p className="text-xs font-bold text-warning-700">{formatMoney(child.commissions.pending)}</p>
+                              </div>
+                              <div className="bg-secondary-50 dark:bg-secondary-950/20 rounded-lg p-2 text-center">
+                                <p className="text-[10px] text-secondary-600">Disponible</p>
+                                <p className="text-xs font-bold text-secondary-700">{formatMoney(child.commissions.available)}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 mt-2 text-[10px] text-zinc-400">
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {formatDate(child.created_at)}
+                              </span>
+                              {child.paid_at && (
+                                <span className="flex items-center gap-1 text-secondary-600">
+                                  <CircleDollarSign className="w-3 h-3" />
+                                  Pagado
+                                </span>
+                              )}
+                              {child.cash_reward_usd > 0 && (
+                                <span className="font-semibold text-primary-600">+{formatMoney(child.cash_reward_usd)}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

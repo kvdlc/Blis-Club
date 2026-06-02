@@ -90,10 +90,54 @@ async function creditPendingCommission(userId: string, commissionCents: number, 
   });
 }
 
+/* ─── Build the ancestor chain for a user up to 3 levels ─── */
+async function buildReferralChain(
+  supabase: any,
+  referredUserId: string
+): Promise<{ user_id: string; referral_id: string; level: number }[]> {
+  const chain: { user_id: string; referral_id: string; level: number }[] = [];
+
+  // Level 1 — direct referrer of referredUserId
+  const { data: ref1 } = await supabase
+    .from("referrals")
+    .select("id, referrer_user_id, status")
+    .eq("referred_user_id", referredUserId)
+    .maybeSingle();
+
+  if (!ref1?.referrer_user_id) return chain;
+
+  chain.push({ user_id: ref1.referrer_user_id, referral_id: ref1.id, level: 1 });
+
+  // Level 2 — who referred the level 1 referrer
+  const { data: ref2 } = await supabase
+    .from("referrals")
+    .select("id, referrer_user_id, status")
+    .eq("referred_user_id", ref1.referrer_user_id)
+    .maybeSingle();
+
+  if (ref2?.referrer_user_id) {
+    chain.push({ user_id: ref2.referrer_user_id, referral_id: ref2.id, level: 2 });
+
+    // Level 3 — who referred the level 2 referrer
+    const { data: ref3 } = await supabase
+      .from("referrals")
+      .select("id, referrer_user_id, status")
+      .eq("referred_user_id", ref2.referrer_user_id)
+      .maybeSingle();
+
+    if (ref3?.referrer_user_id) {
+      chain.push({ user_id: ref3.referrer_user_id, referral_id: ref3.id, level: 3 });
+    }
+  }
+
+  return chain;
+}
+
 /* ─── Multi-level commission processing with HOLD ─── */
 export async function processMultiLevelCommissions(
   referredUserId: string,
-  planPriceCents: number
+  planPriceCents: number,
+  options?: { subscriptionPaymentId?: string; periodStart?: string; periodEnd?: string }
 ) {
   const supabase = createClient();
   const applied: number[] = [];
@@ -101,103 +145,54 @@ export async function processMultiLevelCommissions(
   const availableAfter = new Date();
   availableAfter.setDate(availableAfter.getDate() + HOLD_DAYS);
 
-  // Level 1 — direct
-  const { data: ref1 } = await supabase
+  const chain = await buildReferralChain(supabase, referredUserId);
+  if (chain.length === 0) return applied;
+
+  // Mark the direct referral as paid if it was still pending (first payment only)
+  const directRef = chain[0];
+  const { data: directRefData } = await supabase
     .from("referrals")
-    .select("id, referrer_user_id, level")
-    .eq("referred_user_id", referredUserId)
-    .eq("status", "pending")
-    .maybeSingle();
-
-  if (!ref1) return applied;
-
-  const level1Referrer = (ref1 as any).referrer_user_id as string;
-  const ref1Id = (ref1 as any).id as string;
-
-  // Update referral to paid
-  await supabase
-    .from("referrals")
-    .update({
-      status: "paid",
-      level: 1,
-      cash_reward_usd: COMMISSION.LEVEL_1,
-      reward_granted: true,
-      paid_at: new Date().toISOString(),
-    })
-    .eq("id", ref1Id);
-
-  // Create commission with HOLD
-  const { data: comm1 } = await supabase
-    .from("referral_commissions")
-    .insert({
-      user_id: level1Referrer,
-      referral_id: ref1Id,
-      level: 1,
-      commission_cents: COMMISSION.LEVEL_1,
-      status: "pending",
-      available_after: availableAfter.toISOString(),
-    })
-    .select()
+    .select("status")
+    .eq("id", directRef.referral_id)
     .single();
 
-  await creditPendingCommission(level1Referrer, COMMISSION.LEVEL_1, comm1?.id);
-  applied.push(1);
+  if (directRefData?.status === "pending") {
+    await supabase
+      .from("referrals")
+      .update({
+        status: "paid",
+        level: 1,
+        cash_reward_usd: COMMISSION.LEVEL_1,
+        reward_granted: true,
+        paid_at: new Date().toISOString(),
+      })
+      .eq("id", directRef.referral_id);
+  }
 
-  // Level 2 — who referred the level 1 referrer
-  const { data: ref2 } = await supabase
-    .from("referrals")
-    .select("id, referrer_user_id, status")
-    .eq("referred_user_id", level1Referrer)
-    .eq("status", "paid")
-    .maybeSingle();
+  for (const node of chain) {
+    const commissionCents =
+      node.level === 1 ? COMMISSION.LEVEL_1 :
+      node.level === 2 ? COMMISSION.LEVEL_2 :
+      COMMISSION.LEVEL_3;
 
-  if (ref2) {
-    const level2Referrer = (ref2 as any).referrer_user_id as string;
-    const ref2Id = (ref2 as any).id as string;
-
-    const { data: comm2 } = await supabase
+    const { data: comm } = await supabase
       .from("referral_commissions")
       .insert({
-        user_id: level2Referrer,
-        referral_id: ref1Id,
-        level: 2,
-        commission_cents: COMMISSION.LEVEL_2,
+        user_id: node.user_id,
+        referral_id: node.referral_id,
+        level: node.level,
+        commission_cents: commissionCents,
         status: "pending",
         available_after: availableAfter.toISOString(),
+        subscription_payment_id: options?.subscriptionPaymentId || null,
+        billing_period_start: options?.periodStart || null,
+        billing_period_end: options?.periodEnd || null,
       })
       .select()
       .single();
 
-    await creditPendingCommission(level2Referrer, COMMISSION.LEVEL_2, comm2?.id);
-    applied.push(2);
-
-    // Level 3 — who referred the level 2 referrer
-    const { data: ref3 } = await supabase
-      .from("referrals")
-      .select("id, referrer_user_id, status")
-      .eq("referred_user_id", level2Referrer)
-      .eq("status", "paid")
-      .maybeSingle();
-
-    if (ref3) {
-      const level3Referrer = (ref3 as any).referrer_user_id as string;
-
-      const { data: comm3 } = await supabase
-        .from("referral_commissions")
-        .insert({
-          user_id: level3Referrer,
-          referral_id: ref1Id,
-          level: 3,
-          commission_cents: COMMISSION.LEVEL_3,
-          status: "pending",
-          available_after: availableAfter.toISOString(),
-        })
-        .select()
-        .single();
-
-      await creditPendingCommission(level3Referrer, COMMISSION.LEVEL_3, comm3?.id);
-      applied.push(3);
-    }
+    await creditPendingCommission(node.user_id, commissionCents, comm?.id);
+    applied.push(node.level);
   }
 
   return applied;

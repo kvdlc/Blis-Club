@@ -18,11 +18,18 @@ export async function POST(request: Request) {
     const event = body;
     const supabase = await createClient();
 
-    // Eventos de suscripción
-    if (event.type === "subscription.created" || event.type === "subscription.updated") {
+    // Eventos de suscripción (creación, actualización, pago recurrente)
+    const isPaymentEvent =
+      event.type === "subscription.created" ||
+      event.type === "subscription.updated" ||
+      event.type === "subscription.payment_succeeded" ||
+      event.type === "subscription.charge.succeeded" ||
+      event.type === "payment.succeeded";
+
+    if (isPaymentEvent) {
       const { data: plan } = await supabase
         .from("plans")
-        .select("id, name, price_cents")
+        .select("id, name, price_cents, billing_interval")
         .eq("izipay_price_id", event.data.plan_id)
         .single();
 
@@ -63,46 +70,86 @@ export async function POST(request: Request) {
             });
           }
 
-          // Guardar historial de cobro
-          await supabase.from("subscription_payments").insert({
-            user_id: user.id,
-            subscription_id: subscriptionData?.id,
-            plan_id: plan.id,
-            amount_cents: tx?.amount ? Math.round(tx.amount * 100) : plan.price_cents,
-            currency: tx?.currency || "USD",
-            status: tx?.status === "PAID" || !tx?.status ? "succeeded" : tx.status.toLowerCase(),
-            payment_method: tx?.paymentMethodType || "card",
-            description: `Suscripción ${plan.name}`,
-            izipay_transaction_id: tx?.uuid || event.data.subscription_id,
-            metadata: {
-              izipay_event_type: event.type,
-              izipay_subscription_id: event.data.subscription_id,
-              izipay_order_id: event.data.order_id,
-              raw_event: event,
-            },
-          });
+          // 1. Guardar historial de cobro en subscription_payments
+          const txAmount = tx?.amount ? Math.round(tx.amount * 100) : plan.price_cents;
+          const txUuid = tx?.uuid || `${event.data.subscription_id}_${now.getTime()}`;
 
-          // Procesar comisiones multinivel
+          const { data: paymentRecord, error: paymentErr } = await supabase
+            .from("subscription_payments")
+            .upsert({
+              user_id: user.id,
+              subscription_id: subscriptionData?.id,
+              plan_id: plan.id,
+              amount_cents: txAmount,
+              currency: tx?.currency || "USD",
+              status: tx?.status === "PAID" || !tx?.status ? "succeeded" : tx.status.toLowerCase(),
+              payment_method: tx?.paymentMethodType || "card",
+              description: `Suscripción ${plan.name} — ${event.type}`,
+              izipay_transaction_id: txUuid,
+              izipay_subscription_id: event.data.subscription_id,
+              metadata: {
+                izipay_event_type: event.type,
+                izipay_subscription_id: event.data.subscription_id,
+                izipay_order_id: event.data.order_id,
+                raw_event: event,
+              },
+            }, { onConflict: "izipay_transaction_id" })
+            .select()
+            .single();
+
+          if (paymentErr) {
+            console.error("[IziPay Webhook] Error saving payment:", paymentErr);
+          }
+
+          const paymentId = paymentRecord?.id;
+
+          // 2. Procesar comisiones multinivel (RECURRENT: every payment generates commissions)
+          // Check if this user was referred by anyone
           const { data: referral } = await supabase
             .from("referrals")
-            .select("id, referrer_user_id, status")
+            .select("id, referrer_user_id, status, subscription_id")
             .eq("referred_user_id", user.id)
-            .eq("status", "pending")
             .maybeSingle();
 
           if (referral) {
-            // Guardar subscription_id en el referral para tracking
-            await supabase
-              .from("referrals")
-              .update({ subscription_id: subscriptionData?.id })
-              .eq("id", (referral as any).id);
+            // Update referral subscription_id on first payment
+            if (!referral.subscription_id && subscriptionData?.id) {
+              await supabase
+                .from("referrals")
+                .update({ subscription_id: subscriptionData.id })
+                .eq("id", referral.id);
+            }
 
-            const { processMultiLevelCommissions } = await import("@/lib/referrals");
-            const levels = await processMultiLevelCommissions(
-              user.id,
-              plan.price_cents
-            );
-            console.log(`[IziPay Webhook] Comisiones aplicadas niveles: ${levels.join(", ")} para usuario ${user.id}`);
+            // Check if commissions ALREADY generated for this specific payment
+            const { data: existingCommissions } = await supabase
+              .from("referral_commissions")
+              .select("id")
+              .eq("subscription_payment_id", paymentId)
+              .limit(1);
+
+            if (!existingCommissions || existingCommissions.length === 0) {
+              const { processMultiLevelCommissions } = await import("@/lib/referrals");
+              const levels = await processMultiLevelCommissions(
+                user.id,
+                plan.price_cents,
+                {
+                  subscriptionPaymentId: paymentId,
+                  periodStart: now.toISOString(),
+                  periodEnd: periodEnd.toISOString(),
+                }
+              );
+              console.log(`[IziPay Webhook] Comisiones recurrentes aplicadas niveles: ${levels.join(", ")} para usuario ${user.id}, pago ${paymentId}`);
+
+              // Mark payment as commission_generated
+              if (paymentId) {
+                await supabase
+                  .from("subscription_payments")
+                  .update({ commission_generated: true })
+                  .eq("id", paymentId);
+              }
+            } else {
+              console.log(`[IziPay Webhook] Comisiones YA existen para pago ${paymentId}, skipping.`);
+            }
           }
         }
       }
