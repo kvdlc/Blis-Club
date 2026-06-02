@@ -151,13 +151,7 @@ export default async function DashboardPage() {
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary-500 to-primary-700 p-4 text-white shadow-lg shadow-primary-600/20">
         <div className="relative z-10 flex gap-4">
           <div className="w-28 h-28 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border-2 border-white/20 overflow-hidden shrink-0 self-stretch">
-            {breedImgRaw ? (
-              <img src={breedImgRaw} alt={dog.nombre} className="w-full h-full object-cover object-center" />
-            ) : dog.foto_url ? (
-              <img src={dog.foto_url} alt={dog.nombre} className="w-full h-full object-cover object-center" />
-            ) : (
-              <PawPrint className="w-14 h-14 text-white/80" />
-            )}
+            <img src={dog.foto_url || breedImgRaw || "/icons/dog-default.png"} alt={dog.nombre} className="w-full h-full object-cover object-center" />
           </div>
           <div className="flex-1 min-w-0 py-1 flex flex-col justify-center">
             <div className="flex items-center gap-2 flex-wrap">

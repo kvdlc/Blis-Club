@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Dog, DogMetabolicProfile, DogMealSlot, WeeklyChallenge, UserChallenge } from "@/types/database";
-import { ArrowLeft, Camera, PawPrint, Check, Search, PenLine, ChevronDown, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, PawPrint, Check, Search, PenLine, ChevronDown, Loader2, Trash2, AlertTriangle } from "lucide-react";
 import { MealSlotsConfig } from "../../../MealSlotsConfig";
 import { DatePicker } from "@/components/DatePicker";
 import { uploadDogPhoto, uploadPhotoFromDataUrl } from "@/lib/storage";
@@ -82,6 +82,8 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
   const [uploading, setUploading] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSrc, setEditorSrc] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const breedRef = useRef<HTMLDivElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -135,6 +137,19 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     setTimeout(() => { setSaved(false); setSaveIcon(false); }, 1500);
   }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, activity, allergies, conditions, feedingPct, dog.id, supabase]);
 
+  const handleDelete = async () => {
+    setDeleting(true);
+    const { error } = await supabase.from("dogs").delete().eq("id", dog.id);
+    setDeleting(false);
+    setShowDeleteConfirm(false);
+    if (!error) {
+      router.push("/guau/app/perfil");
+      router.refresh();
+    } else {
+      alert("Error al eliminar: " + error.message);
+    }
+  };
+
   // Debounced auto-save on any field change
   useEffect(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -164,12 +179,8 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
 
       {/* ═══ AVATAR ═══ */}
       <div className="flex flex-col items-center gap-1.5">
-        <label htmlFor="dogPhotoUpload" className="relative w-20 h-20 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-700 overflow-hidden cursor-pointer group">
-          {photo ? (
-            <img src={photo} alt="" className="w-full h-full object-cover object-center" />
-          ) : (
-            <PawPrint className="w-9 h-9 text-zinc-400 group-hover:scale-110 transition-transform" />
-          )}
+        <label htmlFor="dogPhotoUpload" className="relative w-20 h-20 rounded-2xl bg-white flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-700 overflow-hidden cursor-pointer group">
+          <img src={photo || "/icons/dog-default.png"} alt="" className="w-full h-full object-contain object-center" />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
             {uploading ? (
               <Loader2 className="w-5 h-5 text-white animate-spin" />
@@ -357,6 +368,55 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
           <Check className="w-4 h-4" /> Guardado
         </div>
       )}
+
+      {/* ═══ ELIMINAR PERRO ═══ */}
+      <div className="pt-4 border-t border-zinc-200 dark:border-zinc-700">
+        {!showDeleteConfirm ? (
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-full flex items-center justify-center gap-2 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 px-4 py-3 text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" /> Eliminar perro
+          </button>
+        ) : (
+          <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-red-700 dark:text-red-300">
+                  ¿Eliminar a {name}?
+                </p>
+                <p className="text-xs text-red-600/80 dark:text-red-400/80 mt-1">
+                  Se borrarán todos sus datos: paseos, vacunas, comidas, historial médico y fotos. Esta acción no se puede deshacer.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 rounded-lg bg-red-600 text-white px-3 py-2 text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Eliminando...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" /> Sí, eliminar
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* ═══ IMAGE EDITOR ═══ */}
       {editorOpen && (

@@ -138,7 +138,7 @@ export default function BilleteraClient({
   };
 
   const handleShareLink = () => {
-    navigator.clipboard.writeText(`https://blis.club/guau/app?ref=${referralCode}`);
+    navigator.clipboard.writeText(`https://blis.club/guau/webg?ref=${referralCode}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

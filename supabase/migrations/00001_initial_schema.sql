@@ -26,9 +26,22 @@ CREATE POLICY "Usuarios actualizan su propio perfil"
 -- Trigger: crear perfil al registrarse
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  v_first_name TEXT := NEW.raw_user_meta_data->>'first_name';
+  v_last_name TEXT := NEW.raw_user_meta_data->>'last_name';
+  v_display_name TEXT := NEW.raw_user_meta_data->>'display_name';
 BEGIN
-  INSERT INTO public.profiles (id, email, display_name)
-  VALUES (NEW.id, NEW.email, COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)));
+  -- Build display_name from first + last if not provided
+  IF v_display_name IS NULL OR v_display_name = '' THEN
+    v_display_name := NULLIF(TRIM(COALESCE(v_first_name, '') || ' ' || COALESCE(v_last_name, '')), ' ');
+  END IF;
+  -- Fallback to email prefix
+  IF v_display_name IS NULL OR v_display_name = '' THEN
+    v_display_name := split_part(NEW.email, '@', 1);
+  END IF;
+
+  INSERT INTO public.profiles (id, email, first_name, last_name, display_name, avatar_url)
+  VALUES (NEW.id, NEW.email, v_first_name, v_last_name, v_display_name, '/icons/user-default.png');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

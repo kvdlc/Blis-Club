@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, Zap, CheckCircle, Loader2, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -23,23 +23,49 @@ export default function InlineRegister({
 }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    // Leer ?ref= de la URL y guardar en cookie
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      setReferralCode(ref);
+      const expires = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `blis_referral_code=${ref};expires=${expires};path=/;SameSite=Lax`;
+    } else {
+      // Intentar leer de cookie existente
+      const cookie = document.cookie.split("; ").find((r) => r.startsWith("blis_referral_code="));
+      if (cookie) {
+        setReferralCode(cookie.split("=")[1]);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    const fullName = `${firstName} ${lastName}`.trim();
     const supabase = createClient();
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: name || email.split("@")[0], app_category: appSlug },
+        data: { 
+          display_name: fullName || email.split("@")[0], 
+          first_name: firstName,
+          last_name: lastName,
+          app_category: appSlug,
+          referral_code: referralCode,
+        },
       },
     });
 
@@ -86,15 +112,26 @@ export default function InlineRegister({
 
   return (
     <form onSubmit={handleSubmit} className={`space-y-3 ${className}`}>
-      <input
-        type="text"
-        required
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Tu nombre"
-        className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-        style={{ backgroundImage: "none" }}
-      />
+      <div className="grid grid-cols-2 gap-3">
+        <input
+          type="text"
+          required
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          placeholder="Nombre"
+          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          style={{ backgroundImage: "none" }}
+        />
+        <input
+          type="text"
+          required
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          placeholder="Apellido"
+          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          style={{ backgroundImage: "none" }}
+        />
+      </div>
       <div className="relative">
         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
         <input

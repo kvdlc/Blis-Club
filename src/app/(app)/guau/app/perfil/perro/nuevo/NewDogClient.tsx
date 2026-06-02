@@ -58,7 +58,7 @@ export function NewDogClient({ userId }: Props) {
     const { data: newDog } = await supabase.from("dogs").insert({
       owner_id: userId, nombre: name, raza: breed, edad_meses: edadMeses,
       fecha_nacimiento: birthDate,
-      peso_kg: getWeight(), foto_url: photo || null,
+      peso_kg: getWeight(), foto_url: photo || "/icons/dog-default.png",
     }).select("id").single();
 
     if (newDog) {
@@ -82,12 +82,8 @@ export function NewDogClient({ userId }: Props) {
 
       {/* Avatar */}
       <div className="flex flex-col items-center gap-1.5">
-        <label htmlFor="newDogPhoto" className="relative w-20 h-20 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-700 overflow-hidden cursor-pointer group">
-          {photo ? (
-            <img src={photo} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <PawPrint className="w-9 h-9 text-zinc-400 group-hover:scale-110 transition-transform" />
-          )}
+        <label htmlFor="newDogPhoto" className="relative w-20 h-20 rounded-2xl bg-white flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-700 overflow-hidden cursor-pointer group">
+          <img src={photo || "/icons/dog-default.png"} alt="" className="w-full h-full object-contain object-center" />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
             {uploading ? (
               <Loader2 className="w-5 h-5 text-white animate-spin" />

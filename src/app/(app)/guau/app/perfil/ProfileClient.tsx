@@ -98,14 +98,14 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
           {referralCode && (
             <button
               onClick={() => {
-                navigator.clipboard.writeText(`https://blis.club/guau/app?ref=${referralCode}`);
+                navigator.clipboard.writeText(`https://blis.club/guau/webg?ref=${referralCode}`);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
               className="w-full flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 px-3 py-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
             >
               <span className="text-[11px] font-mono text-zinc-600 dark:text-zinc-400 truncate pr-2">
-                blis.club/guau/app?ref={referralCode}
+                blis.club/guau/webg?ref={referralCode}
               </span>
               <span className="text-xs font-semibold text-primary-600 flex items-center gap-1 shrink-0">
                 {copied ? <><Check className="w-3 h-3" /> Copiado</> : <><Copy className="w-3 h-3" /> Copiar</>}
@@ -150,11 +150,7 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
       <div className="card-soft rounded-[1.5rem] p-5 space-y-3">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-primary-50 dark:bg-primary-950 flex items-center justify-center border-2 border-primary-100 dark:border-primary-900 overflow-hidden shrink-0">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-full h-full object-cover object-center" />
-            ) : (
-              <User className="w-8 h-8 text-primary-500" />
-            )}
+            <img src={profile?.avatar_url || "/icons/user-default.png"} alt="" className="w-full h-full object-cover object-center" />
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 truncate">{displayName}</h2>
@@ -192,12 +188,8 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
           return (
             <div key={dog.id} className="card-soft rounded-[1.5rem] p-4 space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-accent-50 dark:bg-accent-950/40 flex items-center justify-center shrink-0 overflow-hidden border border-accent-100 dark:border-accent-800">
-                  {dog.foto_url ? (
-                    <img src={dog.foto_url} alt={dog.nombre} className="w-full h-full object-cover object-center" />
-                  ) : (
-                    <PawPrint className="w-7 h-7 text-accent-500" />
-                  )}
+                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200 dark:border-zinc-700">
+                  <img src={dog.foto_url || "/icons/dog-default.png"} alt={dog.nombre} className="w-full h-full object-contain object-center" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{dog.nombre}</p>

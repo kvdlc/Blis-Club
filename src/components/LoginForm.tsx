@@ -10,7 +10,8 @@ export function LoginForm() {
   const [mode, setMode] = useState<"password" | "magic" | "register">("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -66,14 +67,26 @@ export function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    
+    // Leer ?ref= de la URL o de la cookie
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlRef = urlParams.get("ref");
     const refCookie = document.cookie.split("; ").find((r) => r.startsWith("blis_referral_code="));
-    const refCode = refCookie ? refCookie.split("=")[1] : "";
+    const refCode = urlRef || (refCookie ? refCookie.split("=")[1] : "");
+    
     const nextPath = refCode ? `/guau/app?ref=${refCode}` : "/guau/app";
+    const fullName = `${firstName} ${lastName}`.trim();
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: name, app_category: "guau" },
+        data: { 
+          display_name: fullName, 
+          first_name: firstName,
+          last_name: lastName,
+          app_category: "guau",
+          referral_code: refCode,
+        },
         emailRedirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
       },
     });
@@ -123,12 +136,22 @@ export function LoginForm() {
 
       <form onSubmit={mode === "register" ? handleRegister : mode === "magic" ? handleMagicLink : handlePasswordLogin} className="space-y-4">
         {mode === "register" && (
-          <div>
-            <label htmlFor="name" className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Nombre</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-              <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre"
-                className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Nombre</label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <input id="firstName" type="text" required value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Nombre"
+                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Apellido</label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <input id="lastName" type="text" required value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Apellido"
+                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+              </div>
             </div>
           </div>
         )}

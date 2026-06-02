@@ -11,9 +11,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    // Leer cookie de referral
+    // Leer cookie de referral o del metadata del usuario
     const cookieStore = await cookies();
-    const referralCode = cookieStore.get("blis_referral_code")?.value;
+    const cookieRef = cookieStore.get("blis_referral_code")?.value;
+    const metadataRef = user.user_metadata?.referral_code;
+    const referralCode = cookieRef || metadataRef;
 
     if (!referralCode) {
       return NextResponse.json({ success: true, claimed: false, reason: "No hay código de referido" });

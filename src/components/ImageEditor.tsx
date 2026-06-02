@@ -31,9 +31,14 @@ export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200 
       setImgLoaded(true);
       // Reset transforms
       setRotation(0);
-      setZoom(1);
       setOffsetX(0);
       setOffsetY(0);
+      // Auto-fit: calculate initial zoom so image covers the canvas
+      const canvasSize = (circleSize || 200) * 2;
+      const scaleX = canvasSize / img.width;
+      const scaleY = canvasSize / img.height;
+      const initialZoom = Math.max(scaleX, scaleY);
+      setZoom(initialZoom);
     };
     img.src = imageUrl;
   }, [open, imageUrl]);

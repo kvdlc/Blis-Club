@@ -27,11 +27,7 @@ export function UserPill() {
         {name}
       </span>
       <div className="w-7 h-7 rounded-full bg-primary-50 dark:bg-primary-950 flex items-center justify-center overflow-hidden border-2 border-white dark:border-zinc-600 shrink-0">
-        {profile?.avatar_url ? (
-          <img src={profile.avatar_url} alt="" className="w-full h-full object-cover object-center" />
-        ) : (
-          <User className="w-3.5 h-3.5 text-primary-500" />
-        )}
+        <img src={profile?.avatar_url || "/icons/user-default.png"} alt="" className="w-full h-full object-cover object-center" />
       </div>
     </Link>
   );
