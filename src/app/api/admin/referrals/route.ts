@@ -4,7 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 export async function GET() {
   const supabase = createServiceClient();
 
-  // 1. Obtener todas las comisiones con info de usuario
+  // 1. Get all commissions with user info
   const { data: commissionsRaw, error: commissionsError } = await supabase
     .from("referral_commissions")
     .select("*, referrer:profiles!user_id(id, email, display_name, first_name, last_name), referral:referrals!referral_id(referred_user_id, referrer_user_id, referred:profiles!referred_user_id(email, display_name))")
@@ -24,17 +24,7 @@ export async function GET() {
     return c;
   });
 
-  // 2. Obtener todas las billeteras
-  const { data: wallets, error: walletsError } = await supabase
-    .from("user_rewards")
-    .select("*, profile:profiles!user_id(id, email, display_name, first_name, last_name)")
-    .order("available_cash_usd", { ascending: false });
-
-  if (walletsError) {
-    return NextResponse.json({ error: walletsError.message }, { status: 500 });
-  }
-
-  // 3. Obtener todas las solicitudes de retiro
+  // 2. Get withdrawals
   const { data: withdrawals, error: withdrawalsError } = await supabase
     .from("withdrawal_requests")
     .select("*, profiles:user_id(email, display_name)")
@@ -44,7 +34,55 @@ export async function GET() {
     return NextResponse.json({ error: withdrawalsError.message }, { status: 500 });
   }
 
-  // 4. Calcular resumen
+  // 3. Build wallets dynamically from commissions (source of truth)
+  // Group commissions by user_id
+  const userCommissionMap: Record<string, { total: number; available: number; pending: number; paid_out: number; count: number }> = {};
+
+  (commissions || []).forEach((c: any) => {
+    const uid = c.user_id;
+    if (!userCommissionMap[uid]) {
+      userCommissionMap[uid] = { total: 0, available: 0, pending: 0, paid_out: 0, count: 0 };
+    }
+    userCommissionMap[uid].total += c.commission_cents || 0;
+    userCommissionMap[uid].count += 1;
+    if (c.status === 'available') userCommissionMap[uid].available += c.commission_cents || 0;
+    if (c.status === 'pending') userCommissionMap[uid].pending += c.commission_cents || 0;
+    if (c.status === 'paid_out') userCommissionMap[uid].paid_out += c.commission_cents || 0;
+  });
+
+  // 4. Get profiles for users with commissions
+  const userIds = Object.keys(userCommissionMap);
+  let profilesMap: Record<string, any> = {};
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, email, display_name, first_name, last_name")
+      .in("id", userIds);
+    profilesMap = Object.fromEntries((profiles || []).map((p: any) => [p.id, p]));
+  }
+
+  // Build wallets array dynamically
+  const wallets = userIds.map((uid) => {
+    const stats = userCommissionMap[uid];
+    const profile = profilesMap[uid];
+    return {
+      user_id: uid,
+      total_cash_usd: stats.total,
+      available_cash_usd: stats.available,
+      pending_cash_usd: stats.pending,
+      paid_out_cash_usd: stats.paid_out,
+      commission_count: stats.count,
+      profile: profile ? {
+        id: profile.id,
+        email: profile.email,
+        display_name: profile.display_name,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+      } : null,
+    };
+  }).sort((a, b) => (b.total_cash_usd || 0) - (a.total_cash_usd || 0));
+
+  // 5. Calculate summary
   const totalPending = (commissions || [])
     .filter((c: any) => c.status === 'pending')
     .reduce((sum: number, c: any) => sum + (c.commission_cents || 0), 0);
@@ -57,8 +95,7 @@ export async function GET() {
     .filter((c: any) => c.status === 'paid_out')
     .reduce((sum: number, c: any) => sum + (c.commission_cents || 0), 0);
 
-  const totalWalletAvailable = (wallets || [])
-    .reduce((sum: number, w: any) => sum + (w.available_cash_usd || 0), 0);
+  const totalWalletAvailable = wallets.reduce((sum: number, w: any) => sum + (w.available_cash_usd || 0), 0);
 
   const totalWithdrawn = (withdrawals || [])
     .filter((w: any) => w.status === 'completed')
@@ -77,10 +114,10 @@ export async function GET() {
       totalWithdrawn,
       totalPendingWithdrawals,
       totalCommissions: (commissions || []).length,
-      totalUsersWithEarnings: (wallets || []).filter((w: any) => (w.total_cash_usd || 0) > 0).length,
+      totalUsersWithEarnings: wallets.length,
     },
     commissions: commissions || [],
-    wallets: wallets || [],
+    wallets: wallets,
     withdrawals: withdrawals || [],
   });
 }
