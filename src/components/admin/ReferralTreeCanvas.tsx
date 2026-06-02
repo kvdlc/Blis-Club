@@ -409,7 +409,7 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
 
       {/* Canvas */}
       <div
-        className="flex-1 overflow-hidden card-soft rounded-[1.25rem] relative cursor-grab active:cursor-grabbing"
+        className="flex-1 overflow-hidden card-soft rounded-[1.25rem] relative cursor-grab active:cursor-grabbing select-none"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -435,9 +435,10 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
                   key={line.id}
                   d={line.d}
                   stroke="currentColor"
-                  className="text-zinc-300 dark:text-zinc-600"
-                  strokeWidth="2"
+                  className="text-zinc-400 dark:text-zinc-400"
+                  strokeWidth="3"
                   fill="none"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               ))}

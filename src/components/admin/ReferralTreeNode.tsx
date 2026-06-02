@@ -42,7 +42,7 @@ export function ReferralTreeNode({ node, depth, expandedNodes, onToggle, onSelec
   const formatMoney = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center select-none">
       {/* Node Card */}
       <div
         data-tree-node={node.id}
@@ -50,7 +50,7 @@ export function ReferralTreeNode({ node, depth, expandedNodes, onToggle, onSelec
           e.stopPropagation();
           onSelect(node);
         }}
-        className={`relative cursor-pointer group transition-all duration-200 ${
+        className={`relative cursor-pointer group transition-all duration-200 select-none ${
           isSelected ? "scale-110 z-20" : "hover:scale-105 z-10"
         } ${isHighlighted ? "animate-pulse" : ""}`}
       >
