@@ -91,7 +91,7 @@ export function VeterinariosClient({ userId, trustedVets }: Props) {
                 <input value={editForm.clinic} onChange={(e) => setEditForm((f) => ({ ...f, clinic: e.target.value }))} placeholder="Clínica" className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 text-xs" />
                 <PhoneInput value={editForm.phone} onChange={(v) => setEditForm((f) => ({ ...f, phone: v }))} />
                 <div>
-                  <span className="text-[10px] text-zinc-500">🎯 Especialidad</span>
+                  <span className="text-[10px] text-zinc-500 dark:text-zinc-400">🎯 Especialidad</span>
                   <div className="flex flex-wrap gap-1.5 mt-1">
                     {SPECIALTIES.map((s) => (
                       <button key={s} type="button" onClick={() => setEditForm((f) => ({ ...f, specialty: f.specialty === s ? "" : s }))}
@@ -111,11 +111,11 @@ export function VeterinariosClient({ userId, trustedVets }: Props) {
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{vet.name}</p>
-                    {vet.clinic_name && <p className="text-xs text-zinc-500 truncate">🏥 {vet.clinic_name}</p>}
+                    {vet.clinic_name && <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">🏥 {vet.clinic_name}</p>}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEdit(vet)} className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors">
-                      <Pencil className="w-3 h-3 text-zinc-500" />
+                      <Pencil className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                     </button>
                     <button onClick={() => deleteVet(vet.id)} className="w-6 h-6 rounded-full bg-danger-100 dark:bg-danger-900 flex items-center justify-center hover:bg-danger-200 transition-colors">
                       <Trash2 className="w-3 h-3 text-danger-500" />
@@ -158,7 +158,7 @@ export function VeterinariosClient({ userId, trustedVets }: Props) {
         ))}
 
         {!showAddVet && (
-          <button onClick={() => setShowAddVet(true)} className="w-full flex items-center justify-center gap-1 card-soft rounded-[1.25rem] p-3 border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-xs text-zinc-500 font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+          <button onClick={() => setShowAddVet(true)} className="w-full flex items-center justify-center gap-1 card-soft rounded-[1.25rem] p-3 border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-xs text-zinc-500 dark:text-zinc-400 font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
             <Plus className="w-4 h-4" /> Agregar Veterinario
           </button>
         )}
@@ -171,22 +171,22 @@ export function VeterinariosClient({ userId, trustedVets }: Props) {
             </div>
 
             <div>
-              <div className="flex items-center gap-1 mb-1"><UserRound className="w-3 h-3 text-zinc-400" /><span className="text-[10px] text-zinc-500">👤 Nombre</span></div>
+              <div className="flex items-center gap-1 mb-1"><UserRound className="w-3 h-3 text-zinc-400" /><span className="text-[10px] text-zinc-500 dark:text-zinc-400">👤 Nombre</span></div>
               <input name="name" placeholder="Dr(a). Nombre completo *" required className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" />
             </div>
 
             <div>
-              <div className="flex items-center gap-1 mb-1"><Phone className="w-3 h-3 text-zinc-400" /><span className="text-[10px] text-zinc-500">📱 Teléfono</span></div>
+              <div className="flex items-center gap-1 mb-1"><Phone className="w-3 h-3 text-zinc-400" /><span className="text-[10px] text-zinc-500 dark:text-zinc-400">📱 Teléfono</span></div>
               <PhoneInput value={phone} onChange={setPhone} />
             </div>
 
             <div>
-              <div className="flex items-center gap-1 mb-1"><Building2 className="w-3 h-3 text-zinc-400" /><span className="text-[10px] text-zinc-500">🏥 Clínica</span></div>
+              <div className="flex items-center gap-1 mb-1"><Building2 className="w-3 h-3 text-zinc-400" /><span className="text-[10px] text-zinc-500 dark:text-zinc-400">🏥 Clínica</span></div>
               <input name="clinic" placeholder="Nombre de la clínica" className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" />
             </div>
 
             <div>
-              <div className="flex items-center gap-1 mb-1"><Stethoscope className="w-3 h-3 text-zinc-400" /><span className="text-[10px] text-zinc-500">🎯 Especialidad</span></div>
+              <div className="flex items-center gap-1 mb-1"><Stethoscope className="w-3 h-3 text-zinc-400" /><span className="text-[10px] text-zinc-500 dark:text-zinc-400">🎯 Especialidad</span></div>
               <div className="flex flex-wrap gap-1.5">
                 {SPECIALTIES.map((s) => (
                   <button key={s} type="button" onClick={() => setSpecialty(specialty === s ? "" : s)}

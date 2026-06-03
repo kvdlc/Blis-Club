@@ -92,7 +92,7 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
             <Gift className="w-4 h-4 text-accent-500" />
             <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Invita y gana</h4>
           </div>
-          <p className="text-[11px] text-zinc-500">
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
             Comparte tu enlace magico y gana 1 mes gratis o efectivo por cada amigo que se suscriba.
           </p>
           {referralCode && (
@@ -154,7 +154,7 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 truncate">{displayName}</h2>
-            <p className="text-xs text-zinc-500 truncate">{profile?.email}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{profile?.email}</p>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-[10px] font-mono text-zinc-400">ID: {userId.slice(0, 8)}...</span>
             </div>
@@ -188,12 +188,12 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
           return (
             <div key={dog.id} className="card-soft rounded-[1.5rem] p-4 space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200 dark:border-zinc-700">
+                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-zinc-900 flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200 dark:border-zinc-700">
                   <img src={dog.foto_url || "/icons/dog-default.png"} alt={dog.nombre} className="w-full h-full object-contain object-center" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{dog.nombre}</p>
-                  <p className="text-xs text-zinc-500">{dog.raza} · {dog.edad_meses}m · {dog.peso_kg}kg</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{dog.raza} · {dog.edad_meses}m · {dog.peso_kg}kg</p>
                   {dog.objetivo_principal && <p className="text-[10px] text-zinc-400 mt-0.5 truncate">{dog.objetivo_principal}</p>}
                   {mp && (
                     <p className="text-[10px] text-zinc-400">
@@ -222,7 +222,7 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
                 <div className="w-12 h-12 rounded-2xl bg-accent-50 dark:bg-accent-950/40 border border-accent-200 dark:border-accent-800 flex items-center justify-center">
                   <Award className="w-6 h-6 text-accent-500" />
                 </div>
-                <span className="text-[10px] text-zinc-500 text-center max-w-[60px] leading-tight">{(ub.badges as Badge)?.name}</span>
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 text-center max-w-[60px] leading-tight">{(ub.badges as Badge)?.name}</span>
               </div>
             ))}
           </div>

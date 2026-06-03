@@ -249,7 +249,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs text-zinc-500">Toca el ojo para ocultar/mostrar circuitos</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">Toca el ojo para ocultar/mostrar circuitos</p>
               {[...circuits, ...customCircuits].map((circuit) => {
                 const isCustom = "user_id" in circuit;
                 return (
@@ -493,7 +493,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
 
                   <button
                     onClick={() => loadSessionObstacles(s.id)}
-                    className="w-full text-xs font-semibold text-zinc-500 hover:text-accent-600 py-1 transition-colors"
+                    className="w-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-accent-600 py-1 transition-colors"
                   >
                     {isExpanded ? "Ocultar detalles" : "Ver obstáculos"}
                   </button>

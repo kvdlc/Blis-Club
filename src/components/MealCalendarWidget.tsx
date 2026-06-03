@@ -140,7 +140,7 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
                 <span className={`text-[9px] font-medium ${isTodayDate ? "text-primary-600" : "text-zinc-400"}`}>
                   {d.toLocaleDateString("es", { weekday: "narrow" }).toUpperCase()}
                 </span>
-                <span className={`text-sm font-bold ${selected ? "text-primary-700" : isTodayDate ? "text-secondary-600" : "text-zinc-700"}`}>
+                <span className={`text-sm font-bold ${selected ? "text-primary-700" : isTodayDate ? "text-secondary-600"                     : "text-zinc-700 dark:text-zinc-300"}`}>
                   {d.getDate()}
                 </span>
                 <div className="flex gap-0.5 h-1.5 items-center">
@@ -149,7 +149,7 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
                       <div key={i} className={`w-1 h-1 rounded-full ${i < fed ? "bg-secondary-500" : "bg-primary-400"}`} />
                     ))
                   ) : (
-                    <div className="w-1 h-1 rounded-full bg-zinc-200" />
+                    <div className="w-1 h-1 rounded-full bg-zinc-200 dark:bg-zinc-700" />
                   )}
                 </div>
               </button>
@@ -159,7 +159,7 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
 
         {/* Meals list - SIEMPRE MUESTRA SLOTS */}
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+          <h4 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
             {view === "today" ? "Comidas de hoy" : `Comidas del ${selectedDate.toLocaleDateString("es", { weekday: "long", day: "numeric" })}`}
           </h4>
 
@@ -172,15 +172,15 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
                   item?.status === "fed"
                     ? "bg-secondary-50/60 border-secondary-200/50"
                     : item?.status === "skipped"
-                    ? "bg-zinc-50/60 border-zinc-200/50 opacity-60"
+                    ? "bg-zinc-50/60 dark:bg-zinc-800/50 border-zinc-200/50 dark:border-zinc-700/50 opacity-60"
                     : item?.status === "suggested"
                     ? "bg-primary-50/60 border-primary-200/50"
-                    : "bg-white/60 border-zinc-100"
+                    : "bg-white/60 dark:bg-zinc-900/60 border-zinc-100 dark:border-zinc-800"
                 }`}
               >
                 <div className="flex flex-col items-center w-10 shrink-0">
                   <Clock className="w-3.5 h-3.5 text-zinc-400" />
-                  <span className="text-[10px] font-semibold text-zinc-500 mt-0.5">{slot.time_of_day.slice(0, 5)}</span>
+                  <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 mt-0.5">{slot.time_of_day.slice(0, 5)}</span>
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -190,23 +190,23 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
                         <ChefHat className="w-4 h-4 text-primary-600" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-zinc-800 truncate">{item.recipe.title}</p>
+                        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{item.recipe.title}</p>
                         <p className="text-[10px] text-zinc-400">{item.gramos ?? 0}g · {Math.round(((item.gramos ?? 0) / 100) * (item.recipe.kcal_per_100g ?? 0))} kcal</p>
                       </div>
                     </div>
                   ) : item ? (
                     <div className="flex items-center gap-2">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.status === "fed" ? "bg-secondary-100" : "bg-zinc-100"}`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.status === "fed" ? "bg-secondary-100" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                         <Check className={`w-4 h-4 ${item.status === "fed" ? "text-secondary-600" : "text-zinc-400"}`} />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-zinc-700">{slot.label}</p>
+                        <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{slot.label}</p>
                         <p className="text-[10px] text-zinc-400">{item.gramos ?? 0}g {item.status === "fed" ? "· Completado" : item.status === "skipped" ? "· Saltado" : ""}</p>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
                         <Circle className="w-4 h-4 text-zinc-400" />
                       </div>
                       <div>
@@ -221,7 +221,7 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
                   <button
                     onClick={() => toggleStatus(item.id, item.status)}
                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                      item.status === "fed" ? "bg-secondary-500 text-white" : item.status === "skipped" ? "bg-zinc-300 text-white" : "bg-zinc-100 text-zinc-400 hover:bg-secondary-100"
+                      item.status === "fed" ? "bg-secondary-500 text-white" : item.status === "skipped" ? "bg-zinc-300 dark:bg-zinc-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 hover:bg-secondary-100"
                     }`}
                   >
                     {item.status === "fed" ? <Check className="w-4 h-4" /> : item.status === "skipped" ? <X className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
@@ -245,8 +245,8 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
             <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Resumen Nutricional</h3>
           </div>
           <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-1">
-            <button onClick={() => setView("today")} className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${view === "today" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Hoy</button>
-            <button onClick={() => setView("week")} className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${view === "week" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Semana</button>
+            <button onClick={() => setView("today")} className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${view === "today" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500 dark:text-zinc-400"}`}>Hoy</button>
+            <button onClick={() => setView("week")} className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${view === "week" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500 dark:text-zinc-400"}`}>Semana</button>
           </div>
         </div>
 
@@ -262,7 +262,7 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center pt-6">
               <span className="text-3xl font-bold text-primary-600 dark:text-primary-400">{kcalPercent.toFixed(0)}%</span>
-              <span className="text-[10px] text-zinc-500">de calorías</span>
+              <span className="text-[10px] text-zinc-500 dark:text-zinc-400">de calorías</span>
             </div>
             <div className="absolute left-2 bottom-2 flex items-center gap-1">
               <div className="w-6 h-6 rounded-full bg-rose-50 dark:bg-rose-950 flex items-center justify-center"><Flame className="w-3 h-3 text-rose-500" /></div>

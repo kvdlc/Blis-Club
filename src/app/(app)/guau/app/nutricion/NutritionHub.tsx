@@ -69,7 +69,9 @@ export function NutritionHub(props: Props) {
         />
       )}
       {activeTab === "calculadora" && <CalculadoraTab dog={props.dog} metabolicProfile={props.metabolicProfile} />}
-      {activeTab === "detox" && <DetoxTab dog={props.dog} detoxDays={props.detoxDays} detoxProgress={props.detoxProgress} />}
+      {activeTab === "detox" && (
+        <div className="text-center py-8 text-zinc-400">Reto detox próximamente.</div>
+      )}
       {activeTab === "escaner" && <EscanerTab toxicFoods={props.toxicFoods} />}
       {activeTab === "lista" && <ListaTab shoppingList={props.shoppingList} />}
 
@@ -159,7 +161,7 @@ function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[];
                     : "border-zinc-100 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40"
                 }`}
               >
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-sm border ${meta?.bg ?? "bg-zinc-100"} ${meta?.border ?? "border-zinc-200"}`}>
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-sm border ${meta?.bg ?? "bg-zinc-100 dark:bg-zinc-800"} ${meta?.border ?? "border-zinc-200 dark:border-zinc-700"}`}>
                   {meta?.icon ?? "🍽️"}
                 </div>
                 <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">{meta?.label ?? cat}</span>
@@ -243,19 +245,52 @@ function RecipeCard({ recipe }: { recipe: NutritionRecipe }) {
       {/* Stats row */}
       <div className="flex items-center gap-2 mt-1.5">
         {recipe.prep_time_min && (
-          <span className="text-[10px] text-zinc-500 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
             <Clock className="w-2.5 h-2.5" />
             {recipe.prep_time_min}m
           </span>
         )}
         {recipe.kcal_per_100g && (
-          <span className="text-[10px] text-zinc-500 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
             <Flame className="w-2.5 h-2.5 text-orange-400" />
             {Math.round(recipe.kcal_per_100g)}
           </span>
         )}
       </div>
     </Link>
+  );
+}
+
+/* ================================================================ */
+/*  ESCANER                                                          */
+/* ================================================================ */
+function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
+  const [search, setSearch] = useState("");
+  const filtered = toxicFoods.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
+  return (
+    <div className="space-y-4">
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Buscar alimento..."
+        className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-4 py-2.5 text-sm"
+      />
+      {filtered.length === 0 && <p className="text-center text-sm text-zinc-400 py-4">No encontrado.</p>}
+      <div className="space-y-2">
+        {filtered.map((f) => (
+          <div key={f.id} className="card-soft rounded-xl p-3 flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${f.severity === "alto" || f.severity === "mortal" ? "bg-danger-100 text-danger-600" : f.severity === "medio" ? "bg-warning-100 text-warning-600" : "bg-secondary-100 text-secondary-600"}`}>
+              {f.severity === "alto" || f.severity === "mortal" ? "☠️" : f.severity === "medio" ? "⚠️" : "ℹ️"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{f.name}</p>
+              {f.symptoms && <p className="text-xs text-zinc-500 dark:text-zinc-400">{f.symptoms}</p>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -286,205 +321,58 @@ function CalculadoraTab({ dog, metabolicProfile }: { dog: Dog | null; metabolicP
     );
   };
 
-  if (!dog) return <p className="text-zinc-500 text-center py-8">Registra un perro primero.</p>;
+  if (!dog) return <p className="text-zinc-500 dark:text-zinc-400 text-center py-8">Registra un perro primero.</p>;
 
   return (
     <div className="space-y-5">
-      <div className="card-soft rounded-[1.5rem] p-6 flex flex-col items-center">
-        <div className="relative w-40 h-40">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className="text-zinc-100 dark:text-zinc-800" />
-            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round"
-              className="text-primary-500"
-              strokeDasharray={2 * Math.PI * 42}
-              strokeDashoffset={2 * Math.PI * 42 * (1 - Math.min(feedingPct / 5, 1))}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">{Math.round(total)}</span>
-            <span className="text-[10px] text-zinc-500">gramos/día</span>
+      <div className="card-soft rounded-[1.5rem] p-5 space-y-4">
+        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Calculadora de ración diaria</h3>
+        <div className="flex items-center justify-center py-4">
+          <div className="relative w-40 h-40">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" className="text-zinc-100 dark:text-zinc-800" />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-2xl font-extrabold text-primary-600 dark:text-primary-400">{Math.round(total)}</span>
+              <span className="text-[10px] text-zinc-500 dark:text-zinc-400">gramos/día</span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-5 mt-4">
-          <button onClick={() => setFeedingPct(Math.max(1.5, feedingPct - 0.5))} className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center transition-transform active:scale-95">
-            <Minus className="w-4 h-4" />
-          </button>
+        <div className="flex items-center justify-center gap-3">
+          <button onClick={() => setFeedingPct(Math.max(1.5, feedingPct - 0.5))} className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-lg font-bold text-zinc-700 dark:text-zinc-300">-</button>
           <div className="text-center">
-            <p className="text-base font-bold">{feedingPct}%</p>
+            <span className="text-xl font-bold text-primary-600 dark:text-primary-400">{feedingPct.toFixed(1)}%</span>
             <p className="text-[10px] text-zinc-400">del peso corporal</p>
           </div>
-          <button onClick={() => setFeedingPct(Math.min(3.5, feedingPct + 0.5))} className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center transition-transform active:scale-95">
-            <Plus className="w-4 h-4" />
-          </button>
+          <button onClick={() => setFeedingPct(Math.min(3.5, feedingPct + 0.5))} className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-lg font-bold text-zinc-700 dark:text-zinc-300">+</button>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {[
-          { label: "Proteína", grams: meat, pct: meatPct, color: "bg-danger-500", bg: "bg-danger-50 dark:bg-danger-950/30" },
-          { label: "Huesos", grams: bone, pct: bonePct, color: "bg-warning-500", bg: "bg-warning-50 dark:bg-warning-950/30" },
-          { label: "Vísceras", grams: organ, pct: organPct, color: "bg-accent-500", bg: "bg-accent-50 dark:bg-accent-950/30" },
-          { label: "Vegetales", grams: veggie, pct: veggiePct, color: "bg-secondary-500", bg: "bg-secondary-50 dark:bg-secondary-950/30" },
-        ].map((item) => (
-          <div key={item.label} className={`rounded-[1.25rem] ${item.bg} p-4 card-soft`}>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className={`w-2 h-2 rounded-full ${item.color}`} />
-              <p className="text-[11px] text-zinc-500">{item.label}</p>
-            </div>
-            <p className="text-lg font-bold">{Math.round(item.grams)}g</p>
-            <p className="text-[10px] text-zinc-400">{item.pct}%</p>
-          </div>
-        ))}
-      </div>
-
-      <button onClick={() => setExpertMode(!expertMode)} className="text-xs text-accent-600 dark:text-accent-400 font-semibold">
-        {expertMode ? "Ocultar modo experto" : "Modo experto"}
-      </button>
-
-      {expertMode && (
-        <div className="card-soft rounded-[1.5rem] p-5 space-y-3">
-          {[
-            { label: "Proteína", value: meatPct, set: setMeatPct },
-            { label: "Huesos", value: bonePct, set: setBonePct },
-            { label: "Vísceras", value: organPct, set: setOrganPct },
-            { label: "Vegetales", value: veggiePct, set: setVeggiePct },
-          ].map((s) => (
-            <div key={s.label} className="flex items-center gap-3">
-              <span className="text-xs w-16 text-zinc-500">{s.label}</span>
-              <input type="range" min={0} max={100} value={s.value} onChange={(e) => s.set(Number(e.target.value))} className="flex-1 accent-primary-600" />
-              <span className="text-xs font-mono w-8 text-right">{s.value}%</span>
-            </div>
-          ))}
-          <button onClick={handleSave} className="w-full rounded-xl bg-secondary-600 hover:bg-secondary-700 text-white py-2.5 text-sm font-bold transition-colors active:scale-[0.98]">
-            Guardar configuración
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ================================================================ */
-/*  DETOX                                                            */
-/* ================================================================ */
-function DetoxTab({ dog, detoxDays, detoxProgress }: { dog: Dog | null; detoxDays: Props["detoxDays"]; detoxProgress: Props["detoxProgress"] }) {
-  const supabase = createClient();
-  const [progressState, setProgressState] = useState(detoxProgress);
-  const completedDays = progressState.filter((p) => p.completed).map((p) => p.day_number);
-  const maxUnlocked = completedDays.length > 0 ? Math.max(...completedDays) + 1 : 1;
-
-  const markDay = async (day: number) => {
-    if (!dog || day > maxUnlocked || completedDays.includes(day)) return;
-    const { error } = await supabase.from("detox_progress").upsert(
-      { dog_id: dog.id, day_number: day, completed: true, completed_at: new Date().toISOString() },
-      { onConflict: "dog_id,day_number" }
-    );
-    if (!error) {
-      setProgressState((prev) => [...prev.filter((p) => p.day_number !== day), { day_number: day, completed: true }]);
-    }
-  };
-
-  if (!dog) return <p className="text-zinc-500 text-center py-8">Registra un perro primero.</p>;
-
-  return (
-    <div className="space-y-3">
-      <div className="card-soft rounded-[1.5rem] p-4 bg-warning-50/60 dark:bg-warning-950/20 border-warning-200/50 dark:border-warning-900/30">
-        <p className="text-sm text-warning-700 dark:text-warning-300 font-bold">Reto Detox 14 Días</p>
-        <p className="text-xs text-warning-600 dark:text-warning-400 mt-1">Transición de croquetas a alimentación natural. Completa un día a la vez.</p>
-      </div>
-      {detoxDays.map((day) => {
-        const isCompleted = completedDays.includes(day.day_number);
-        const isUnlocked = day.day_number <= maxUnlocked;
-        return (
-          <div
-            key={day.day_number}
-            className={`rounded-[1.25rem] p-3.5 ${
-              isCompleted ? "card-soft bg-secondary-50/60 dark:bg-secondary-950/20" : isUnlocked ? "card-soft" : "card-soft opacity-50"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${
-                isCompleted ? "bg-secondary-500 text-white" : isUnlocked ? "bg-primary-100 dark:bg-primary-900 text-primary-700" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
-              }`}>
-                {isCompleted ? <Check className="w-4 h-4" /> : isUnlocked ? day.day_number : <Lock className="w-3.5 h-3.5" />}
+        {expertMode && (
+          <div className="space-y-3 pt-2">
+            {[
+              { label: "Carne", pct: meatPct, set: setMeatPct, color: "text-red-500" },
+              { label: "Hueso", pct: bonePct, set: setBonePct, color: "text-orange-500" },
+              { label: "Víscera", pct: organPct, set: setOrganPct, color: "text-purple-500" },
+              { label: "Verdura", pct: veggiePct, set: setVeggiePct, color: "text-green-500" },
+            ].map((item) => (
+              <div key={item.label}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">{item.label}</span>
+                  <span className="text-[10px] text-zinc-400">{item.pct}% · {Math.round(total * (item.pct / 100))}g</span>
+                </div>
+                <input type="range" min={0} max={100} value={item.pct} onChange={(e) => item.set(Number(e.target.value))} className="w-full accent-primary-600" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold truncate">Día {day.day_number}: {day.title}</h4>
-                {isUnlocked && <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">{day.instructions}</p>}
-              </div>
-              {isUnlocked && !isCompleted && (
-                <button onClick={() => markDay(day.day_number)} className="shrink-0 rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 text-xs font-bold transition-colors active:scale-95">
-                  Listo
-                </button>
-              )}
-            </div>
-            {day.warning && isUnlocked && (
-              <p className="text-[10px] text-warning-600 dark:text-warning-400 mt-2 pl-10">{day.warning}</p>
-            )}
+            ))}
           </div>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ================================================================ */
-/*  ESCANER                                                          */
-/* ================================================================ */
-function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
-  const [query, setQuery] = useState("");
-  const result = useMemo(() => {
-    if (!query.trim()) return null;
-    return toxicFoods.find((f) => f.name.toLowerCase().includes(query.toLowerCase()));
-  }, [query, toxicFoods]);
-
-  return (
-    <div className="space-y-4">
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder='Buscar alimento (ej: "Uvas", "Cebolla")'
-          className="w-full rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border border-zinc-100 dark:border-zinc-800 pl-11 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 shadow-sm"
-        />
-        {query && (
-          <button onClick={() => setQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2">
-            <X className="w-4 h-4 text-zinc-400" />
-          </button>
         )}
+        <div className="flex gap-2 pt-2">
+          <button onClick={() => setExpertMode(!expertMode)} className="flex-1 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-xs font-bold text-zinc-700 dark:text-zinc-300">
+            {expertMode ? "Modo simple" : "Modo experto"}
+          </button>
+          <button onClick={handleSave} className="flex-1 py-2.5 rounded-xl bg-primary-600 text-white text-xs font-bold">
+            Guardar
+          </button>
+        </div>
       </div>
-
-      {result ? (
-        <div className={`rounded-[1.5rem] p-5 text-center ${
-          result.is_toxic ? "bg-danger-50 dark:bg-danger-950/30 border-2 border-danger-400" : "bg-secondary-50 dark:bg-secondary-950/30 border-2 border-secondary-400"
-        }`}>
-          <div className="flex justify-center mb-2">
-            {result.is_toxic ? <AlertTriangle className="w-10 h-10 text-danger-500" /> : <ShieldCheck className="w-10 h-10 text-secondary-500" />}
-          </div>
-          <h3 className={`text-base font-bold ${result.is_toxic ? "text-danger-700 dark:text-danger-300" : "text-secondary-700 dark:text-secondary-300"}`}>
-            {result.name}
-          </h3>
-          <p className={`text-xs font-semibold mt-1 ${result.is_toxic ? "text-danger-600" : "text-secondary-600"}`}>
-            {result.is_toxic ? `TÓXICO · Severidad: ${result.severity}` : "SEGURO"}
-          </p>
-          {result.explanation && <p className="text-xs mt-2 text-zinc-600 dark:text-zinc-400">{result.explanation}</p>}
-          {result.symptoms && (
-            <p className="text-[11px] text-danger-600 dark:text-danger-400 mt-2 bg-danger-100 dark:bg-danger-900 rounded-xl p-2.5">Síntomas: {result.symptoms}</p>
-          )}
-        </div>
-      ) : query.trim() ? (
-        <div className="text-center py-8 text-zinc-400">
-          <p>Alimento no encontrado</p>
-          <p className="text-xs mt-1">Intenta con otro nombre</p>
-        </div>
-      ) : (
-        <div className="text-center py-8 text-zinc-400">
-          <ScanBarcode className="w-10 h-10 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">Busca un alimento para saber si es tóxico o seguro</p>
-        </div>
-      )}
     </div>
   );
 }

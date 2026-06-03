@@ -251,10 +251,10 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
 
         {photos.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-zinc-500">Fotos de la sesión</p>
+            <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Fotos de la sesión</p>
             <div className="flex gap-2">
               {photos.map((p, i) => (
-                <div key={i} className="w-20 h-20 rounded-xl overflow-hidden border border-zinc-200">
+                <div key={i} className="w-20 h-20 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
                   <img src={p} alt="" className="w-full h-full object-cover" />
                 </div>
               ))}
@@ -313,7 +313,7 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
       {/* Header */}
       <div className="text-center space-y-1">
         <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">Resumen del entrenamiento</h3>
-        <p className="text-sm text-zinc-500">{dog.nombre} lo hizo increíble.</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">{dog.nombre} lo hizo increíble.</p>
       </div>
 
       {/* Stats grid */}
@@ -345,7 +345,7 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
       {/* Fouls list - editable */}
       {fouls.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Faltas registradas</h4>
+          <h4 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Faltas registradas</h4>
           <div className="space-y-1.5">
             {fouls.map((foul) => {
               const obstacle = config.selectedObstacles.find((o) => o.id === foul.obstacle_id);

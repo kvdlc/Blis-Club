@@ -133,7 +133,7 @@ export default async function DashboardPage() {
           <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">
             ¡Bienvenido a Blis Club!
           </h2>
-          <p className="text-zinc-500 mt-2 max-w-sm text-sm leading-relaxed">
+          <p className="text-zinc-500 dark:text-zinc-400 mt-2 max-w-sm text-sm leading-relaxed">
             Registra tu primer perro para empezar a usar la calculadora de nutrición, el tracker de paseos y la academia de entrenamiento.
           </p>
         </div>

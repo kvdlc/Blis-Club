@@ -130,7 +130,7 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs text-zinc-500">{new Date(w.fecha + "T00:00:00").toLocaleDateString("es")}</span>
+                          <span className="text-xs text-zinc-500 dark:text-zinc-400">{new Date(w.fecha + "T00:00:00").toLocaleDateString("es")}</span>
                           <span className="text-sm font-extrabold text-zinc-700 dark:text-zinc-300">{w.peso_kg} kg</span>
                         </div>
                         {trend && (
@@ -143,7 +143,7 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
                       </div>
                       <div className="flex items-center gap-0.5 shrink-0">
                         <button onClick={() => startEdit(w)} className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors">
-                          <Pencil className="w-3 h-3 text-zinc-500" />
+                          <Pencil className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                         </button>
                         <button onClick={() => deleteWeight(w.id)} className="w-6 h-6 rounded-full bg-danger-100 dark:bg-danger-900 flex items-center justify-center hover:bg-danger-200 transition-colors">
                           <Trash2 className="w-3 h-3 text-danger-500" />
@@ -168,17 +168,17 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
 
         <div className="flex gap-2">
           <div className="flex-1">
-            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">📅 Fecha</span></div>
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">📅 Fecha</span></div>
             <DatePicker value={formDate} onChange={setFormDate} />
           </div>
           <div className="w-28">
-            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">⚖️ Peso</span></div>
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">⚖️ Peso</span></div>
             <input name="peso_kg" type="number" step="0.1" placeholder={`${dog.peso_kg}`} required className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm font-bold text-accent-600" />
           </div>
         </div>
 
         <div>
-          <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">📸 Foto de progreso</span></div>
+          <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">📸 Foto de progreso</span></div>
           <div className="flex gap-2">
             {photoUrl ? (
               <div className="relative w-full">
@@ -196,7 +196,7 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
                 <div className="w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900 flex items-center justify-center">
                   <Camera className="w-5 h-5 text-accent-500" />
                 </div>
-                <span className="text-[11px] font-semibold text-zinc-500">Tocar para tomar o elegir foto</span>
+                <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">Tocar para tomar o elegir foto</span>
               </button>
             )}
           </div>
@@ -211,7 +211,7 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
         </div>
 
         <div>
-          <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">🗒️ Notas</span></div>
+          <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">🗒️ Notas</span></div>
           <input name="notas" placeholder="Ej: Después del desayuno" className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" />
         </div>
 

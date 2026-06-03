@@ -45,7 +45,7 @@ export default async function AcademiaPage() {
           </svg>
         </div>
         <h2 className="text-xl font-semibold text-zinc-700 dark:text-zinc-300">Academia</h2>
-        <p className="text-zinc-500">El contenido educativo estará disponible pronto.</p>
+        <p className="text-zinc-500 dark:text-zinc-400">El contenido educativo estará disponible pronto.</p>
       </div>
     );
   }

@@ -115,22 +115,22 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{med.medication_name}</p>
-                    {med.dosage && <p className="text-xs text-zinc-500 truncate">{med.dosage}</p>}
+                    {med.dosage && <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{med.dosage}</p>}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEdit(med)} className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors">
-                      <Pencil className="w-3 h-3 text-zinc-500" />
+                      <Pencil className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                     </button>
                     <button onClick={() => deleteMed(med.id)} className="w-6 h-6 rounded-full bg-danger-100 dark:bg-danger-900 flex items-center justify-center hover:bg-danger-200 transition-colors">
                       <Trash2 className="w-3 h-3 text-danger-500" />
                     </button>
                     <button onClick={() => toggleMedStatus(med.id, med.status)}
-                      className={`text-xs px-2.5 py-1 rounded-full font-semibold ${med.status === "active" ? "bg-secondary-100 text-secondary-700" : "bg-zinc-100 text-zinc-500"}`}>
+                      className={`text-xs px-2.5 py-1 rounded-full font-semibold ${med.status === "active" ? "bg-secondary-100 text-secondary-700" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"}`}>
                       {med.status === "active" ? "Activo" : "Completado"}
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-zinc-500">
+                <div className="flex items-center gap-2 text-[10px] text-zinc-500 dark:text-zinc-400">
                   <span>{new Date(med.start_date + "T00:00:00").toLocaleDateString("es")} - {med.end_date ? new Date(med.end_date + "T00:00:00").toLocaleDateString("es") : "Indefinido"}</span>
                   <span>· {med.doses_per_day} dosis/día</span>
                 </div>
@@ -160,28 +160,28 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
 
           <div className="flex gap-2">
             <div className="flex-1">
-              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">💊 Nombre</span></div>
+              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">💊 Nombre</span></div>
               <input name="medication_name" placeholder="Nombre *" required className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" />
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">⚗️ Dosis</span></div>
+              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">⚗️ Dosis</span></div>
               <input name="dosage" placeholder="Ej: 1 comp/8h" className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" />
             </div>
           </div>
 
           <div className="flex gap-2">
             <div className="flex-1">
-              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">📅 Inicio</span></div>
+              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">📅 Inicio</span></div>
               <DatePicker value={formStartDate} onChange={setFormStartDate} />
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">🏁 Fin</span></div>
+              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">🏁 Fin</span></div>
               <DatePicker value={formEndDate} onChange={setFormEndDate} label="Indefinido" />
             </div>
           </div>
 
           <div>
-            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">🕐 Dosis por día</span></div>
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">🕐 Dosis por día</span></div>
             <div className="flex gap-1.5">
               {[1, 2, 3, 4].map((n) => (
                 <button key={n} type="button" onClick={() => setDosesPerDay(n)}

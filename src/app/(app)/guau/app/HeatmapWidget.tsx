@@ -24,7 +24,7 @@ function getTextColor(light: string | null) {
     case "green": return "text-secondary-600 dark:text-secondary-400";
     case "yellow": return "text-warning-600 dark:text-warning-400";
     case "red": return "text-danger-600 dark:text-danger-400";
-    default: return "text-zinc-500";
+    default: return "text-zinc-500 dark:text-zinc-400";
   }
 }
 

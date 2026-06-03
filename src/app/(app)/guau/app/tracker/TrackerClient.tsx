@@ -157,7 +157,7 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
       )}
 
       {!dog ? (
-        <p className="text-center text-zinc-500 py-8">Registra un perro para empezar a trackear paseos.</p>
+        <p className="text-center text-zinc-500 dark:text-zinc-400 py-8">Registra un perro para empezar a trackear paseos.</p>
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3">
@@ -171,10 +171,10 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
             {todayStats ? (
               <>
                 <div className="grid grid-cols-2 gap-3 text-center">
-                  <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-xl p-3"><p className="text-lg font-bold text-primary-600">{todayStats.count}</p><p className="text-[10px] text-zinc-500">Paseos</p></div>
-                  <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-xl p-3"><p className="text-lg font-bold text-zinc-700">{todayStats.mins}m</p><p className="text-[10px] text-zinc-500">Minutos</p></div>
+                  <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-xl p-3"><p className="text-lg font-bold text-primary-600">{todayStats.count}</p><p className="text-[10px] text-zinc-500 dark:text-zinc-400">Paseos</p></div>
+                  <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-xl p-3"><p className="text-lg font-bold text-zinc-700">{todayStats.mins}m</p><p className="text-[10px] text-zinc-500 dark:text-zinc-400">Minutos</p></div>
                 </div>
-                <div className="flex items-center justify-between text-xs text-zinc-500">
+                <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
                   <span className="flex items-center gap-1"><Droplets className="w-3 h-3 text-warning-500" />{todayStats.pipis}</span>
                   <span className="flex items-center gap-1"><BadgeCheck className="w-3 h-3 text-secondary-500" />{todayStats.popos}</span>
                   <span className={`font-semibold ${todayStats.avg <= 1.3 ? "text-secondary-600" : todayStats.avg <= 2.3 ? "text-warning-600" : "text-danger-600"}`}>{todayStats.avg <= 1.3 ? "Calma" : todayStats.avg <= 2.3 ? "Tensión" : "Estrés"}</span>
@@ -236,7 +236,7 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
           {/* Walk Cards */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Footprints className="w-4 h-4 text-zinc-500" />
+              <Footprints className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
               <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 truncate">
                 Paseos del {new Date(selectedDate + "T00:00:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "short" })}
               </h3>
@@ -280,7 +280,7 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
           {/* Reactivity chart */}
           {reactivityData.length > 1 && (
             <div className="card-soft rounded-[1.5rem] p-5">
-              <h3 className="text-xs font-bold text-zinc-500 mb-3 uppercase tracking-wide">Evolución Semanal</h3>
+              <h3 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 mb-3 uppercase tracking-wide">Evolución Semanal</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={reactivityData}>
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} /><YAxis tick={{ fontSize: 10 }} /><Tooltip />

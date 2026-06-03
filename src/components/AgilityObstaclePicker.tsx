@@ -165,7 +165,7 @@ export function AgilityObstaclePicker({
       {!loading && !loadError && (
         <div className="max-h-80 overflow-y-auto space-y-5 pr-1">
           {Object.entries(grouped).map(([category, obstacles]) => {
-            const config = CATEGORY_CONFIG[category] || { label: category, emoji: "🏁", color: "text-zinc-600", lightBg: "bg-zinc-50", border: "border-zinc-200" };
+            const config = CATEGORY_CONFIG[category] || { label: category, emoji: "🏁", color: "text-zinc-600", lightBg: "bg-zinc-50 dark:bg-zinc-800/50", border: "border-zinc-200 dark:border-zinc-700" };
             return (
               <div key={category}>
                 <div className={`flex items-center gap-1.5 mb-2 px-2 py-1 rounded-lg ${config.lightBg} ${config.border} border w-fit`}>
@@ -222,7 +222,7 @@ export function AgilityObstaclePicker({
       {!suggesting ? (
         <button
           onClick={() => setSuggesting(true)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           Sugerir obstáculo

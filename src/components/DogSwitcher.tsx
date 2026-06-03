@@ -74,7 +74,7 @@ export function DogSwitcher() {
   if (!currentDog) return null;
   if (allDogs.length <= 1) return (
     <div className="flex items-center gap-2">
-      <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center overflow-hidden border border-zinc-200 dark:border-zinc-700">
+      <div className="w-7 h-7 rounded-lg bg-white dark:bg-zinc-900 flex items-center justify-center overflow-hidden border border-zinc-200 dark:border-zinc-700">
         <img src={currentDog.foto_url || breedImg || "/icons/dog-default.png"} alt="" className="w-full h-full object-contain object-center" />
       </div>
       <span className="text-xs font-bold text-zinc-600 dark:text-zinc-400 truncate max-w-[120px]">
@@ -89,7 +89,7 @@ export function DogSwitcher() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 rounded-full bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 pl-1.5 pr-2.5 py-1 transition-all hover:shadow-sm"
       >
-        <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center overflow-hidden border-2 border-white dark:border-zinc-600">
+        <div className="w-7 h-7 rounded-lg bg-white dark:bg-zinc-800 flex items-center justify-center overflow-hidden border-2 border-white dark:border-zinc-600">
           <img src={currentDog.foto_url || breedImg || "/icons/dog-default.png"} alt="" className="w-full h-full object-contain object-center" />
         </div>
         <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 max-w-[100px] truncate">
@@ -108,7 +108,7 @@ export function DogSwitcher() {
                 onClick={() => { setCurrentDogId(dog.id); setOpen(false); router.refresh(); }}
                 className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 ${dog.id === currentDog.id ? "bg-primary-50 dark:bg-primary-950/30" : ""}`}
               >
-                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 flex items-center justify-center overflow-hidden shrink-0">
                   <img src={dog.foto_url || "/icons/dog-default.png"} alt="" className="w-full h-full object-contain object-center" />
                 </div>
                 <div className="text-left min-w-0">

@@ -282,7 +282,7 @@ export default function WalkPage() {
               }`}
             >
               <span className="text-3xl">✏️</span>
-              <span className="text-[10px] font-semibold text-zinc-500 leading-tight text-center">Otro</span>
+              <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 leading-tight text-center">Otro</span>
             </button>
           </div>
 
@@ -350,7 +350,7 @@ export default function WalkPage() {
                 }`}
               >
                 <span className="text-2xl">{s.e}</span>
-                <span className="text-[10px] text-zinc-500">{s.l}</span>
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{s.l}</span>
               </button>
             ))}
           </div>
@@ -366,7 +366,7 @@ export default function WalkPage() {
           <h2 className="text-xl font-bold text-secondary-600 dark:text-secondary-400">
             ¡Paseo guardado!
           </h2>
-          <p className="text-zinc-500">
+          <p className="text-zinc-500 dark:text-zinc-400">
             {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")} · {pipiCount} pipí · {popoCount} popó
           </p>
           {trafficLight && (

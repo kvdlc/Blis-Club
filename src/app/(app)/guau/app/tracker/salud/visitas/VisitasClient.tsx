@@ -107,7 +107,7 @@ export function VisitasClient({ dog, vetVisits: initialVisits, trustedVets }: Pr
                   <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate min-w-0 flex-1">{visit.motivo}</p>
                   <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEdit(visit)} className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors">
-                      <Pencil className="w-3 h-3 text-zinc-500" />
+                      <Pencil className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                     </button>
                     <button onClick={() => deleteVisit(visit.id)} className="w-6 h-6 rounded-full bg-danger-100 dark:bg-danger-900 flex items-center justify-center hover:bg-danger-200 transition-colors">
                       <Trash2 className="w-3 h-3 text-danger-500" />
@@ -138,40 +138,40 @@ export function VisitasClient({ dog, vetVisits: initialVisits, trustedVets }: Pr
           </div>
 
           <div>
-            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">📅 Fecha</span></div>
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">📅 Fecha</span></div>
             <DatePicker value={formFecha} onChange={setFormFecha} />
             <input type="hidden" name="fecha" value={formFecha} />
           </div>
 
           <div>
-            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">📝 Motivo</span></div>
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">📝 Motivo</span></div>
             <input name="motivo" placeholder="Ej: Revisión general, vacuna..." required className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" />
           </div>
 
           <div className="flex gap-2">
             <div className="flex-1">
-              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">👨‍⚕️ Veterinario</span></div>
+              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">👨‍⚕️ Veterinario</span></div>
               <input name="vet_name" placeholder="Nombre del vet" className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" />
             </div>
             <div className="w-24">
-              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">⚖️ Peso</span></div>
+              <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">⚖️ Peso</span></div>
               <input name="peso_kg" type="number" step="0.1" placeholder="kg" className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" />
             </div>
           </div>
 
           <div>
-            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">🩺 Veterinario de confianza</span></div>
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">🩺 Veterinario de confianza</span></div>
             <VetSelect value={formVetId} onChange={setFormVetId} trustedVets={trustedVets} placeholder="Seleccionar..." />
           </div>
           <input type="hidden" name="vet_id" value={formVetId} />
 
           <div>
-            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">🗒️ Notas</span></div>
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">🗒️ Notas</span></div>
             <textarea name="notas" placeholder="Notas de la visita" className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" rows={2} />
           </div>
 
           <div>
-            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">📋 Diagnóstico</span></div>
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">📋 Diagnóstico</span></div>
             <textarea name="diagnostico" placeholder="Diagnóstico del veterinario" className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" rows={2} />
           </div>
 

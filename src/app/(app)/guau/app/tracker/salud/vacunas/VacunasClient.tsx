@@ -207,7 +207,7 @@ export function VacunasClient({ dog, vaccines: initialVaccines, trustedVets }: P
 
                       <button
                         onClick={() => addVaccineDose(vaccine.id)}
-                        className="w-full card-soft rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 p-3 flex items-center justify-center gap-2 text-xs font-semibold text-zinc-500"
+                        className="w-full card-soft rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 p-3 flex items-center justify-center gap-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400"
                       >
                         <Plus className="w-4 h-4" /> Agregar dosis de {vaccine.name}
                       </button>
@@ -279,14 +279,14 @@ function DoseRow({ record, trustedVets, scheduleDosesCount, expectedDate, onSave
         <div>
           <div className="flex items-center gap-1 mb-1">
             <CalendarDays className="w-3 h-3 text-zinc-400" />
-            <span className="text-[10px] text-zinc-500">Fecha</span>
+            <span className="text-[10px] text-zinc-500 dark:text-zinc-400">Fecha</span>
           </div>
           <DatePicker value={date} onChange={setDate} label="Seleccionar" />
         </div>
         <div>
           <div className="flex items-center gap-1 mb-1">
             <Tag className="w-3 h-3 text-zinc-400" />
-            <span className="text-[10px] text-zinc-500">Marca</span>
+            <span className="text-[10px] text-zinc-500 dark:text-zinc-400">Marca</span>
           </div>
           <input
             type="text"
@@ -301,7 +301,7 @@ function DoseRow({ record, trustedVets, scheduleDosesCount, expectedDate, onSave
         <div>
           <div className="flex items-center gap-1 mb-1">
             <DollarSign className="w-3 h-3 text-zinc-400" />
-            <span className="text-[10px] text-zinc-500">Costo</span>
+            <span className="text-[10px] text-zinc-500 dark:text-zinc-400">Costo</span>
           </div>
           <input
             type="number"
@@ -315,7 +315,7 @@ function DoseRow({ record, trustedVets, scheduleDosesCount, expectedDate, onSave
         <div>
           <div className="flex items-center gap-1 mb-1">
             <Stethoscope className="w-3 h-3 text-zinc-400" />
-            <span className="text-[10px] text-zinc-500">Veterinario</span>
+            <span className="text-[10px] text-zinc-500 dark:text-zinc-400">Veterinario</span>
           </div>
           <VetSelect value={vetId} onChange={setVetId} trustedVets={trustedVets} placeholder="Sin vet" />
         </div>
