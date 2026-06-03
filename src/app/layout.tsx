@@ -15,12 +15,13 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#5956e9",
+  colorScheme: "only light",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={`antialiased bg-app-gradient text-zinc-900 dark:text-zinc-100 min-h-screen ${quicksand.variable} ${nunito.variable}`}>
+      <body className={`antialiased bg-app-gradient text-zinc-900 min-h-screen ${quicksand.variable} ${nunito.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light" disableTransitionOnChange>
           {children}
         </ThemeProvider>

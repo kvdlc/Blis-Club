@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* Force light mode everywhere — block Samsung/Android forced dark mode */
+html {
+  color-scheme: only light !important;
+}
+
+body {
+  background-color: #eeedff;
+  color: #18181b;
+}
+
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --color-bg-main: #fafafa;
@@ -103,27 +113,6 @@
   box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0,0,0,0.04);
 }
 
-/* Dark mode backgrounds */
-.dark .bg-app-gradient {
-  background-color: #1a1025;
-  background-image:
-    radial-gradient(circle at 15% 10%, rgba(139,92,246,0.08) 0%, transparent 50%),
-    radial-gradient(circle at 85% 90%, rgba(139,92,246,0.06) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(34,197,94,0.04) 0%, transparent 60%);
-}
-
-.dark .card-soft {
-  background: rgba(30, 30, 35, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.2);
-}
-
-.dark .card-elevated {
-  background: rgba(30, 30, 35, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.3);
-}
-
 /* Custom scrollbar hide utility */
 .scrollbar-hide {
   -ms-overflow-style: none;
@@ -133,64 +122,4 @@
   display: none;
 }
 
-.dark {
-  --color-primary-50: #1e1c5e;
-  --color-primary-100: #34318a;
-  --color-primary-200: #3d3aad;
-  --color-primary-300: #4a47d4;
-  --color-primary-400: #5956e9;
-  --color-primary-500: #6b63f3;
-  --color-primary-600: #837cf7;
-  --color-primary-700: #a29dfa;
-  --color-primary-800: #c5c2fc;
-  --color-primary-900: #e0dfff;
-  --color-primary-950: #eeedff;
 
-  --color-secondary-50: #072924;
-  --color-secondary-100: #114940;
-  --color-secondary-200: #14594d;
-  --color-secondary-300: #167060;
-  --color-secondary-400: #1a8a76;
-  --color-secondary-500: #209f89;
-  --color-secondary-600: #2ec4a8;
-  --color-secondary-700: #5edcc0;
-  --color-secondary-800: #99ebd7;
-  --color-secondary-900: #ccf5eb;
-  --color-secondary-950: #e6faf5;
-
-  --color-warning-50: #431f00;
-  --color-warning-100: #7c4401;
-  --color-warning-200: #9a5502;
-  --color-warning-300: #c26c03;
-  --color-warning-400: #f38704;
-  --color-warning-500: #f97316;
-  --color-warning-600: #fb923c;
-  --color-warning-700: #fdba74;
-  --color-warning-800: #fed7aa;
-  --color-warning-900: #ffedd5;
-  --color-warning-950: #fff8eb;
-
-  --color-danger-50: #450a0a;
-  --color-danger-100: #7f1d1d;
-  --color-danger-200: #991b1b;
-  --color-danger-300: #b91c1c;
-  --color-danger-400: #d54c4c;
-  --color-danger-500: #ef4444;
-  --color-danger-600: #f87171;
-  --color-danger-700: #fca5a5;
-  --color-danger-800: #fecaca;
-  --color-danger-900: #fee2e2;
-  --color-danger-950: #fef2f2;
-
-  --color-accent-50: #2e1065;
-  --color-accent-100: #4c1d95;
-  --color-accent-200: #5b21b6;
-  --color-accent-300: #6d28d9;
-  --color-accent-400: #7c3aed;
-  --color-accent-500: #8b5cf6;
-  --color-accent-600: #c084fc;
-  --color-accent-700: #d8b4fe;
-  --color-accent-800: #e9d5ff;
-  --color-accent-900: #f3e8ff;
-  --color-accent-950: #faf5ff;
-}
