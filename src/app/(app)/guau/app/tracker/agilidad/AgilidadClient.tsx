@@ -2,10 +2,12 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { AgilityTimer } from "@/components/AgilityTimer";
 import { AgilityForm } from "@/components/AgilityForm";
 import { AgilityChallenges } from "@/components/AgilityChallenges";
 import { TrainingAssistant } from "@/components/TrainingAssistant";
+import { AgilitySetup, type SessionConfig } from "@/components/AgilitySetup";
+import { AgilityRun, type RunData } from "@/components/AgilityRun";
+import { AgilityReview } from "@/components/AgilityReview";
 import type { AgilitySession, Dog, AgilitySessionType, AgilitySessionObstacle, AgilityObstacle, AgilityCircuit, AgilityCustomCircuit } from "@/types/database";
 import {
   ArrowLeft, Zap, Play, Plus, Trophy, Clock, Target,
@@ -22,7 +24,9 @@ interface Props {
 
 export function AgilidadClient({ sessions, dog, userId }: Props) {
   const router = useRouter();
-  const [showTimer, setShowTimer] = useState(false);
+  const [wizardStep, setWizardStep] = useState<null | "setup" | "run" | "review">(null);
+  const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(null);
+  const [runData, setRunData] = useState<RunData | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [sessionList, setSessionList] = useState<AgilitySession[]>(sessions);
   const [filterType, setFilterType] = useState<string | null>(null);
@@ -75,7 +79,9 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
   };
 
   const handleSaved = () => {
-    setShowTimer(false);
+    setWizardStep(null);
+    setSessionConfig(null);
+    setRunData(null);
     setShowForm(false);
     fetch(`/api/agility/sessions?dog_id=${dog?.id}`)
       .then((r) => r.json())
@@ -126,8 +132,31 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
 
   const startCircuit = (circuit: AgilityCircuit | AgilityCustomCircuit) => {
     setSelectedCircuit(circuit);
-    setShowTimer(true);
     setShowForm(false);
+    // Preload circuit config and go to setup
+    const circuitAny = circuit as any;
+    const obsIds = Array.isArray(circuitAny.standard_obstacles)
+      ? circuitAny.standard_obstacles
+      : Array.isArray(circuitAny.obstacles)
+      ? circuitAny.obstacles
+      : [];
+    
+    fetch("/api/agility/obstacles")
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.obstacles && obsIds.length > 0) {
+          const obstacleIds = obsIds.map((o: any) => o.obstacle_id || o);
+          const matched = j.obstacles.filter((o: AgilityObstacle) => obstacleIds.includes(o.id));
+          setSessionConfig({
+            sessionTypeId: circuit.session_type_id || null,
+            difficulty: circuit.difficulty_level || "principiante",
+            selectedObstacles: matched,
+            penaltySettings: {},
+            sessionTypeName: circuit.name,
+          });
+          setWizardStep("setup");
+        }
+      });
   };
 
   const visibleCircuits = [...circuits, ...customCircuits].filter((c) => c.is_visible !== false);
@@ -146,14 +175,14 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
       {dog && (
         <div className="grid grid-cols-2 gap-3">
           <button
-            onClick={() => { setShowTimer(true); setShowForm(false); setSelectedCircuit(null); }}
+            onClick={() => { setWizardStep("setup"); setShowForm(false); setSelectedCircuit(null); setSessionConfig(null); }}
             className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-gradient-to-r from-accent-500 to-accent-600 text-white font-bold text-sm active:scale-[0.98] transition-all shadow-lg shadow-accent-500/20"
           >
             <Play className="w-4 h-4 fill-current" />
             Iniciar Circuito
           </button>
           <button
-            onClick={() => { setShowForm(true); setShowTimer(false); setSelectedCircuit(null); }}
+            onClick={() => { setShowForm(true); setWizardStep(null); setSelectedCircuit(null); }}
             className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
@@ -270,13 +299,31 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
         </div>
       </div>
 
-      {/* Timer / Form inline */}
-      {showTimer && dog && (
-        <AgilityTimer
+      {/* Wizard */}
+      {wizardStep === "setup" && dog && (
+        <AgilitySetup
+          dog={dog}
+          onStart={(config) => { setSessionConfig(config); setWizardStep("run"); }}
+          onClose={() => { setWizardStep(null); setSessionConfig(null); }}
+          onQuickStart={(config) => { setSessionConfig(config); setWizardStep("run"); }}
+        />
+      )}
+      {wizardStep === "run" && dog && sessionConfig && (
+        <AgilityRun
           dog={dog}
           userId={userId}
-          onClose={() => { setShowTimer(false); setSelectedCircuit(null); }}
-          preloadedCircuit={selectedCircuit}
+          config={sessionConfig}
+          onFinish={(data) => { setRunData(data); setWizardStep("review"); }}
+          onClose={() => { setWizardStep("setup"); }}
+        />
+      )}
+      {wizardStep === "review" && dog && runData && (
+        <AgilityReview
+          dog={dog}
+          userId={userId}
+          runData={runData}
+          onSaved={handleSaved}
+          onClose={handleSaved}
         />
       )}
       {showForm && dog && (

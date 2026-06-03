@@ -7,9 +7,6 @@ import type { AgilityObstacle } from "@/types/database";
 interface Props {
   selected: AgilityObstacle[];
   onChange: (obstacles: AgilityObstacle[]) => void;
-  onFoulsChange?: (obstacleId: string, fouls: number) => void;
-  foulsMap?: Record<string, number>;
-  showFouls?: boolean;
 }
 
 const CATEGORY_CONFIG: Record<string, { label: string; emoji: string; color: string; lightBg: string; border: string }> = {
@@ -23,9 +20,6 @@ const CATEGORY_CONFIG: Record<string, { label: string; emoji: string; color: str
 export function AgilityObstaclePicker({
   selected,
   onChange,
-  onFoulsChange,
-  foulsMap = {},
-  showFouls = false,
 }: Props) {
   const [search, setSearch] = useState("");
   const [suggesting, setSuggesting] = useState(false);
@@ -85,18 +79,6 @@ export function AgilityObstaclePicker({
     }
   };
 
-  const addFoul = (obstacleId: string) => {
-    if (!onFoulsChange) return;
-    const current = foulsMap[obstacleId] ?? 0;
-    onFoulsChange(obstacleId, current + 1);
-  };
-
-  const removeFoul = (obstacleId: string) => {
-    if (!onFoulsChange) return;
-    const current = foulsMap[obstacleId] ?? 0;
-    onFoulsChange(obstacleId, Math.max(0, current - 1));
-  };
-
   const handleSuggest = async () => {
     if (!suggestName.trim()) return;
     setSaving(true);
@@ -146,11 +128,6 @@ export function AgilityObstaclePicker({
               className="inline-flex items-center gap-1 bg-primary-50 dark:bg-primary-950/40 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-300 text-xs font-semibold px-2.5 py-1 rounded-full"
             >
               {obs.name}
-              {showFouls && (
-                <span className="ml-1 bg-warning-100 dark:bg-warning-900 text-warning-700 dark:text-warning-300 px-1 rounded-full text-[10px]">
-                  {foulsMap[obs.id] ?? 0} faltas
-                </span>
-              )}
               <button
                 onClick={() => toggleObstacle(obs)}
                 className="ml-1 text-primary-400 hover:text-danger-500"
@@ -201,7 +178,6 @@ export function AgilityObstaclePicker({
                 <div className="grid grid-cols-2 gap-2">
                   {obstacles.map((obs) => {
                     const isSelected = selected.some((s) => s.id === obs.id);
-                    const fouls = foulsMap[obs.id] ?? 0;
                     return (
                       <button
                         key={obs.id}
@@ -224,26 +200,6 @@ export function AgilityObstaclePicker({
                         <span className={`font-semibold text-[11px] leading-tight ${isSelected ? config.color : "text-zinc-700 dark:text-zinc-300"}`}>
                           {obs.name}
                         </span>
-
-                        {showFouls && isSelected && (
-                          <div className="absolute -top-1.5 -right-1.5 flex items-center gap-1">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); removeFoul(obs.id); }}
-                              className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-600 flex items-center justify-center text-[10px] active:scale-95"
-                            >
-                              −
-                            </button>
-                            <span className="text-[10px] font-bold bg-warning-100 dark:bg-warning-900 text-warning-700 px-1.5 py-0.5 rounded-full">
-                              {fouls}
-                            </span>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); addFoul(obs.id); }}
-                              className="w-5 h-5 rounded-full bg-warning-500 text-white flex items-center justify-center text-[10px] active:scale-95 shadow-sm"
-                            >
-                              +
-                            </button>
-                          </div>
-                        )}
                       </button>
                     );
                   })}

@@ -217,9 +217,6 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
         <AgilityObstaclePicker
           selected={selectedObstacles}
           onChange={setSelectedObstacles}
-          onFoulsChange={handleFoulsChange}
-          foulsMap={foulsMap}
-          showFouls={true}
         />
       </div>
 
