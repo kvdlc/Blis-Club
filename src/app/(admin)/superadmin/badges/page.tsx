@@ -12,7 +12,7 @@ interface Badge {
   icon_url: string;
 }
 
-const BADGE_TYPES = ["academia", "tracker", "streak"];
+const BADGE_TYPES = ["academia", "tracker", "streak", "agility"];
 
 export default function BadgesPage() {
   const [badges, setBadges] = useState<Badge[]>([]);

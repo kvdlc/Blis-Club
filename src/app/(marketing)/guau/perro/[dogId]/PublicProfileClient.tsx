@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { PawPrint, MapPin, Phone, Calendar, Scale, AlertTriangle, Heart, MessageCircle, Shield, Clock, Info, Share2, ZoomIn } from "lucide-react";
+import { PawPrint, MapPin, Phone, Calendar, Scale, AlertTriangle, Heart, MessageCircle, Shield, Clock, Info, Share2, Zap, Trophy } from "lucide-react";
+import type { AgilitySession, AgilitySessionObstacle, AgilityObstacle } from "@/types/database";
 
 interface Dog {
   id: string;
@@ -25,6 +26,8 @@ interface Dog {
 interface Props {
   dog: Dog;
   shareUrl: string;
+  agilitySessions: AgilitySession[];
+  agilityObstacles: Record<string, (AgilitySessionObstacle & { obstacle: AgilityObstacle })[]>;
 }
 
 function getEdadTexto(meses: number): string {
@@ -87,8 +90,9 @@ function FloatingCircle({ size = 200, delay = 0, className }: { size?: number; d
   );
 }
 
-export default function PublicProfileClient({ dog, shareUrl }: Props) {
+export default function PublicProfileClient({ dog, shareUrl, agilitySessions, agilityObstacles }: Props) {
   const [loaded, setLoaded] = useState(false);
+  const [activeTab, setActiveTab] = useState<"info" | "agility">("info");
   useEffect(() => { setLoaded(true); }, []);
 
   const photoUrl = dog.poster_photo_url || dog.foto_url || dog.breed_image_url;
@@ -100,6 +104,17 @@ export default function PublicProfileClient({ dog, shareUrl }: Props) {
     `\n${shareUrl}`
   );
   const isLost = dog.is_lost;
+
+  const formatTime = (seconds: number | null) => {
+    if (seconds === null || seconds === undefined) return "—";
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+
+  const bestCircuit = agilitySessions.length > 0
+    ? Math.min(...agilitySessions.filter((s) => s.circuit_time_seconds).map((s) => s.circuit_time_seconds!))
+    : null;
 
   return (
     <div className="min-h-screen bg-app-gradient">
@@ -195,6 +210,95 @@ export default function PublicProfileClient({ dog, shareUrl }: Props) {
       {/* ═══════ CONTENT ═══════ */}
       <div className={`max-w-lg mx-auto px-4 -mt-4 space-y-4 relative z-10 pb-12 ${isLost ? "bg-red-50/30" : ""}`}>
 
+        {/* Tabs */}
+        {!isLost && (
+          <FadeIn delay={250}>
+            <div className="flex gap-2 mb-2">
+              <button
+                onClick={() => setActiveTab("info")}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === "info"
+                    ? "bg-primary-600 text-white shadow-md"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                }`}
+              >
+                Información
+              </button>
+              <button
+                onClick={() => setActiveTab("agility")}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  activeTab === "agility"
+                    ? "bg-accent-600 text-white shadow-md"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5" />
+                Agilidad
+              </button>
+            </div>
+          </FadeIn>
+        )}
+
+        {activeTab === "agility" && !isLost && (
+          <div className="space-y-3">
+            <FadeIn delay={300}>
+              <div className="card-elevated rounded-2xl p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 rounded-xl bg-accent-100 flex items-center justify-center">
+                    <Trophy className="w-4 h-4 text-accent-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Entrenamiento de Agilidad</h3>
+                    <p className="text-[10px] text-zinc-400">{agilitySessions.length} sesiones registradas</p>
+                  </div>
+                </div>
+
+                {bestCircuit && (
+                  <div className="bg-accent-50 dark:bg-accent-950/30 rounded-xl p-3 text-center mb-3">
+                    <p className="text-[10px] text-accent-600 font-semibold uppercase">Mejor tiempo</p>
+                    <p className="text-2xl font-black text-accent-700">{formatTime(bestCircuit)}s</p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  {agilitySessions.length === 0 && (
+                    <p className="text-xs text-zinc-400 text-center py-3">Sin sesiones aún</p>
+                  )}
+                  {agilitySessions.map((s) => {
+                    const obstacles = agilityObstacles[s.id] || [];
+                    return (
+                      <div key={s.id} className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-3 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">{s.activity_type}</p>
+                          {s.clean_run && (
+                            <span className="text-[10px] font-bold bg-secondary-100 text-secondary-700 px-2 py-0.5 rounded-full">Clean</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-[10px] text-zinc-400">
+                          <span>{s.fecha}</span>
+                          <span>{formatTime(s.raw_time_seconds ?? s.circuit_time_seconds)} bruto</span>
+                          <span>{s.fouls_total} faltas</span>
+                        </div>
+                        {obstacles.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {obstacles.map((o) => (
+                              <span key={o.id} className="text-[9px] bg-zinc-100 dark:bg-zinc-700 text-zinc-500 px-1.5 py-0.5 rounded-full">
+                                {o.obstacle?.name}{o.fouls_count > 0 ? ` (${o.fouls_count})` : ""}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        )}
+
+        {activeTab === "info" && (
+          <>
         {/* Lost details */}
         {isLost && (
           <div className="space-y-3">
@@ -353,6 +457,9 @@ export default function PublicProfileClient({ dog, shareUrl }: Props) {
         </FadeIn>
 
         {/* Footer */}
+          </>
+        )}
+
         <FadeIn delay={isLost ? 1000 : 600}>
           <div className="text-center pt-4 pb-6">
             <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border border-primary-100 dark:border-primary-800/30 shadow-sm">

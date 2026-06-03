@@ -22,5 +22,5 @@ export default async function AgilidadPage() {
     agilitySessions = (data as AgilitySession[] | null) ?? [];
   }
 
-  return <AgilidadClient sessions={agilitySessions} />;
+  return <AgilidadClient sessions={agilitySessions} dog={(dog as Dog | null) ?? null} userId={user.id} />;
 }

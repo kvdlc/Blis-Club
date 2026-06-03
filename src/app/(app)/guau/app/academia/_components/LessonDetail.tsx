@@ -64,8 +64,15 @@ export function LessonDetail({
     setPlaying(true);
   };
 
+  const handlePracticeAgility = () => {
+    router.push(`/guau/app/tracker/agilidad?lessonId=${lesson.id}`);
+  };
+
   // Determine button label
   const buttonLabel = isCompleted ? "Repetir lección" : "Comenzar lección";
+
+  // Is this an agility-related lesson?
+  const isAgilityLesson = stageSlug === "agilidad" || lesson.type === "practice_timer";
 
   // Materials from content_json or fallback
   const content = lesson.content_json as Record<string, unknown>;
@@ -363,7 +370,7 @@ export function LessonDetail({
       )}
 
       {/* Sticky Bottom Button */}
-      <div className="fixed bottom-24 left-4 right-4 z-50 md:hidden">
+      <div className="fixed bottom-24 left-4 right-4 z-50 md:hidden space-y-2">
         <button
           onClick={handlePlay}
           className={`w-full rounded-[1.25rem] text-white py-4 font-bold text-sm shadow-xl transition-transform active:scale-[0.97] flex items-center justify-center gap-2 ${
@@ -375,10 +382,19 @@ export function LessonDetail({
           <Play className="w-5 h-5 fill-current" />
           {buttonLabel}
         </button>
+        {isAgilityLesson && (
+          <button
+            onClick={handlePracticeAgility}
+            className="w-full rounded-[1.25rem] bg-accent-600 hover:bg-accent-700 text-white py-3 font-bold text-sm shadow-xl transition-transform active:scale-[0.97] flex items-center justify-center gap-2"
+          >
+            <Zap className="w-4 h-4" />
+            Practicar ahora
+          </button>
+        )}
       </div>
 
       {/* Desktop button (non-sticky) */}
-      <div className="hidden md:block">
+      <div className="hidden md:block space-y-2">
         <button
           onClick={handlePlay}
           className={`w-full rounded-[1.25rem] text-white py-4 font-bold text-sm shadow-lg transition-transform active:scale-[0.97] flex items-center justify-center gap-2 ${
@@ -390,6 +406,15 @@ export function LessonDetail({
           <Play className="w-5 h-5 fill-current" />
           {buttonLabel}
         </button>
+        {isAgilityLesson && (
+          <button
+            onClick={handlePracticeAgility}
+            className="w-full rounded-[1.25rem] bg-accent-600 hover:bg-accent-700 text-white py-3 font-bold text-sm shadow-lg transition-transform active:scale-[0.97] flex items-center justify-center gap-2"
+          >
+            <Zap className="w-4 h-4" />
+            Practicar ahora
+          </button>
+        )}
       </div>
     </div>
   );

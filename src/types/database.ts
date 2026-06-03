@@ -243,6 +243,68 @@ export interface AgilitySession {
   duration_min: number;
   circuit_time_seconds: number | null;
   notes: string | null;
+  session_type_id: string | null;
+  lesson_id: string | null;
+  difficulty_level: "principiante" | "intermedio" | "avanzado" | null;
+  fouls_total: number;
+  clean_run: boolean;
+  time_fault: boolean;
+  video_url: string | null;
+  obstacles_completed_count: number;
+  raw_time_seconds: number | null;
+  net_time_seconds: number | null;
+}
+
+export interface AgilitySessionType {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  standard_obstacle_count: number | null;
+  has_contact_zones: boolean;
+  has_time_limit: boolean;
+  created_at: string;
+}
+
+export interface AgilityFoulType {
+  id: string;
+  name: string;
+  slug: string;
+  default_time_penalty_seconds: number;
+  is_disqualification: boolean;
+  description: string | null;
+  created_at: string;
+}
+
+export interface AgilityObstacle {
+  id: string;
+  name: string;
+  category: string;
+  icon_name: string | null;
+  is_custom: boolean;
+  suggested_by_user_id: string | null;
+  approved_by_admin: boolean;
+  created_at: string;
+}
+
+export interface AgilitySessionObstacle {
+  id: string;
+  session_id: string;
+  obstacle_id: string;
+  used: boolean;
+  fouls_count: number;
+  notes: string | null;
+  created_at: string;
+  obstacle?: AgilityObstacle | null;
+}
+
+export interface AgilitySessionPenaltySetting {
+  id: string;
+  session_id: string;
+  foul_type_id: string;
+  penalty_seconds: number;
+  created_at: string;
+  foul_type?: AgilityFoulType | null;
 }
 
 export interface UserStreak {

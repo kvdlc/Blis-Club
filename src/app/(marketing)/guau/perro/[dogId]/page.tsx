@@ -2,6 +2,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { headers } from "next/headers";
 import PublicProfileClient from "./PublicProfileClient";
 import { PawPrint } from "lucide-react";
+import type { AgilitySession, AgilitySessionObstacle, AgilityObstacle } from "@/types/database";
 
 interface PublicDog {
   id: string;
@@ -43,6 +44,40 @@ async function getPublicDog(dogId: string): Promise<PublicDog | null> {
   };
 }
 
+async function getAgilitySessions(dogId: string): Promise<AgilitySession[]> {
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from("agility_sessions")
+    .select("*")
+    .eq("dog_id", dogId)
+    .order("fecha", { ascending: false })
+    .limit(10);
+  return (data as AgilitySession[] | null) ?? [];
+}
+
+async function getAgilitySessionObstacles(dogId: string): Promise<Record<string, (AgilitySessionObstacle & { obstacle: AgilityObstacle })[]>> {
+  const supabase = createServiceClient();
+  const { data: sessions } = await supabase
+    .from("agility_sessions")
+    .select("id")
+    .eq("dog_id", dogId)
+    .limit(10);
+
+  const map: Record<string, (AgilitySessionObstacle & { obstacle: AgilityObstacle })[]> = {};
+  if (!sessions) return map;
+
+  for (const s of sessions) {
+    const { data } = await supabase
+      .from("agility_session_obstacles")
+      .select("*, obstacle:obstacle_id(*)")
+      .eq("session_id", s.id);
+    if (data) {
+      map[s.id] = data as (AgilitySessionObstacle & { obstacle: AgilityObstacle })[];
+    }
+  }
+  return map;
+}
+
 export default async function PublicDogProfile({ params }: { params: Promise<{ dogId: string }> }) {
   const { dogId } = await params;
   const dog = await getPublicDog(dogId);
@@ -67,5 +102,8 @@ export default async function PublicDogProfile({ params }: { params: Promise<{ d
   const protocol = forwardedProto ? forwardedProto.split(",")[0] : "http";
   const shareUrl = `${protocol}://${host}/guau/perro/${dog.id}`;
 
-  return <PublicProfileClient dog={dog} shareUrl={shareUrl} />;
+  const agilitySessions = await getAgilitySessions(dogId);
+  const agilityObstacles = await getAgilitySessionObstacles(dogId);
+
+  return <PublicProfileClient dog={dog} shareUrl={shareUrl} agilitySessions={agilitySessions} agilityObstacles={agilityObstacles} />;
 }
