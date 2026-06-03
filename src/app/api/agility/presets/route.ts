@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const serverClient = await createClient();
+    const { data: { user } } = await serverClient.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const supabase = createServiceClient();
 
     const { searchParams } = new URL(request.url);
     const dogId = searchParams.get("dog_id");
@@ -50,9 +53,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const serverClient = await createClient();
+    const { data: { user } } = await serverClient.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const supabase = createServiceClient();
 
     const body = await request.json();
     const { dog_id, session_type_id, difficulty_level, obstacles } = body;
