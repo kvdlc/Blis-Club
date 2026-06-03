@@ -71,23 +71,35 @@ export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
+  const [loadError, setLoadError] = useState<string | null>(null);
+
   // Load session types and foul types
   useEffect(() => {
-    fetch("/api/agility/session-types")
-      .then((r) => r.json())
-      .then((j) => { if (j.sessionTypes) setSessionTypes(j.sessionTypes); });
+    Promise.all([
+      fetch("/api/agility/session-types").then((r) => r.json()),
+      fetch("/api/agility/fouls").then((r) => r.json()),
+    ])
+      .then(([typesRes, foulsRes]) => {
+        if (typesRes.sessionTypes && typesRes.sessionTypes.length > 0) {
+          setSessionTypes(typesRes.sessionTypes);
+        } else {
+          console.warn("No session types found");
+        }
 
-    fetch("/api/agility/fouls")
-      .then((r) => r.json())
-      .then((j) => {
-        if (j.foulTypes) {
-          setFoulTypes(j.foulTypes);
+        if (foulsRes.foulTypes && foulsRes.foulTypes.length > 0) {
+          setFoulTypes(foulsRes.foulTypes);
           const defaults: Record<string, number> = {};
-          j.foulTypes.forEach((f: AgilityFoulType) => {
+          foulsRes.foulTypes.forEach((f: AgilityFoulType) => {
             defaults[f.id] = f.default_time_penalty_seconds;
           });
           setPenaltySettings(defaults);
+        } else {
+          console.warn("No foul types found");
         }
+      })
+      .catch((err) => {
+        console.error("Error loading agility config:", err);
+        setLoadError("Error cargando configuración. Intenta recargar la página.");
       });
   }, []);
 
@@ -464,25 +476,35 @@ export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) 
             </button>
           </div>
 
+          {loadError && (
+            <div className="p-3 rounded-xl bg-danger-50 dark:bg-danger-950/30 border border-danger-200 dark:border-danger-800 text-danger-700 dark:text-danger-300 text-xs">
+              {loadError}
+            </div>
+          )}
+
           {/* Session Type */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-zinc-500">Tipo de sesión</label>
-            <div className="grid grid-cols-2 gap-2">
-              {sessionTypes.map((st) => (
-                <button
-                  key={st.id}
-                  onClick={() => setSessionTypeId(st.id)}
-                  className={`p-3 rounded-xl border-2 text-left text-xs transition-all ${
-                    sessionTypeId === st.id
-                      ? "border-accent-400 bg-accent-50 dark:bg-accent-950/40"
-                      : "border-zinc-100 dark:border-zinc-800"
-                  }`}
-                >
-                  <span className="font-bold text-zinc-700 dark:text-zinc-300">{st.name}</span>
-                  <p className="text-[10px] text-zinc-400 mt-0.5 line-clamp-2">{st.description}</p>
-                </button>
-              ))}
-            </div>
+            {sessionTypes.length === 0 ? (
+              <p className="text-xs text-zinc-400 py-2">Cargando tipos de sesión...</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {sessionTypes.map((st) => (
+                  <button
+                    key={st.id}
+                    onClick={() => setSessionTypeId(st.id)}
+                    className={`p-3 rounded-xl border-2 text-left text-xs transition-all ${
+                      sessionTypeId === st.id
+                        ? "border-accent-400 bg-accent-50 dark:bg-accent-950/40"
+                        : "border-zinc-100 dark:border-zinc-800"
+                    }`}
+                  >
+                    <span className="font-bold text-zinc-700 dark:text-zinc-300">{st.name}</span>
+                    <p className="text-[10px] text-zinc-400 mt-0.5 line-clamp-2">{st.description}</p>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Difficulty */}
@@ -516,24 +538,28 @@ export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) 
             </button>
             {showPenaltyConfig && (
               <div className="space-y-2 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
-                {foulTypes.map((ft) => (
-                  <div key={ft.id} className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-600 dark:text-zinc-400">{ft.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-zinc-400">+</span>
-                      <input
-                        type="number"
-                        value={penaltySettings[ft.id] ?? ft.default_time_penalty_seconds}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value) || 0;
-                          setPenaltySettings((prev) => ({ ...prev, [ft.id]: val }));
-                        }}
-                        className="w-12 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-2 py-1 text-center text-xs"
-                      />
-                      <span className="text-zinc-400">seg</span>
+                {foulTypes.length === 0 ? (
+                  <p className="text-xs text-zinc-400">Cargando tipos de faltas...</p>
+                ) : (
+                  foulTypes.map((ft) => (
+                    <div key={ft.id} className="flex items-center justify-between text-xs">
+                      <span className="text-zinc-600 dark:text-zinc-400">{ft.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-zinc-400">+</span>
+                        <input
+                          type="number"
+                          value={penaltySettings[ft.id] ?? ft.default_time_penalty_seconds}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value) || 0;
+                            setPenaltySettings((prev) => ({ ...prev, [ft.id]: val }));
+                          }}
+                          className="w-12 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-2 py-1 text-center text-xs"
+                        />
+                        <span className="text-zinc-400">seg</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             )}
           </div>

@@ -34,6 +34,7 @@ export function AgilityObstaclePicker({
   const [suggestIcon, setSuggestIcon] = useState("Zap");
   const [allObstacles, setAllObstacles] = useState<AgilityObstacle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Load obstacles immediately on mount
@@ -41,12 +42,19 @@ export function AgilityObstaclePicker({
     fetch("/api/agility/obstacles")
       .then((r) => r.json())
       .then((json) => {
-        if (json.obstacles) {
+        if (json.obstacles && json.obstacles.length > 0) {
           setAllObstacles(json.obstacles);
+          setLoadError(null);
+        } else {
+          setLoadError("No se encontraron obstáculos. Verifica la conexión o recarga la página.");
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Error loading obstacles:", err);
+        setLoadError("Error cargando obstáculos. Intenta recargar la página.");
+        setLoading(false);
+      });
   }, []);
 
   const filtered = useMemo(() => {
@@ -169,8 +177,15 @@ export function AgilityObstaclePicker({
         </div>
       )}
 
+      {/* Error state */}
+      {loadError && !loading && (
+        <div className="p-3 rounded-xl bg-danger-50 dark:bg-danger-950/30 border border-danger-200 dark:border-danger-800 text-danger-700 dark:text-danger-300 text-xs text-center">
+          {loadError}
+        </div>
+      )}
+
       {/* Results */}
-      {!loading && (
+      {!loading && !loadError && (
         <div className="max-h-72 overflow-y-auto space-y-4 pr-1">
           {Object.entries(grouped).map(([category, obstacles]) => (
             <div key={category}>
@@ -234,7 +249,7 @@ export function AgilityObstaclePicker({
               </div>
             </div>
           ))}
-          {filtered.length === 0 && (
+          {filtered.length === 0 && search && (
             <p className="text-xs text-zinc-400 text-center py-3">
               No encontramos "{search}". ¿Quieres sugerirlo?
             </p>
