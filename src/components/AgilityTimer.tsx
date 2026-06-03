@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { AgilityObstaclePicker } from "@/components/AgilityObstaclePicker";
 import { PhotoCollageEditor } from "@/components/PhotoCollageEditor";
 import { toPng } from "html-to-image";
-import type { Dog, AgilityObstacle, AgilityFoulType, AgilitySessionType } from "@/types/database";
+import type { Dog, AgilityObstacle, AgilityFoulType, AgilitySessionType, AgilityCircuit, AgilityCustomCircuit } from "@/types/database";
 import {
   Play, Square, RotateCcw, Settings, Camera, X, Check, Zap,
   ChevronLeft, Trophy, Share2, Download, ImagePlus, Video, Clapperboard
@@ -30,11 +30,12 @@ interface Props {
   dog: Dog;
   userId: string;
   onClose: () => void;
+  preloadedCircuit?: AgilityCircuit | AgilityCustomCircuit | null;
 }
 
 const STORAGE_KEY = "blis_active_agility";
 
-export function AgilityTimer({ dog, userId, onClose }: Props) {
+export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const lessonId = searchParams.get("lessonId");
@@ -89,6 +90,38 @@ export function AgilityTimer({ dog, userId, onClose }: Props) {
         }
       });
   }, []);
+
+  // Preload circuit if provided
+  useEffect(() => {
+    if (preloadedCircuit) {
+      // Set session type
+      if (preloadedCircuit.session_type_id) {
+        setSessionTypeId(preloadedCircuit.session_type_id);
+      }
+      // Set difficulty
+      if (preloadedCircuit.difficulty_level) {
+        setDifficulty(preloadedCircuit.difficulty_level);
+      }
+      // Load obstacles for this circuit
+      const circuitAny = preloadedCircuit as any;
+      const obsIds = Array.isArray(circuitAny.standard_obstacles)
+        ? circuitAny.standard_obstacles
+        : Array.isArray(circuitAny.obstacles)
+        ? circuitAny.obstacles
+        : [];
+      if (obsIds.length > 0) {
+        fetch("/api/agility/obstacles")
+          .then((r) => r.json())
+          .then((j) => {
+            if (j.obstacles) {
+              const obstacleIds = obsIds.map((o: any) => o.obstacle_id || o);
+              const matched = j.obstacles.filter((o: AgilityObstacle) => obstacleIds.includes(o.id));
+              setSelectedObstacles(matched);
+            }
+          });
+      }
+    }
+  }, [preloadedCircuit]);
 
   // Restore from localStorage
   useEffect(() => {

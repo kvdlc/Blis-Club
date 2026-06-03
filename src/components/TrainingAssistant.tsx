@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { Lightbulb, ChevronRight } from "lucide-react";
 import type { AgilitySession, Dog } from "@/types/database";
-import Link from "next/link";
 
 interface Props {
   sessions: AgilitySession[];
@@ -66,7 +65,6 @@ const SUGGESTIONS: Array<{
   {
     id: "streak-3",
     condition: (sessions) => {
-      // Simple check: at least 3 sessions in last 7 days
       const recent = sessions.filter((s) => {
         const daysSince = (Date.now() - new Date(s.fecha).getTime()) / (1000 * 60 * 60 * 24);
         return daysSince <= 7;
@@ -99,7 +97,7 @@ const SUGGESTIONS: Array<{
     },
     title: "Varía el entrenamiento",
     subtitle: "Usas pocos obstáculos. Agrega el túnel, la mesa o el balancín.",
-    action: "Iniciar sesión",
+    action: "Iniciar entrenamiento",
     href: "/guau/app/tracker/agilidad",
   },
   {
@@ -147,13 +145,12 @@ const SUGGESTIONS: Array<{
       ),
     title: "Prueba el túnel",
     subtitle: "Nunca has registrado un túnel. A muchos perros les encanta.",
-    action: "Iniciar sesión",
+    action: "Iniciar entrenamiento",
     href: "/guau/app/tracker/agilidad",
   },
   {
     id: "contact-faults",
     condition: (sessions) => {
-      // Rough heuristic: if activity_type mentions contact obstacles and has fouls
       const contactSessions = sessions.filter(
         (s) =>
           (s.activity_type?.toLowerCase().includes("contacto") ||
@@ -170,7 +167,6 @@ const SUGGESTIONS: Array<{
   {
     id: "slalom-slow",
     condition: (sessions) => {
-      // Heuristic: if session title mentions slalom and raw time > 15s for simple courses
       const slalomSessions = sessions.filter(
         (s) =>
           s.activity_type?.toLowerCase().includes("slalom") &&
@@ -204,7 +200,7 @@ const SUGGESTIONS: Array<{
       const last5 = withTime.slice(0, 5);
       const times = last5.map((s) => s.net_time_seconds ?? 0);
       const maxDiff = Math.max(...times) - Math.min(...times);
-      return maxDiff < 3; // Less than 3 seconds variation = plateau
+      return maxDiff < 3;
     },
     title: "Rompe la meseta",
     subtitle: "5 sesiones sin mejorar tu récord. Prueba un tipo de sesión diferente.",
@@ -223,7 +219,6 @@ const SUGGESTIONS: Array<{
   {
     id: "same-sequence",
     condition: (sessions) => {
-      // Heuristic: if user always uses same activity_type
       const types = sessions.map((s) => s.activity_type);
       const unique = [...new Set(types)];
       return sessions.length >= 5 && unique.length === 1;
@@ -273,7 +268,7 @@ const SUGGESTIONS: Array<{
       sessions.length >= 3 && sessions.every((s) => (s.obstacles_completed_count ?? 0) < 8),
     title: "Aumenta obstáculos",
     subtitle: "Usas pocos obstáculos por sesión. Prueba agregar 1 o 2 más cada vez.",
-    action: "Iniciar sesión",
+    action: "Iniciar entrenamiento",
     href: "/guau/app/tracker/agilidad",
   },
   {
@@ -288,9 +283,7 @@ const SUGGESTIONS: Array<{
 
 export function TrainingAssistant({ sessions, dog }: Props) {
   const activeSuggestions = useMemo(() => {
-    // Sort: most specific/urgent first (more conditions matched = higher priority)
     const matched = SUGGESTIONS.filter((s) => s.condition(sessions, dog));
-    // Limit to top 2
     return matched.slice(0, 2);
   }, [sessions, dog]);
 
@@ -300,25 +293,23 @@ export function TrainingAssistant({ sessions, dog }: Props) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Lightbulb className="w-4 h-4 text-warning-500" />
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Entrenamiento asistido</h3>
+        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Sugerencias de entrenamiento</h3>
       </div>
       {activeSuggestions.map((suggestion) => (
-        <div
+        <a
           key={suggestion.id}
-          className="card-soft rounded-[1.25rem] p-4 space-y-2 bg-warning-50/40 dark:bg-warning-950/20 border border-warning-100 dark:border-warning-900/40"
+          href={suggestion.href || "#"}
+          className="card-soft rounded-[1.25rem] p-4 space-y-2 bg-warning-50/40 dark:bg-warning-950/20 border border-warning-100 dark:border-warning-900/40 block active:scale-[0.98] transition-transform"
         >
           <p className="text-sm font-bold text-warning-800 dark:text-warning-300">{suggestion.title}</p>
           <p className="text-xs text-warning-600 dark:text-warning-400 leading-relaxed">{suggestion.subtitle}</p>
           {suggestion.href && (
-            <Link
-              href={suggestion.href}
-              className="inline-flex items-center gap-1 text-xs font-bold text-warning-700 dark:text-warning-300 hover:underline"
-            >
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-warning-700 dark:text-warning-300">
               {suggestion.action}
               <ChevronRight className="w-3 h-3" />
-            </Link>
+            </span>
           )}
-        </div>
+        </a>
       ))}
     </div>
   );

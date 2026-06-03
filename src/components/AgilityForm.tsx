@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { AgilityObstaclePicker } from "@/components/AgilityObstaclePicker";
 import type { Dog, AgilityObstacle, AgilitySessionType } from "@/types/database";
-import { X, Save, Calendar, Clock } from "lucide-react";
+import { X, Save, Calendar, Clock, Bookmark, Zap } from "lucide-react";
 
 interface Props {
   dog: Dog;
@@ -26,6 +26,8 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
   const [foulsMap, setFoulsMap] = useState<Record<string, number>>({});
   const [sessionTypes, setSessionTypes] = useState<AgilitySessionType[]>([]);
   const [saving, setSaving] = useState(false);
+  const [saveAsCircuit, setSaveAsCircuit] = useState(false);
+  const [circuitName, setCircuitName] = useState("");
 
   useEffect(() => {
     fetch("/api/agility/session-types")
@@ -81,6 +83,25 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
       });
       const json = await res.json();
       if (json.success) {
+        // Save as custom circuit if requested
+        if (saveAsCircuit && circuitName.trim()) {
+          try {
+            await fetch("/api/agility/circuits", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: circuitName.trim(),
+                description: notes || null,
+                session_type_id: sessionTypeId,
+                difficulty_level: difficulty,
+                dog_id: dog.id,
+                obstacles: selectedObstacles.map((o, i) => ({ obstacle_id: o.id, order: i + 1 })),
+              }),
+            });
+          } catch (e) {
+            console.error("Save circuit error:", e);
+          }
+        }
         // Check for new badges
         try {
           await fetch("/api/agility/check-badges", {
@@ -102,7 +123,7 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
   return (
     <div className="card-soft rounded-[1.5rem] p-5 space-y-5 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-700">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Registrar sesión manual</h3>
+        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Circuito personalizado</h3>
         <button onClick={onClose} className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
           <X className="w-4 h-4 text-zinc-500" />
         </button>
@@ -214,12 +235,34 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
         />
       </div>
 
+      {/* Save as reusable circuit */}
+      <div className="space-y-2">
+        <button
+          onClick={() => setSaveAsCircuit(!saveAsCircuit)}
+          className={`flex items-center gap-2 text-xs font-semibold transition-colors ${
+            saveAsCircuit ? "text-accent-600" : "text-zinc-500"
+          }`}
+        >
+          <Bookmark className={`w-3.5 h-3.5 ${saveAsCircuit ? "fill-current" : ""}`} />
+          {saveAsCircuit ? "Guardar como circuito reutilizable" : "¿Guardar este circuito para reutilizarlo?"}
+        </button>
+        {saveAsCircuit && (
+          <input
+            type="text"
+            value={circuitName}
+            onChange={(e) => setCircuitName(e.target.value)}
+            placeholder="Ej: Mi rutina de mañanas"
+            className="w-full rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+          />
+        )}
+      </div>
+
       <button
         onClick={handleSubmit}
         disabled={saving || selectedObstacles.length === 0}
         className="w-full bg-accent-600 text-white rounded-2xl py-4 font-bold text-sm disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
       >
-        <Save className="w-4 h-4" />
+        <Zap className="w-4 h-4" />
         {saving ? "Guardando..." : "Guardar sesión"}
       </button>
     </div>

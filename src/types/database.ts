@@ -519,3 +519,32 @@ export interface UserApp {
   current_period_end: string | null;
   created_at: string;
 }
+
+export interface AgilityCircuit {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  session_type_id: string | null;
+  difficulty_level: "principiante" | "intermedio" | "avanzado" | null;
+  standard_obstacles: Array<{ obstacle_id: string; order: number }>;
+  is_active: boolean;
+  is_visible: boolean;
+  application_id: string | null;
+  created_at: string;
+}
+
+export interface AgilityCustomCircuit {
+  id: string;
+  user_id: string;
+  dog_id: string | null;
+  name: string;
+  description: string | null;
+  session_type_id: string | null;
+  difficulty_level: "principiante" | "intermedio" | "avanzado" | null;
+  obstacles: Array<{ obstacle_id: string; order: number }>;
+  is_active: boolean;
+  is_visible: boolean;
+  suggested_to_admin: boolean;
+  created_at: string;
+}

@@ -6,10 +6,11 @@ import { AgilityTimer } from "@/components/AgilityTimer";
 import { AgilityForm } from "@/components/AgilityForm";
 import { AgilityChallenges } from "@/components/AgilityChallenges";
 import { TrainingAssistant } from "@/components/TrainingAssistant";
-import type { AgilitySession, Dog, AgilitySessionType, AgilitySessionObstacle, AgilityObstacle } from "@/types/database";
+import type { AgilitySession, Dog, AgilitySessionType, AgilitySessionObstacle, AgilityObstacle, AgilityCircuit, AgilityCustomCircuit } from "@/types/database";
 import {
   ArrowLeft, Zap, Play, Plus, Trophy, Clock, Target,
-  Flame, Calendar, Trash2, TrendingUp
+  Flame, Calendar, Trash2, TrendingUp, Eye, EyeOff,
+  ChevronDown, ChevronUp, Star
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
@@ -29,11 +30,21 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
   const [sessionObstacles, setSessionObstacles] = useState<Record<string, (AgilitySessionObstacle & { obstacle: AgilityObstacle })[]>>({});
 
-  // Load session types
+  // Circuits
+  const [circuits, setCircuits] = useState<AgilityCircuit[]>([]);
+  const [customCircuits, setCustomCircuits] = useState<AgilityCustomCircuit[]>([]);
+  const [showManageCircuits, setShowManageCircuits] = useState(false);
+  const [selectedCircuit, setSelectedCircuit] = useState<AgilityCircuit | AgilityCustomCircuit | null>(null);
+  const [showSessions, setShowSessions] = useState(false);
+
+  // Load circuits
   useMemo(() => {
-    fetch("/api/agility/session-types")
+    fetch("/api/agility/circuits")
       .then((r) => r.json())
-      .then((j) => { if (j.sessionTypes) setSessionTypes(j.sessionTypes); });
+      .then((j) => {
+        if (j.circuits) setCircuits(j.circuits);
+        if (j.customCircuits) setCustomCircuits(j.customCircuits);
+      });
   }, []);
 
   const filteredSessions = useMemo(() => {
@@ -55,20 +66,17 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
 
   const totalSessions = sessionList.length;
   const cleanRuns = sessionList.filter((s) => s.clean_run).length;
-  const totalObstacles = sessionList.reduce((sum, s) => sum + (s.obstacles_completed_count ?? 0), 0);
 
   const formatTime = (seconds: number | null) => {
     if (seconds === null || seconds === undefined) return "—";
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
-    const ms = Math.floor((seconds % 1) * 100);
-    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(ms).padStart(2, "0")}`;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
   const handleSaved = () => {
     setShowTimer(false);
     setShowForm(false);
-    // Refresh sessions
     fetch(`/api/agility/sessions?dog_id=${dog?.id}`)
       .then((r) => r.json())
       .then((j) => { if (j.sessions) setSessionList(j.sessions); });
@@ -94,6 +102,36 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
     setSessionList((prev) => prev.filter((s) => s.id !== sessionId));
   };
 
+  const toggleCircuitVisibility = async (circuitId: string, isCustom: boolean, currentVisible: boolean) => {
+    const endpoint = isCustom ? "/api/agility/circuits" : "/api/admin/circuits";
+    try {
+      await fetch(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: circuitId, is_visible: !currentVisible }),
+      });
+      if (isCustom) {
+        setCustomCircuits((prev) =>
+          prev.map((c) => (c.id === circuitId ? { ...c, is_visible: !currentVisible } : c))
+        );
+      } else {
+        setCircuits((prev) =>
+          prev.map((c) => (c.id === circuitId ? { ...c, is_visible: !currentVisible } : c))
+        );
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const startCircuit = (circuit: AgilityCircuit | AgilityCustomCircuit) => {
+    setSelectedCircuit(circuit);
+    setShowTimer(true);
+    setShowForm(false);
+  };
+
+  const visibleCircuits = [...circuits, ...customCircuits].filter((c) => c.is_visible !== false);
+
   return (
     <div className="space-y-5 pb-8">
       {/* Header */}
@@ -103,6 +141,94 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
         </button>
         <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Agilidad</h1>
       </div>
+
+      {/* 🎯 BOTONES PRINCIPALES — ARRIBA */}
+      {dog && (
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => { setShowTimer(true); setShowForm(false); setSelectedCircuit(null); }}
+            className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-gradient-to-r from-accent-500 to-accent-600 text-white font-bold text-sm active:scale-[0.98] transition-all shadow-lg shadow-accent-500/20"
+          >
+            <Play className="w-4 h-4 fill-current" />
+            Iniciar Circuito
+          </button>
+          <button
+            onClick={() => { setShowForm(true); setShowTimer(false); setSelectedCircuit(null); }}
+            className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm active:scale-[0.98] transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            Circuito Personalizado
+          </button>
+        </div>
+      )}
+
+      {/* 🏃 CIRCUITOS RÁPIDOS */}
+      {visibleCircuits.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Circuitos rápidos</h3>
+            <button
+              onClick={() => setShowManageCircuits(!showManageCircuits)}
+              className="text-[10px] font-semibold text-zinc-500 flex items-center gap-1"
+            >
+              <Eye className="w-3 h-3" />
+              Gestionar
+            </button>
+          </div>
+
+          {!showManageCircuits ? (
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x">
+              {visibleCircuits.map((circuit) => {
+                const obstacleCount = Array.isArray((circuit as any).standard_obstacles) 
+                  ? (circuit as any).standard_obstacles.length 
+                  : (Array.isArray((circuit as any).obstacles) ? (circuit as any).obstacles.length : 0);
+                const isCustom = "user_id" in circuit;
+                return (
+                  <button
+                    key={circuit.id}
+                    onClick={() => startCircuit(circuit)}
+                    className="snap-start flex flex-col items-center gap-2 p-4 rounded-[1.25rem] bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 min-w-[140px] active:scale-[0.97] transition-all hover:border-accent-300"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-accent-100 dark:bg-accent-900 flex items-center justify-center">
+                      {isCustom ? <Star className="w-5 h-5 text-accent-600" /> : <Zap className="w-5 h-5 text-accent-600" />}
+                    </div>
+                    <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 text-center leading-tight">{circuit.name}</span>
+                    <span className="text-[10px] text-zinc-400">{obstacleCount} obstáculos</span>
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                      circuit.difficulty_level === "principiante" ? "bg-secondary-100 text-secondary-700" :
+                      circuit.difficulty_level === "intermedio" ? "bg-warning-100 text-warning-700" :
+                      "bg-danger-100 text-danger-700"
+                    }`}>
+                      {circuit.difficulty_level || "General"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs text-zinc-500">Toca el ojo para ocultar/mostrar circuitos</p>
+              {[...circuits, ...customCircuits].map((circuit) => {
+                const isCustom = "user_id" in circuit;
+                return (
+                  <div key={circuit.id} className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                    <div className="flex items-center gap-2">
+                      {isCustom ? <Star className="w-4 h-4 text-accent-500" /> : <Zap className="w-4 h-4 text-accent-500" />}
+                      <span className="text-xs font-semibold">{circuit.name}</span>
+                    </div>
+                    <button
+                      onClick={() => toggleCircuitVisibility(circuit.id, isCustom, circuit.is_visible ?? true)}
+                      className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center"
+                    >
+                      {(circuit.is_visible ?? true) ? <Eye className="w-3.5 h-3.5 text-zinc-500" /> : <EyeOff className="w-3.5 h-3.5 text-zinc-400" />}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 gap-3">
@@ -144,7 +270,25 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
         </div>
       </div>
 
-      {/* Evolution Chart */}
+      {/* Timer / Form inline */}
+      {showTimer && dog && (
+        <AgilityTimer
+          dog={dog}
+          userId={userId}
+          onClose={() => { setShowTimer(false); setSelectedCircuit(null); }}
+          preloadedCircuit={selectedCircuit}
+        />
+      )}
+      {showForm && dog && (
+        <AgilityForm
+          dog={dog}
+          userId={userId}
+          onClose={() => setShowForm(false)}
+          onSaved={handleSaved}
+        />
+      )}
+
+      {/* Evolution Chart — only if data exists */}
       {filteredSessions.length > 1 && (
         <div className="card-soft rounded-[1.5rem] p-5 space-y-3">
           <div className="flex items-center gap-2 mb-2">
@@ -178,161 +322,132 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
       )}
 
       {/* Challenges */}
-      <AgilityChallenges />
+      <AgilityChallenges sessions={sessionList} />
 
       {/* Training Assistant */}
       {dog && <TrainingAssistant sessions={sessionList} dog={dog} />}
 
-      {/* Action buttons */}
-      {dog && (
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => { setShowTimer(true); setShowForm(false); }}
-            className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-gradient-to-r from-accent-500 to-accent-600 text-white font-bold text-sm active:scale-[0.98] transition-all shadow-lg shadow-accent-500/20"
-          >
-            <Play className="w-4 h-4 fill-current" />
-            Iniciar Circuito
-          </button>
-          <button
-            onClick={() => { setShowForm(true); setShowTimer(false); }}
-            className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm active:scale-[0.98] transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            Registrar Manual
-          </button>
-        </div>
-      )}
-
-      {/* Timer / Form */}
-      {showTimer && dog && (
-        <AgilityTimer dog={dog} userId={userId} onClose={() => setShowTimer(false)} />
-      )}
-      {showForm && dog && (
-        <AgilityForm dog={dog} userId={userId} onClose={() => setShowForm(false)} onSaved={handleSaved} />
-      )}
-
-      {/* Filter by session type */}
-      {sessionTypes.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
-          <button
-            onClick={() => setFilterType(null)}
-            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-              filterType === null
-                ? "bg-accent-600 text-white"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-            }`}
-          >
-            Todas
-          </button>
-          {sessionTypes.map((st) => (
-            <button
-              key={st.id}
-              onClick={() => setFilterType(st.id)}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-                filterType === st.id
-                  ? "bg-accent-600 text-white"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-              }`}
-            >
-              {st.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Sessions list */}
+      {/* Sessions list — collapsible */}
       <div className="space-y-3">
-        {filteredSessions.length === 0 && (
-          <p className="text-center text-zinc-400 py-8 text-sm">Sin sesiones de agilidad registradas.</p>
-        )}
+        <button
+          onClick={() => setShowSessions(!showSessions)}
+          className="w-full flex items-center justify-between p-4 rounded-[1.25rem] bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800"
+        >
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-zinc-400" />
+            <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Sesiones anteriores</span>
+            <span className="text-xs text-zinc-400">({filteredSessions.length})</span>
+          </div>
+          {showSessions ? <ChevronUp className="w-4 h-4 text-zinc-400" /> : <ChevronDown className="w-4 h-4 text-zinc-400" />}
+        </button>
 
-        {filteredSessions.map((s) => {
-          const isBest = s.circuit_time_seconds === bestCircuit && bestCircuit !== null;
-          const isExpanded = expandedSession === s.id;
-
-          return (
-            <div key={s.id} className="card-soft rounded-[1.25rem] p-4 space-y-3">
-              {/* Header row */}
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{s.activity_type}</p>
-                    {s.clean_run && (
-                      <span className="text-[10px] font-bold bg-secondary-100 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-300 px-2 py-0.5 rounded-full">
-                        Clean Run
-                      </span>
-                    )}
-                    {isBest && (
-                      <span className="text-[10px] font-bold bg-accent-100 dark:bg-accent-900 text-accent-700 dark:text-accent-300 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Trophy className="w-3 h-3" /> Récord
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-zinc-400 mt-1 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" /> {s.fecha}
-                    <span className="mx-1">·</span>
-                    <span className="capitalize">{s.difficulty_level}</span>
-                  </p>
-                </div>
+        {showSessions && (
+          <div className="space-y-3">
+            {/* Filter by session type */}
+            {sessionTypes.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
                 <button
-                  onClick={() => deleteSession(s.id)}
-                  className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-danger-500 transition-colors"
+                  onClick={() => setFilterType(null)}
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    filterType === null ? "bg-accent-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                  }`}
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  Todas
                 </button>
+                {sessionTypes.map((st) => (
+                  <button
+                    key={st.id}
+                    onClick={() => setFilterType(st.id)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                      filterType === st.id ? "bg-accent-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                    }`}
+                  >
+                    {st.name}
+                  </button>
+                ))}
               </div>
+            )}
 
-              {/* Times */}
-              <div className="grid grid-cols-3 gap-2">
-                <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 text-center">
-                  <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{formatTime(s.raw_time_seconds ?? s.circuit_time_seconds)}</p>
-                  <p className="text-[10px] text-zinc-400">Bruto</p>
-                </div>
-                <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 text-center">
-                  <p className="text-sm font-bold text-accent-600">{formatTime(s.net_time_seconds ?? s.circuit_time_seconds)}</p>
-                  <p className="text-[10px] text-zinc-400">Neto</p>
-                </div>
-                <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 text-center">
-                  <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{s.fouls_total}</p>
-                  <p className="text-[10px] text-zinc-400">Faltas</p>
-                </div>
-              </div>
+            {filteredSessions.length === 0 && (
+              <p className="text-center text-zinc-400 py-8 text-sm">Sin sesiones de agilidad registradas.</p>
+            )}
 
-              {/* Photo collage */}
-              {s.video_url && (
-                <div className="flex gap-1.5">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
-                    <img src={s.video_url} alt="" className="w-full h-full object-cover" />
-                  </div>
-                </div>
-              )}
-
-              {/* Expand details */}
-              <button
-                onClick={() => loadSessionObstacles(s.id)}
-                className="w-full text-xs font-semibold text-zinc-500 hover:text-accent-600 py-1 transition-colors"
-              >
-                {isExpanded ? "Ocultar detalles" : "Ver obstáculos"}
-              </button>
-
-              {isExpanded && sessionObstacles[s.id] && (
-                <div className="space-y-1.5 pt-1 border-t border-zinc-100 dark:border-zinc-800">
-                  {sessionObstacles[s.id].map((obs) => (
-                    <div key={obs.id} className="flex items-center justify-between text-xs">
-                      <span className="text-zinc-600 dark:text-zinc-400">{obs.obstacle?.name}</span>
-                      {obs.fouls_count > 0 && (
-                        <span className="text-warning-600 font-bold">{obs.fouls_count} faltas</span>
-                      )}
+            {filteredSessions.map((s) => {
+              const isBest = s.circuit_time_seconds === bestCircuit && bestCircuit !== null;
+              const isExpanded = expandedSession === s.id;
+              return (
+                <div key={s.id} className="card-soft rounded-[1.25rem] p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{s.activity_type}</p>
+                        {s.clean_run && (
+                          <span className="text-[10px] font-bold bg-secondary-100 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-300 px-2 py-0.5 rounded-full">Clean Run</span>
+                        )}
+                        {isBest && (
+                          <span className="text-[10px] font-bold bg-accent-100 dark:bg-accent-900 text-accent-700 dark:text-accent-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Trophy className="w-3 h-3" /> Récord
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-zinc-400 mt-1 flex items-center gap-1">
+                        <Calendar className="w-3 h-3" /> {s.fecha}
+                        <span className="mx-1">·</span>
+                        <span className="capitalize">{s.difficulty_level}</span>
+                      </p>
                     </div>
-                  ))}
-                  {s.notes && (
-                    <p className="text-[10px] text-zinc-400 mt-2">{s.notes}</p>
+                    <button
+                      onClick={() => deleteSession(s.id)}
+                      className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-danger-500 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 text-center">
+                      <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{formatTime(s.raw_time_seconds ?? s.circuit_time_seconds)}</p>
+                      <p className="text-[10px] text-zinc-400">Bruto</p>
+                    </div>
+                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 text-center">
+                      <p className="text-sm font-bold text-accent-600">{formatTime(s.net_time_seconds ?? s.circuit_time_seconds)}</p>
+                      <p className="text-[10px] text-zinc-400">Neto</p>
+                    </div>
+                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 text-center">
+                      <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{s.fouls_total}</p>
+                      <p className="text-[10px] text-zinc-400">Faltas</p>
+                    </div>
+                  </div>
+
+                  {s.video_url && (
+                    <div className="rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-black">
+                      <video src={s.video_url} controls className="w-full max-h-32" />
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => loadSessionObstacles(s.id)}
+                    className="w-full text-xs font-semibold text-zinc-500 hover:text-accent-600 py-1 transition-colors"
+                  >
+                    {isExpanded ? "Ocultar detalles" : "Ver obstáculos"}
+                  </button>
+
+                  {isExpanded && sessionObstacles[s.id] && (
+                    <div className="space-y-1.5 pt-1 border-t border-zinc-100 dark:border-zinc-800">
+                      {sessionObstacles[s.id].map((obs) => (
+                        <div key={obs.id} className="flex items-center justify-between text-xs">
+                          <span className="text-zinc-600 dark:text-zinc-400">{obs.obstacle?.name}</span>
+                          {obs.fouls_count > 0 && <span className="text-warning-600 font-bold">{obs.fouls_count} faltas</span>}
+                        </div>
+                      ))}
+                      {s.notes && <p className="text-[10px] text-zinc-400 mt-2">{s.notes}</p>}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
-          );
-        })}
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -148,6 +148,74 @@ export async function POST(request: Request) {
       });
     }
 
+    // Auto-complete challenges
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: activeChallenges } = await supabase
+        .from("weekly_challenges")
+        .select("*")
+        .lte("fecha_inicio", today)
+        .gte("fecha_fin", today);
+
+      if (activeChallenges && activeChallenges.length > 0) {
+        const { data: existingCompletions } = await supabase
+          .from("user_challenges")
+          .select("challenge_id")
+          .eq("user_id", user.id)
+          .in("challenge_id", activeChallenges.map((c: any) => c.id));
+
+        const completedIds = new Set((existingCompletions || []).map((c: any) => c.challenge_id));
+
+        for (const challenge of activeChallenges) {
+          if (completedIds.has(challenge.id)) continue;
+
+          const title = (challenge.title || "").toLowerCase();
+          const desc = (challenge.description || "").toLowerCase();
+
+          let shouldComplete = false;
+
+          // Check challenge criteria
+          if (title.includes("sesion") || title.includes("sesión") || desc.includes("sesión")) {
+            // Count sessions this week
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            const { count } = await supabase
+              .from("agility_sessions")
+              .select("*", { count: "exact", head: true })
+              .eq("dog_id", dog_id)
+              .gte("fecha", weekStart.toISOString().slice(0, 10));
+            const target = parseInt(title.match(/\d+/)?.[0] || "1");
+            if ((count || 0) >= target) shouldComplete = true;
+          }
+
+          if (title.includes("clean run") || title.includes("clean_run") || title.includes("sin faltas")) {
+            if (clean_run) shouldComplete = true;
+          }
+
+          if (title.includes("récord") || title.includes("record") || title.includes("mejorar")) {
+            // Simple check: any session with time
+            if ((circuit_time_seconds ?? 0) > 0) shouldComplete = true;
+          }
+
+          if (title.includes("obstáculo") || title.includes("obstaculo")) {
+            const target = parseInt(title.match(/\d+/)?.[0] || "5");
+            if ((obstacles?.length || 0) >= target) shouldComplete = true;
+          }
+
+          if (shouldComplete) {
+            await supabase.from("user_challenges").insert({
+              user_id: user.id,
+              challenge_id: challenge.id,
+              completed: true,
+              completed_at: new Date().toISOString(),
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Auto-complete challenges error:", e);
+    }
+
     return NextResponse.json({ session: sessionData, success: true });
   } catch (err: any) {
     console.error("Agility session POST error:", err);
