@@ -133,6 +133,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
   const startCircuit = (circuit: AgilityCircuit | AgilityCustomCircuit) => {
     setSelectedCircuit(circuit);
     setShowForm(false);
+    setWizardStep(null);
     // Preload circuit config and go to setup
     const circuitAny = circuit as any;
     const obsIds = Array.isArray(circuitAny.standard_obstacles)
@@ -144,18 +145,30 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
     fetch("/api/agility/obstacles")
       .then((r) => r.json())
       .then((j) => {
+        let matched: AgilityObstacle[] = [];
         if (j.obstacles && obsIds.length > 0) {
           const obstacleIds = obsIds.map((o: any) => o.obstacle_id || o);
-          const matched = j.obstacles.filter((o: AgilityObstacle) => obstacleIds.includes(o.id));
-          setSessionConfig({
-            sessionTypeId: circuit.session_type_id || null,
-            difficulty: circuit.difficulty_level || "principiante",
-            selectedObstacles: matched,
-            penaltySettings: {},
-            sessionTypeName: circuit.name,
-          });
-          setWizardStep("setup");
+          matched = j.obstacles.filter((o: AgilityObstacle) => obstacleIds.includes(o.id));
         }
+        setSessionConfig({
+          sessionTypeId: circuit.session_type_id || null,
+          difficulty: circuit.difficulty_level || "principiante",
+          selectedObstacles: matched,
+          penaltySettings: {},
+          sessionTypeName: circuit.name,
+        });
+        setWizardStep("setup");
+      })
+      .catch(() => {
+        // If obstacles fail to load, still open setup so user can configure manually
+        setSessionConfig({
+          sessionTypeId: circuit.session_type_id || null,
+          difficulty: circuit.difficulty_level || "principiante",
+          selectedObstacles: [],
+          penaltySettings: {},
+          sessionTypeName: circuit.name,
+        });
+        setWizardStep("setup");
       });
   };
 
@@ -299,40 +312,46 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
         </div>
       </div>
 
-      {/* Wizard */}
-      {wizardStep === "setup" && dog && (
-        <AgilitySetup
-          dog={dog}
-          onStart={(config) => { setSessionConfig(config); setWizardStep("run"); }}
-          onClose={() => { setWizardStep(null); setSessionConfig(null); }}
-          onQuickStart={(config) => { setSessionConfig(config); setWizardStep("run"); }}
-        />
-      )}
-      {wizardStep === "run" && dog && sessionConfig && (
-        <AgilityRun
-          dog={dog}
-          userId={userId}
-          config={sessionConfig}
-          onFinish={(data) => { setRunData(data); setWizardStep("review"); }}
-          onClose={() => { setWizardStep("setup"); }}
-        />
-      )}
-      {wizardStep === "review" && dog && runData && (
-        <AgilityReview
-          dog={dog}
-          userId={userId}
-          runData={runData}
-          onSaved={handleSaved}
-          onClose={handleSaved}
-        />
+      {/* Wizard Overlay */}
+      {wizardStep && (
+        <div className="fixed inset-0 z-50 bg-white dark:bg-zinc-950 overflow-y-auto">
+          {wizardStep === "setup" && dog && (
+            <AgilitySetup
+              dog={dog}
+              onStart={(config) => { setSessionConfig(config); setWizardStep("run"); }}
+              onClose={() => { setWizardStep(null); setSessionConfig(null); }}
+              onQuickStart={(config) => { setSessionConfig(config); setWizardStep("run"); }}
+            />
+          )}
+          {wizardStep === "run" && dog && sessionConfig && (
+            <AgilityRun
+              dog={dog}
+              userId={userId}
+              config={sessionConfig}
+              onFinish={(data) => { setRunData(data); setWizardStep("review"); }}
+              onClose={() => { setWizardStep("setup"); }}
+            />
+          )}
+          {wizardStep === "review" && dog && runData && (
+            <AgilityReview
+              dog={dog}
+              userId={userId}
+              runData={runData}
+              onSaved={handleSaved}
+              onClose={handleSaved}
+            />
+          )}
+        </div>
       )}
       {showForm && dog && (
-        <AgilityForm
-          dog={dog}
-          userId={userId}
-          onClose={() => setShowForm(false)}
-          onSaved={handleSaved}
-        />
+        <div className="fixed inset-0 z-50 bg-white dark:bg-zinc-950 overflow-y-auto">
+          <AgilityForm
+            dog={dog}
+            userId={userId}
+            onClose={() => setShowForm(false)}
+            onSaved={handleSaved}
+          />
+        </div>
       )}
 
       {/* Evolution Chart — only if data exists */}

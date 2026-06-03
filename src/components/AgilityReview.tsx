@@ -309,7 +309,7 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
   }
 
   return (
-    <div className="card-soft rounded-[1.5rem] p-5 space-y-5 bg-white dark:bg-zinc-900 border-2 border-accent-200 dark:border-accent-800">
+    <div className="bg-white dark:bg-zinc-950 p-4 pb-8 space-y-5 min-h-screen">
       {/* Header */}
       <div className="text-center space-y-1">
         <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">Resumen del entrenamiento</h3>

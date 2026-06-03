@@ -285,7 +285,7 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
   }
 
   return (
-    <div className="card-soft rounded-[1.5rem] bg-white dark:bg-zinc-900 border-2 border-accent-200 dark:border-accent-800 flex flex-col h-[calc(100vh-200px)] min-h-[500px]">
+    <div className="bg-white dark:bg-zinc-950 flex flex-col h-screen">
       {/* Timer zone - 30% */}
       <div className="flex flex-col items-center justify-center py-4 border-b border-zinc-100 dark:border-zinc-800">
         <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Tiempo Total</p>

@@ -126,7 +126,7 @@ export function AgilitySetup({ dog, onStart, onClose, onQuickStart }: Props) {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 p-4 pb-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Configurar entrenamiento</h3>
