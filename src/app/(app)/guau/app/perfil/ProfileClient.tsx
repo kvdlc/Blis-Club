@@ -2,10 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import type { Dog, WeeklyChallenge, UserChallenge, DogMetabolicProfile, Badge, UserBadge, Subscription, Plan, Profile } from "@/types/database";
-import { User, PawPrint, Award, Check, LogOut, Moon, Sun, MessageCircle, ExternalLink, Edit3, Plus, Building2, Crown, Shield, ChevronRight, Sparkles, Copy, Wallet, Clock, Gift } from "lucide-react";
+import { User, PawPrint, Award, Check, LogOut, MessageCircle, ExternalLink, Edit3, Plus, Building2, Crown, Shield, ChevronRight, Sparkles, Copy, Wallet, Clock, Gift } from "lucide-react";
 import { useState } from "react";
 
 interface Props {
@@ -39,7 +38,6 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
   };
   const router = useRouter();
   const supabase = createClient();
-  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -52,13 +50,8 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
 
   return (
     <div className="space-y-5">
-      {/* ═══ TOP BAR: Tema + Suscripción + Blis Corp ═══ */}
+      {/* ═══ TOP BAR: Suscripción + Blis Corp ═══ */}
       <div className="flex items-center justify-between card-soft rounded-[1.25rem] px-4 py-3">
-        <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="flex items-center gap-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-          {theme === "dark" ? <Sun className="w-4 h-4 text-warning-500" /> : <Moon className="w-4 h-4 text-primary-500" />}
-          {theme === "dark" ? "Claro" : "Oscuro"}
-        </button>
         <a href="https://www.blis-corp.com" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-[10px] text-zinc-400 hover:text-primary-500 transition-colors">
           <Building2 className="w-3 h-3" />
