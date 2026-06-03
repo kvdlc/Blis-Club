@@ -23,7 +23,13 @@ export function ScheduleMealModal({ open, onClose, recipe, dog, totalGrams }: Pr
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const dateStr = selectedDate.toISOString().slice(0, 10);
+  const toLocalDateStr = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+  const dateStr = toLocalDateStr(selectedDate);
 
   useEffect(() => {
     if (!open || !dog) return;

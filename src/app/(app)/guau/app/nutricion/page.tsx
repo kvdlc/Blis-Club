@@ -32,24 +32,21 @@ export default async function NutricionPage({
 
   let metabolicProfile: DogMetabolicProfile | null = null;
   let detoxProgress: { day_number: number; completed: boolean }[] = [];
-  let shoppingList: ShoppingListItem[] = [];
   let mealSlots: DogMealSlot[] = [];
   let mealSchedule: (MealSchedule & { recipe: NutritionRecipe | null })[] = [];
   let walks: Walk[] = [];
 
   if ((dog as Dog | null)?.id) {
     const dogId = (dog as Dog).id;
-    const [mpRes, dpRes, slRes, slotsRes, schedRes, walksRes] = await Promise.all([
+    const [mpRes, dpRes, slotsRes, schedRes, walksRes] = await Promise.all([
       supabase.from("dog_metabolic_profiles").select("*").eq("dog_id", dogId).maybeSingle(),
       supabase.from("detox_progress").select("day_number, completed").eq("dog_id", dogId),
-      supabase.from("shopping_list").select("*").eq("user_id", user.id).order("checked"),
       supabase.from("dog_meal_slots").select("*").eq("dog_id", dogId).order("slot_index", { ascending: true }),
       supabase.from("meal_schedule").select("*, recipe:nutrition_recipes(*)").eq("dog_id", dogId).order("fecha", { ascending: true }),
       supabase.from("walks").select("*").eq("dog_id", dogId).order("start_time", { ascending: false }).limit(30),
     ]);
     metabolicProfile = mpRes.data as DogMetabolicProfile | null;
     detoxProgress = (dpRes.data as { day_number: number; completed: boolean }[] | null) ?? [];
-    shoppingList = (slRes.data as ShoppingListItem[] | null) ?? [];
     mealSlots = (slotsRes.data as DogMealSlot[] | null) ?? [];
     mealSchedule = (schedRes.data as (MealSchedule & { recipe: NutritionRecipe | null })[] | null) ?? [];
     walks = (walksRes.data as Walk[] | null) ?? [];
@@ -57,7 +54,7 @@ export default async function NutricionPage({
 
   const greenCount = walks.filter((w) => w.traffic_light === "green").length;
 
-  const validTabs = ["recetario", "calculadora", "detox", "escaner", "lista"] as const;
+  const validTabs = ["recetario", "plan", "calculadora", "detox", "escaner", "lista"] as const;
   const initialTab = tab && validTabs.includes(tab as typeof validTabs[number]) ? (tab as typeof validTabs[number]) : undefined;
 
   return (
@@ -68,7 +65,6 @@ export default async function NutricionPage({
       metabolicProfile={metabolicProfile}
       detoxDays={(detoxDays as DetoxDay[] | null) ?? []}
       detoxProgress={detoxProgress}
-      shoppingList={shoppingList}
       userId={user.id}
       mealSlots={mealSlots}
       mealSchedule={mealSchedule}

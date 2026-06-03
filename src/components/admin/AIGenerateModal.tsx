@@ -59,9 +59,9 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
     }
   };
 
-  const handleUse = () => {
+  const handleUse = async () => {
     if (!preview) return;
-    onGenerate(preview);
+    await onGenerate(preview);
     onClose();
     setPrompt("");
     setPreview(null);

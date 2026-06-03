@@ -90,6 +90,9 @@ export interface RecipeIngredient {
   ingredient_name: string;
   quantity_per_serving_g: number;
   ingredient_type: "proteina" | "hueso" | "viscera" | "vegetal" | "suplemento" | "otro";
+  unit_type: string;
+  unit_weight_g: number;
+  display_unit: string | null;
 }
 
 export interface Walk {
@@ -547,4 +550,29 @@ export interface AgilityCustomCircuit {
   is_visible: boolean;
   suggested_to_admin: boolean;
   created_at: string;
+}
+
+export interface PurchaseStore {
+  id: string;
+  user_id: string;
+  name: string;
+  location: string | null;
+  color: string | null;
+  created_at: string;
+}
+
+export interface ShoppingPurchase {
+  id: string;
+  user_id: string;
+  ingredient_name: string;
+  store_id: string | null;
+  quantity: number | null;
+  quantity_unit: string;
+  currency: string;
+  price_total: number | null;
+  price_per_kg: number | null;
+  purchase_date: string;
+  notes: string | null;
+  created_at: string;
+  store?: PurchaseStore | null;
 }

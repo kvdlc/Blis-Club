@@ -4,16 +4,10 @@ import { createServiceClient } from "@/lib/supabase/service";
 export async function GET(request: Request) {
   const supabase = createServiceClient();
   const { searchParams } = new URL(request.url);
-  const recipeId = searchParams.get("recipe_id");
+  const userId = searchParams.get("user_id");
+  if (!userId) return NextResponse.json({ error: "user_id required" }, { status: 400 });
 
-  if (!recipeId) return NextResponse.json({ error: "recipe_id required" }, { status: 400 });
-
-  const { data, error } = await supabase
-    .from("recipe_ingredients")
-    .select("*")
-    .eq("recipe_id", recipeId)
-    .order("ingredient_name");
-
+  const { data, error } = await supabase.from("purchase_stores").select("*").eq("user_id", userId).order("name");
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ data });
 }
@@ -21,14 +15,10 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const supabase = createServiceClient();
   const body = await request.json();
-  const { recipe_id, ingredient_name, quantity_per_serving_g, ingredient_type, unit_type, unit_weight_g, display_unit } = body;
-  if (!recipe_id || !ingredient_name) return NextResponse.json({ error: "recipe_id and ingredient_name required" }, { status: 400 });
+  const { user_id, name, location, color } = body;
+  if (!user_id || !name) return NextResponse.json({ error: "user_id and name required" }, { status: 400 });
 
-  const { data, error } = await supabase.from("recipe_ingredients").insert({
-    recipe_id, ingredient_name, quantity_per_serving_g, ingredient_type: ingredient_type || "otro",
-    unit_type: unit_type || "g", unit_weight_g: unit_weight_g ?? 1, display_unit: display_unit || ingredient_name
-  }).select().single();
-
+  const { data, error } = await supabase.from("purchase_stores").insert({ user_id, name, location, color }).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ data });
 }
@@ -40,10 +30,10 @@ export async function PUT(request: Request) {
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
   const valid: Record<string, unknown> = {};
-  for (const k of ["ingredient_name", "quantity_per_serving_g", "ingredient_type", "unit_type", "unit_weight_g", "display_unit"]) {
+  for (const k of ["name", "location", "color"]) {
     if (updates[k] !== undefined) valid[k] = updates[k];
   }
-  const { data, error } = await supabase.from("recipe_ingredients").update(valid).eq("id", id).select().single();
+  const { data, error } = await supabase.from("purchase_stores").update(valid).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ data });
 }
@@ -53,6 +43,6 @@ export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
-  await supabase.from("recipe_ingredients").delete().eq("id", id);
+  await supabase.from("purchase_stores").delete().eq("id", id);
   return NextResponse.json({ success: true });
 }

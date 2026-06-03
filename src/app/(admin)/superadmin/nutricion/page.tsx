@@ -14,7 +14,7 @@ interface Recipe {
   prep_time_min: number; difficulty: string; kcal_per_100g: number;
   is_detox: boolean; source_book: string;
 }
-interface Ingredient { id: string; recipe_id: string; ingredient_name: string; quantity_per_serving_g: number; ingredient_type: string; }
+interface Ingredient { id: string; recipe_id: string; ingredient_name: string; quantity_per_serving_g: number; ingredient_type: string; unit_type: string; unit_weight_g: number; display_unit: string | null; }
 interface Step { id: string; recipe_id: string; step_number: number; instruction: string; duration_min: number; image_url: string; }
 interface NutritionFact { id?: string; recipe_id: string; protein_g: number; fat_g: number; carbs_g: number; fiber_g: number; moisture_g: number; ash_g: number; calcium_mg: number; phosphorus_mg: number; iron_mg: number; zinc_mg: number; vitamin_a_ui: number; vitamin_d_ui: number; vitamin_e_mg: number; omega3_g: number; omega6_g: number; }
 
@@ -37,7 +37,7 @@ export default function NutricionPage() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [steps, setSteps] = useState<Step[]>([]);
   const [facts, setFacts] = useState<NutritionFact>(emptyFacts);
-  const [newIngredient, setNewIngredient] = useState({ ingredient_name: "", quantity_per_serving_g: 0, ingredient_type: "otro" });
+  const [newIngredient, setNewIngredient] = useState({ ingredient_name: "", quantity_per_serving_g: 0, ingredient_type: "otro", unit_type: "g", unit_weight_g: 1, display_unit: "" });
   const [newStep, setNewStep] = useState({ instruction: "", duration_min: 0 });
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [showAIModal, setShowAIModal] = useState(false);
@@ -76,14 +76,16 @@ export default function NutricionPage() {
     return j.data?.find((a: any) => a.slug === appSlug())?.id;
   };
 
-  const handleSave = async () => {
+  const handleSave = async (recipeData?: Partial<typeof emptyRecipe>) => {
     const appId = await getAppId();
     if (!appId) return;
 
+    const data = recipeData ? { ...emptyRecipe, ...recipeData } : form;
+
     if (editing) {
-      await fetch("/api/admin/recipes", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editing.id, ...form }) });
+      await fetch("/api/admin/recipes", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editing.id, ...data }) });
     } else {
-      const r = await fetch("/api/admin/recipes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, application_id: appId }) });
+      const r = await fetch("/api/admin/recipes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...data, application_id: appId }) });
       const j = await r.json();
       if (j.data) {
         setEditing(j.data);
@@ -98,7 +100,7 @@ export default function NutricionPage() {
   const addIngredient = async () => {
     if (!editing || !newIngredient.ingredient_name) return;
     await fetch("/api/admin/recipe-ingredients", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...newIngredient, recipe_id: editing.id }) });
-    setNewIngredient({ ingredient_name: "", quantity_per_serving_g: 0, ingredient_type: "otro" });
+    setNewIngredient({ ingredient_name: "", quantity_per_serving_g: 0, ingredient_type: "otro", unit_type: "g", unit_weight_g: 1, display_unit: "" });
     loadSubEntities(editing.id);
   };
 
@@ -121,8 +123,8 @@ export default function NutricionPage() {
     loadSubEntities(r.id);
   };
 
-  const handleAIGenerate = (recipe: any) => {
-    setForm({
+  const handleAIGenerate = async (recipe: any) => {
+    const aiRecipe = {
       title: recipe.title || "",
       description: recipe.description || "",
       category: recipe.category || "diario",
@@ -135,9 +137,65 @@ export default function NutricionPage() {
       kcal_per_100g: recipe.kcal_per_100g || 0,
       is_detox: recipe.is_detox || false,
       source_book: recipe.source_book || "",
-    });
-    // Save recipe first to get an ID, then add sub-entities
-    handleSave();
+    };
+    setForm(aiRecipe);
+
+    const appId = await getAppId();
+    if (!appId) return;
+
+    // Save recipe
+    const r = await fetch("/api/admin/recipes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...aiRecipe, application_id: appId }) });
+    const j = await r.json();
+    if (!j.data?.id) return;
+    const recipeId = j.data.id;
+    setEditing(j.data);
+    setForm(j.data);
+
+    // Save AI-generated ingredients
+    if (recipe.ingredients?.length) {
+      await Promise.all(recipe.ingredients.map((ing: any) =>
+        fetch("/api/admin/recipe-ingredients", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            recipe_id: recipeId,
+            ingredient_name: ing.ingredient_name,
+            quantity_per_serving_g: ing.quantity_per_serving_g || 0,
+            ingredient_type: ing.ingredient_type || "otro",
+            unit_type: ing.unit_type || "g",
+            unit_weight_g: ing.unit_weight_g ?? 1,
+            display_unit: ing.display_unit || ing.ingredient_name,
+          })
+        })
+      ));
+    }
+
+    // Save AI-generated steps
+    if (recipe.steps?.length) {
+      await Promise.all(recipe.steps.map((step: any, idx: number) =>
+        fetch("/api/admin/recipe-steps", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            recipe_id: recipeId,
+            step_number: step.step_number || idx + 1,
+            instruction: step.instruction,
+            duration_min: step.duration_min || null,
+            image_url: step.image_url || null,
+          })
+        })
+      ));
+    }
+
+    // Save AI-generated nutrition facts
+    if (recipe.nutrition_facts) {
+      await fetch("/api/admin/recipe-nutrition", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...recipe.nutrition_facts, recipe_id: recipeId })
+      });
+    }
+
+    loadSubEntities(recipeId);
+    setShowNew(false);
+    load();
   };
 
   const handleGenerateImage = async () => {
@@ -157,11 +215,11 @@ export default function NutricionPage() {
 
     setGeneratingImage(true);
     try {
-      const prompt = `Professional food photography of ${form.title}. ${form.description}. Appetizing, well-lit, top-down or 45-degree angle, white background, square format 1024x1024.`;
+      const recipeDescription = `${form.title}. ${form.description}`;
       const res = await fetch("/api/ai/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, model: "flux-2-pro" }),
+        body: JSON.stringify({ recipeDescription, model: "flux-2-pro" }),
       });
       const data = await res.json();
       if (data.imageUrl) {
@@ -306,7 +364,7 @@ export default function NutricionPage() {
               </div>
               <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Libro fuente</label>
                 <input value={form.source_book} onChange={e => setForm({...form, source_book: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
-              <button onClick={handleSave} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all"><Save className="w-4 h-4" /> Guardar Receta</button>
+              <button onClick={() => handleSave()} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all"><Save className="w-4 h-4" /> Guardar Receta</button>
             </div>
 
             {/* ═══ INGREDIENTS ═══ */}
@@ -320,13 +378,21 @@ export default function NutricionPage() {
                     className="w-24 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   <select value={newIngredient.ingredient_type} onChange={e => setNewIngredient({...newIngredient, ingredient_type: e.target.value})}
                     className="w-32 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">{INGREDIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
+                  <select value={newIngredient.unit_type} onChange={e => setNewIngredient({...newIngredient, unit_type: e.target.value})}
+                    className="w-28 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                    <option value="g">g</option><option value="kg">kg</option><option value="pieza">pieza</option><option value="media_pieza">½ pieza</option>
+                    <option value="taza">taza</option><option value="cda">cda</option><option value="cdta">cdta</option><option value="ml">ml</option><option value="litro">litro</option>
+                  </select>
+                  <input type="number" placeholder="g por unidad" value={newIngredient.unit_weight_g || ""} onChange={e => setNewIngredient({...newIngredient, unit_weight_g: parseFloat(e.target.value)||1})}
+                    className="w-28 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  <input placeholder="Nombre descriptivo" value={newIngredient.display_unit} onChange={e => setNewIngredient({...newIngredient, display_unit: e.target.value})}
+                    className="flex-1 min-w-[120px] rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   <button onClick={addIngredient} className="bg-primary-600 text-white rounded-xl px-4 py-2 text-sm font-bold"><Plus className="w-4 h-4" /></button>
                 </div>
                 <div className="space-y-1">
                   {ingredients.map(i => (
                     <div key={i.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/50 dark:bg-zinc-800/30 text-sm">
-                      <span className="font-semibold flex-1">{i.ingredient_name}</span>
-                      <span className="text-xs text-zinc-500">{i.quantity_per_serving_g}g</span>
+                      <span className="font-semibold flex-1">{i.ingredient_name} <span className="text-zinc-400 font-normal">({i.unit_type === 'g' ? i.quantity_per_serving_g + 'g' : Math.round(i.quantity_per_serving_g / (i.unit_weight_g || 1)) + ' ' + (i.display_unit || i.unit_type)})</span></span>
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800">{i.ingredient_type}</span>
                       <button onClick={() => { fetch(`/api/admin/recipe-ingredients?id=${i.id}`,{method:"DELETE"}).then(() => loadSubEntities(editing.id)); }}
                         className="text-zinc-400 hover:text-danger-500"><Trash2 className="w-3.5 h-3.5" /></button>

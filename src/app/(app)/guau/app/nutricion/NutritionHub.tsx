@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { NutritionRecipe, ToxicFood, Dog, DogMetabolicProfile, DogMealSlot, MealSchedule, Walk } from "@/types/database";
@@ -8,10 +8,11 @@ import { MealCalendarWidget } from "@/components/MealCalendarWidget";
 import {
   Search, Plus, Minus, ChefHat, Lock, Check, ShoppingCart,
   AlertTriangle, ShieldCheck, X, Trash2, Sparkles, Clock,
-  Flame, ChevronRight, ScanBarcode, UtensilsCrossed, ArrowRight
+  Flame, ChevronRight, ScanBarcode, UtensilsCrossed, ArrowRight,
+  CalendarDays
 } from "lucide-react";
 
-type Tab = "recetario" | "calculadora" | "detox" | "escaner" | "lista";
+type Tab = "recetario" | "calculadora" | "detox" | "escaner" | "lista" | "plan";
 
 interface Props {
   initialRecipes: NutritionRecipe[];
@@ -20,7 +21,6 @@ interface Props {
   metabolicProfile: DogMetabolicProfile | null;
   detoxDays: { day_number: number; title: string; instructions: string; warning: string | null }[];
   detoxProgress: { day_number: number; completed: boolean }[];
-  shoppingList: { id: string; ingredient_name: string; quantity_g: number | null; checked: boolean }[];
   userId: string;
   mealSlots: DogMealSlot[];
   mealSchedule: (MealSchedule & { recipe: NutritionRecipe | null })[];
@@ -31,6 +31,7 @@ interface Props {
 
 const TABS: { key: Tab; label: string; icon: any }[] = [
   { key: "recetario", label: "Recetario", icon: ChefHat },
+  { key: "plan", label: "Plan", icon: CalendarDays },
   { key: "calculadora", label: "Calculadora", icon: Plus },
   { key: "detox", label: "Detox", icon: Sparkles },
   { key: "lista", label: "Lista", icon: ShoppingCart },
@@ -68,16 +69,8 @@ export function NutritionHub(props: Props) {
           onOpenScanner={() => { setActiveTab("escaner"); }}
         />
       )}
-      {activeTab === "calculadora" && <CalculadoraTab dog={props.dog} metabolicProfile={props.metabolicProfile} />}
-      {activeTab === "detox" && (
-        <div className="text-center py-8 text-zinc-400">Reto detox próximamente.</div>
-      )}
-      {activeTab === "escaner" && <EscanerTab toxicFoods={props.toxicFoods} />}
-      {activeTab === "lista" && <ListaTab shoppingList={props.shoppingList} />}
-
-      {/* Calendario de comidas */}
-      {props.dog && (
-        <MealCalendarWidget
+      {activeTab === "plan" && (
+        <PlanTab
           dog={props.dog}
           mealSlots={props.mealSlots}
           mealSchedule={props.mealSchedule}
@@ -86,6 +79,45 @@ export function NutritionHub(props: Props) {
           walksCount={props.walks.length}
           greenWalksCount={props.greenCount}
         />
+      )}
+      {activeTab === "calculadora" && <CalculadoraTab dog={props.dog} metabolicProfile={props.metabolicProfile} />}
+      {activeTab === "detox" && <DetoxTab dog={props.dog} detoxDays={props.detoxDays} detoxProgress={props.detoxProgress} />}
+      {activeTab === "escaner" && <EscanerTab toxicFoods={props.toxicFoods} />}
+      {activeTab === "lista" && <ListaTab userId={props.userId} />}
+    </div>
+  );
+}
+
+/* ================================================================ */
+/*  PLAN TAB                                                         */
+/* ================================================================ */
+function PlanTab(props: {
+  dog: Dog | null;
+  mealSlots: DogMealSlot[];
+  mealSchedule: (MealSchedule & { recipe: NutritionRecipe | null })[];
+  metabolicProfile: DogMetabolicProfile | null;
+  recipes: NutritionRecipe[];
+  walksCount: number;
+  greenWalksCount: number;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2">
+        <CalendarDays className="w-5 h-5 text-primary-600" />
+        <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">Plan de Alimentación</h2>
+      </div>
+      {props.dog ? (
+        <MealCalendarWidget
+          dog={props.dog}
+          mealSlots={props.mealSlots}
+          mealSchedule={props.mealSchedule}
+          metabolicProfile={props.metabolicProfile}
+          recipes={props.recipes}
+          walksCount={props.walksCount}
+          greenWalksCount={props.greenWalksCount}
+        />
+      ) : (
+        <p className="text-zinc-500 text-center py-8">Registra un perro primero para ver tu plan de alimentación.</p>
       )}
     </div>
   );
@@ -262,6 +294,70 @@ function RecipeCard({ recipe }: { recipe: NutritionRecipe }) {
 }
 
 /* ================================================================ */
+/*  DETOX                                                            */
+/* ================================================================ */
+function DetoxTab({ dog, detoxDays, detoxProgress }: { dog: Dog | null; detoxDays: Props["detoxDays"]; detoxProgress: Props["detoxProgress"] }) {
+  const supabase = createClient();
+  const [progressState, setProgressState] = useState(detoxProgress);
+  const completedDays = progressState.filter((p) => p.completed).map((p) => p.day_number);
+  const maxUnlocked = completedDays.length > 0 ? Math.max(...completedDays) + 1 : 1;
+
+  const markDay = async (day: number) => {
+    if (!dog || day > maxUnlocked || completedDays.includes(day)) return;
+    const { error } = await supabase.from("detox_progress").upsert(
+      { dog_id: dog.id, day_number: day, completed: true, completed_at: new Date().toISOString() },
+      { onConflict: "dog_id,day_number" }
+    );
+    if (!error) {
+      setProgressState((prev) => [...prev.filter((p) => p.day_number !== day), { day_number: day, completed: true }]);
+    }
+  };
+
+  if (!dog) return <p className="text-zinc-500 text-center py-8">Registra un perro primero.</p>;
+
+  return (
+    <div className="space-y-3">
+      <div className="card-soft rounded-[1.5rem] p-4 bg-warning-50/60 dark:bg-warning-950/20 border-warning-200/50 dark:border-warning-900/30">
+        <p className="text-sm text-warning-700 dark:text-warning-300 font-bold">Reto Detox 14 Días</p>
+        <p className="text-xs text-warning-600 dark:text-warning-400 mt-1">Transición de croquetas a alimentación natural. Completa un día a la vez.</p>
+      </div>
+      {detoxDays.map((day) => {
+        const isCompleted = completedDays.includes(day.day_number);
+        const isUnlocked = day.day_number <= maxUnlocked;
+        return (
+          <div
+            key={day.day_number}
+            className={`rounded-[1.25rem] p-3.5 ${
+              isCompleted ? "card-soft bg-secondary-50/60 dark:bg-secondary-950/20" : isUnlocked ? "card-soft" : "card-soft opacity-50"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${
+                isCompleted ? "bg-secondary-500 text-white" : isUnlocked ? "bg-primary-100 dark:bg-primary-900 text-primary-700" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+              }`}>
+                {isCompleted ? <Check className="w-4 h-4" /> : isUnlocked ? day.day_number : <Lock className="w-3.5 h-3.5" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-semibold truncate">Día {day.day_number}: {day.title}</h4>
+                {isUnlocked && <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">{day.instructions}</p>}
+              </div>
+              {isUnlocked && !isCompleted && (
+                <button onClick={() => markDay(day.day_number)} className="shrink-0 rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 text-xs font-bold transition-colors active:scale-95">
+                  Listo
+                </button>
+              )}
+            </div>
+            {day.warning && isUnlocked && (
+              <p className="text-[10px] text-warning-600 dark:text-warning-400 mt-2 pl-10">{day.warning}</p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ================================================================ */
 /*  ESCANER                                                          */
 /* ================================================================ */
 function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
@@ -378,62 +474,291 @@ function CalculadoraTab({ dog, metabolicProfile }: { dog: Dog | null; metabolicP
 }
 
 /* ================================================================ */
-/*  LISTA DE COMPRAS                                                 */
+/*  LISTA DE COMPRAS INTELIGENTE                                     */
 /* ================================================================ */
-function ListaTab({ shoppingList }: { shoppingList: Props["shoppingList"] }) {
+function ListaTab({ userId }: { userId: string }) {
   const supabase = createClient();
-  const [items, setItems] = useState(shoppingList);
+  const [view, setView] = useState<"generator" | "history" | "stores">("generator");
+  const [startDate, setStartDate] = useState(() => { const d = new Date(); const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,"0"); const day = String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; });
+  const [endDate, setEndDate] = useState(() => { const d = new Date(); d.setDate(d.getDate()+7); const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,"0"); const day = String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; });
+  const [generating, setGenerating] = useState(false);
+  const [listData, setListData] = useState<{ combined: any[]; byDog: any[] } | null>(null);
+  const [groupMode, setGroupMode] = useState<"combined" | "byDog">("combined");
+  const [stores, setStores] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [purchaseItem, setPurchaseItem] = useState<any>(null);
+  const [purchaseForm, setPurchaseForm] = useState({ quantity: "", quantity_unit: "kg", price_total: "", currency: "PEN", store_id: "", notes: "" });
+  const [savingPurchase, setSavingPurchase] = useState(false);
+  const [newStoreName, setNewStoreName] = useState("");
+  const [newStoreLocation, setNewStoreLocation] = useState("");
 
-  const toggleCheck = async (id: string, current: boolean) => {
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, checked: !current } : i)));
-    await supabase.from("shopping_list").update({ checked: !current }).eq("id", id);
+  useEffect(() => { loadStores(); }, []);
+
+  const loadStores = async () => {
+    const res = await fetch(`/api/shopping-list/stores?user_id=${userId}`);
+    const j = await res.json();
+    setStores(j.data || []);
   };
 
-  const removeItem = async (id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    await supabase.from("shopping_list").delete().eq("id", id);
+  const generateList = async () => {
+    setGenerating(true);
+    const res = await fetch("/api/shopping-list/generate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, startDate, endDate }),
+    });
+    const j = await res.json();
+    setListData(j.data || { combined: [], byDog: [] });
+    setGenerating(false);
   };
 
-  if (items.length === 0) {
-    return (
-      <div className="text-center py-12 text-zinc-400">
-        <ShoppingCart className="w-10 h-10 mx-auto mb-2 opacity-30" />
-        <p className="text-sm">Tu lista de compras está vacía</p>
-        <p className="text-xs mt-1">Agrega ingredientes desde las recetas</p>
-      </div>
-    );
-  }
+  const openPurchase = (item: any) => {
+    setPurchaseItem(item);
+    setPurchaseForm({ quantity: "", quantity_unit: item.unit_type === 'g' || item.unit_type === 'kg' ? 'kg' : 'unidad', price_total: "", currency: "PEN", store_id: "", notes: "" });
+    setShowPurchaseModal(true);
+  };
 
-  const pending = items.filter((i) => !i.checked);
-  const completed = items.filter((i) => i.checked);
+  const savePurchase = async () => {
+    if (!purchaseItem || !purchaseForm.quantity || !purchaseForm.price_total) return;
+    setSavingPurchase(true);
+    await fetch("/api/shopping-list/purchase", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userId,
+        ingredient_name: purchaseItem.ingredient_name,
+        store_id: purchaseForm.store_id || null,
+        quantity: parseFloat(purchaseForm.quantity),
+        quantity_unit: purchaseForm.quantity_unit,
+        currency: purchaseForm.currency,
+        price_total: parseFloat(purchaseForm.price_total),
+        purchase_date: new Date().toISOString().slice(0, 10),
+        notes: purchaseForm.notes,
+      }),
+    });
+    setSavingPurchase(false);
+    setShowPurchaseModal(false);
+    // Mark as purchased in the list
+    if (listData) {
+      const mark = (items: any[]) => items.map((it: any) => it.ingredient_name === purchaseItem.ingredient_name ? { ...it, purchased: true } : it);
+      setListData({ combined: mark(listData.combined), byDog: listData.byDog.map((d: any) => ({ ...d, items: mark(d.items) })) });
+    }
+  };
+
+  const addStore = async () => {
+    if (!newStoreName.trim()) return;
+    await fetch("/api/shopping-list/stores", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, name: newStoreName, location: newStoreLocation }),
+    });
+    setNewStoreName(""); setNewStoreLocation("");
+    loadStores();
+  };
+
+  const loadHistory = async () => {
+    const res = await fetch(`/api/shopping-list/history?user_id=${userId}`);
+    const j = await res.json();
+    setHistory(j.data || []);
+  };
+
+  const toLocalDateStr = (d: Date) => { const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,"0"); const day = String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; };
+
+  const groupedByType = (items: any[]) => {
+    const groups: Record<string, any[]> = {};
+    items.forEach((item) => {
+      const type = item.ingredient_type || "otro";
+      if (!groups[type]) groups[type] = [];
+      groups[type].push(item);
+    });
+    return groups;
+  };
+
+  const INGREDIENT_TYPE_LABELS: Record<string, string> = { proteina: "Proteínas", hueso: "Huesos", viscera: "Vísceras", vegetal: "Vegetales", suplemento: "Suplementos", otro: "Otros" };
 
   return (
-    <div className="space-y-3">
-      <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{pending.length} pendiente{pending.length !== 1 ? "s" : ""}</p>
-      {[...pending, ...completed].map((item) => (
-        <div
-          key={item.id}
-          className={`flex items-center gap-3 p-3 rounded-[1.25rem] transition-all ${
-            item.checked ? "card-soft bg-secondary-50/60 dark:bg-secondary-950/20" : "card-soft"
-          }`}
-        >
-          <button
-            onClick={() => toggleCheck(item.id, item.checked)}
-            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
-              item.checked ? "bg-secondary-500 border-secondary-500" : "border-zinc-300 dark:border-zinc-600"
-            }`}
-          >
-            {item.checked && <Check className="w-3 h-3 text-white" />}
-          </button>
-          <span className={`flex-1 text-sm ${item.checked ? "line-through text-zinc-400" : "text-zinc-900 dark:text-zinc-100"}`}>
-            {item.ingredient_name}
-          </span>
-          {item.quantity_g && <span className="text-xs text-zinc-400">{item.quantity_g}g</span>}
-          <button onClick={() => removeItem(item.id)} className="text-zinc-400 hover:text-danger-500 transition-colors">
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+    <div className="space-y-4">
+      {/* Tabs */}
+      <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-1">
+        <button onClick={() => setView("generator")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${view === "generator" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Generar Lista</button>
+        <button onClick={() => { setView("history"); loadHistory(); }} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${view === "history" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Historial</button>
+        <button onClick={() => setView("stores")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${view === "stores" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Tiendas</button>
+      </div>
+
+      {view === "generator" && (
+        <div className="space-y-4">
+          {/* Date range */}
+          <div className="card-soft rounded-[1.5rem] p-4 space-y-3">
+            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Rango de fechas</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] text-zinc-500 mb-1 block">Desde</label>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] text-zinc-500 mb-1 block">Hasta</label>
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+              </div>
+            </div>
+            <button onClick={generateList} disabled={generating} className="w-full rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 text-white py-2.5 text-sm font-bold flex items-center justify-center gap-2">
+              {generating ? "Generando..." : <><Sparkles className="w-4 h-4" /> Generar Lista de Compras</>}
+            </button>
+          </div>
+
+          {/* Results */}
+          {listData && (
+            <>
+              <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-1">
+                <button onClick={() => setGroupMode("combined")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${groupMode === "combined" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Todos los perros</button>
+                <button onClick={() => setGroupMode("byDog")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${groupMode === "byDog" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Por perro</button>
+              </div>
+
+              {groupMode === "combined" && (
+                <div className="space-y-3">
+                  {Object.entries(groupedByType(listData.combined)).map(([type, items]) => (
+                    <div key={type} className="card-soft rounded-[1.5rem] p-4 space-y-2">
+                      <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">{INGREDIENT_TYPE_LABELS[type] || type}</h4>
+                      {items.map((item: any) => (
+                        <div key={item.ingredient_name} className={`flex items-center gap-3 p-2.5 rounded-xl text-sm ${item.purchased ? "bg-secondary-50/60 opacity-60" : "bg-white/50 dark:bg-zinc-800/30"}`}>
+                          <span className="font-semibold flex-1">{item.ingredient_name}</span>
+                          <span className="text-xs text-zinc-500">
+                            {item.pieces ? `${item.pieces} ${item.display_unit || item.unit_type}` : `${item.total_g}g`}
+                          </span>
+                          {!item.purchased && (
+                            <button onClick={() => openPurchase(item)} className="text-primary-600 text-[10px] font-bold bg-primary-50 dark:bg-primary-950/30 px-2 py-1 rounded-lg">Registrar</button>
+                          )}
+                          {item.purchased && <Check className="w-4 h-4 text-secondary-500" />}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                  {listData.combined.length === 0 && (
+                    <p className="text-center text-sm text-zinc-400 py-8">No hay recetas agendadas en este rango de fechas.</p>
+                  )}
+                </div>
+              )}
+
+              {groupMode === "byDog" && (
+                <div className="space-y-4">
+                  {listData.byDog.map((dog: any) => (
+                    <div key={dog.dog_id} className="card-soft rounded-[1.5rem] p-4 space-y-2">
+                      <h4 className="text-sm font-bold text-primary-700 dark:text-primary-300">{dog.dog_name}</h4>
+                      {dog.items.map((item: any) => (
+                        <div key={item.ingredient_name} className={`flex items-center gap-3 p-2.5 rounded-xl text-sm ${item.purchased ? "bg-secondary-50/60 opacity-60" : "bg-white/50 dark:bg-zinc-800/30"}`}>
+                          <span className="font-semibold flex-1">{item.ingredient_name}</span>
+                          <span className="text-xs text-zinc-500">{item.pieces ? `${item.pieces} ${item.display_unit || item.unit_type}` : `${item.total_g}g`}</span>
+                          {!item.purchased && (
+                            <button onClick={() => openPurchase(item)} className="text-primary-600 text-[10px] font-bold bg-primary-50 dark:bg-primary-950/30 px-2 py-1 rounded-lg">Registrar</button>
+                          )}
+                          {item.purchased && <Check className="w-4 h-4 text-secondary-500" />}
+                        </div>
+                      ))}
+                      {dog.items.length === 0 && <p className="text-xs text-zinc-400">Sin recetas agendadas.</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
-      ))}
+      )}
+
+      {view === "history" && (
+        <div className="space-y-3">
+          {history.length === 0 && <p className="text-center text-sm text-zinc-400 py-8">Aún no has registrado compras.</p>}
+          {history.map((h: any) => (
+            <div key={h.id} className="card-soft rounded-[1.25rem] p-4 text-sm space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200">{h.ingredient_name}</span>
+                <span className="text-xs text-zinc-400">{h.purchase_date}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-zinc-500">
+                <span>{h.quantity} {h.quantity_unit}</span>
+                <span>·</span>
+                <span>{h.currency} {h.price_total?.toFixed(2)}</span>
+                {h.price_per_kg && <span>· {h.currency} {h.price_per_kg.toFixed(2)}/kg</span>}
+              </div>
+              {h.store && <span className="text-[10px] text-primary-600 bg-primary-50 dark:bg-primary-950/30 px-2 py-0.5 rounded-full">{h.store.name}</span>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {view === "stores" && (
+        <div className="space-y-4">
+          <div className="card-soft rounded-[1.5rem] p-4 space-y-3">
+            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Mis Tiendas</h3>
+            <div className="space-y-2">
+              <input value={newStoreName} onChange={e => setNewStoreName(e.target.value)} placeholder="Nombre de la tienda" className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+              <input value={newStoreLocation} onChange={e => setNewStoreLocation(e.target.value)} placeholder="Ubicación (opcional)" className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+              <button onClick={addStore} className="w-full rounded-xl bg-primary-600 text-white py-2 text-sm font-bold">Añadir Tienda</button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {stores.map((s: any) => (
+              <div key={s.id} className="flex items-center gap-3 p-3 rounded-[1.25rem] card-soft text-sm">
+                <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 flex items-center justify-center font-bold text-xs">{s.name[0]}</div>
+                <div className="flex-1">
+                  <p className="font-semibold">{s.name}</p>
+                  {s.location && <p className="text-xs text-zinc-400">{s.location}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Purchase Modal */}
+      {showPurchaseModal && purchaseItem && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4" onClick={() => setShowPurchaseModal(false)}>
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Registrar Compra</h3>
+              <button onClick={() => setShowPurchaseModal(false)} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="p-3 rounded-2xl bg-primary-50 dark:bg-primary-950/30">
+              <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{purchaseItem.ingredient_name}</p>
+              <p className="text-xs text-zinc-500">Necesitas: {purchaseItem.pieces ? `${purchaseItem.pieces} ${purchaseItem.display_unit || purchaseItem.unit_type}` : `${purchaseItem.total_g}g`}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] text-zinc-500 mb-1 block">Cantidad comprada</label>
+                <input type="number" value={purchaseForm.quantity} onChange={e => setPurchaseForm({...purchaseForm, quantity: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] text-zinc-500 mb-1 block">Unidad</label>
+                <select value={purchaseForm.quantity_unit} onChange={e => setPurchaseForm({...purchaseForm, quantity_unit: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+                  <option value="kg">kg</option><option value="g">g</option><option value="unidad">unidad</option><option value="pieza">pieza</option><option value="docena">docena</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] text-zinc-500 mb-1 block">Precio total</label>
+                <input type="number" step="0.01" value={purchaseForm.price_total} onChange={e => setPurchaseForm({...purchaseForm, price_total: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] text-zinc-500 mb-1 block">Moneda</label>
+                <select value={purchaseForm.currency} onChange={e => setPurchaseForm({...purchaseForm, currency: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+                  <option value="PEN">PEN (S/)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="MXN">MXN</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] text-zinc-500 mb-1 block">Tienda</label>
+              <select value={purchaseForm.store_id} onChange={e => setPurchaseForm({...purchaseForm, store_id: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+                <option value="">Sin tienda</option>
+                {stores.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] text-zinc-500 mb-1 block">Notas</label>
+              <input value={purchaseForm.notes} onChange={e => setPurchaseForm({...purchaseForm, notes: e.target.value})} placeholder="Ej: oferta, marca..." className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+            </div>
+            <button onClick={savePurchase} disabled={savingPurchase} className="w-full rounded-2xl bg-gradient-to-r from-secondary-500 to-secondary-600 text-white py-3 text-sm font-bold disabled:opacity-50">
+              {savingPurchase ? "Guardando..." : "Guardar Compra"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

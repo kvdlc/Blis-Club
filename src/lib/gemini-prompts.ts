@@ -35,7 +35,10 @@ Responde ÚNICAMENTE con un objeto JSON válido que siga exactamente este schema
     {
       "ingredient_name": "string",
       "quantity_per_serving_g": "number (gramos por porción para perro de ~20kg)",
-      "ingredient_type": "proteina | hueso | viscera | vegetal | suplemento | otro"
+      "ingredient_type": "proteina | hueso | viscera | vegetal | suplemento | otro",
+      "unit_type": "string (unidad natural: pieza, media_pieza, taza, cucharada, cucharadita, ml, litro, g, kg)",
+      "unit_weight_g": "number (cuántos gramos pesa 1 unidad de este ingrediente)",
+      "display_unit": "string (nombre descriptivo: 'pechuga de pollo', 'zanahoria mediana', 'taza de arroz')"
     }
   ],
   "steps": [
