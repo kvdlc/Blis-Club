@@ -12,12 +12,12 @@ interface Props {
   showFouls?: boolean;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  contacto: "🟦 Contacto",
-  salto: "🟩 Salto",
-  slalom: "🟨 Slalom",
-  tunel: "🟥 Túnel",
-  entrenamiento: "🟪 Entrenamiento",
+const CATEGORY_CONFIG: Record<string, { label: string; emoji: string; color: string; lightBg: string; border: string }> = {
+  contacto: { label: "Contacto", emoji: "🐾", color: "text-blue-600", lightBg: "bg-blue-50 dark:bg-blue-950/30", border: "border-blue-200 dark:border-blue-800" },
+  salto: { label: "Salto", emoji: "🦘", color: "text-green-600", lightBg: "bg-green-50 dark:bg-green-950/30", border: "border-green-200 dark:border-green-800" },
+  slalom: { label: "Slalom", emoji: "〰️", color: "text-yellow-600", lightBg: "bg-yellow-50 dark:bg-yellow-950/30", border: "border-yellow-200 dark:border-yellow-800" },
+  tunel: { label: "Túnel", emoji: "🌀", color: "text-purple-600", lightBg: "bg-purple-50 dark:bg-purple-950/30", border: "border-purple-200 dark:border-purple-800" },
+  entrenamiento: { label: "Entrenamiento", emoji: "🎯", color: "text-orange-600", lightBg: "bg-orange-50 dark:bg-orange-950/30", border: "border-orange-200 dark:border-orange-800" },
 };
 
 export function AgilityObstaclePicker({
@@ -63,7 +63,7 @@ export function AgilityObstaclePicker({
     return allObstacles.filter(
       (o) =>
         o.name.toLowerCase().includes(q) ||
-        CATEGORY_LABELS[o.category]?.toLowerCase().includes(q)
+        CATEGORY_CONFIG[o.category]?.label.toLowerCase().includes(q)
     );
   }, [allObstacles, search]);
 
@@ -186,73 +186,78 @@ export function AgilityObstaclePicker({
 
       {/* Results */}
       {!loading && !loadError && (
-        <div className="max-h-72 overflow-y-auto space-y-4 pr-1">
-          {Object.entries(grouped).map(([category, obstacles]) => (
-            <div key={category}>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">
-                {CATEGORY_LABELS[category] || category}
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {obstacles.map((obs) => {
-                  const isSelected = selected.some((s) => s.id === obs.id);
-                  const fouls = foulsMap[obs.id] ?? 0;
-                  return (
-                    <div
-                      key={obs.id}
-                      className={`flex flex-col gap-1 p-2.5 rounded-xl border-2 text-xs transition-all ${
-                        isSelected
-                          ? "border-primary-400 bg-primary-50 dark:bg-primary-950/40"
-                          : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900"
-                      }`}
-                    >
+        <div className="max-h-80 overflow-y-auto space-y-5 pr-1">
+          {Object.entries(grouped).map(([category, obstacles]) => {
+            const config = CATEGORY_CONFIG[category] || { label: category, emoji: "🏁", color: "text-zinc-600", lightBg: "bg-zinc-50", border: "border-zinc-200" };
+            return (
+              <div key={category}>
+                <div className={`flex items-center gap-1.5 mb-2 px-2 py-1 rounded-lg ${config.lightBg} ${config.border} border w-fit`}>
+                  <span className="text-sm">{config.emoji}</span>
+                  <span className={`text-[11px] font-bold uppercase tracking-wider ${config.color}`}>
+                    {config.label}
+                  </span>
+                  <span className="text-[10px] text-zinc-400">({obstacles.length})</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {obstacles.map((obs) => {
+                    const isSelected = selected.some((s) => s.id === obs.id);
+                    const fouls = foulsMap[obs.id] ?? 0;
+                    return (
                       <button
+                        key={obs.id}
                         onClick={() => toggleObstacle(obs)}
-                        className="flex items-center gap-2 text-left"
+                        className={`relative flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all active:scale-[0.97] ${
+                          isSelected
+                            ? `${config.lightBg} ${config.border} border-2`
+                            : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-700"
+                        }`}
                       >
                         <div
-                          className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${
+                          className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-xs ${
                             isSelected
-                              ? "bg-primary-500 text-white"
+                              ? `${config.color} bg-white dark:bg-zinc-800 shadow-sm`
                               : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
                           }`}
                         >
-                          {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                          {isSelected ? "✅" : "➕"}
                         </div>
-                        <span className="font-semibold text-zinc-700 dark:text-zinc-300 text-[11px] leading-tight">
+                        <span className={`font-semibold text-[11px] leading-tight ${isSelected ? config.color : "text-zinc-700 dark:text-zinc-300"}`}>
                           {obs.name}
                         </span>
-                      </button>
 
-                      {showFouls && isSelected && (
-                        <div className="flex items-center justify-between pt-1 border-t border-zinc-100 dark:border-zinc-800 mt-1">
-                          <span className="text-[10px] text-zinc-500">Faltas</span>
-                          <div className="flex items-center gap-2">
+                        {showFouls && isSelected && (
+                          <div className="absolute -top-1.5 -right-1.5 flex items-center gap-1">
                             <button
-                              onClick={() => removeFoul(obs.id)}
-                              className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 flex items-center justify-center text-xs active:scale-95"
+                              onClick={(e) => { e.stopPropagation(); removeFoul(obs.id); }}
+                              className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-600 flex items-center justify-center text-[10px] active:scale-95"
                             >
-                              -
+                              −
                             </button>
-                            <span className="text-xs font-bold w-4 text-center">{fouls}</span>
+                            <span className="text-[10px] font-bold bg-warning-100 dark:bg-warning-900 text-warning-700 px-1.5 py-0.5 rounded-full">
+                              {fouls}
+                            </span>
                             <button
-                              onClick={() => addFoul(obs.id)}
-                              className="w-5 h-5 rounded-full bg-warning-100 dark:bg-warning-900 text-warning-700 flex items-center justify-center text-xs active:scale-95"
+                              onClick={(e) => { e.stopPropagation(); addFoul(obs.id); }}
+                              className="w-5 h-5 rounded-full bg-warning-500 text-white flex items-center justify-center text-[10px] active:scale-95 shadow-sm"
                             >
                               +
                             </button>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {filtered.length === 0 && search && (
-            <p className="text-xs text-zinc-400 text-center py-3">
-              No encontramos "{search}". ¿Quieres sugerirlo?
-            </p>
+            <div className="text-center py-6 space-y-2">
+              <span className="text-2xl">🔍</span>
+              <p className="text-xs text-zinc-400">
+                No encontramos "{search}"<br/>¿Quieres sugerirlo?
+              </p>
+            </div>
           )}
         </div>
       )}
@@ -281,8 +286,8 @@ export function AgilityObstaclePicker({
               onChange={(e) => setSuggestCategory(e.target.value)}
               className="flex-1 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
             >
-              {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>{label}</option>
+              {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
+                <option key={key} value={key}>{config.emoji} {config.label}</option>
               ))}
             </select>
             <select

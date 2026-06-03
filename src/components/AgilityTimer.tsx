@@ -72,6 +72,8 @@ export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) 
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [presetSaving, setPresetSaving] = useState(false);
+  const presetDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load session types and foul types
   useEffect(() => {
@@ -103,18 +105,47 @@ export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) 
       });
   }, []);
 
-  // Preload circuit if provided
+  // Load preset or native circuit when sessionTypeId changes
+  useEffect(() => {
+    if (!sessionTypeId) return;
+    fetch(`/api/agility/presets?dog_id=${dog.id}&session_type_id=${sessionTypeId}`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.preset) {
+          const presetAny = j.preset as any;
+          const obsIds = Array.isArray(presetAny.obstacles)
+            ? presetAny.obstacles
+            : Array.isArray(presetAny.standard_obstacles)
+            ? presetAny.standard_obstacles
+            : [];
+          if (obsIds.length > 0) {
+            fetch("/api/agility/obstacles")
+              .then((r) => r.json())
+              .then((j2) => {
+                if (j2.obstacles) {
+                  const obstacleIds = obsIds.map((o: any) => o.obstacle_id || o);
+                  const matched = j2.obstacles.filter((o: AgilityObstacle) => obstacleIds.includes(o.id));
+                  setSelectedObstacles(matched);
+                }
+              });
+          }
+          if (presetAny.difficulty_level) {
+            setDifficulty(presetAny.difficulty_level);
+          }
+        }
+      })
+      .catch((err) => console.error("Error loading preset:", err));
+  }, [sessionTypeId, dog.id]);
+
+  // Preload circuit if provided (from quick circuits carousel)
   useEffect(() => {
     if (preloadedCircuit) {
-      // Set session type
       if (preloadedCircuit.session_type_id) {
         setSessionTypeId(preloadedCircuit.session_type_id);
       }
-      // Set difficulty
       if (preloadedCircuit.difficulty_level) {
         setDifficulty(preloadedCircuit.difficulty_level);
       }
-      // Load obstacles for this circuit
       const circuitAny = preloadedCircuit as any;
       const obsIds = Array.isArray(circuitAny.standard_obstacles)
         ? circuitAny.standard_obstacles
@@ -251,9 +282,32 @@ export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) 
     });
   };
 
+  const savePreset = useCallback((obs: AgilityObstacle[]) => {
+    if (!sessionTypeId || !dog?.id) return;
+    setPresetSaving(true);
+    const obstaclesPayload = obs.map((o, idx) => ({ obstacle_id: o.id, order: idx + 1 }));
+    fetch("/api/agility/presets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dog_id: dog.id,
+        session_type_id: sessionTypeId,
+        difficulty_level: difficulty,
+        obstacles: obstaclesPayload,
+      }),
+    })
+      .then(() => setPresetSaving(false))
+      .catch(() => setPresetSaving(false));
+  }, [sessionTypeId, dog?.id, difficulty]);
+
   const handleObstaclesChange = (obs: AgilityObstacle[]) => {
     setSelectedObstacles(obs);
     persist({ selectedObstacles: obs });
+    // Auto-save preset with debounce
+    if (presetDebounceRef.current) clearTimeout(presetDebounceRef.current);
+    presetDebounceRef.current = setTimeout(() => {
+      savePreset(obs);
+    }, 1500);
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -484,46 +538,78 @@ export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) 
 
           {/* Session Type */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-zinc-500">Tipo de sesión</label>
+            <label className="text-xs font-semibold text-zinc-500 flex items-center gap-1">
+              <span>🎯</span> Tipo de sesión
+            </label>
             {sessionTypes.length === 0 ? (
               <p className="text-xs text-zinc-400 py-2">Cargando tipos de sesión...</p>
             ) : (
               <div className="grid grid-cols-2 gap-2">
-                {sessionTypes.map((st) => (
-                  <button
-                    key={st.id}
-                    onClick={() => setSessionTypeId(st.id)}
-                    className={`p-3 rounded-xl border-2 text-left text-xs transition-all ${
-                      sessionTypeId === st.id
-                        ? "border-accent-400 bg-accent-50 dark:bg-accent-950/40"
-                        : "border-zinc-100 dark:border-zinc-800"
-                    }`}
-                  >
-                    <span className="font-bold text-zinc-700 dark:text-zinc-300">{st.name}</span>
-                    <p className="text-[10px] text-zinc-400 mt-0.5 line-clamp-2">{st.description}</p>
-                  </button>
-                ))}
+                {sessionTypes.map((st) => {
+                  const isActive = sessionTypeId === st.id;
+                  const emojiMap: Record<string, string> = {
+                    'entrenamiento-libre': '🎾',
+                    'circuito-estandar': '🏆',
+                    'jumpers': '⚡',
+                    'agility-contacto': '🐾',
+                    'snooker': '🎱',
+                    'gamblers': '🎲',
+                    'steeplechase': '🏃',
+                    'relevos': '👯',
+                    'power-speed': '💪',
+                    'secuencia-tecnica': '🧩',
+                  };
+                  return (
+                    <button
+                      key={st.id}
+                      onClick={() => setSessionTypeId(st.id)}
+                      className={`p-3 rounded-xl border-2 text-left text-xs transition-all active:scale-[0.97] ${
+                        isActive
+                          ? "border-accent-400 bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-950/40 dark:to-accent-900/40 shadow-md"
+                          : "border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-base">{emojiMap[st.slug] || '🏁'}</span>
+                        <span className={`font-bold ${isActive ? 'text-accent-700 dark:text-accent-300' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                          {st.name}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-zinc-400 line-clamp-2 pl-5">{st.description}</p>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
 
           {/* Difficulty */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-zinc-500">Nivel</label>
+            <label className="text-xs font-semibold text-zinc-500 flex items-center gap-1">
+              <span>📊</span> Nivel
+            </label>
             <div className="flex gap-2">
-              {["principiante", "intermedio", "avanzado"].map((lvl) => (
-                <button
-                  key={lvl}
-                  onClick={() => setDifficulty(lvl)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold capitalize transition-all ${
-                    difficulty === lvl
-                      ? "bg-accent-600 text-white"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                  }`}
-                >
-                  {lvl}
-                </button>
-              ))}
+              {[
+                { key: "principiante", label: "Principiante", emoji: "🌱", color: "bg-secondary-500", light: "bg-secondary-50 text-secondary-700 border-secondary-200" },
+                { key: "intermedio", label: "Intermedio", emoji: "🔥", color: "bg-warning-500", light: "bg-warning-50 text-warning-700 border-warning-200" },
+                { key: "avanzado", label: "Avanzado", emoji: "👑", color: "bg-danger-500", light: "bg-danger-50 text-danger-700 border-danger-200" },
+              ].map((lvl) => {
+                const isActive = difficulty === lvl.key;
+                return (
+                  <button
+                    key={lvl.key}
+                    onClick={() => setDifficulty(lvl.key)}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold capitalize transition-all active:scale-[0.97] flex flex-col items-center gap-0.5 ${
+                      isActive
+                        ? `${lvl.color} text-white shadow-lg`
+                        : `bg-white dark:bg-zinc-900 text-zinc-500 border-2 border-zinc-100 dark:border-zinc-800`
+                    }`}
+                  >
+                    <span className="text-base">{lvl.emoji}</span>
+                    <span>{lvl.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -531,10 +617,11 @@ export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) 
           <div className="space-y-2">
             <button
               onClick={() => setShowPenaltyConfig(!showPenaltyConfig)}
-              className="flex items-center gap-2 text-xs font-semibold text-zinc-500"
+              className="flex items-center gap-2 text-xs font-semibold text-zinc-500 hover:text-zinc-700 transition-colors"
             >
-              <Settings className="w-3.5 h-3.5" />
-              Penalizaciones por defecto
+              <span className="text-sm">⚙️</span>
+              <span>Penalizaciones por defecto</span>
+              <span className={`transition-transform ${showPenaltyConfig ? 'rotate-180' : ''}`}>▼</span>
             </button>
             {showPenaltyConfig && (
               <div className="space-y-2 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
@@ -566,7 +653,19 @@ export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) 
 
           {/* Obstacles */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-zinc-500">Obstáculos del circuito</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-zinc-500 flex items-center gap-1">
+                <span>🚧</span> Obstáculos del circuito
+              </label>
+              {presetSaving && (
+                <span className="text-[10px] text-accent-500 animate-pulse flex items-center gap-1">
+                  <span>💾</span> Guardando...
+                </span>
+              )}
+              {selectedObstacles.length > 0 && !presetSaving && (
+                <span className="text-[10px] text-zinc-400">{selectedObstacles.length} seleccionados</span>
+              )}
+            </div>
             <AgilityObstaclePicker
               selected={selectedObstacles}
               onChange={handleObstaclesChange}
@@ -576,10 +675,10 @@ export function AgilityTimer({ dog, userId, onClose, preloadedCircuit }: Props) 
           <button
             onClick={startSession}
             disabled={selectedObstacles.length === 0}
-            className="w-full bg-gradient-to-r from-accent-500 to-accent-600 text-white rounded-2xl py-4 font-bold text-lg disabled:opacity-50 active:scale-[0.98] transition-all shadow-lg shadow-accent-500/25"
+            className="w-full bg-gradient-to-r from-accent-500 via-accent-600 to-accent-700 text-white rounded-2xl py-4 font-black text-lg disabled:opacity-40 active:scale-[0.97] transition-all shadow-xl shadow-accent-500/30 flex items-center justify-center gap-2"
           >
-            <Play className="w-5 h-5 inline mr-2 fill-current" />
-            INICIAR CIRCUITO
+            <span className="text-2xl">🚀</span>
+            <span>INICIAR CIRCUITO</span>
           </button>
         </div>
       )}
