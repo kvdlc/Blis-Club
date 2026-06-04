@@ -82,6 +82,7 @@ export interface NutritionRecipe {
   difficulty: RecipeDifficulty;
   kcal_per_100g: number | null;
   is_detox: boolean;
+  protein_type: string | null;
 }
 
 export interface RecipeIngredient {

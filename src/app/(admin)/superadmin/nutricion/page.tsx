@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { Plus, Edit, Trash2, UtensilsCrossed, Save, X, ChevronDown, ChevronUp, Sparkles, Camera, Image as ImageIcon, Loader2 } from "lucide-react";
 import AIGenerateModal from "@/components/admin/AIGenerateModal";
@@ -12,7 +12,7 @@ interface Recipe {
   id: string; title: string; description: string; category: string;
   image_url: string; video_url: string | null; is_therapeutic: boolean; health_tags: string[];
   prep_time_min: number; difficulty: string; kcal_per_100g: number;
-  is_detox: boolean; source_book: string;
+  is_detox: boolean; source_book: string; protein_type: string;
 }
 interface Ingredient { id: string; recipe_id: string; ingredient_name: string; quantity_per_serving_g: number; ingredient_type: string; unit_type: string; unit_weight_g: number; display_unit: string | null; }
 interface Step { id: string; recipe_id: string; step_number: number; instruction: string; duration_min: number; image_url: string; }
@@ -23,7 +23,7 @@ const DIFFICULTIES = ["facil", "medio", "avanzado"];
 const INGREDIENT_TYPES = ["proteina", "hueso", "viscera", "vegetal", "suplemento", "otro"];
 const TAG_OPTIONS = ["sin gluten", "sin lacteos", "hipoalergenico", "alto en proteina", "bajo en grasa", "renal", "hepatico", "diabetico", "cardiaco", "digestivo", "articular"];
 
-const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", video_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "" };
+const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", video_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "", protein_type: "" };
 const emptyFacts: NutritionFact = { recipe_id: "", protein_g: 0, fat_g: 0, carbs_g: 0, fiber_g: 0, moisture_g: 0, ash_g: 0, calcium_mg: 0, phosphorus_mg: 0, iron_mg: 0, zinc_mg: 0, vitamin_a_ui: 0, vitamin_d_ui: 0, vitamin_e_mg: 0, omega3_g: 0, omega6_g: 0 };
 
 export default function NutricionPage() {
@@ -46,8 +46,14 @@ export default function NutricionPage() {
   const [generatingImage, setGeneratingImage] = useState(false);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [imageEditorUrl, setImageEditorUrl] = useState("");
+  const [newProtein, setNewProtein] = useState("");
 
   const appSlug = () => { try { return localStorage.getItem("blis_active_app_slug") || "guau"; } catch { return "guau"; } };
+
+  const existingProteinTypes = useMemo(() => {
+    const types = [...new Set(recipes.map((r) => r.protein_type).filter(Boolean))];
+    return types.sort();
+  }, [recipes]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -118,7 +124,7 @@ export default function NutricionPage() {
 
   const handleEdit = (r: Recipe) => {
     setEditing(r);
-    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min || 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g || 0, is_detox: r.is_detox, source_book: r.source_book || "" });
+    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min || 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g || 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "" });
     setShowNew(false);
     loadSubEntities(r.id);
   };
@@ -137,6 +143,7 @@ export default function NutricionPage() {
       kcal_per_100g: recipe.kcal_per_100g || 0,
       is_detox: recipe.is_detox || false,
       source_book: recipe.source_book || "",
+      protein_type: recipe.protein_type || "",
     };
     setForm(aiRecipe);
 
@@ -275,13 +282,18 @@ export default function NutricionPage() {
           <div className="grid gap-3">
             {recipes.map(r => (
               <div key={r.id} className="card-soft rounded-[1.25rem] p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onClick={() => handleEdit(r)}>
-                <div className="w-12 h-12 rounded-2xl bg-warning-100 dark:bg-warning-950 flex items-center justify-center text-warning-600"><UtensilsCrossed className="w-6 h-6" /></div>
+                {r.image_url ? (
+                  <img src={r.image_url} alt={r.title} className="w-12 h-12 rounded-2xl object-cover border border-zinc-100 dark:border-zinc-700" />
+                ) : (
+                  <div className="w-12 h-12 rounded-2xl bg-warning-100 dark:bg-warning-950 flex items-center justify-center text-warning-600"><UtensilsCrossed className="w-6 h-6" /></div>
+                )}
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">{r.title}</p>
                   <div className="flex gap-2 mt-1 flex-wrap">
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.category}</span>
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.difficulty}</span>
                     {r.prep_time_min ? <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.prep_time_min}min</span> : null}
+                    {r.protein_type && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-100 text-primary-700">{r.protein_type}</span>}
                     {r.is_therapeutic && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary-100 text-secondary-700">Terapéutica</span>}
                   </div>
                 </div>
@@ -315,6 +327,16 @@ export default function NutricionPage() {
                   <input type="number" value={form.prep_time_min} onChange={e => setForm({...form, prep_time_min: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
                 <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Kcal/100g</label>
                   <input type="number" value={form.kcal_per_100g} onChange={e => setForm({...form, kcal_per_100g: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Proteína principal</label>
+                  <select value={form.protein_type} onChange={e => { const val = e.target.value; if (val === "__new__") { setNewProtein(""); setForm(f => ({...f, protein_type: ""})); } else { setForm(f => ({...f, protein_type: val})); } }} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                    <option value="">Sin especificar</option>
+                    {existingProteinTypes.map(pt => <option key={pt} value={pt}>{pt}</option>)}
+                    <option value="__new__">+ Nueva proteína...</option>
+                  </select>
+                  {form.protein_type === "" && newProtein !== undefined && (
+                    <input value={newProtein} onChange={e => { setNewProtein(e.target.value); setForm(f => ({...f, protein_type: e.target.value})); }} placeholder="Escribe la proteína..." className="w-full mt-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  )}
+                </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Imagen de la Receta</label>
                   <div className="flex items-center gap-3">

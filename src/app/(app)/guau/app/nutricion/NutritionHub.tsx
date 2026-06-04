@@ -135,14 +135,24 @@ const CATEGORY_META: Record<string, { label: string; icon: string; bg: string; b
 
 function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[]; onOpenScanner: () => void }) {
   const [selectedCategory, setSelectedCategory] = useState<string | "all">("all");
+  const [selectedProtein, setSelectedProtein] = useState<string>("");
 
   const categories = [...new Set(recipes.map((r) => r.category))];
+  const proteinTypes = useMemo(() => {
+    const types = [...new Set(recipes
+      .filter(r => r.category === "diario" || selectedCategory !== "diario")
+      .map((r) => r.protein_type)
+      .filter((pt): pt is string => !!pt)
+    )];
+    return types.sort();
+  }, [recipes]);
 
   const filteredRecipes = useMemo(() => {
     let result = recipes;
     if (selectedCategory !== "all") result = result.filter((r) => r.category === selectedCategory);
+    if (selectedProtein) result = result.filter((r) => r.protein_type === selectedProtein);
     return result;
-  }, [recipes, selectedCategory]);
+  }, [recipes, selectedCategory, selectedProtein]);
 
   const popular = filteredRecipes.filter((r) => !r.is_detox).slice(0, 4);
   const newest = [...filteredRecipes].reverse().slice(0, 4);
@@ -202,6 +212,20 @@ function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[];
           })}
         </div>
       </div>
+
+      {/* Protein filter dropdown */}
+      {(selectedCategory === "all" || selectedCategory === "diario") && proteinTypes.length > 0 && (
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-semibold text-zinc-500 whitespace-nowrap">Filtrar por proteína:</label>
+          <select value={selectedProtein} onChange={e => setSelectedProtein(e.target.value)} className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+            <option value="">Todas las proteínas</option>
+            {proteinTypes.map(pt => <option key={pt} value={pt}>{pt}</option>)}
+          </select>
+          {selectedProtein && (
+            <button onClick={() => setSelectedProtein("")} className="text-[10px] text-zinc-400 hover:text-zinc-600 font-semibold px-2 py-1">Limpiar</button>
+          )}
+        </div>
+      )}
 
       {/* Popular section */}
       {popular.length > 0 && (

@@ -27,6 +27,7 @@ Responde ÚNICAMENTE con un objeto JSON válido que siga exactamente este schema
   "prep_time_min": "number (tiempo realista en minutos)",
   "kcal_per_100g": "number",
   "is_therapeutic": "boolean",
+  "protein_type": "string | null (proteína principal: Pollo, Res, Pavo, Pescado, Cerdo, Cordero, Huevo, Mixto, Vegetal, o inventa una nueva)",
   "health_tags": "string[] (opciones válidas: sin_gluten, hipoalergenico, renal, digestivo, articular, peso_ideal, senior, cachorro, diabetico, dermatitis, inmunidad)",
   "source_book": "string | null",
   "image_url": "string | null (URL de placeholder o null)",
