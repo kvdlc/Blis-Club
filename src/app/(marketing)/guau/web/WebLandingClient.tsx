@@ -109,14 +109,6 @@ const EXPANDABLE_FEATURES = [
     win: "Detectarás sobrepeso o deshidratación semanas antes de que sea un problema. Ahorrarás cientos en visitas veterinarias de emergencia.",
   },
   {
-    icon: <img src="/icons/feature-soporte-prioritario.webp" alt="Soporte prioritario" className="w-20 h-20 object-contain" />,
-    title: "Soporte prioritario",
-    has: "Acceso directo a expertos caninos que responden en menos de 24 horas por chat.",
-    before: "Tienes una duda urgente un sábado a la noche y no sabes a quién preguntar. Google te da 10 respuestas distintas.",
-    after: "Escribes en la app y un entrenador o nutricionista certificado te orienta con pasos claros y seguros.",
-    win: "Evitarás emergencias por errores de novato. Cada decisión que tomes estará respaldada por profesionales, no por foros de internet.",
-  },
-  {
     icon: <img src="/icons/feature-escaner-alimentos.webp" alt="Escáner de alimentos" className="w-20 h-20 object-contain" />,
     title: "Escáner de alimentos",
     has: "Verifica en segundos si un alimento es seguro, tóxico o debe darse con precaución.",
@@ -473,7 +465,7 @@ export function WebLandingClient({ plans }: Props) {
             <div key={i} className={`group relative ${i === 0 ? "sm:col-span-2 lg:col-span-3" : ""}`}>
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-[1.5rem] blur opacity-0 group-hover:opacity-20 transition-opacity" />
               <div className="relative bg-white dark:bg-zinc-900 rounded-[1.5rem] p-3 border border-zinc-100 dark:border-zinc-800 h-full">
-                <div className={`rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 mb-3 mx-auto ${i === 0 ? "max-w-md" : ""} ${s.wide ? "aspect-[406/210] max-h-48" : "aspect-[9/16] max-h-72"}`}>
+                <div className={`rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 mb-3 mx-auto ${i === 0 ? "max-w-md" : ""} ${s.wide ? "aspect-[406/210] max-h-48" : "aspect-[9/16] max-h-[500px]"}`}>
                   <img src={s.src} alt={s.title} className="w-full h-full object-contain" />
                 </div>
                 <h3 className="text-sm font-extrabold text-zinc-900 dark:text-white mb-1">{s.title}</h3>
@@ -499,8 +491,8 @@ export function WebLandingClient({ plans }: Props) {
           {SOLUTION_PILLARS.map((s, i) => (
             <div key={i} className="relative group">
               <div className={`absolute -inset-0.5 bg-gradient-to-r ${s.color} rounded-[1.5rem] blur opacity-20 group-hover:opacity-40 transition-opacity`} />
-              <div className="relative bg-white dark:bg-zinc-900 rounded-[1.5rem] p-6 border border-zinc-100 dark:border-zinc-800 h-full">
-                <div className="w-24 h-24 mb-4 flex items-center justify-center">
+              <div className="relative bg-white dark:bg-zinc-900 rounded-[1.5rem] p-6 border border-zinc-100 dark:border-zinc-800 h-full text-center">
+                <div className="w-24 h-24 mb-4 mx-auto flex items-center justify-center">
                   {s.icon}
                 </div>
                 <h3 className="text-base font-extrabold text-zinc-900 dark:text-white mb-2">{s.title}</h3>
@@ -553,7 +545,7 @@ export function WebLandingClient({ plans }: Props) {
         <div className="text-center mb-10">
           <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">Todo incluido</span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white mt-2">
-            Una app, doce superpoderes
+            Una app, once superpoderes
           </h2>
           <p className="text-sm text-zinc-500 mt-2 max-w-lg mx-auto">
             Toca cada función para ver qué incluye, qué problema resuelve y qué vas a lograr con ella.
