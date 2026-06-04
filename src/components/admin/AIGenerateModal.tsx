@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Sparkles, Loader2, Wand2 } from "lucide-react";
+import { X, Sparkles, Loader2, Wand2, Search } from "lucide-react";
 
 interface Props {
   isOpen: boolean;
@@ -19,6 +19,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState<any>(null);
+  const [importMode, setImportMode] = useState<"generate" | "import">("generate");
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -27,13 +28,17 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
     setPreview(null);
 
     try {
-      const endpoint = mode === "recipe" ? "/api/ai/generate-recipe" : "/api/ai/generate-lesson";
-      const body: any = { prompt };
+      const endpoint = importMode === "import"
+        ? "/api/ai/import-croqueta"
+        : mode === "recipe"
+          ? "/api/ai/generate-recipe"
+          : "/api/ai/generate-lesson";
+      const body: any = importMode === "import" ? { query: prompt } : { prompt };
 
-      if (mode === "recipe") {
+      if (mode === "recipe" && importMode === "generate") {
         if (category) body.category = category;
         if (difficulty) body.difficulty = difficulty;
-      } else {
+      } else if (mode === "lesson") {
         if (lessonType) body.type = lessonType;
         if (moduleTitle) body.moduleTitle = moduleTitle;
       }
@@ -51,7 +56,32 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
         return;
       }
 
-      setPreview(mode === "recipe" ? data.recipe : data.content_json);
+      if (importMode === "import") {
+        // Transform import response to recipe format
+        const imported = data.data;
+        setPreview({
+          title: imported.official_name || imported.title,
+          description: imported.description,
+          category: imported.category || "croquetas",
+          image_url: "",
+          video_url: "",
+          is_therapeutic: imported.is_therapeutic || false,
+          health_tags: imported.health_tags || [],
+          prep_time_min: imported.prep_time_min || 0,
+          difficulty: imported.difficulty || "facil",
+          kcal_per_100g: imported.kcal_per_100g || 0,
+          is_detox: imported.is_detox || false,
+          source_book: imported.brand || "",
+          protein_type: imported.protein_type || "Croqueta comercial",
+          ingredients: imported.ingredients || [],
+          steps: imported.steps || [],
+          nutrition_facts: imported.nutrition_facts || null,
+          breed_sizes: imported.breed_sizes || [],
+          image_search_query: imported.image_search_query || "",
+        });
+      } else {
+        setPreview(mode === "recipe" ? data.recipe : data.content_json);
+      }
     } catch (e) {
       setError("Error de conexión");
     } finally {
@@ -65,6 +95,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
     onClose();
     setPrompt("");
     setPreview(null);
+    setImportMode("generate");
   };
 
   const handleRegenerate = () => {
@@ -86,7 +117,11 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
               <Sparkles className="w-4 h-4 text-accent-600" />
             </div>
             <h2 className="font-bold text-zinc-900 dark:text-white text-sm">
-              {isRecipe ? "Generar receta con AI" : "Generar lección con AI"}
+              {isRecipe
+                ? importMode === "import"
+                  ? "Importar croqueta comercial"
+                  : "Generar receta con AI"
+                : "Generar lección con AI"}
             </h2>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors">
@@ -95,18 +130,38 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
         </div>
 
         <div className="p-4 space-y-4">
+          {/* Mode toggle for recipes */}
+          {isRecipe && (
+            <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-0.5">
+              <button
+                onClick={() => { setImportMode("generate"); setPreview(null); }}
+                className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${importMode === "generate" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}
+              >
+                Generar receta
+              </button>
+              <button
+                onClick={() => { setImportMode("import"); setPreview(null); }}
+                className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${importMode === "import" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}
+              >
+                Importar croqueta
+              </button>
+            </div>
+          )}
+
           {/* Prompt input */}
           <div>
             <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 block mb-1">
-              Describe lo que quieres generar
+              {importMode === "import" ? "Nombre aproximado de la croqueta" : "Describe lo que quieres generar"}
             </label>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder={
-                isRecipe
-                  ? "Ej: Receta de pollo con zanahoria para perro diabético de 10kg, baja en grasa..."
-                  : "Ej: Lección sobre cómo enseñar 'sentado' a un cachorro de 3 meses, con teoría y quiz..."
+                importMode === "import"
+                  ? "Ej: AVANT ADULTO RAZA MEDIANA GRANDE..."
+                  : isRecipe
+                    ? "Ej: Receta de pollo con zanahoria para perro diabético de 10kg, baja en grasa..."
+                    : "Ej: Lección sobre cómo enseñar 'sentado' a un cachorro de 3 meses, con teoría y quiz..."
               }
               rows={4}
               className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 text-sm"
@@ -114,7 +169,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
           </div>
 
           {/* Recipe options */}
-          {isRecipe && (
+          {isRecipe && importMode === "generate" && (
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 block mb-1">Categoría (opcional)</label>
@@ -128,6 +183,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                   <option value="snack">Snack</option>
                   <option value="helado">Helado</option>
                   <option value="pastel">Pastel</option>
+                  <option value="croquetas">Croquetas</option>
                 </select>
               </div>
               <div>
@@ -153,9 +209,9 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
             className="w-full rounded-xl bg-accent-600 hover:bg-accent-700 text-white py-3 text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Generando con Gemini 2.5 Pro...</>
+              <><Loader2 className="w-4 h-4 animate-spin" /> {importMode === "import" ? "Buscando..." : "Generando con Gemini 2.5 Pro..."}</>
             ) : (
-              <><Wand2 className="w-4 h-4" /> Generar</>
+              <>{importMode === "import" ? <Search className="w-4 h-4" /> : <Wand2 className="w-4 h-4" />} {importMode === "import" ? "Buscar e importar" : "Generar"}</>
             )}
           </button>
 
@@ -179,6 +235,16 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                     <span className="text-[10px] bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full">{preview.difficulty}</span>
                     <span className="text-[10px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">{preview.prep_time_min} min</span>
                   </div>
+                  {preview.breed_sizes && preview.breed_sizes.length > 0 && (
+                    <div className="flex gap-1 flex-wrap">
+                      {preview.breed_sizes.map((bs: string) => (
+                        <span key={bs} className="text-[9px] bg-secondary-100 text-secondary-700 px-1.5 py-0.5 rounded-full">{bs}</span>
+                      ))}
+                    </div>
+                  )}
+                  {preview.image_search_query && (
+                    <p className="text-[10px] text-zinc-400">Buscar imagen: {preview.image_search_query}</p>
+                  )}
                   <p className="text-xs text-zinc-600">
                     <strong>{preview.ingredients?.length || 0}</strong> ingredientes · <strong>{preview.steps?.length || 0}</strong> pasos
                   </p>

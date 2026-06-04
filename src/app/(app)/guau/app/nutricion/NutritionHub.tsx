@@ -9,7 +9,7 @@ import {
   Search, Plus, Minus, ChefHat, Lock, Check, ShoppingCart,
   AlertTriangle, ShieldCheck, X, Trash2, Sparkles, Clock,
   Flame, ChevronRight, ScanBarcode, UtensilsCrossed, ArrowRight,
-  CalendarDays
+  CalendarDays, Heart, EyeOff
 } from "lucide-react";
 
 type Tab = "recetario" | "calculadora" | "detox" | "escaner" | "lista" | "plan";
@@ -27,6 +27,8 @@ interface Props {
   walks: Walk[];
   greenCount: number;
   initialTab?: Tab;
+  favoriteRecipeIds: Set<string>;
+  hiddenRecipeIds: Map<string, string | null>;
 }
 
 const TABS: { key: Tab; label: string; icon: any }[] = [
@@ -67,6 +69,9 @@ export function NutritionHub(props: Props) {
         <RecetarioView
           recipes={props.initialRecipes}
           onOpenScanner={() => { setActiveTab("escaner"); }}
+          userId={props.userId}
+          favoriteIds={props.favoriteRecipeIds}
+          hiddenMap={props.hiddenRecipeIds}
         />
       )}
       {activeTab === "plan" && (
@@ -89,41 +94,6 @@ export function NutritionHub(props: Props) {
 }
 
 /* ================================================================ */
-/*  PLAN TAB                                                         */
-/* ================================================================ */
-function PlanTab(props: {
-  dog: Dog | null;
-  mealSlots: DogMealSlot[];
-  mealSchedule: (MealSchedule & { recipe: NutritionRecipe | null })[];
-  metabolicProfile: DogMetabolicProfile | null;
-  recipes: NutritionRecipe[];
-  walksCount: number;
-  greenWalksCount: number;
-}) {
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <CalendarDays className="w-5 h-5 text-primary-600" />
-        <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">Plan de Alimentación</h2>
-      </div>
-      {props.dog ? (
-        <MealCalendarWidget
-          dog={props.dog}
-          mealSlots={props.mealSlots}
-          mealSchedule={props.mealSchedule}
-          metabolicProfile={props.metabolicProfile}
-          recipes={props.recipes}
-          walksCount={props.walksCount}
-          greenWalksCount={props.greenWalksCount}
-        />
-      ) : (
-        <p className="text-zinc-500 text-center py-8">Registra un perro primero para ver tu plan de alimentación.</p>
-      )}
-    </div>
-  );
-}
-
-/* ================================================================ */
 /*  RECETARIO PREMIUM                                                */
 /* ================================================================ */
 const CATEGORY_META: Record<string, { label: string; icon: string; bg: string; border: string }> = {
@@ -134,30 +104,52 @@ const CATEGORY_META: Record<string, { label: string; icon: string; bg: string; b
   croquetas: { label: "Croquetas", icon: "🥘", bg: "bg-zinc-50 dark:bg-zinc-900/30", border: "border-zinc-200 dark:border-zinc-800" },
 };
 
-function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[]; onOpenScanner: () => void }) {
-  const [selectedCategory, setSelectedCategory] = useState<string | "all">("all");
+function RecetarioView({
+  recipes, onOpenScanner, userId, favoriteIds, hiddenMap
+}: {
+  recipes: NutritionRecipe[];
+  onOpenScanner: () => void;
+  userId: string;
+  favoriteIds: Set<string>;
+  hiddenMap: Map<string, string | null>;
+}) {
+  const [selectedCategory, setSelectedCategory] = useState<string | "all" | "hidden">("all");
   const [selectedProtein, setSelectedProtein] = useState<string>("");
 
   const categories = [...new Set(recipes.map((r) => r.category))];
+
+  // Visible recipes (exclude hidden by default)
+  const visibleRecipes = useMemo(() => {
+    if (selectedCategory === "hidden") {
+      return recipes.filter((r) => hiddenMap.has(r.id));
+    }
+    return recipes.filter((r) => !hiddenMap.has(r.id));
+  }, [recipes, hiddenMap, selectedCategory]);
+
   const proteinTypes = useMemo(() => {
-    const types = [...new Set(recipes
+    const types = [...new Set(visibleRecipes
       .filter(r => r.category === "diario" || selectedCategory !== "diario")
       .map((r) => r.protein_type)
       .filter((pt): pt is string => !!pt)
     )];
     return types.sort();
-  }, [recipes]);
+  }, [visibleRecipes, selectedCategory]);
 
   const filteredRecipes = useMemo(() => {
-    let result = recipes;
-    if (selectedCategory !== "all") result = result.filter((r) => r.category === selectedCategory);
+    let result = visibleRecipes;
+    if (selectedCategory !== "all" && selectedCategory !== "hidden") result = result.filter((r) => r.category === selectedCategory);
     if (selectedProtein) result = result.filter((r) => r.protein_type === selectedProtein);
     return result;
-  }, [recipes, selectedCategory, selectedProtein]);
+  }, [visibleRecipes, selectedCategory, selectedProtein]);
 
+  // Favorites
+  const favoriteRecipes = useMemo(() => {
+    return recipes.filter((r) => favoriteIds.has(r.id) && !hiddenMap.has(r.id));
+  }, [recipes, favoriteIds, hiddenMap]);
+
+  // Popular (diverse, not detox)
   const popular = useMemo(() => {
-    const candidates = filteredRecipes.filter((r) => !r.is_detox);
-    // Pick diverse protein types (or categories if no protein) for visual variety
+    const candidates = visibleRecipes.filter((r) => !r.is_detox);
     const seen = new Set<string>();
     const diverse: NutritionRecipe[] = [];
     for (const r of candidates) {
@@ -168,7 +160,6 @@ function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[];
         if (diverse.length >= 4) break;
       }
     }
-    // Fill remaining slots
     for (const r of candidates) {
       if (!diverse.includes(r)) {
         diverse.push(r);
@@ -176,13 +167,27 @@ function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[];
       }
     }
     return diverse;
-  }, [filteredRecipes]);
+  }, [visibleRecipes]);
 
-  const newest = [...filteredRecipes].reverse().slice(0, 4);
+  // By category rows
+  const recipesByCategory = useMemo(() => {
+    const groups: Record<string, NutritionRecipe[]> = {};
+    for (const r of visibleRecipes) {
+      if (!groups[r.category]) groups[r.category] = [];
+      groups[r.category].push(r);
+    }
+    return groups;
+  }, [visibleRecipes]);
+
+  // Newest
+  const newest = [...visibleRecipes].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 4);
+
+  const hasFavorites = favoriteRecipes.length > 0;
+  const hasHidden = hiddenMap.size > 0;
 
   return (
     <div className="space-y-6">
-      {/* Scanner banner — FIRST */}
+      {/* Scanner banner */}
       <button
         onClick={onOpenScanner}
         className="w-full flex items-center gap-4 p-4 rounded-[1.5rem] bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/20 transition-transform active:scale-[0.98]"
@@ -233,6 +238,21 @@ function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[];
               </button>
             );
           })}
+          {hasHidden && (
+            <button
+              onClick={() => setSelectedCategory("hidden")}
+              className={`shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${
+                selectedCategory === "hidden"
+                  ? "border-primary-400 bg-primary-50 dark:bg-primary-950/50 shadow-sm"
+                  : "border-zinc-100 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40"
+              }`}
+            >
+              <div className="w-14 h-14 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shadow-sm border border-zinc-200 dark:border-zinc-700">
+                <EyeOff className="w-5 h-5 text-zinc-400" />
+              </div>
+              <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">Ocultas</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -250,31 +270,91 @@ function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[];
         </div>
       )}
 
-      {/* Popular section */}
-      {popular.length > 0 && (
-        <section>
+      {/* VISTA "TODOS" - Carruseles dinámicos */}
+      {selectedCategory === "all" && (
+        <>
+          {/* Favorites — tarjetas grandes tipo Netflix */}
+          {hasFavorites && (
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Tus Favoritos ❤️</h3>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
+                {favoriteRecipes.map((r) => (
+                  <RecipeCard key={r.id} recipe={r} size="large" />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Populares — tarjetas anchas horizontales */}
+          {popular.length > 0 && (
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Populares</h3>
+                <span className="text-xs text-primary-600 dark:text-primary-400 font-semibold">{visibleRecipes.length} recetas</span>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                {popular.map((r) => (
+                  <RecipeCard key={r.id} recipe={r} size="wide" />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Filas por categoría — tarjetas estándar en scroll horizontal */}
+          {categories.map((cat) => {
+            const catRecipes = recipesByCategory[cat];
+            if (!catRecipes || catRecipes.length === 0) return null;
+            return (
+              <section key={cat}>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{CATEGORY_META[cat]?.label ?? cat}</h3>
+                  <button
+                    onClick={() => setSelectedCategory(cat)}
+                    className="text-xs text-primary-600 dark:text-primary-400 font-semibold"
+                  >
+                    Ver todo →
+                  </button>
+                </div>
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
+                  {catRecipes.map((r) => (
+                    <RecipeCard key={r.id} recipe={r} size="standard" />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+
+          {/* Nuevas */}
+          {newest.length > 0 && (
+            <section>
+              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-3">Nuevas</h3>
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
+                {newest.map((r) => (
+                  <RecipeCard key={r.id} recipe={r} size="standard" />
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )}
+
+      {/* VISTA POR CATEGÍA / HIDDEN — grid normal */}
+      {selectedCategory !== "all" && (
+        <>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Populares</h3>
+            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+              {selectedCategory === "hidden" ? "Recetas ocultas" : CATEGORY_META[selectedCategory]?.label ?? selectedCategory}
+            </h3>
             <span className="text-xs text-primary-600 dark:text-primary-400 font-semibold">{filteredRecipes.length} recetas</span>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {popular.map((r) => (
-              <RecipeCard key={r.id} recipe={r} />
+            {filteredRecipes.map((r) => (
+              <RecipeCard key={r.id} recipe={r} size="standard" />
             ))}
           </div>
-        </section>
-      )}
-
-      {/* What's New section */}
-      {newest.length > 0 && (
-        <section>
-          <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-3">Nuevas</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {newest.map((r) => (
-              <RecipeCard key={r.id} recipe={r} />
-            ))}
-          </div>
-        </section>
+        </>
       )}
 
       {/* If no results */}
@@ -289,50 +369,109 @@ function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[];
   );
 }
 
-function RecipeCard({ recipe }: { recipe: NutritionRecipe }) {
+/* ================================================================ */
+/*  RECIPE CARD — 3 tamaños                                          */
+/* ================================================================ */
+function RecipeCard({ recipe, size = "standard" }: { recipe: NutritionRecipe; size?: "standard" | "large" | "wide" }) {
   const categoryMeta = CATEGORY_META[recipe.category];
 
+  if (size === "large") {
+    // Netflix-style tall card
+    return (
+      <Link
+        href={`/guau/app/nutricion/recetario/${recipe.id}`}
+        className="shrink-0 w-40 snap-start card-soft rounded-[1.25rem] p-2.5 hover:shadow-lg transition-all active:scale-[0.97] block group"
+      >
+        <div className="relative w-full aspect-[3/4] rounded-2xl mb-2 flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 dark:from-primary-900/40 dark:via-zinc-900/40 dark:to-accent-900/40 isolate">
+          {recipe.image_url ? (
+            <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover rounded-2xl" />
+          ) : (
+            <ChefHat className={`w-10 h-10 transition-transform group-hover:scale-110 ${recipe.is_therapeutic ? "text-accent-400" : "text-primary-400"}`} />
+          )}
+          {recipe.is_therapeutic && (
+            <span className="absolute top-2 right-2 bg-accent-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">Terapéutico</span>
+          )}
+        </div>
+        <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight">{recipe.title}</h4>
+        <div className="flex items-center gap-2 mt-1">
+          {recipe.prep_time_min && (
+            <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+              <Clock className="w-2.5 h-2.5" />{recipe.prep_time_min}m
+            </span>
+          )}
+        </div>
+      </Link>
+    );
+  }
+
+  if (size === "wide") {
+    // Horizontal wide card
+    return (
+      <Link
+        href={`/guau/app/nutricion/recetario/${recipe.id}`}
+        className="card-soft rounded-[1.25rem] p-3 hover:shadow-lg transition-all active:scale-[0.97] block group"
+      >
+        <div className="flex gap-3">
+          <div className="relative w-24 h-24 shrink-0 rounded-2xl flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 dark:from-primary-900/40 dark:via-zinc-900/40 dark:to-accent-900/40 isolate">
+            {recipe.image_url ? (
+              <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover rounded-2xl" />
+            ) : (
+              <ChefHat className={`w-8 h-8 transition-transform group-hover:scale-110 ${recipe.is_therapeutic ? "text-accent-400" : "text-primary-400"}`} />
+            )}
+          </div>
+          <div className="flex-1 min-w-0 py-0.5">
+            <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight">{recipe.title}</h4>
+            <p className="text-[10px] text-zinc-500 mt-1 line-clamp-2">{recipe.description}</p>
+            <div className="flex items-center gap-2 mt-2">
+              {recipe.prep_time_min && (
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+                  <Clock className="w-2.5 h-2.5" />{recipe.prep_time_min}m
+                </span>
+              )}
+              {recipe.kcal_per_100g && (
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+                  <Flame className="w-2.5 h-2.5 text-orange-400" />{Math.round(recipe.kcal_per_100g)}
+                </span>
+              )}
+              {recipe.is_therapeutic && (
+                <span className="text-[9px] font-bold bg-accent-100 text-accent-700 px-1.5 py-0.5 rounded-full">Terapéutico</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  // Standard square card
   return (
     <Link
       href={`/guau/app/nutricion/recetario/${recipe.id}`}
-      className="card-soft rounded-[1.25rem] p-3.5 hover:shadow-lg transition-all active:scale-[0.97] block group"
+      className="shrink-0 w-40 snap-start card-soft rounded-[1.25rem] p-3 hover:shadow-lg transition-all active:scale-[0.97] block group"
     >
-      {/* Image / gradient area */}
-      <div className="relative w-full aspect-square rounded-2xl mb-2.5 flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 dark:from-primary-900/40 dark:via-zinc-900/40 dark:to-accent-900/40 isolate">
+      <div className="relative w-full aspect-square rounded-2xl mb-2 flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 dark:from-primary-900/40 dark:via-zinc-900/40 dark:to-accent-900/40 isolate">
         {recipe.image_url ? (
           <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover rounded-2xl" />
         ) : (
           <ChefHat className={`w-10 h-10 transition-transform group-hover:scale-110 ${recipe.is_therapeutic ? "text-accent-400" : "text-primary-400"}`} />
         )}
-
-        {/* Therapeutic badge */}
         {recipe.is_therapeutic && (
-          <span className="absolute top-2 right-2 bg-accent-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-            Terapéutico
-          </span>
+          <span className="absolute top-2 right-2 bg-accent-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">Terapéutico</span>
         )}
-
-        {/* Quick add circle button */}
         <div className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-white/90 dark:bg-zinc-800/90 flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
           <ArrowRight className="w-3.5 h-3.5 text-primary-600" />
         </div>
       </div>
-
-      {/* Text */}
       <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight">{recipe.title}</h4>
-
-      {/* Stats row */}
       <div className="flex items-center gap-2 mt-1.5">
         {recipe.prep_time_min && (
           <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
-            <Clock className="w-2.5 h-2.5" />
-            {recipe.prep_time_min}m
+            <Clock className="w-2.5 h-2.5" />{recipe.prep_time_min}m
           </span>
         )}
         {recipe.kcal_per_100g && (
           <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
-            <Flame className="w-2.5 h-2.5 text-orange-400" />
-            {Math.round(recipe.kcal_per_100g)}
+            <Flame className="w-2.5 h-2.5 text-orange-400" />{Math.round(recipe.kcal_per_100g)}
           </span>
         )}
       </div>
@@ -521,6 +660,41 @@ function CalculadoraTab({ dog, metabolicProfile }: { dog: Dog | null; metabolicP
 }
 
 /* ================================================================ */
+/*  PLAN TAB                                                         */
+/* ================================================================ */
+function PlanTab(props: {
+  dog: Dog | null;
+  mealSlots: DogMealSlot[];
+  mealSchedule: (MealSchedule & { recipe: NutritionRecipe | null })[];
+  metabolicProfile: DogMetabolicProfile | null;
+  recipes: NutritionRecipe[];
+  walksCount: number;
+  greenWalksCount: number;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2">
+        <CalendarDays className="w-5 h-5 text-primary-600" />
+        <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">Plan de Alimentación</h2>
+      </div>
+      {props.dog ? (
+        <MealCalendarWidget
+          dog={props.dog}
+          mealSlots={props.mealSlots}
+          mealSchedule={props.mealSchedule}
+          metabolicProfile={props.metabolicProfile}
+          recipes={props.recipes}
+          walksCount={props.walksCount}
+          greenWalksCount={props.greenWalksCount}
+        />
+      ) : (
+        <p className="text-zinc-500 text-center py-8">Registra un perro primero para ver tu plan de alimentación.</p>
+      )}
+    </div>
+  );
+}
+
+/* ================================================================ */
 /*  LISTA DE COMPRAS INTELIGENTE                                     */
 /* ================================================================ */
 function ListaTab({ userId }: { userId: string }) {
@@ -584,7 +758,6 @@ function ListaTab({ userId }: { userId: string }) {
     });
     setSavingPurchase(false);
     setShowPurchaseModal(false);
-    // Mark as purchased in the list
     if (listData) {
       const mark = (items: any[]) => items.map((it: any) => it.ingredient_name === purchaseItem.ingredient_name ? { ...it, purchased: true } : it);
       setListData({ combined: mark(listData.combined), byDog: listData.byDog.map((d: any) => ({ ...d, items: mark(d.items) })) });

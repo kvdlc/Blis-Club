@@ -21,13 +21,15 @@ export default async function NutricionPage({
   const cookieStore = await cookies();
   const savedDogId = cookieStore.get("blis_current_dog")?.value ?? null;
 
-  const [{ data: recipes }, { data: toxicFoods }, { data: dog }, { data: detoxDays }] = await Promise.all([
+  const [{ data: recipes }, { data: toxicFoods }, { data: dog }, { data: detoxDays }, { data: favorites }, { data: hidden }] = await Promise.all([
     supabase.from("nutrition_recipes").select("*").order("category"),
     supabase.from("toxic_foods").select("*").order("name"),
     savedDogId
       ? supabase.from("dogs").select("*").eq("id", savedDogId).eq("owner_id", user.id).single()
       : supabase.from("dogs").select("*").eq("owner_id", user.id).limit(1).single(),
     supabase.from("detox_days").select("*").order("day_number"),
+    supabase.from("user_favorite_recipes").select("recipe_id").eq("user_id", user.id),
+    supabase.from("user_hidden_recipes").select("recipe_id, reason").eq("user_id", user.id),
   ]);
 
   let metabolicProfile: DogMetabolicProfile | null = null;
@@ -57,6 +59,9 @@ export default async function NutricionPage({
   const validTabs = ["recetario", "plan", "calculadora", "detox", "escaner", "lista"] as const;
   const initialTab = tab && validTabs.includes(tab as typeof validTabs[number]) ? (tab as typeof validTabs[number]) : undefined;
 
+  const favoriteIds = new Set((favorites ?? []).map((f: any) => f.recipe_id));
+  const hiddenMap = new Map((hidden ?? []).map((h: any) => [h.recipe_id, h.reason]));
+
   return (
     <NutritionHub
       initialRecipes={(recipes as NutritionRecipe[] | null) ?? []}
@@ -71,6 +76,8 @@ export default async function NutricionPage({
       walks={walks}
       greenCount={greenCount}
       initialTab={initialTab}
+      favoriteRecipeIds={favoriteIds}
+      hiddenRecipeIds={hiddenMap}
     />
   );
 }

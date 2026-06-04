@@ -182,6 +182,11 @@ export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200,
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
+              onWheel={(e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -0.02 : 0.02;
+                setZoom((z) => Math.max(0.3, Math.min(3, z + delta)));
+              }}
               onTouchStart={(e) => {
                 if (e.touches[0]) {
                   setDragging(true);
@@ -214,7 +219,7 @@ export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200,
 
           {/* Zoom out */}
           <button
-            onClick={() => setZoom((z) => Math.max(0.3, z - 0.15))}
+            onClick={() => setZoom((z) => Math.max(0.3, z - 0.05))}
             className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors active:scale-95"
           >
             <ZoomOut className="w-5 h-5 text-white" />
@@ -227,7 +232,7 @@ export function ImageEditor({ open, onClose, onSave, imageUrl, circleSize = 200,
 
           {/* Zoom in */}
           <button
-            onClick={() => setZoom((z) => Math.min(3, z + 0.15))}
+            onClick={() => setZoom((z) => Math.min(3, z + 0.05))}
             className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors active:scale-95"
           >
             <ZoomIn className="w-5 h-5 text-white" />

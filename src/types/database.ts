@@ -83,6 +83,20 @@ export interface NutritionRecipe {
   kcal_per_100g: number | null;
   is_detox: boolean;
   protein_type: string | null;
+  created_at: string;
+}
+
+export interface UserFavoriteRecipe {
+  user_id: string;
+  recipe_id: string;
+  created_at: string;
+}
+
+export interface UserHiddenRecipe {
+  user_id: string;
+  recipe_id: string;
+  reason: string | null;
+  created_at: string;
 }
 
 export interface RecipeIngredient {

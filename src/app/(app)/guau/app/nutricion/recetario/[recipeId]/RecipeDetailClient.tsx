@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { NutritionRecipe, RecipeIngredient, Dog, DogMetabolicProfile, RecipeStep, RecipeNutritionFacts, DogMealSlot } from "@/types/database";
-import { ChefHat, ShoppingCart, ArrowLeft, Check, Heart, Clock, Flame, Star, ChevronDown, ChevronUp, Bone, Beef, Carrot, Pill, CircleHelp, CalendarDays, Plus, Play, X, Circle } from "lucide-react";
+import { ChefHat, ShoppingCart, ArrowLeft, Check, Heart, Clock, Flame, Star, ChevronDown, ChevronUp, Bone, Beef, Carrot, Pill, CircleHelp, CalendarDays, Plus, Play, X, Circle, EyeOff } from "lucide-react";
 import { ScheduleMealModal } from "./ScheduleMealModal";
 import VideoEmbed from "@/components/VideoEmbed";
+import { RecipeLightbox } from "@/components/RecipeLightbox";
 
 interface Props {
   recipe: NutritionRecipe;
@@ -44,6 +45,14 @@ const DIFFICULTY_STARS: Record<string, number> = {
   facil: 1, medio: 2, avanzado: 3,
 };
 
+const HIDE_REASONS = [
+  { emoji: "🐕", label: "Mi perro no le gustó" },
+  { emoji: "👨‍🍳", label: "Es muy difícil de preparar" },
+  { emoji: "🛒", label: "No consigo los ingredientes" },
+  { emoji: "⏱️", label: "Tarda mucho tiempo" },
+  { emoji: "🙅", label: "Otro / Prefiero no decir" },
+];
+
 function formatPieces(grams: number, unitWeight: number, displayUnit: string | null, unitType: string) {
   if (unitType === 'g' || unitType === 'kg') return `${Math.round(grams)}g`;
   if (!unitWeight || unitWeight <= 0) return `${Math.round(grams)}g`;
@@ -69,10 +78,16 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   const [todaySchedule, setTodaySchedule] = useState<{ meal_slot_index: number; status: string }[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [savingCook, setSavingCook] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [perMealMode, setPerMealMode] = useState(false);
+  const [hideModalOpen, setHideModalOpen] = useState(false);
+  const [hidingRecipe, setHidingRecipe] = useState(false);
 
   const feedingPct = metabolicProfile?.feeding_pct ?? 2.5;
   const weight = dog?.peso_kg ?? 0;
   const totalGrams = weight * 1000 * (feedingPct / 100);
+  const mealCount = dogSlots.length || 1;
+  const gramsPerMeal = totalGrams / mealCount;
   const stars = DIFFICULTY_STARS[recipe.difficulty] ?? 1;
 
   const toLocalDateStr = (d = new Date()) => {
@@ -82,6 +97,15 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
     return `${y}-${m}-${day}`;
   };
   const todayStr = toLocalDateStr();
+
+  // Load favorite status
+  useEffect(() => {
+    const loadFav = async () => {
+      const { data } = await supabase.from("user_favorite_recipes").select("recipe_id").eq("user_id", userId).eq("recipe_id", recipe.id).maybeSingle();
+      setLiked(!!data);
+    };
+    loadFav();
+  }, [supabase, userId, recipe.id]);
 
   useEffect(() => {
     if (!dog || !cookModalOpen) return;
@@ -99,6 +123,24 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
     if (!dog) return;
     const { data } = await supabase.from("meal_schedule").select("meal_slot_index, status").eq("dog_id", dog.id).eq("fecha", todayStr);
     setTodaySchedule((data as { meal_slot_index: number; status: string }[] | null) ?? []);
+  };
+
+  const toggleFavorite = async () => {
+    if (liked) {
+      await supabase.from("user_favorite_recipes").delete().eq("user_id", userId).eq("recipe_id", recipe.id);
+      setLiked(false);
+    } else {
+      await supabase.from("user_favorite_recipes").insert({ user_id: userId, recipe_id: recipe.id });
+      setLiked(true);
+    }
+  };
+
+  const handleHide = async (reason: string) => {
+    setHidingRecipe(true);
+    await supabase.from("user_hidden_recipes").insert({ user_id: userId, recipe_id: recipe.id, reason });
+    setHidingRecipe(false);
+    setHideModalOpen(false);
+    router.back();
   };
 
   const handleAddToCart = async () => {
@@ -125,7 +167,6 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
     if (!dog || selectedSlot === null) return;
     setSavingCook(true);
 
-    // Save nutrition log
     await supabase.from("nutrition_logs").insert({
       dog_id: dog.id,
       recipe_id: recipe.id,
@@ -133,7 +174,6 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
       fecha: todayStr,
     });
 
-    // Upsert into meal_schedule with status fed
     await supabase.from("meal_schedule").upsert({
       dog_id: dog.id,
       recipe_id: recipe.id,
@@ -160,18 +200,26 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           <button onClick={() => router.back()} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 hover:bg-white/30 transition-colors">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
-          <button onClick={() => setLiked(!liked)} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 hover:bg-white/30 transition-colors">
-            <Heart className={`w-5 h-5 text-white ${liked ? "fill-white" : ""}`} />
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => setHideModalOpen(true)} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 hover:bg-white/30 transition-colors">
+              <EyeOff className="w-5 h-5 text-white" />
+            </button>
+            <button onClick={toggleFavorite} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 hover:bg-white/30 transition-colors">
+              <Heart className={`w-5 h-5 text-white ${liked ? "fill-white" : ""}`} />
+            </button>
+          </div>
         </div>
         <div className="relative z-10 flex flex-col items-center pt-6">
-          <div className="w-28 h-28 rounded-2xl bg-white/20 backdrop-blur-md border-4 border-white/30 flex items-center justify-center overflow-hidden shadow-xl isolate">
+          <button
+            onClick={() => recipe.image_url && setLightboxOpen(true)}
+            className="w-28 h-28 rounded-2xl bg-white/20 backdrop-blur-md border-4 border-white/30 flex items-center justify-center overflow-hidden shadow-xl isolate"
+          >
             {recipe.image_url ? (
               <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover rounded-2xl" />
             ) : (
               <ChefHat className="w-12 h-12 text-white/90" />
             )}
-          </div>
+          </button>
         </div>
       </div>
 
@@ -202,7 +250,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </div>
         </div>
 
-        {/* Action buttons — MOVED UP */}
+        {/* Action buttons */}
         <div className="space-y-3">
           <div className="flex gap-3">
             <button onClick={() => setScheduleOpen(true)} className="flex-1 rounded-2xl py-3 font-bold text-sm transition-all bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/20 active:scale-[0.97] flex items-center justify-center gap-2">
@@ -247,18 +295,35 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </div>
         )}
 
-        {/* Scale to dog — NOW IN PIECES (hidden for croquetas) */}
+        {/* Scale to dog with toggle */}
         {dog && recipe.category !== "croquetas" && (
           <div className="bg-secondary-50/80 dark:bg-secondary-950/30 rounded-2xl border border-secondary-200/60 dark:border-secondary-800/40 p-5">
-            <h3 className="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
-              Cocinar para {dog.nombre} ({dog.peso_kg}kg)
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-secondary-700 dark:text-secondary-300">
+                {perMealMode ? `Por comida (${mealCount} al día)` : `Cocinar para ${dog.nombre} (${dog.peso_kg}kg)`}
+              </h3>
+              <div className="flex items-center gap-2 bg-white dark:bg-zinc-800 rounded-full p-0.5 border border-secondary-200 dark:border-secondary-800">
+                <button
+                  onClick={() => setPerMealMode(false)}
+                  className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-all ${!perMealMode ? "bg-secondary-500 text-white" : "text-zinc-500"}`}
+                >
+                  Todo el día
+                </button>
+                <button
+                  onClick={() => setPerMealMode(true)}
+                  className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-all ${perMealMode ? "bg-secondary-500 text-white" : "text-zinc-500"}`}
+                >
+                  1 comida
+                </button>
+              </div>
+            </div>
             <p className="text-xs text-secondary-600 dark:text-secondary-400 mb-3">
-              Porción diaria total: <strong>{Math.round(totalGrams)}g</strong> (al {feedingPct}%)
+              Porción {perMealMode ? "por comida" : "diaria total"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong> (al {feedingPct}%)
             </p>
             <div className="space-y-1.5">
               {ingredients.map((ing) => {
-                const scaledGrams = (ing.quantity_per_serving_g / totalIngGrams) * totalGrams;
+                const baseGrams = (ing.quantity_per_serving_g / totalIngGrams) * totalGrams;
+                const scaledGrams = perMealMode ? baseGrams / mealCount : baseGrams;
                 const display = formatPieces(scaledGrams, ing.unit_weight_g, ing.display_unit, ing.unit_type);
                 return (
                   <div key={ing.id} className="flex justify-between text-xs text-secondary-700 dark:text-secondary-300">
@@ -416,6 +481,44 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </div>
         </div>
       )}
+
+      {/* Hide Recipe Modal */}
+      {hideModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4" onClick={() => setHideModalOpen(false)}>
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">¿Por qué ocultas esta receta?</h3>
+              <button onClick={() => setHideModalOpen(false)} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-zinc-500">Nos ayuda a mostrarte recetas más relevantes.</p>
+            <div className="space-y-2">
+              {HIDE_REASONS.map((r) => (
+                <button
+                  key={r.label}
+                  onClick={() => handleHide(r.label)}
+                  disabled={hidingRecipe}
+                  className="w-full flex items-center gap-3 p-3.5 rounded-2xl border-2 border-zinc-100 dark:border-zinc-800 hover:border-primary-200 dark:hover:border-zinc-700 bg-white dark:bg-zinc-900 transition-all text-left"
+                >
+                  <span className="text-xl">{r.emoji}</span>
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{r.label}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => handleHide("")}
+              disabled={hidingRecipe}
+              className="w-full text-xs text-zinc-400 hover:text-zinc-600 py-2"
+            >
+              Solo ocultar, no dar motivo
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      <RecipeLightbox open={lightboxOpen} imageUrl={recipe.image_url || ""} onClose={() => setLightboxOpen(false)} />
     </div>
   );
 }

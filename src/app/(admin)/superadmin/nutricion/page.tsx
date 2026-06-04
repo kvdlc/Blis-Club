@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
-import { Plus, Edit, Trash2, UtensilsCrossed, Save, X, ChevronDown, ChevronUp, Sparkles, Camera, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, UtensilsCrossed, Save, X, ChevronDown, ChevronUp, Sparkles, Camera, Image as ImageIcon, Loader2, Search, Filter, Check } from "lucide-react";
 import AIGenerateModal from "@/components/admin/AIGenerateModal";
 import { ImageEditor } from "@/components/ImageEditor";
 import { uploadRecipeImage } from "@/lib/storage";
@@ -47,6 +47,12 @@ export default function NutricionPage() {
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [imageEditorUrl, setImageEditorUrl] = useState("");
   const [newProtein, setNewProtein] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveToast, setSaveToast] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterProtein, setFilterProtein] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "az" | "therapeutic">("recent");
 
   const appSlug = () => { try { return localStorage.getItem("blis_active_app_slug") || "guau"; } catch { return "guau"; } };
 
@@ -83,8 +89,9 @@ export default function NutricionPage() {
   };
 
   const handleSave = async (recipeData?: Partial<typeof emptyRecipe>) => {
+    setIsSaving(true);
     const appId = await getAppId();
-    if (!appId) return;
+    if (!appId) { setIsSaving(false); return; }
 
     const data = recipeData ? { ...emptyRecipe, ...recipeData } : form;
 
@@ -99,6 +106,9 @@ export default function NutricionPage() {
         loadSubEntities(j.data.id);
       }
     }
+    setIsSaving(false);
+    setSaveToast(true);
+    setTimeout(() => setSaveToast(false), 2000);
     setShowNew(false);
     load();
   };
@@ -279,34 +289,84 @@ export default function NutricionPage() {
         {/* ─── RECIPE LIST ─── */}
         {!editing && !showNew && (
           loading ? <div className="text-center py-12 text-zinc-500">Cargando...</div> :
-          <div className="grid gap-3">
-            {recipes.map(r => (
-              <div key={r.id} className="card-soft rounded-[1.25rem] p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onClick={() => handleEdit(r)}>
-                {r.image_url ? (
-                  <img src={r.image_url} alt={r.title} className="w-12 h-12 rounded-2xl object-cover border border-zinc-100 dark:border-zinc-700" />
-                ) : (
-                  <div className="w-12 h-12 rounded-2xl bg-warning-100 dark:bg-warning-950 flex items-center justify-center text-warning-600"><UtensilsCrossed className="w-6 h-6" /></div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">{r.title}</p>
-                  <div className="flex gap-2 mt-1 flex-wrap">
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.category}</span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.difficulty}</span>
-                    {r.prep_time_min ? <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.prep_time_min}min</span> : null}
-                    {r.protein_type && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-100 text-primary-700">{r.protein_type}</span>}
-                    {r.is_therapeutic && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary-100 text-secondary-700">Terapéutica</span>}
-                  </div>
-                </div>
-                <button onClick={(e) => { e.stopPropagation(); if(confirm("¿Eliminar?")) fetch(`/api/admin/recipes?id=${r.id}`,{method:"DELETE"}).then(load); }}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50"><Trash2 className="w-4 h-4" /></button>
+          <div className="space-y-4">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-2">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <input
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Buscar receta..."
+                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                />
               </div>
-            ))}
+              <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+                <option value="">Todas las cats</option>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <select value={filterProtein} onChange={e => setFilterProtein(e.target.value)} className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+                <option value="">Todas las proteínas</option>
+                {existingProteinTypes.map(pt => <option key={pt} value={pt}>{pt}</option>)}
+              </select>
+              <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+                <option value="recent">Más reciente</option>
+                <option value="az">A-Z</option>
+                <option value="therapeutic">Terapéuticas primero</option>
+              </select>
+            </div>
+
+            <div className="grid gap-3">
+              {recipes
+                .filter(r => {
+                  if (searchQuery) {
+                    const q = searchQuery.toLowerCase();
+                    return r.title.toLowerCase().includes(q) || (r.description?.toLowerCase() || "").includes(q) || (r.protein_type?.toLowerCase() || "").includes(q);
+                  }
+                  return true;
+                })
+                .filter(r => !filterCategory || r.category === filterCategory)
+                .filter(r => !filterProtein || r.protein_type === filterProtein)
+                .sort((a, b) => {
+                  if (sortBy === "az") return a.title.localeCompare(b.title);
+                  if (sortBy === "therapeutic") return (b.is_therapeutic ? 1 : 0) - (a.is_therapeutic ? 1 : 0);
+                  return 0; // recent = default server order
+                })
+                .map(r => (
+                <div key={r.id} className="card-soft rounded-[1.25rem] p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onClick={() => handleEdit(r)}>
+                  {r.image_url ? (
+                    <img src={r.image_url} alt={r.title} className="w-12 h-12 rounded-2xl object-cover border border-zinc-100 dark:border-zinc-700" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-2xl bg-warning-100 dark:bg-warning-950 flex items-center justify-center text-warning-600"><UtensilsCrossed className="w-6 h-6" /></div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">{r.title}</p>
+                    <div className="flex gap-2 mt-1 flex-wrap">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.category}</span>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.difficulty}</span>
+                      {r.prep_time_min ? <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.prep_time_min}min</span> : null}
+                      {r.protein_type && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-100 text-primary-700">{r.protein_type}</span>}
+                      {r.is_therapeutic && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary-100 text-secondary-700">Terapéutica</span>}
+                      {(r as any).created_at && <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-50 text-zinc-400">{new Date((r as any).created_at).toLocaleDateString()}</span>}
+                    </div>
+                  </div>
+                  <button onClick={(e) => { e.stopPropagation(); if(confirm("¿Eliminar?")) fetch(`/api/admin/recipes?id=${r.id}`,{method:"DELETE"}).then(load); }}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {/* ─── RECIPE EDITOR ─── */}
         {(editing || showNew) && (
           <div className="space-y-6">
+            {saveToast && (
+              <div className="flex items-center gap-2 bg-secondary-50 dark:bg-secondary-950/30 border border-secondary-200 dark:border-secondary-800 rounded-xl px-4 py-3 text-sm text-secondary-700 dark:text-secondary-300 animate-in fade-in slide-in-from-top-2 duration-300">
+                <Check className="w-4 h-4 text-secondary-500" />
+                Receta guardada correctamente
+              </div>
+            )}
             <button onClick={() => { setEditing(null); setShowNew(false); load(); }} className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-700"><X className="w-4 h-4" /> Cerrar editor</button>
 
             {/* Basic fields */}
@@ -386,7 +446,9 @@ export default function NutricionPage() {
               </div>
               <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Libro fuente</label>
                 <input value={form.source_book} onChange={e => setForm({...form, source_book: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
-              <button onClick={() => handleSave()} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all"><Save className="w-4 h-4" /> Guardar Receta</button>
+              <button onClick={() => handleSave()} disabled={isSaving} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all disabled:opacity-60">
+                {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : <><Save className="w-4 h-4" /> Guardar Receta</>}
+              </button>
             </div>
 
             {/* ═══ INGREDIENTS ═══ */}
