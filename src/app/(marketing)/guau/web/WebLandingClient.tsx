@@ -47,16 +47,16 @@ interface Props {
 
 /* ─── Data ─── */
 const PAIN_POINTS = [
-  { icon: <Scale className="w-6 h-6" />, title: "Sobrepeso canino", desc: "El 56% de los perros en Latinoamérica tienen sobrepeso por croquetas procesadas.", image: "/icons/El problema - Sobre peso canino.webp" },
-  { icon: <Pill className="w-6 h-6" />, title: "Enfermedades evitables", desc: "Diabetes, alergias y problemas renales causados por mala alimentación.", image: "/icons/El problema - enfermedades evitables.webp" },
-  { icon: <Activity className="w-6 h-6" />, title: "Falta de ejercicio", desc: "Paseos sin control que no ejercitan correctamente a tu perro.", image: "/icons/El problema - falta de ejercicio.webp" },
-  { icon: <Stethoscope className="w-6 h-6" />, title: "Vet caro e impredecible", desc: "Visitas de emergencia que podrían evitarse con prevención.", image: "/icons/El problema - vet caro e impredecible.webp" },
+  { icon: <Scale className="w-6 h-6" />, title: "Sobrepeso canino", desc: "El 56% de los perros en Latinoamérica tienen sobrepeso por croquetas procesadas.", image: "/icons/problema-sobrepeso-canino.webp" },
+  { icon: <Pill className="w-6 h-6" />, title: "Enfermedades evitables", desc: "Diabetes, alergias y problemas renales causados por mala alimentación.", image: "/icons/problema-enfermedades-evitables.webp" },
+  { icon: <Activity className="w-6 h-6" />, title: "Falta de ejercicio", desc: "Paseos sin control que no ejercitan correctamente a tu perro.", image: "/icons/problema-falta-ejercicio.webp" },
+  { icon: <Stethoscope className="w-6 h-6" />, title: "Vet caro e impredecible", desc: "Visitas de emergencia que podrían evitarse con prevención.", image: "/icons/problema-vet-caro.webp" },
 ];
 
 const SOLUTION_PILLARS = [
-  { icon: <Bone className="w-8 h-8" />, title: "Nutrición Mixta Inteligente", desc: "150+ recetas personalizadas. Calculadora automática que ajusta la ración según peso, edad y actividad.", color: "from-secondary-400 to-secondary-600", image: "/icons/La solucion - Nutricion mixta inteligente.webp" },
-  { icon: <GraduationCap className="w-8 h-8" />, title: "Academia Canina Pro", desc: "Entrenamiento gamificado estilo Duolingo. Obediencia, agilidad, seguridad y socialización paso a paso.", color: "from-primary-400 to-primary-600", image: "/icons/La solucion - Academia canina.webp" },
-  { icon: <Heart className="w-8 h-8" />, title: "Tracker de Salud 360°", desc: "Vacunas, peso, visitas, medicamentos y veterinarios. Todo el historial médico en un solo lugar.", color: "from-accent-400 to-accent-600", image: "/icons/La solucion - Tracker de salud 360.webp" },
+  { icon: <Bone className="w-8 h-8" />, title: "Nutrición Mixta Inteligente", desc: "150+ recetas personalizadas. Calculadora automática que ajusta la ración según peso, edad y actividad.", color: "from-secondary-400 to-secondary-600", image: "/icons/solucion-nutricion-mixta.webp" },
+  { icon: <GraduationCap className="w-8 h-8" />, title: "Academia Canina Pro", desc: "Entrenamiento gamificado estilo Duolingo. Obediencia, agilidad, seguridad y socialización paso a paso.", color: "from-primary-400 to-primary-600", image: "/icons/solucion-academia-canina.webp" },
+  { icon: <Heart className="w-8 h-8" />, title: "Tracker de Salud 360°", desc: "Vacunas, peso, visitas, medicamentos y veterinarios. Todo el historial médico en un solo lugar.", color: "from-accent-400 to-accent-600", image: "/icons/solucion-tracker-salud.webp" },
 ];
 
 const SCREENSHOTS = [
@@ -75,7 +75,7 @@ const EXPANDABLE_FEATURES = [
     before: "Tienes 2 o 3 perros y usas notas de papel o apps separadas. Se te olvida quién ya comió o cuándo le toca vacuna a cada uno.",
     after: "Controlas a toda la manada desde un solo lugar. Un cambio de perfil y ves exactamente lo que necesita ese perro hoy.",
     win: "Lograrás tranquilidad doméstica. Nada de caos ni olvidos: cada perro recibe lo que le corresponde exactamente cuando le toca.",
-    image: "/icons/una app doce superpoderes - hasta 4 perros.png.webp",
+    image: "/icons/feature-hasta-4-perros.webp",
   },
   {
     icon: <Bone className="w-6 h-6" />,
@@ -84,7 +84,7 @@ const EXPANDABLE_FEATURES = [
     before: "Das croquetas porque no sabes qué cantidad de carne, hueso o verdura necesita. Temes que le falte calcio o proteína.",
     after: "Tienes menús semanales listos para comprar y preparar. Gramos exactos, proporciones balanceadas y variación real.",
     win: "Verás a tu perro con energía de sobra, pelaje brillante y digestión perfecta. Dejarás de tirar dinero en comida procesada que lo enferma.",
-    image: "/icons/una app doce superporedes - 150+ recetas mixtas.webp",
+    image: "/icons/feature-150-recetas.webp",
   },
   {
     icon: <Flame className="w-6 h-6" />,
@@ -93,7 +93,7 @@ const EXPANDABLE_FEATURES = [
     before: "Cambias de dieta de golpe y tu perro tiene diarrea o vómitos. No sabes si es normal o peligroso, así que vuelves a las croquetas.",
     after: "Una ruta paso a paso que respeta el sistema digestivo de tu perro. Monitoreas heces, energía y sed día a día.",
     win: "Tu perro dejará de oler mal, tendrá aliento fresco y heces compactas y sin olor. Notarás el cambio en días, no en meses.",
-    image: "/icons/una app doce superporedes - reto de transicion de comida.webp",
+    image: "/icons/feature-reto-transicion.webp",
   },
   {
     icon: <GraduationCap className="w-6 h-6" />,
@@ -102,7 +102,7 @@ const EXPANDABLE_FEATURES = [
     before: "Intentas con videos de YouTube pero cada entrenador dice algo distinto. Tu perro se confunde, tú te frustras y abandonas.",
     after: "Una ruta de aprendizaje progresiva y gamificada. Sabes exactamente qué practicar hoy, durante cuánto tiempo y cómo reforzarlo.",
     win: "Tendrás un perro que obedece en el parque, que no tira de la correa y que te mira buscando instrucciones. La relación cambia por completo.",
-    image: "/icons/una app doce superpoderes - academia caninca completa.webp",
+    image: "/icons/feature-academia-canina.webp",
   },
   {
     icon: <TrendingUp className="w-6 h-6" />,
@@ -111,7 +111,7 @@ const EXPANDABLE_FEATURES = [
     before: "No sabes si tu perro está subiendo o bajando de peso de forma saludable. Todo es a ojo y suposición.",
     after: "Curvas claras de evolución. Ves tendencias antes de que se vuelvan problemas. Tomas decisiones con datos, no con intuición.",
     win: "Detectarás sobrepeso o deshidratación semanas antes de que sea un problema. Ahorrarás cientos en visitas veterinarias de emergencia.",
-    image: "/icons/una app doce superpoderes - graficos avanzados.webp",
+    image: "/icons/feature-graficos-avanzados.webp",
   },
   {
     icon: <MessageCircle className="w-6 h-6" />,
@@ -120,7 +120,7 @@ const EXPANDABLE_FEATURES = [
     before: "Tienes una duda urgente un sábado a la noche y no sabes a quién preguntar. Google te da 10 respuestas distintas.",
     after: "Escribes en la app y un entrenador o nutricionista certificado te orienta con pasos claros y seguros.",
     win: "Evitarás emergencias por errores de novato. Cada decisión que tomes estará respaldada por profesionales, no por foros de internet.",
-    image: "/icons/una app doce superpoderes - soporte prioritario.webp",
+    image: "/icons/feature-soporte-prioritario.webp",
   },
   {
     icon: <ScanLine className="w-6 h-6" />,
@@ -129,7 +129,7 @@ const EXPANDABLE_FEATURES = [
     before: "Le das un pedazo de lo que comes sin saber si es veneno para él. Uvas, chocolate, cebolla... un descuido puede costar miles o su vida.",
     after: "Escaneas o buscas el alimento antes de compartir. La app te dice sí, no o cuidado, con explicación médica.",
     win: "Eliminarás el riesgo de intoxicación alimentaria. Dormirás tranquilo sabiendo que nada en tu casa puede dañarlo por accidente.",
-    image: "/icons/una app soce superpoderes - escaner de alimentos.webp",
+    image: "/icons/feature-escaner-alimentos.webp",
   },
   {
     icon: <Stethoscope className="w-6 h-6" />,
@@ -138,7 +138,7 @@ const EXPANDABLE_FEATURES = [
     before: "Olvidas la vacuna anual hasta que el vet te llama, o peor, hasta que tu perro se enferma de algo prevenible.",
     after: "Alertas automáticas antes de que venza cualquier protección. Historial médico completo siempre a mano, incluso de viaje.",
     win: "Tu perro estará protegido siempre a tiempo. Un historial completo también ayuda al veterinario a diagnosticar más rápido y mejor.",
-    image: "/icons/una app doce superpoderes - tracker de salud 360.webp",
+    image: "/icons/feature-tracker-salud.webp",
   },
   {
     icon: <MapPin className="w-6 h-6" />,
@@ -147,7 +147,7 @@ const EXPANDABLE_FEATURES = [
     before: "Paseas 'lo que da la gana'. Un día 10 minutos, otro 40. No sabes si realmente se está ejercitando lo suficiente.",
     after: "Rutas trazadas, metas semanales de kilometraje y descubrimiento de zonas seguras para soltarlo.",
     win: "Un perro cansado es un perro feliz y obediente. Reducirás drásticamente comportamientos destructivos en casa por exceso de energía.",
-    image: "/icons/una app doce superpoderes - mapa de paseos.webp",
+    image: "/icons/feature-mapa-paseos.webp",
   },
   {
     icon: <Award className="w-6 h-6" />,
@@ -156,7 +156,7 @@ const EXPANDABLE_FEATURES = [
     before: "Empiezas motivado pero a los 5 días olvidas el entrenamiento. No hay nadie que te pregunte por tu progreso.",
     after: "Rachas diarias, niveles desbloqueados y recompensas visibles que te empujan a no romper el hábito.",
     win: "Crearás una rutina sólida sin depender solo de fuerza de voluntad. La app se convierte en tu compañera de disciplina.",
-    image: "/icons/una app doce superpoderes - badges y logros.webp",
+    image: "/icons/feature-badges-logros.webp",
   },
   {
     icon: <Target className="w-6 h-6" />,
@@ -165,7 +165,7 @@ const EXPANDABLE_FEATURES = [
     before: "Dices 'este mes lo pongo a dieta' pero no hay plan, ni número, ni fecha límite. Fracaso seguro.",
     after: "Metas SMART para tu perro: bajar 2kg en 8 semanas, 15 minutos de obediencia diaria, 12km de paseo semanal.",
     win: "Cada pequeño logro visible te mantendrá motivado. Verás resultados reales y medibles en vez de promesas vacías.",
-    image: "/icons/una app doce superpoderes - objetivos personalizados.webp",
+    image: "/icons/feature-objetivos-personalizados.webp",
   },
   {
     icon: <Smartphone className="w-6 h-6" />,
@@ -174,7 +174,7 @@ const EXPANDABLE_FEATURES = [
     before: "Tus datos quedan en el celular de tu pareja o se pierden si cambias de teléfono. Nadie más puede ayudarte a pasearlo.",
     after: "Accedes desde cualquier dispositivo. Tu pareja, tu hijo o el paseador pueden ver la misma información actualizada al instante.",
     win: "Toda la familia participa en el cuidado del perro. No hay más 'yo no sabía que ya comió' o 'se me olvidó su medicina'.",
-    image: "/icons/una app doce superpoderes - disponible en todos lados.webp",
+    image: "/icons/feature-disponible-todos-lados.webp",
   },
 ];
 
@@ -185,7 +185,7 @@ const SUCCESS_STORIES = [
     story: "Jorge tenía vergüenza de sacar a su Pitbull, Thor. Tiraba de la correa, ladraba a otros perros y no le hacía caso ni sentado. Sentía que lo juzgaban. Con la Academia Canina de Blis, siguió la ruta de Obediencia I durante 21 días. Empezó con 'mira' y 'sentado' en casa, sin distracciones. A la semana 3, Thor caminaba al pie sin tirar. Ahora pasean por el parque todos los días y otros dueños le preguntan quién lo entrenó.",
     reflection: "Si tu perro no te obedece en casa, no te obedecerá en la calle. La obediencia básica no es un lujo: es seguridad para él y tranquilidad para ti. Imagina cruzar la calle sabiendo que tu perro se quedará quieto al primer comando.",
     icon: <Dog className="w-8 h-8" />,
-    image: "/icons/historias de exito - obediencia basica.webp",
+    image: "/icons/historia-obediencia-basica.webp",
   },
   {
     tag: "Perro de seguridad",
@@ -193,7 +193,7 @@ const SUCCESS_STORIES = [
     story: "La familia de Ana adoptó un Pastor Alemán para protección, pero Bruno creció desconfiado y reactivo. Ladraba a todos, incluso a los visitantes amigos. Ana usó el módulo de Seguridad de Blis y descubrió que primero debía enseñarle obediencia firme. Tras dominar 'quieto', 'deja' y 'a tu lugar', Bruno pudo aprender a distinguir entre visita normal e intruso. Hoy es un perro seguro y predecible.",
     reflection: "Un perro agresivo sin control no protege: pone en riesgo a todos. La seguridad canina empieza por el autocontrol. Si sueñas con un perro que cuide tu hogar, primero necesitas un perro que te escuche.",
     icon: <ShieldCheck className="w-8 h-8" />,
-    image: "/icons/historias de exito - perro de seguridad.webp",
+    image: "/icons/historia-perro-seguridad.webp",
   },
   {
     tag: "Agilidad y deporte",
@@ -201,7 +201,7 @@ const SUCCESS_STORIES = [
     story: "Luna, una Frenchie hiperactiva, destruía zapatos y muebles por aburrimiento. Su dueña, Lucía, pensaba que los paseos bastaban. En Blis descubrió el módulo de Agilidad: túnel, slalom y saltos bajos adaptados para razas pequeñas. Empezaron con 10 minutos diarios en el patio. A las 4 semanas, Luna dormía tranquila toda la noche. El vínculo entre ellas cambió por completo.",
     reflection: "Un perro físicamente cansado es un perro mentalmente calmado. La agilidad no es solo para competencias: es terapia física y emocional. Imagina llegar a casa y que tu perro te reciba contento, no con ansiedad destructiva.",
     icon: <Activity className="w-8 h-8" />,
-    image: "/icons/historias de exito - agilidad y deporte.webp",
+    image: "/icons/historia-agilidad-deporte.webp",
   },
   {
     tag: "El entrenador primero",
@@ -209,7 +209,7 @@ const SUCCESS_STORIES = [
     story: "María llevaba 6 meses intentando que Max, su Labrador, bajara de peso. Compraba comida 'light' pero seguía dándole trozos de pan en la cena. En Blis entendió que el problema no era la dieta del perro, era su propia disciplina. El Reto de Transición de Comida le enseñó a ella, no solo a Max, a crear horarios reales. María bajó 3kg de sobrepeso en 2 meses, pero lo más valioso fue que ella se convirtió en la líder que Max necesitaba.",
     reflection: "El perro refleja al dueño. Si tú no tienes rutina, paciencia o constancia, tu perro tampoco las tendrá. La app no solo entrena perros: te entrena a TI para que seas el guía que tu compañero merece.",
     icon: <Users className="w-8 h-8" />,
-    image: "/icons/historias de exito - el entrenador primero.webp",
+    image: "/icons/historia-entrenador-primero.webp",
   },
 ];
 
@@ -223,12 +223,12 @@ const TESTIMONIALS = [
 ];
 
 const BEFORE_AFTER = [
-  { label: "Antes", title: "Alimentación desordenada", desc: "Croquetas procesadas, sobrealimentación por ansiedad, golosinas sin control y un perro con sobrepeso, mal aliento y heces enormes.", bad: true, icon: <Pill className="w-5 h-5" />, image: "/icons/Antes y despues - alimentación desordenada.webp" },
-  { label: "Después", title: "Dieta Mixta estructurada", desc: "Recetas balanceadas con gramos exactos, menús semanales claros y un perro con energía estable, pelaje brillante y digestión perfecta.", bad: false, icon: <Bone className="w-5 h-5" />, image: "/icons/Antes y despues - Dieta mixta estructurada.webp" },
-  { label: "Antes", title: "Entrenamiento caótico", desc: "Videos contradictorios, métodos que no se adaptan a tu raza, frustración diaria y un perro que te ignora hasta con premio en la mano.", bad: true, icon: <Activity className="w-5 h-5" />, image: "/icons/antes y despues - entrenamiento caotico.webp" },
-  { label: "Después", title: "Academia gamificada", desc: "Lecciones diarias progresivas, seguimiento visual de avance, logros desbloqueables y un perro que obedece en casa y en la calle.", bad: false, icon: <GraduationCap className="w-5 h-5" />, image: "/icons/antes y despues - academia gamficada .webp" },
-  { label: "Antes", title: "Salud reactiva", desc: "Vet solo en emergencias costosas, vacunas olvidadas, historial disperso en papeles y un perro expuesto a enfermedades prevenibles.", bad: true, icon: <Stethoscope className="w-5 h-5" />, image: "/icons/antes y despues - salud reactiva .webp" },
-  { label: "Después", title: "Salud preventiva", desc: "Recordatorios automáticos, historial completo siempre en el celular, alertas inteligentes y un perro protegido antes de que algo pase.", bad: false, icon: <Heart className="w-5 h-5" />, image: "/icons/antes y despues - salud preventiva.webp" },
+  { label: "Antes", title: "Alimentación desordenada", desc: "Croquetas procesadas, sobrealimentación por ansiedad, golosinas sin control y un perro con sobrepeso, mal aliento y heces enormes.", bad: true, icon: <Pill className="w-5 h-5" />, image: "/icons/antes-despues-alimentacion-desordenada.webp" },
+  { label: "Después", title: "Dieta Mixta estructurada", desc: "Recetas balanceadas con gramos exactos, menús semanales claros y un perro con energía estable, pelaje brillante y digestión perfecta.", bad: false, icon: <Bone className="w-5 h-5" />, image: "/icons/antes-despues-dieta-mixta.webp" },
+  { label: "Antes", title: "Entrenamiento caótico", desc: "Videos contradictorios, métodos que no se adaptan a tu raza, frustración diaria y un perro que te ignora hasta con premio en la mano.", bad: true, icon: <Activity className="w-5 h-5" />, image: "/icons/antes-despues-entrenamiento-caotico.webp" },
+  { label: "Después", title: "Academia gamificada", desc: "Lecciones diarias progresivas, seguimiento visual de avance, logros desbloqueables y un perro que obedece en casa y en la calle.", bad: false, icon: <GraduationCap className="w-5 h-5" />, image: "/icons/antes-despues-academia-gamificada.webp" },
+  { label: "Antes", title: "Salud reactiva", desc: "Vet solo en emergencias costosas, vacunas olvidadas, historial disperso en papeles y un perro expuesto a enfermedades prevenibles.", bad: true, icon: <Stethoscope className="w-5 h-5" />, image: "/icons/antes-despues-salud-reactiva.webp" },
+  { label: "Después", title: "Salud preventiva", desc: "Recordatorios automáticos, historial completo siempre en el celular, alertas inteligentes y un perro protegido antes de que algo pase.", bad: false, icon: <Heart className="w-5 h-5" />, image: "/icons/antes-despues-salud-preventiva.webp" },
 ];
 
 const FAQS = [
