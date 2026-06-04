@@ -18,7 +18,7 @@ interface Ingredient { id: string; recipe_id: string; ingredient_name: string; q
 interface Step { id: string; recipe_id: string; step_number: number; instruction: string; duration_min: number; image_url: string; }
 interface NutritionFact { id?: string; recipe_id: string; protein_g: number; fat_g: number; carbs_g: number; fiber_g: number; moisture_g: number; ash_g: number; calcium_mg: number; phosphorus_mg: number; iron_mg: number; zinc_mg: number; vitamin_a_ui: number; vitamin_d_ui: number; vitamin_e_mg: number; omega3_g: number; omega6_g: number; }
 
-const CATEGORIES = ["diario", "snack", "helado", "pastel"];
+const CATEGORIES = ["diario", "snack", "helado", "pastel", "croquetas"];
 const DIFFICULTIES = ["facil", "medio", "avanzado"];
 const INGREDIENT_TYPES = ["proteina", "hueso", "viscera", "vegetal", "suplemento", "otro"];
 const TAG_OPTIONS = ["sin gluten", "sin lacteos", "hipoalergenico", "alto en proteina", "bajo en grasa", "renal", "hepatico", "diabetico", "cardiaco", "digestivo", "articular"];

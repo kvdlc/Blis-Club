@@ -1,7 +1,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type ActivityLevel = "sedentario" | "moderado" | "activo" | "atletico";
-export type RecipeCategory = "diario" | "snack" | "helado" | "pastel";
+export type RecipeCategory = "diario" | "snack" | "helado" | "pastel" | "croquetas";
 export type RecipeDifficulty = "facil" | "medio" | "avanzado";
 export type LessonType = "theory" | "minigame_reflejos" | "minigame_diccionario" | "practice_timer";
 export type TrafficLight = "green" | "yellow" | "red";

@@ -131,6 +131,7 @@ const CATEGORY_META: Record<string, { label: string; icon: string; bg: string; b
   snack:  { label: "Snacks",      icon: "🍪", bg: "bg-warning-50 dark:bg-warning-900/30", border: "border-warning-200 dark:border-warning-800" },
   helado: { label: "Helados",     icon: "🍦", bg: "bg-secondary-50 dark:bg-secondary-900/30", border: "border-secondary-200 dark:border-secondary-800" },
   pastel: { label: "Pasteles",    icon: "🎂", bg: "bg-accent-50 dark:bg-accent-900/30", border: "border-accent-200 dark:border-accent-800" },
+  croquetas: { label: "Croquetas", icon: "🥘", bg: "bg-zinc-50 dark:bg-zinc-900/30", border: "border-zinc-200 dark:border-zinc-800" },
 };
 
 function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[]; onOpenScanner: () => void }) {
@@ -154,7 +155,29 @@ function RecetarioView({ recipes, onOpenScanner }: { recipes: NutritionRecipe[];
     return result;
   }, [recipes, selectedCategory, selectedProtein]);
 
-  const popular = filteredRecipes.filter((r) => !r.is_detox).slice(0, 4);
+  const popular = useMemo(() => {
+    const candidates = filteredRecipes.filter((r) => !r.is_detox);
+    // Pick diverse protein types (or categories if no protein) for visual variety
+    const seen = new Set<string>();
+    const diverse: NutritionRecipe[] = [];
+    for (const r of candidates) {
+      const key = r.protein_type || r.category;
+      if (!seen.has(key)) {
+        seen.add(key);
+        diverse.push(r);
+        if (diverse.length >= 4) break;
+      }
+    }
+    // Fill remaining slots
+    for (const r of candidates) {
+      if (!diverse.includes(r)) {
+        diverse.push(r);
+        if (diverse.length >= 4) break;
+      }
+    }
+    return diverse;
+  }, [filteredRecipes]);
+
   const newest = [...filteredRecipes].reverse().slice(0, 4);
 
   return (
@@ -275,9 +298,9 @@ function RecipeCard({ recipe }: { recipe: NutritionRecipe }) {
       className="card-soft rounded-[1.25rem] p-3.5 hover:shadow-lg transition-all active:scale-[0.97] block group"
     >
       {/* Image / gradient area */}
-      <div className="relative w-full aspect-square rounded-2xl mb-2.5 flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 dark:from-primary-900/40 dark:via-zinc-900/40 dark:to-accent-900/40 border border-white/50 dark:border-white/5">
+      <div className="relative w-full aspect-square rounded-2xl mb-2.5 flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 dark:from-primary-900/40 dark:via-zinc-900/40 dark:to-accent-900/40 isolate">
         {recipe.image_url ? (
-          <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover" />
+          <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover rounded-2xl" />
         ) : (
           <ChefHat className={`w-10 h-10 transition-transform group-hover:scale-110 ${recipe.is_therapeutic ? "text-accent-400" : "text-primary-400"}`} />
         )}

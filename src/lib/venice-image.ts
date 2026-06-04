@@ -67,5 +67,5 @@ export async function generateImage(params: GenerateImageParams): Promise<{
 
 /** Build an optimized prompt for recipe food photography */
 export function buildRecipeImagePrompt(recipeDescription: string): string {
-  return `Professional food photography, top-down flat lay view of a healthy homemade dog meal: ${recipeDescription}. Served in a modern ceramic pet food bowl, isolated on pure clean white background (#FFFFFF), square format, soft diffused natural lighting from above, appetizing presentation, restaurant-quality food styling, minimal composition, sharp focus, 8k ultra detailed, vibrant natural colors`;
+  return `Professional food photography, top-down flat lay view of a healthy homemade dog meal: ${recipeDescription}. Served in a modern ceramic pet food bowl, isolated on pure clean white background (#FFFFFF), square format, soft diffused natural lighting from above, appetizing presentation, restaurant-quality food styling, minimal composition, sharp focus, 8k ultra detailed, vibrant natural colors. NO text, NO letters, NO words, NO typography, NO watermarks, NO logos`;
 }

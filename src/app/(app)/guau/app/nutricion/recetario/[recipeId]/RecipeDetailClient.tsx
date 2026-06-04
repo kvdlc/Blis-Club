@@ -165,9 +165,9 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </button>
         </div>
         <div className="relative z-10 flex flex-col items-center pt-6">
-          <div className="w-28 h-28 rounded-2xl bg-white/20 backdrop-blur-md border-4 border-white/30 flex items-center justify-center overflow-hidden shadow-xl">
+          <div className="w-28 h-28 rounded-2xl bg-white/20 backdrop-blur-md border-4 border-white/30 flex items-center justify-center overflow-hidden shadow-xl isolate">
             {recipe.image_url ? (
-              <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover" />
+              <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover rounded-2xl" />
             ) : (
               <ChefHat className="w-12 h-12 text-white/90" />
             )}
@@ -209,13 +209,15 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
               <CalendarDays className="w-4 h-4" /> Agendar
             </button>
             <button onClick={openCookModal} className={`flex-1 rounded-2xl py-3 font-bold text-sm transition-all ${cooked ? "bg-secondary-500 text-white" : "bg-secondary-600 hover:bg-secondary-700 text-white"} active:scale-[0.97] flex items-center justify-center gap-2`}>
-              {cooked ? <><Check className="w-4 h-4" /> Registrado</> : <><ChefHat className="w-4 h-4" /> Cocinar Hoy</>}
+              {cooked ? <><Check className="w-4 h-4" /> Registrado</> : recipe.category === "croquetas" ? <><ChefHat className="w-4 h-4" /> Registrar Comida</> : <><ChefHat className="w-4 h-4" /> Cocinar Hoy</>}
             </button>
           </div>
-          <button onClick={handleAddToCart} className={`w-full rounded-2xl py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 ${addedToCart ? "bg-primary-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"} active:scale-[0.97]`}>
-            {addedToCart ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
-            {addedToCart ? "Añadido" : "Añadir a lista de compras"}
-          </button>
+          {recipe.category !== "croquetas" && (
+            <button onClick={handleAddToCart} className={`w-full rounded-2xl py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 ${addedToCart ? "bg-primary-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"} active:scale-[0.97]`}>
+              {addedToCart ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+              {addedToCart ? "Añadido" : "Añadir a lista de compras"}
+            </button>
+          )}
         </div>
 
         {/* Video */}
@@ -229,22 +231,24 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </div>
         )}
 
-        {/* Ingredients */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
-          <div className="flex flex-wrap gap-2">
-            {ingredients.map((ing) => (
-              <div key={ing.id} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium ${TYPE_COLORS[ing.ingredient_type] ?? TYPE_COLORS.otro}`}>
-                {TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}
-                <span>{ing.ingredient_name}</span>
-                <span className="opacity-60">({ing.quantity_per_serving_g}g)</span>
-              </div>
-            ))}
+        {/* Ingredients (hidden for croquetas) */}
+        {recipe.category !== "croquetas" && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
+            <div className="flex flex-wrap gap-2">
+              {ingredients.map((ing) => (
+                <div key={ing.id} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium ${TYPE_COLORS[ing.ingredient_type] ?? TYPE_COLORS.otro}`}>
+                  {TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}
+                  <span>{ing.ingredient_name}</span>
+                  <span className="opacity-60">({ing.quantity_per_serving_g}g)</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Scale to dog — NOW IN PIECES */}
-        {dog && (
+        {/* Scale to dog — NOW IN PIECES (hidden for croquetas) */}
+        {dog && recipe.category !== "croquetas" && (
           <div className="bg-secondary-50/80 dark:bg-secondary-950/30 rounded-2xl border border-secondary-200/60 dark:border-secondary-800/40 p-5">
             <h3 className="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
               Cocinar para {dog.nombre} ({dog.peso_kg}kg)
@@ -267,8 +271,8 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </div>
         )}
 
-        {/* Preparation Steps */}
-        {steps.length > 0 && (
+        {/* Preparation Steps (hidden for croquetas) */}
+        {recipe.category !== "croquetas" && steps.length > 0 && (
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Preparación</h3>
             <div className="space-y-3">
