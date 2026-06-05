@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import type { Dog, WeeklyChallenge, UserChallenge, DogMetabolicProfile, Badge, UserBadge, Subscription, Plan, Profile } from "@/types/database";
-import { User, PawPrint, Award, Check, LogOut, MessageCircle, ExternalLink, Edit3, Plus, Building2, Crown, Shield, ChevronRight, Sparkles, Copy, Wallet, Clock, Gift } from "lucide-react";
+import { User, PawPrint, Award, Check, LogOut, MessageCircle, ExternalLink, Edit3, Plus, Building2, Crown, Shield, ChevronRight, Sparkles, Copy, Wallet, Clock, Gift, BookOpen } from "lucide-react";
 import { useState } from "react";
+import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 
 interface Props {
   profile: Profile | null;
@@ -28,6 +29,7 @@ interface Props {
 
 export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, challenges, userChallenges, subscription, userId, daysLeft = 0, referralCode = "", rewards = null }: Props) {
   const [copied, setCopied] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const handleCopyCode = () => {
     if (referralCode) {
@@ -49,7 +51,9 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
     : profile?.display_name ?? "Tutor";
 
   return (
-    <div className="space-y-5">
+    <>
+      <OnboardingTutorial userId={userId} forceShow={showTutorial} onComplete={() => setShowTutorial(false)} />
+      <div className="space-y-5">
       {/* ═══ TOP BAR: Suscripción + Blis Corp ═══ */}
       <div className="flex items-center justify-between card-soft rounded-[1.25rem] px-4 py-3">
         <a href="https://www.blis-corp.com" target="_blank" rel="noopener noreferrer"
@@ -234,11 +238,29 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
         <ExternalLink className="w-4 h-4 text-zinc-400" />
       </a>
 
+      {/* ═══ TUTORIAL ═══ */}
+      <button
+        onClick={() => setShowTutorial(true)}
+        className="w-full flex items-center justify-between card-soft rounded-[1.25rem] p-4 hover:bg-primary-50 dark:hover:bg-primary-950/20 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+            <BookOpen className="w-5 h-5 text-primary-600" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ver tutorial de bienvenida</p>
+            <p className="text-[10px] text-zinc-500">Conocé todo lo que podés hacer en Blis Club</p>
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-zinc-400" />
+      </button>
+
       {/* ═══ LOGOUT ═══ */}
       <button onClick={handleLogout}
         className="w-full flex items-center justify-center gap-2 card-soft rounded-[1.25rem] p-4 hover:bg-danger-50 dark:hover:bg-danger-950/20 transition-colors text-sm font-medium text-danger-600">
         <LogOut className="w-4 h-4" /> Cerrar sesión
       </button>
-    </div>
+      </div>
+    </>
   );
 }

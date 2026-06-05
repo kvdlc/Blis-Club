@@ -20,6 +20,7 @@ export interface Profile {
   country: string | null;
   whatsapp: string | null;
   timezone: string | null;
+  has_seen_tutorial?: boolean;
   created_at: string;
 }
 

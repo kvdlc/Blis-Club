@@ -2,12 +2,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { cookies } from "next/headers";
-import type { Dog, Walk, DailyLog, DogMealSlot, MealSchedule, NutritionRecipe, DogMetabolicProfile, Lesson, UserProgress, DogVaccine } from "@/types/database";
+import type { Dog, Walk, DailyLog, DogMealSlot, MealSchedule, NutritionRecipe, DogMetabolicProfile, Lesson, UserProgress, DogVaccine, Profile } from "@/types/database";
 import { PawPrint } from "lucide-react";
 import { AddDogForm } from "./AddDogForm";
 import QuickToolsCarousel from "@/components/QuickToolsCarousel";
 import { DashboardWidgets } from "./DashboardWidgets";
 import { HeatmapWidget } from "./HeatmapWidget";
+import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 
 async function getDashboardData(userId: string, dogId: string | null) {
   const supabase = await createClient();
@@ -95,6 +96,8 @@ export default async function DashboardPage() {
 
   const { dog, walks, mealSchedule, metabolicProfile, breedImg, lessons, progress, vaccines } = await getDashboardData(user.id, savedDogId);
 
+  const { data: profile } = await supabase.from("profiles").select("has_seen_tutorial").eq("id", user.id).single();
+
   const totalWalks = walks.length || 1;
   const greenCount = walks.filter((w) => w.traffic_light === "green").length;
   const greenPct = Math.round((greenCount / totalWalks) * 100);
@@ -125,27 +128,32 @@ export default async function DashboardPage() {
 
   if (!dog) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
-        <div className="w-24 h-24 rounded-full bg-primary-50 dark:bg-primary-950 flex items-center justify-center">
-          <PawPrint className="w-12 h-12 text-primary-400 dark:text-primary-600" />
+      <>
+        <OnboardingTutorial userId={user.id} hasSeenTutorial={profile?.has_seen_tutorial ?? false} />
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
+          <div className="w-24 h-24 rounded-full bg-primary-50 dark:bg-primary-950 flex items-center justify-center">
+            <PawPrint className="w-12 h-12 text-primary-400 dark:text-primary-600" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">
+              ¡Bienvenido a Blis Club!
+            </h2>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-2 max-w-sm text-sm leading-relaxed">
+              Registra tu primer perro para empezar a usar la calculadora de nutrición, el tracker de paseos y la academia de entrenamiento.
+            </p>
+          </div>
+          <AddDogForm userId={user.id} />
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">
-            ¡Bienvenido a Blis Club!
-          </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-2 max-w-sm text-sm leading-relaxed">
-            Registra tu primer perro para empezar a usar la calculadora de nutrición, el tracker de paseos y la academia de entrenamiento.
-          </p>
-        </div>
-        <AddDogForm userId={user.id} />
-      </div>
+      </>
     );
   }
 
   const breedImgRaw = breedImg ? breedImg.replace(/ /g, "%20") : null;
 
   return (
-    <div className="space-y-4">
+    <>
+      <OnboardingTutorial userId={user.id} hasSeenTutorial={profile?.has_seen_tutorial ?? false} />
+      <div className="space-y-4">
 
       {/* Dog Hero Card */}
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary-500 to-primary-700 p-4 text-white shadow-lg shadow-primary-600/20">
@@ -194,6 +202,7 @@ export default async function DashboardPage() {
         <HeatmapWidget walks={walks} greenPct={greenPct} todayWalks={todayWalks.length} />
       )}
 
-    </div>
+      </div>
+    </>
   );
 }
