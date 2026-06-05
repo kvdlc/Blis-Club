@@ -81,6 +81,8 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
           steps: imported.steps || [],
           nutrition_facts: imported.nutrition_facts || null,
           breed_sizes: bs,
+          benefits: imported.benefits || [],
+          storage_instructions: imported.storage_instructions || "",
           image_search_query: imported.image_search_query || "",
         });
       } else {
@@ -274,6 +276,16 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                     <p className="text-xs text-zinc-600">
                       <strong>{preview.ingredients.length}</strong> ingredientes · <strong>{preview.steps?.length || 0}</strong> pasos
                     </p>
+                  )}
+                  {preview.benefits?.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {preview.benefits.map((b: string, i: number) => (
+                        <span key={i} className="text-[9px] bg-accent-100 text-accent-700 px-1.5 py-0.5 rounded-full">{b}</span>
+                      ))}
+                    </div>
+                  )}
+                  {preview.storage_instructions && (
+                    <p className="text-[10px] text-zinc-500 italic">Almacenamiento: {preview.storage_instructions}</p>
                   )}
                 </div>
               )}

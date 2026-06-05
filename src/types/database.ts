@@ -85,6 +85,8 @@ export interface NutritionRecipe {
   is_detox: boolean;
   protein_type: string | null;
   breed_sizes: string[];
+  benefits: string[];
+  storage_instructions: string | null;
   created_at: string;
 }
 

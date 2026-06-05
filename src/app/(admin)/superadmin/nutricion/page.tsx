@@ -13,6 +13,7 @@ interface Recipe {
   image_url: string; video_url: string | null; is_therapeutic: boolean; health_tags: string[];
   prep_time_min: number; difficulty: string; kcal_per_100g: number;
   is_detox: boolean; source_book: string; protein_type: string;
+  breed_sizes: string[]; benefits: string[]; storage_instructions: string | null;
 }
 interface Ingredient { id: string; recipe_id: string; ingredient_name: string; quantity_per_serving_g: number; ingredient_type: string; unit_type: string; unit_weight_g: number; display_unit: string | null; }
 interface Step { id: string; recipe_id: string; step_number: number; instruction: string; duration_min: number; image_url: string; }
@@ -23,7 +24,7 @@ const DIFFICULTIES = ["facil", "medio", "avanzado"];
 const INGREDIENT_TYPES = ["proteina", "hueso", "viscera", "vegetal", "suplemento", "otro"];
 const TAG_OPTIONS = ["sin gluten", "sin lacteos", "hipoalergenico", "alto en proteina", "bajo en grasa", "renal", "hepatico", "diabetico", "cardiaco", "digestivo", "articular"];
 
-const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", video_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "", protein_type: "", breed_sizes: [] as string[] };
+const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", video_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "", protein_type: "", breed_sizes: [] as string[], benefits: [] as string[], storage_instructions: "" };
 const emptyFacts: NutritionFact = { recipe_id: "", protein_g: 0, fat_g: 0, carbs_g: 0, fiber_g: 0, moisture_g: 0, ash_g: 0, calcium_mg: 0, phosphorus_mg: 0, iron_mg: 0, zinc_mg: 0, vitamin_a_ui: 0, vitamin_d_ui: 0, vitamin_e_mg: 0, omega3_g: 0, omega6_g: 0 };
 
 export default function NutricionPage() {
@@ -134,7 +135,7 @@ export default function NutricionPage() {
 
   const handleEdit = (r: Recipe) => {
     setEditing(r);
-    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min ?? 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g ?? 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "", breed_sizes: (r as any).breed_sizes || [] });
+    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min ?? 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g ?? 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "", breed_sizes: (r as any).breed_sizes || [], benefits: (r as any).benefits || [], storage_instructions: (r as any).storage_instructions || "" });
     setShowNew(false);
     loadSubEntities(r.id);
   };
@@ -156,6 +157,8 @@ export default function NutricionPage() {
       source_book: recipe.source_book || "",
       protein_type: recipe.protein_type || "",
       breed_sizes: recipe.breed_sizes || [],
+      benefits: recipe.benefits || [],
+      storage_instructions: recipe.storage_instructions || "",
     };
     setForm(aiRecipe);
 
@@ -466,8 +469,35 @@ export default function NutricionPage() {
                   ))}
                 </div>
               </div>
-              <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Libro fuente</label>
+              <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Libro fuente / Fabricante</label>
                 <input value={form.source_book} onChange={e => setForm({...form, source_book: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+
+              {/* Croqueta-specific fields */}
+              {form.category === "croquetas" && (
+                <>
+                  <div>
+                    <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Beneficios clave</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {form.benefits.map((b, i) => (
+                        <span key={i} className="inline-flex items-center gap-1 text-[10px] bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">
+                          {b}
+                          <button onClick={() => setForm(f => ({...f, benefits: f.benefits.filter((_, j) => j !== i)}))} className="hover:text-danger-500">&times;</button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-1 mt-1">
+                      <input placeholder="Nuevo beneficio..." className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-1.5 text-xs"
+                        onKeyDown={e => { if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) { setForm(f => ({...f, benefits: [...f.benefits, (e.target as HTMLInputElement).value.trim()] })); (e.target as HTMLInputElement).value = ""; } }} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Indicaciones de almacenamiento</label>
+                    <textarea value={form.storage_instructions} onChange={e => setForm({...form, storage_instructions: e.target.value})} rows={2}
+                      className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  </div>
+                </>
+              )}
+
               <button onClick={() => handleSave()} disabled={isSaving} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all disabled:opacity-60">
                 {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : <><Save className="w-4 h-4" /> Guardar Receta</>}
               </button>

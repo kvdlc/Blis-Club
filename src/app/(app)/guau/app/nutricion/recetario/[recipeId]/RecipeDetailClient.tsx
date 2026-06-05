@@ -259,6 +259,35 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
             {recipe.source_book && (
               <p className="text-xs text-zinc-400 mt-2">Fabricante: {recipe.source_book}</p>
             )}
+
+            {/* Croqueta-specific info */}
+            {recipe.category === "croquetas" && (
+              <div className="mt-4 space-y-3 text-left">
+                {recipe.description && (
+                  <p className="text-xs text-zinc-500 leading-relaxed">{recipe.description}</p>
+                )}
+                {recipe.protein_type && (
+                  <p className="text-xs text-zinc-500"><span className="font-semibold">Proteína principal:</span> {recipe.protein_type}</p>
+                )}
+                {recipe.health_tags && recipe.health_tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {recipe.health_tags.map(t => (
+                      <span key={t} className="text-[10px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">{t}</span>
+                    ))}
+                  </div>
+                )}
+                {(recipe as any).benefits?.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {(recipe as any).benefits.map((b: string, i: number) => (
+                      <span key={i} className="text-[10px] bg-accent-50 text-accent-700 px-2 py-0.5 rounded-full">{b}</span>
+                    ))}
+                  </div>
+                )}
+                {(recipe as any).storage_instructions && (
+                  <p className="text-[10px] text-zinc-400 italic"><span className="font-semibold not-italic">Almacenamiento:</span> {(recipe as any).storage_instructions}</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -291,10 +320,14 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </div>
         )}
 
-        {/* Ingredients (hidden for croquetas) */}
-        {recipe.category !== "croquetas" && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
+        {/* Ingredients */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
+          {recipe.category === "croquetas" ? (
+            <p className="text-xs text-zinc-500 leading-relaxed">
+              {ingredients.length > 0 ? ingredients.map(i => i.ingredient_name).join(", ") : "Lista de ingredientes no disponible."}
+            </p>
+          ) : (
             <div className="flex flex-wrap gap-2">
               {ingredients.map((ing) => (
                 <div key={ing.id} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium ${TYPE_COLORS[ing.ingredient_type] ?? TYPE_COLORS.otro}`}>
@@ -304,8 +337,8 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Scale to dog with toggle */}
         {dog && recipe.category !== "croquetas" && (

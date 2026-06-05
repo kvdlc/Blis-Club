@@ -453,6 +453,16 @@ function RecipeCard({ recipe, size = "standard" }: { recipe: NutritionRecipe; si
             </span>
           )}
         </div>
+        {recipe.category === "croquetas" && recipe.breed_sizes.length > 0 && (
+          <div className="flex flex-wrap gap-0.5 mt-1">
+            {recipe.breed_sizes.map(s => (
+              <span key={s} className="text-[8px] bg-primary-50 text-primary-600 px-1 py-0.5 rounded-full">{s}</span>
+            ))}
+          </div>
+        )}
+        {recipe.category === "croquetas" && recipe.source_book && (
+          <p className="text-[8px] text-zinc-400 mt-0.5 truncate">{recipe.source_book}</p>
+        )}
       </Link>
     );
   }
@@ -528,6 +538,9 @@ function RecipeCard({ recipe, size = "standard" }: { recipe: NutritionRecipe; si
           </span>
         )}
       </div>
+      {recipe.category === "croquetas" && recipe.source_book && (
+        <p className="text-[8px] text-zinc-400 mt-1 truncate">{recipe.source_book}</p>
+      )}
     </Link>
   );
 }
