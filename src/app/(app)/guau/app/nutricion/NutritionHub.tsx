@@ -447,62 +447,31 @@ function RecipeCard({ recipe, size = "standard" }: { recipe: NutritionRecipe; si
         </div>
         <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight">{recipe.title}</h4>
         <div className="flex items-center gap-2 mt-1">
-          {recipe.prep_time_min && (
-            <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
-              <Clock className="w-2.5 h-2.5" />{recipe.prep_time_min}m
-            </span>
-          )}
-        </div>
-        {recipe.category === "croquetas" && recipe.breed_sizes.length > 0 && (
-          <div className="flex flex-wrap gap-0.5 mt-1">
-            {recipe.breed_sizes.map(s => (
-              <span key={s} className="text-[8px] bg-primary-50 text-primary-600 px-1 py-0.5 rounded-full">{s}</span>
-            ))}
-          </div>
+        {(recipe.prep_time_min ?? 0) > 0 && (
+          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+            <Clock className="w-2.5 h-2.5" />{recipe.prep_time_min}m
+          </span>
         )}
-        {recipe.category === "croquetas" && recipe.source_book && (
-          <p className="text-[8px] text-zinc-400 mt-0.5 truncate">{recipe.source_book}</p>
-        )}
-      </Link>
-    );
-  }
-
-  if (size === "wide") {
-    // Horizontal wide card
-    return (
-      <Link
-        href={`/guau/app/nutricion/recetario/${recipe.id}`}
-        className="card-soft rounded-[1.25rem] p-3 hover:shadow-lg transition-all active:scale-[0.97] block group"
-      >
-        <div className="flex gap-3">
-          <div className="relative w-24 h-24 shrink-0 rounded-2xl flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 dark:from-primary-900/40 dark:via-zinc-900/40 dark:to-accent-900/40 isolate">
-            {recipe.image_url ? (
-              <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover rounded-2xl" />
-            ) : (
-              <ChefHat className={`w-8 h-8 transition-transform group-hover:scale-110 ${recipe.is_therapeutic ? "text-accent-400" : "text-primary-400"}`} />
-            )}
-          </div>
-          <div className="flex-1 min-w-0 py-0.5">
-            <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight">{recipe.title}</h4>
-            <p className="text-[10px] text-zinc-500 mt-1 line-clamp-2">{recipe.description}</p>
-            <div className="flex items-center gap-2 mt-2">
-              {recipe.prep_time_min && (
+        {(recipe.kcal_per_100g ?? 0) > 0 && (
                 <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
-                  <Clock className="w-2.5 h-2.5" />{recipe.prep_time_min}m
-                </span>
-              )}
-              {recipe.kcal_per_100g && (
-                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
-                  <Flame className="w-2.5 h-2.5 text-orange-400" />{Math.round(recipe.kcal_per_100g)}
+                  <Flame className="w-2.5 h-2.5 text-orange-400" />{Math.round(recipe.kcal_per_100g ?? 0)}
                 </span>
               )}
               {recipe.is_therapeutic && (
                 <span className="text-[9px] font-bold bg-accent-100 text-accent-700 px-1.5 py-0.5 rounded-full">Terapéutico</span>
               )}
             </div>
-          </div>
-        </div>
-      </Link>
+            {recipe.category === "croquetas" && recipe.breed_sizes.length > 0 && (
+              <div className="flex flex-wrap gap-0.5 mt-1">
+                {recipe.breed_sizes.map(s => (
+                  <span key={s} className="text-[8px] bg-primary-50 text-primary-600 px-1 py-0.5 rounded-full">{s}</span>
+                ))}
+              </div>
+            )}
+            {recipe.category === "croquetas" && recipe.source_book && (
+              <p className="text-[8px] text-zinc-400 mt-0.5 truncate">{recipe.source_book}</p>
+            )}
+        </Link>
     );
   }
 
@@ -527,14 +496,14 @@ function RecipeCard({ recipe, size = "standard" }: { recipe: NutritionRecipe; si
       </div>
       <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight">{recipe.title}</h4>
       <div className="flex items-center gap-2 mt-1.5">
-        {recipe.prep_time_min && (
+              {(recipe.prep_time_min ?? 0) > 0 && (
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+                  <Clock className="w-2.5 h-2.5" />{recipe.prep_time_min}m
+                </span>
+              )}
+              {(recipe.kcal_per_100g ?? 0) > 0 && (
           <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
-            <Clock className="w-2.5 h-2.5" />{recipe.prep_time_min}m
-          </span>
-        )}
-        {recipe.kcal_per_100g && (
-          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
-            <Flame className="w-2.5 h-2.5 text-orange-400" />{Math.round(recipe.kcal_per_100g)}
+            <Flame className="w-2.5 h-2.5 text-orange-400" />{Math.round(recipe.kcal_per_100g ?? 0)}
           </span>
         )}
       </div>

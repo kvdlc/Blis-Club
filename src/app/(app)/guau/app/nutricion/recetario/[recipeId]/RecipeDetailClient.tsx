@@ -229,16 +229,16 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 shadow-lg rounded-[2rem] p-6 text-center">
             <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{recipe.title}</h2>
             <div className="flex items-center justify-center gap-5 mt-3">
-              {recipe.prep_time_min && (
+              {(recipe.prep_time_min ?? 0) > 0 && (
                 <div className="flex items-center gap-1.5 text-xs text-zinc-500">
                   <Clock className="w-3.5 h-3.5 text-secondary-500" />
                   <span>{recipe.prep_time_min} min</span>
                 </div>
               )}
-              {recipe.kcal_per_100g && (
+              {(recipe.kcal_per_100g ?? 0) > 0 && (
                 <div className="flex items-center gap-1.5 text-xs text-zinc-500">
                   <Flame className="w-3.5 h-3.5 text-danger-500" />
-                  <span>{Math.round(recipe.kcal_per_100g)} kcal</span>
+                  <span>{Math.round(recipe.kcal_per_100g ?? 0)} kcal</span>
                 </div>
               )}
               <div className="flex items-center gap-0.5">

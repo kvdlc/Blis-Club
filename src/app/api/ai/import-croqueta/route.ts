@@ -24,7 +24,7 @@ NO busques información adicional. NO inventes ni adivines valores faltantes. De
 
 INSTRUCCIONES POR CAMPO:
 
-1. **official_name**: El nombre completo del producto (ej: "Cani Super Premium Adultos Razas Pequeñas Cordero y Vegetales"). null si no aparece.
+1. **official_name**: El nombre EXACTO del producto tal como aparece en "Nombre del Producto". NO modifiques, NO agregues números ni prefijos/sufijos. Copiar textualmente. null si no aparece.
 
 2. **brand**: El fabricante/marca del campo "Fabricante". null si no aparece.
 
@@ -32,18 +32,19 @@ INSTRUCCIONES POR CAMPO:
 
 4. **category**: Siempre "croquetas".
 
-5. **protein_type**: Extraer el sabor principal + el porcentaje de proteína cruda (ej: si "Sabor Principal: Cordero y Vegetales / Carne de pato" y "Proteína Cruda: 27%", retornar "Carne de pato 27%"). Formato: "Ingrediente principal XX%".
+5. **protein_type**: Extraer el sabor principal + porcentaje de proteína. Buscar en "Sabor Principal" o "Primer Ingrediente" para obtener el ingrediente (ej: "Pollo"). Buscar "Proteína Cruda" para obtener el % (ej: "30%" → 30). Formato EXACTO: "Pollo 30%". Si no hay %, solo el ingrediente. Si no hay información, "Croqueta comercial".
 
 6. **kcal_per_100g**: Si aparece "Energía Metabolizable" o "Kcal/kg", convertir el valor: ej. "3800 Kcal/kg" → 380. Si no hay valor, null.
 
-7. **nutrition_facts**: Extraer del "Análisis Nutricional" o "Análisis Garantizado". Reglas de conversión:
-   - Valores en % (ej: "Proteína Cruda: 27%") → poner el mismo número en _g (27 → protein_g: 27)
-   - Valores en % para calcio/fósforo (ej: "Calcio: 1.2%") → convertir a mg: 1.2% = 1200mg → calcium_mg: 1200
-   - Omega-3/6: si aparece "Omega-3" o similar, extraer el valor. Si es texto sin número, null.
-   - El resto de campos dejarlos como null si no aparecen.
+7. **nutrition_facts**: Extraer del "Análisis Nutricional" o "Análisis Garantizado". Reglas:
+   - Valores en % → poner el mismo número en _g (ej: "Proteína: 27%" → protein_g: 27)
+   - Calcio/Fósforo en % → convertir a mg (ej: "1.2%" → 1200mg)
+   - Si hay múltiples valores (ej: "30% / 28%"), usar el PRIMER valor (30)
+   - Omega-3/6: extraer número si existe, si no, null
+   - Dejar null si el campo no aparece en el texto
 
-8. **ingredients**: Extraer de la "Lista de Ingredientes". Lista completa, separar por comas. Cada ingrediente como objeto:
-   {"ingredient_name": "nombre exacto", "quantity_per_serving_g": 0, "ingredient_type": "croqueta", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"}
+8. **ingredients**: Extraer de "Lista de Ingredientes" o "Lista de Ingredientes Completa". Separar por comas. Para cada ítem, limpiar el nombre (quitar textos entre paréntesis como "(ingrediente principal)" o "(lista parcial...)"):
+   {"ingredient_name": "nombre limpio", "quantity_per_serving_g": 0, "ingredient_type": "croqueta", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"}
 
 9. **breed_sizes**: Extraer del campo "Tamaño de Raza". MAPEAR valores en español:
    - "Razas Pequeñas" o "Miniatura" → "miniatura"
