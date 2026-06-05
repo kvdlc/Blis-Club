@@ -18,81 +18,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "query is required" }, { status: 400 });
     }
 
-    const prompt = `Eres un asistente experto en nutrición canina. Parsea la información del producto abajo EXACTAMENTE como se indica.
+    const prompt = `Eres un asistente de nutrición canina. Formatea la siguiente información de producto para mostrarla en una app de mascotas.
 
-REGLAS ESTRICTAS:
-- NO inventes datos. Si algo no está en el texto, usa null o [] .
-- Para porcentajes, extrae SOLO el número (ej: "30%" → 30, "15% (mín.)" → 15).
-- Si hay "30% / 28%", usa 30 (el primero).
+REGLAS:
+- Extrae SOLO lo que está presente en el texto.
+- Si un dato no aparece en el texto, NO lo incluyas en el JSON (no null, no vacío).
+- Para porcentajes, extrae SOLO el número (ej: "30% (mín.)" → 30).
+- Si hay múltiples valores (ej: "30% / 28%"), usa el primero (30).
+- Los ingredientes: separa por comas, limpia textos entre paréntesis.
 
-EJEMPLOS DE EXTRACCIÓN:
+DEVUELVE SOLO JSON. Sin markdown. Sin explicaciones.
 
-Ejemplo 1 - "Sabor Principal / Primer Ingrediente: Pollo (Proteína de pollo)" + "Proteína Cruda: 30%":
-  protein_type → "Pollo 30%"
-
-Ejemplo 2 - "Lista de Ingredientes: Proteína de pollo (ingrediente principal), arroz, maíz":
-  ingredients → [
-    {"ingredient_name": "Proteína de pollo", "quantity_per_serving_g": 0, "ingredient_type": "croqueta", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"},
-    {"ingredient_name": "arroz", "quantity_per_serving_g": 0, "ingredient_type": "croqueta", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"},
-    {"ingredient_name": "maíz", "quantity_per_serving_g": 0, "ingredient_type": "croqueta", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"}
-  ]
-
-Ejemplo 3 - "Tamaño de Raza: Medianas y Grandes":
-  breed_sizes → ["mediana", "grande"]
-
-Ejemplo 4 - "Fabricante: Pronaca" + "Página web: https://www.pronaca.com":
-  source_book → "Pronaca (pronaca.com)"
-
-Ejemplo 5 - "Beneficios Clave: 1. Óptimo desarrollo... 2. Refuerza sistema inmune...":
-  benefits → ["Óptimo desarrollo inicial con niveles balanceados para músculos y huesos fuertes.", "Refuerza el sistema inmune mediante vitaminas, minerales y antioxidantes naturales."]
-
-CAMPOS A EXTRAER:
-1. official_name → campo "Nombre del Producto", copiar exacto
-2. brand → campo "Fabricante"
-3. description → "Tecnología o Fórmula Especial" o primera frase descriptiva
-4. category → siempre "croquetas"
-5. protein_type → ingrediente principal + % proteína (ej: "Pollo 30%")
-6. kcal_per_100g → "Energía Metabolizable (Kcal/kg)" ÷ 10, o null
-7. nutrition_facts → parsear % a números:
-   protein_g, fat_g, fiber_g, moisture_g de los valores en % (ej: 30% → 30)
-   calcium_mg, phosphorus_mg: si son %, multiplicar × 1000 (1% → 1000)
-   carbs_g: calcular 100 - protein_g - fat_g - fiber_g - moisture_g - ash_g, o 0
-   ash_g: si no está, usar 0
-   omega3_g, omega6_g: extraer si hay números, si no 0
-   El resto: 0
-8. ingredients → array de objetos, uno por cada ítem en "Lista de Ingredientes", limpiando textos entre paréntesis
-9. breed_sizes → mapear "Medianas y Grandes" → ["mediana","grande"]
-10. benefits → array de strings de "Beneficios Clave"
-11. health_tags → claims de salud cortos ("desarrollo muscular", "sistema inmune", etc.)
-12. storage_instructions → "Indicaciones de Almacenamiento", o null
-13. source_book → "brand (dominio.com)" si hay web
-
-Información del producto:
-"""
-${query}
-"""
-
-Responde SOLO con JSON válido. Sin markdown. Sin explicaciones.
+ESTRUCTURA ESPERADA (incluye SOLO campos con datos):
 
 {
-  "official_name": null,
-  "brand": null,
-  "description": null,
-  "category": "croquetas",
-  "difficulty": "facil",
-  "prep_time_min": 0,
-  "kcal_per_100g": null,
-  "protein_type": null,
-  "is_therapeutic": false,
-  "is_detox": false,
-  "health_tags": [],
-  "source_book": null,
-  "nutrition_facts": {
-    "protein_g": 0,
-    "fat_g": 0,
-    "carbs_g": 0,
-    "fiber_g": 0,
-    "moisture_g": 0,
+  "title": "Nombre exacto del producto",
+  "description": "Frase corta descriptiva del producto",
+  "protein_type": "Ingrediente principal + % (ej: Pollo 30%)",
+  "source_book": "Fabricante (dominio.com si hay web)",
+  "breed_sizes": ["mediana", "grande"],
+  "nutrition_summary": {
+    "protein_g": 30,
+    "fat_g": 15,
+    "fiber_g": 3,
+    "moisture_g": 10,
     "ash_g": 0,
     "calcium_mg": 0,
     "phosphorus_mg": 0,
@@ -104,15 +53,17 @@ Responde SOLO con JSON válido. Sin markdown. Sin explicaciones.
     "omega3_g": 0,
     "omega6_g": 0
   },
-  "ingredients": [],
-  "steps": [
-    {"instruction": "Servir la cantidad recomendada según el peso del perro.", "duration_min": 0}
-  ],
-  "breed_sizes": [],
-  "calories_per_kg": null,
-  "benefits": [],
-  "storage_instructions": null
-}`;
+  "nutrition_description": "Resumen en lenguaje natural de por qué esta croqueta es buena",
+  "ingredients_text": "Proteína de pollo, arroz, maíz, pulpa de remolacha, aceite de pescado",
+  "benefits": ["Beneficio 1", "Beneficio 2"],
+  "health_tags": ["tag1", "tag2"],
+  "storage_instructions": "texto de almacenamiento"
+}
+
+Información del producto:
+"""
+${query}
+"""`;
 
     const { text, json } = await generateStructuredContent(prompt);
 
@@ -123,7 +74,41 @@ Responde SOLO con JSON válido. Sin markdown. Sin explicaciones.
       );
     }
 
-    return NextResponse.json({ success: true, data: json, raw: text });
+    // Add missing fields with defaults for the form
+    const j = json as any;
+    const result = {
+      official_name: j.title || null,
+      title: j.title || null,
+      description: j.description || null,
+      category: "croquetas",
+      difficulty: "facil",
+      prep_time_min: 0,
+      kcal_per_100g: null,
+      protein_type: j.protein_type || null,
+      is_therapeutic: false,
+      is_detox: false,
+      health_tags: j.health_tags || [],
+      source_book: j.source_book || null,
+      nutrition_facts: j.nutrition_summary || {},
+      nutrition_description: j.nutrition_description || null,
+      ingredients_text: j.ingredients_text || null,
+      ingredients: j.ingredients_text 
+        ? j.ingredients_text.split(",").map((name: string) => ({
+            ingredient_name: name.trim(),
+            quantity_per_serving_g: 0,
+            ingredient_type: "croqueta",
+            unit_type: "g",
+            unit_weight_g: 1,
+            display_unit: "g"
+          }))
+        : [],
+      steps: [{ instruction: "Servir la cantidad recomendada según el peso del perro.", duration_min: 0 }],
+      breed_sizes: j.breed_sizes || [],
+      benefits: j.benefits || [],
+      storage_instructions: j.storage_instructions || null,
+    };
+
+    return NextResponse.json({ success: true, data: result, raw: text });
   } catch (error) {
     console.error("[AI Import Croqueta] Error:", error);
     return NextResponse.json(

@@ -507,8 +507,11 @@ function RecipeCard({ recipe, size = "standard" }: { recipe: NutritionRecipe; si
           </span>
         )}
       </div>
+      {recipe.category === "croquetas" && recipe.protein_type && (
+        <p className="text-[8px] text-primary-600 mt-0.5 truncate">{recipe.protein_type}</p>
+      )}
       {recipe.category === "croquetas" && recipe.source_book && (
-        <p className="text-[8px] text-zinc-400 mt-1 truncate">{recipe.source_book}</p>
+        <p className="text-[8px] text-zinc-400 mt-0.5 truncate">{recipe.source_book}</p>
       )}
     </Link>
   );

@@ -239,12 +239,15 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                   {preview.description && <p className="text-xs text-zinc-500 line-clamp-3">{preview.description}</p>}
                   <div className="flex gap-2 flex-wrap">
                     <span className="text-[10px] bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">{preview.category}</span>
-                    <span className="text-[10px] bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full">{preview.difficulty}</span>
-                    <span className="text-[10px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">{preview.prep_time_min} min</span>
+                    {preview.difficulty && <span className="text-[10px] bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full">{preview.difficulty}</span>}
+                    {preview.prep_time_min > 0 && <span className="text-[10px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">{preview.prep_time_min} min</span>}
                     {preview.kcal_per_100g > 0 && <span className="text-[10px] bg-danger-100 text-danger-700 px-2 py-0.5 rounded-full">{Math.round(preview.kcal_per_100g)} kcal</span>}
                   </div>
                   {preview.source_book && (
-                    <p className="text-xs text-zinc-500"><span className="font-semibold">Marca:</span> {preview.source_book}</p>
+                    <p className="text-xs text-zinc-500"><span className="font-semibold">Fabricante:</span> {preview.source_book}</p>
+                  )}
+                  {preview.protein_type && (
+                    <p className="text-xs text-zinc-500"><span className="font-semibold">Proteína:</span> {preview.protein_type}</p>
                   )}
 
                   {/* Breed sizes checkbox */}
@@ -258,10 +261,10 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                     </div>
                   </div>
 
-                  {/* Nutrition facts summary if available */}
-                  {preview.nutrition_facts && (
+                  {/* Nutrition summary */}
+                  {preview.nutrition_facts && Object.keys(preview.nutrition_facts).length > 0 && (
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-zinc-500">Nutrientes extraídos:</p>
+                      <p className="text-[10px] font-bold text-zinc-500">Nutrición (por 100g):</p>
                       <div className="flex flex-wrap gap-1">
                         {Object.entries(preview.nutrition_facts as Record<string, string | number | null | undefined>)
                           .filter(([_, v]) => v !== null && v !== 0 && v !== undefined)
@@ -272,18 +275,33 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                     </div>
                   )}
 
-                  {preview.ingredients?.length > 0 && (
-                    <p className="text-xs text-zinc-600">
-                      <strong>{preview.ingredients.length}</strong> ingredientes · <strong>{preview.steps?.length || 0}</strong> pasos
-                    </p>
+                  {preview.nutrition_description && (
+                    <p className="text-[10px] text-zinc-500 italic">{preview.nutrition_description}</p>
                   )}
+
+                  {preview.ingredients_text && (
+                    <p className="text-xs text-zinc-600"><strong>Ingredientes:</strong> {preview.ingredients_text}</p>
+                  )}
+
                   {preview.benefits?.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-zinc-500">Beneficios:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {preview.benefits.map((b: string, i: number) => (
+                          <span key={i} className="text-[9px] bg-accent-100 text-accent-700 px-1.5 py-0.5 rounded-full">{b}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {preview.health_tags?.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {preview.benefits.map((b: string, i: number) => (
-                        <span key={i} className="text-[9px] bg-accent-100 text-accent-700 px-1.5 py-0.5 rounded-full">{b}</span>
+                      {preview.health_tags.map((t: string, i: number) => (
+                        <span key={i} className="text-[9px] bg-primary-100 text-primary-700 px-1.5 py-0.5 rounded-full">{t}</span>
                       ))}
                     </div>
                   )}
+
                   {preview.storage_instructions && (
                     <p className="text-[10px] text-zinc-500 italic">Almacenamiento: {preview.storage_instructions}</p>
                   )}

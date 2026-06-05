@@ -276,13 +276,6 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                     ))}
                   </div>
                 )}
-                {(recipe as any).benefits?.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {(recipe as any).benefits.map((b: string, i: number) => (
-                      <span key={i} className="text-[10px] bg-accent-50 text-accent-700 px-2 py-0.5 rounded-full">{b}</span>
-                    ))}
-                  </div>
-                )}
                 {(recipe as any).storage_instructions && (
                   <p className="text-[10px] text-zinc-400 italic"><span className="font-semibold not-italic">Almacenamiento:</span> {(recipe as any).storage_instructions}</p>
                 )}
@@ -321,24 +314,28 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
         )}
 
         {/* Ingredients */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
-          {recipe.category === "croquetas" ? (
-            <p className="text-xs text-zinc-500 leading-relaxed">
-              {ingredients.length > 0 ? ingredients.map(i => i.ingredient_name).join(", ") : "Lista de ingredientes no disponible."}
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {ingredients.map((ing) => (
-                <div key={ing.id} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium ${TYPE_COLORS[ing.ingredient_type] ?? TYPE_COLORS.otro}`}>
-                  {TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}
-                  <span>{ing.ingredient_name}</span>
-                  <span className="opacity-60">({ing.quantity_per_serving_g}g)</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {ingredients.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
+            {recipe.category === "croquetas" ? (
+              <div className="flex flex-wrap gap-1.5">
+                {ingredients.map(ing => (
+                  <span key={ing.id} className="text-[10px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">{ing.ingredient_name}</span>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {ingredients.map((ing) => (
+                  <div key={ing.id} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium ${TYPE_COLORS[ing.ingredient_type] ?? TYPE_COLORS.otro}`}>
+                    {TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}
+                    <span>{ing.ingredient_name}</span>
+                    <span className="opacity-60">({ing.quantity_per_serving_g}g)</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Scale to dog with toggle */}
         {dog && recipe.category !== "croquetas" && (
@@ -450,6 +447,29 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Nutrition description (croquetas) */}
+        {recipe.category === "croquetas" && (recipe as any).nutrition_description && (
+          <div className="card-soft rounded-[1.5rem] p-5">
+            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-2">Descripción nutricional</h3>
+            <p className="text-xs text-zinc-500 leading-relaxed">{(recipe as any).nutrition_description}</p>
+          </div>
+        )}
+
+        {/* Benefits (croquetas) */}
+        {recipe.category === "croquetas" && (recipe as any).benefits?.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Beneficios</h3>
+            <div className="space-y-2">
+              {(recipe as any).benefits.map((b: string, i: number) => (
+                <div key={i} className="flex items-start gap-2">
+                  <span className="text-accent-500 mt-0.5">✓</span>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{b}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

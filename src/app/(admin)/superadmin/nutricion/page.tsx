@@ -24,7 +24,7 @@ const DIFFICULTIES = ["facil", "medio", "avanzado"];
 const INGREDIENT_TYPES = ["proteina", "hueso", "viscera", "vegetal", "suplemento", "otro"];
 const TAG_OPTIONS = ["sin gluten", "sin lacteos", "hipoalergenico", "alto en proteina", "bajo en grasa", "renal", "hepatico", "diabetico", "cardiaco", "digestivo", "articular"];
 
-const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", video_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "", protein_type: "", breed_sizes: [] as string[], benefits: [] as string[], storage_instructions: "" };
+const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", video_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "", protein_type: "", breed_sizes: [] as string[], benefits: [] as string[], storage_instructions: "", ingredients_text: "", nutrition_description: "" };
 const emptyFacts: NutritionFact = { recipe_id: "", protein_g: 0, fat_g: 0, carbs_g: 0, fiber_g: 0, moisture_g: 0, ash_g: 0, calcium_mg: 0, phosphorus_mg: 0, iron_mg: 0, zinc_mg: 0, vitamin_a_ui: 0, vitamin_d_ui: 0, vitamin_e_mg: 0, omega3_g: 0, omega6_g: 0 };
 
 export default function NutricionPage() {
@@ -107,6 +107,30 @@ export default function NutricionPage() {
         loadSubEntities(j.data.id);
       }
     }
+    // Parse ingredients_text into recipe_ingredients for croquetas
+    const recipeId = editing?.id || (data as any).id;
+    const ingText = (data as any).ingredients_text || "";
+    if (ingText && recipeId) {
+      const names = ingText.split(/[,\n]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+      // Clear existing and add new ones (only if user explicitly changed the text)
+        for (const name of names) {
+        await fetch("/api/admin/recipe-ingredients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            recipe_id: recipeId,
+            ingredient_name: name,
+            quantity_per_serving_g: 0,
+            ingredient_type: "croqueta",
+            unit_type: "g",
+            unit_weight_g: 1,
+            display_unit: name,
+          })
+        });
+      }
+      if (editing) loadSubEntities(recipeId);
+    }
+
     setIsSaving(false);
     setSaveToast(true);
     setTimeout(() => setSaveToast(false), 2000);
@@ -135,7 +159,7 @@ export default function NutricionPage() {
 
   const handleEdit = (r: Recipe) => {
     setEditing(r);
-    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min ?? 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g ?? 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "", breed_sizes: (r as any).breed_sizes || [], benefits: (r as any).benefits || [], storage_instructions: (r as any).storage_instructions || "" });
+    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min ?? 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g ?? 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "", breed_sizes: (r as any).breed_sizes || [], benefits: (r as any).benefits || [], storage_instructions: (r as any).storage_instructions || "", ingredients_text: (r as any).ingredients_text || "", nutrition_description: (r as any).nutrition_description || "" });
     setShowNew(false);
     loadSubEntities(r.id);
   };
@@ -159,6 +183,8 @@ export default function NutricionPage() {
       breed_sizes: recipe.breed_sizes || [],
       benefits: recipe.benefits || [],
       storage_instructions: recipe.storage_instructions || "",
+      ingredients_text: recipe.ingredients_text || "",
+      nutrition_description: recipe.nutrition_description || "",
     };
     setForm(aiRecipe);
 
@@ -414,12 +440,17 @@ export default function NutricionPage() {
                   <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Imagen de la Receta</label>
                   <div className="flex flex-col gap-3">
                     {form.image_url ? (
-                      <button onClick={() => { setImageEditorUrl(form.image_url); setShowImageEditor(true); }} className="relative group self-start">
-                        <img src={form.image_url} alt="Preview" className="w-32 h-32 rounded-2xl object-cover border border-zinc-200 dark:border-zinc-700" />
-                        <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Edit className="w-5 h-5 text-white" />
-                        </div>
-                      </button>
+                      <div className="relative self-start">
+                        <button onClick={() => { setImageEditorUrl(form.image_url); setShowImageEditor(true); }} className="relative group">
+                          <img src={form.image_url} alt="Preview" className="w-32 h-32 rounded-2xl object-cover border border-zinc-200 dark:border-zinc-700" />
+                          <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Edit className="w-5 h-5 text-white" />
+                          </div>
+                        </button>
+                        <button onClick={() => setForm(f => ({...f, image_url: ""}))} className="absolute -top-2 -right-2 w-6 h-6 bg-danger-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-danger-600 shadow-sm z-10">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
                     ) : (
                       <label className="relative self-start cursor-pointer">
                         <div className="w-32 h-32 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
@@ -483,6 +514,19 @@ export default function NutricionPage() {
               {/* Croqueta-specific fields */}
               {form.category === "croquetas" && (
                 <>
+                  <div>
+                    <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Ingredientes (uno por línea o separados por coma)</label>
+                    <textarea value={(form as any).ingredients_text || ""} onChange={e => setForm(f => ({...f, ingredients_text: e.target.value}))} rows={3}
+                      placeholder="Proteína de pollo, arroz, maíz, aceite de pescado..."
+                      className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                    <p className="text-[10px] text-zinc-400 mt-0.5">Se guardarán como ingredientes individuales al guardar la receta</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Descripción nutricional (resumen en lenguaje natural)</label>
+                    <textarea value={(form as any).nutrition_description || ""} onChange={e => setForm(f => ({...f, nutrition_description: e.target.value}))} rows={2}
+                      placeholder="Croqueta con alto contenido proteico ideal para..."
+                      className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  </div>
                   <div>
                     <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Beneficios clave</label>
                     <div className="flex flex-wrap gap-1.5">
