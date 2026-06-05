@@ -75,7 +75,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
           difficulty: imported.difficulty || "facil",
           kcal_per_100g: imported.kcal_per_100g || 0,
           is_detox: imported.is_detox || false,
-          source_book: imported.brand || "",
+          source_book: imported.source_book || imported.brand || "",
           protein_type: imported.protein_type || "Croqueta comercial",
           ingredients: imported.ingredients || [],
           steps: imported.steps || [],
