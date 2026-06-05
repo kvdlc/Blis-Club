@@ -32,7 +32,7 @@ INSTRUCCIONES POR CAMPO:
 
 4. **category**: Siempre "croquetas".
 
-5. **protein_type**: Extraer el primer ingrediente proteico o sabor principal (ej: "Carne de pato", "Salmón"). Si no hay, "Croqueta comercial".
+5. **protein_type**: Extraer el sabor principal + el porcentaje de proteína cruda (ej: si "Sabor Principal: Cordero y Vegetales / Carne de pato" y "Proteína Cruda: 27%", retornar "Carne de pato 27%"). Formato: "Ingrediente principal XX%".
 
 6. **kcal_per_100g**: Si aparece "Energía Metabolizable" o "Kcal/kg", convertir el valor: ej. "3800 Kcal/kg" → 380. Si no hay valor, null.
 
@@ -43,7 +43,7 @@ INSTRUCCIONES POR CAMPO:
    - El resto de campos dejarlos como null si no aparecen.
 
 8. **ingredients**: Extraer de la "Lista de Ingredientes". Lista completa, separar por comas. Cada ingrediente como objeto:
-   {"ingredient_name": "nombre exacto", "quantity_per_serving_g": 0, "ingredient_type": "otro", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"}
+   {"ingredient_name": "nombre exacto", "quantity_per_serving_g": 0, "ingredient_type": "croqueta", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"}
 
 9. **breed_sizes**: Extraer del campo "Tamaño de Raza". MAPEAR valores en español:
    - "Razas Pequeñas" o "Miniatura" → "miniatura"
@@ -62,7 +62,7 @@ INSTRUCCIONES POR CAMPO:
 
 13. **storage_instructions**: Las "Indicaciones de Almacenamiento", o null.
 
-14. **source_book**: Mismo valor que brand (fabricante).
+14. **source_book**: Mismo valor que brand (fabricante). Si aparece una página web o dominio en la información del producto (ej: "www.bioalimentar.com"), incluirla al final: "Bioalimentar (bioalimentar.com)".
 
 Información del producto:
 """

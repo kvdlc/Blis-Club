@@ -1,7 +1,7 @@
 const MAX_WIDTH = 1200;
 const MAX_HEIGHT = 1200;
 const JPEG_QUALITY = 0.75;
-const MAX_SIZE_BYTES = 500 * 1024;
+const MAX_SIZE_BYTES = 100 * 1024;
 
 export async function compressImage(file: File): Promise<Blob> {
   const bitmap = await createImageBitmap(file);

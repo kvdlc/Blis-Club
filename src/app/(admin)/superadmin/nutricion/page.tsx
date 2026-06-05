@@ -134,23 +134,24 @@ export default function NutricionPage() {
 
   const handleEdit = (r: Recipe) => {
     setEditing(r);
-    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min || 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g || 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "", breed_sizes: (r as any).breed_sizes || [] });
+    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min ?? 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g ?? 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "", breed_sizes: (r as any).breed_sizes || [] });
     setShowNew(false);
     loadSubEntities(r.id);
   };
 
   const handleAIGenerate = async (recipe: any) => {
+    const isCroquetas = recipe.category === "croquetas";
     const aiRecipe = {
       title: recipe.title || "",
       description: recipe.description || "",
-      category: recipe.category || "diario",
+      category: recipe.category || (isCroquetas ? "croquetas" : "diario"),
       image_url: recipe.image_url || "",
       video_url: recipe.video_url || "",
       is_therapeutic: recipe.is_therapeutic || false,
       health_tags: recipe.health_tags || [],
-      prep_time_min: recipe.prep_time_min || 15,
+      prep_time_min: recipe.prep_time_min ?? (isCroquetas ? 0 : 15),
       difficulty: recipe.difficulty || "facil",
-      kcal_per_100g: recipe.kcal_per_100g || 0,
+      kcal_per_100g: recipe.kcal_per_100g ?? 0,
       is_detox: recipe.is_detox || false,
       source_book: recipe.source_book || "",
       protein_type: recipe.protein_type || "",
@@ -400,32 +401,43 @@ export default function NutricionPage() {
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Imagen de la Receta</label>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col gap-3">
                     {form.image_url ? (
-                      <button onClick={() => { setImageEditorUrl(form.image_url); setShowImageEditor(true); }} className="relative group shrink-0">
-                        <img src={form.image_url} alt="Preview" className="w-16 h-16 rounded-2xl object-cover border border-zinc-200 dark:border-zinc-700" />
+                      <button onClick={() => { setImageEditorUrl(form.image_url); setShowImageEditor(true); }} className="relative group self-start">
+                        <img src={form.image_url} alt="Preview" className="w-32 h-32 rounded-2xl object-cover border border-zinc-200 dark:border-zinc-700" />
                         <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Edit className="w-4 h-4 text-white" />
+                          <Edit className="w-5 h-5 text-white" />
                         </div>
                       </button>
                     ) : (
-                      <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
-                        <ImageIcon className="w-6 h-6 text-zinc-400" />
-                      </div>
+                      <label className="relative self-start cursor-pointer">
+                        <div className="w-32 h-32 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+                          <div className="text-center">
+                            <Camera className="w-8 h-8 text-zinc-400 mx-auto mb-1" />
+                            <span className="text-[10px] text-zinc-400 font-semibold">Seleccionar foto</span>
+                          </div>
+                        </div>
+                        <input type="file" accept="image/*" className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const blobUrl = URL.createObjectURL(file);
+                            setImageEditorUrl(blobUrl);
+                            setShowImageEditor(true);
+                            e.target.value = "";
+                          }} />
+                      </label>
                     )}
-                    <div className="flex-1 space-y-2">
-                      <input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} placeholder="https://..." className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
-                      <div className="flex gap-2">
-                        <button onClick={handleGenerateImage} disabled={generatingImage}
-                          className="flex items-center gap-1.5 bg-accent-600 text-white rounded-lg px-3 py-1.5 text-xs font-bold hover:bg-accent-700 disabled:opacity-50 transition-all">
-                          {generatingImage ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                          Generar con AI
-                        </button>
-                        <button onClick={() => { setImageEditorUrl(form.image_url || "https://placehold.co/400x400/EEE/999?text=Imagen"); setShowImageEditor(true); }}
-                          className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg px-3 py-1.5 text-xs font-bold hover:bg-zinc-200 transition-all">
-                          <Camera className="w-3 h-3" /> Subir / Editar
-                        </button>
-                      </div>
+                    <div className="flex gap-2">
+                      <button onClick={handleGenerateImage} disabled={generatingImage}
+                        className="flex items-center gap-1.5 bg-accent-600 text-white rounded-lg px-3 py-1.5 text-xs font-bold hover:bg-accent-700 disabled:opacity-50 transition-all">
+                        {generatingImage ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                        Generar con AI
+                      </button>
+                      <button onClick={() => { setImageEditorUrl(form.image_url || "https://placehold.co/400x400/EEE/999?text=Imagen"); setShowImageEditor(true); }}
+                        className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg px-3 py-1.5 text-xs font-bold hover:bg-zinc-200 transition-all">
+                        <Camera className="w-3 h-3" /> Editar / Recortar
+                      </button>
                     </div>
                   </div>
                 </div>
