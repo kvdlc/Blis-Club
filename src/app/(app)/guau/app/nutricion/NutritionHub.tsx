@@ -340,16 +340,16 @@ function RecetarioView({
             </section>
           )}
 
-          {/* Populares — tarjetas anchas horizontales */}
+          {/* Populares — grilla de 2 columnas */}
           {popular.length > 0 && (
             <section>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Populares</h3>
                 <span className="text-xs text-primary-600 dark:text-primary-400 font-semibold">{visibleRecipes.length} recetas</span>
               </div>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {popular.map((r) => (
-                  <RecipeCard key={r.id} recipe={r} size="wide" />
+                  <RecipeCard key={r.id} recipe={r} size="standard" />
                 ))}
               </div>
             </section>
