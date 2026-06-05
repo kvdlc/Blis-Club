@@ -247,6 +247,18 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                 ))}
               </div>
             </div>
+            {recipe.breed_sizes && recipe.breed_sizes.length > 0 && (
+              <div className="flex items-center justify-center gap-1.5 mt-3">
+                {recipe.breed_sizes.map(s => (
+                  <span key={s} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300">
+                    {s === "miniatura" ? "Miniatura" : s === "pequena" ? "Pequeña" : s === "mediana" ? "Mediana" : s === "grande" ? "Grande" : s === "gigante" ? "Gigante" : s}
+                  </span>
+                ))}
+              </div>
+            )}
+            {recipe.source_book && (
+              <p className="text-xs text-zinc-400 mt-2">Fabricante: {recipe.source_book}</p>
+            )}
           </div>
         </div>
 

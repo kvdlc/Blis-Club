@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Dog, DogMetabolicProfile, DogMealSlot, WeeklyChallenge, UserChallenge } from "@/types/database";
+import { sugerirTamanoPorRaza, BREED_SIZE_LABELS } from "@/lib/breed-sizes";
 import { ArrowLeft, Camera, PawPrint, Check, Search, PenLine, ChevronDown, Loader2, Trash2, AlertTriangle } from "lucide-react";
 import { MealSlotsConfig } from "../../../MealSlotsConfig";
 import { DatePicker } from "@/components/DatePicker";
@@ -66,6 +67,15 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
   const [weightDisplay, setWeightDisplay] = useState(String(dog.peso_kg).replace(".", ","));
   const [objective, setObjective] = useState(dog.objetivo_principal ?? "");
   const [breedImage, setBreedImage] = useState(dog.foto_url || (dog as any).breed_image_url || "");
+  const [tamano, setTamano] = useState(dog.tamano || "");
+
+  // Auto-detect size from breed
+  useEffect(() => {
+    if (breed && !tamano) {
+      const suggested = sugerirTamanoPorRaza(breed);
+      if (suggested) setTamano(suggested);
+    }
+  }, [breed]);
 
   const getWeightNumber = () => {
     const v = parseFloat(weightDisplay.replace(",", "."));
@@ -125,6 +135,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     await supabase.from("dogs").update({
       nombre: name, raza: breed, edad_meses: edadMeses, fecha_nacimiento: birthDate,
       peso_kg: getWeightNumber(),
+      tamano: tamano || null,
       objetivo_principal: objective || null, foto_url: photo || null, breed_image_url: breedImage || null,
     }).eq("id", dog.id);
 
@@ -135,7 +146,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
 
     setSaved(true);
     setTimeout(() => { setSaved(false); setSaveIcon(false); }, 1500);
-  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, activity, allergies, conditions, feedingPct, dog.id, supabase]);
+  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, tamano, activity, allergies, conditions, feedingPct, dog.id, supabase]);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -311,6 +322,23 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
             <option value="">Sin objetivo</option>
             {OBJECTIVES.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
+        </div>
+
+        {/* Tamaño dropdown */}
+        <div>
+          <label className="text-xs text-zinc-500 block mb-1">Tamaño de raza</label>
+          <select value={tamano} onChange={(e) => setTamano(e.target.value)}
+            className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm">
+            <option value="">Auto-detectar</option>
+            {Object.entries(BREED_SIZE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+          <p className="text-[10px] text-zinc-400 mt-0.5">
+            {tamano
+              ? `Seleccionado: ${BREED_SIZE_LABELS[tamano]}`
+              : breed
+                ? `Se auto-detectará según la raza: ${breed}`
+                : "Se auto-detectará según la raza"}
+          </p>
         </div>
       </div>
 

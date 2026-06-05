@@ -23,7 +23,7 @@ const DIFFICULTIES = ["facil", "medio", "avanzado"];
 const INGREDIENT_TYPES = ["proteina", "hueso", "viscera", "vegetal", "suplemento", "otro"];
 const TAG_OPTIONS = ["sin gluten", "sin lacteos", "hipoalergenico", "alto en proteina", "bajo en grasa", "renal", "hepatico", "diabetico", "cardiaco", "digestivo", "articular"];
 
-const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", video_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "", protein_type: "" };
+const emptyRecipe = { title: "", description: "", category: "diario", image_url: "", video_url: "", is_therapeutic: false, health_tags: [] as string[], prep_time_min: 15, difficulty: "facil", kcal_per_100g: 0, is_detox: false, source_book: "", protein_type: "", breed_sizes: [] as string[] };
 const emptyFacts: NutritionFact = { recipe_id: "", protein_g: 0, fat_g: 0, carbs_g: 0, fiber_g: 0, moisture_g: 0, ash_g: 0, calcium_mg: 0, phosphorus_mg: 0, iron_mg: 0, zinc_mg: 0, vitamin_a_ui: 0, vitamin_d_ui: 0, vitamin_e_mg: 0, omega3_g: 0, omega6_g: 0 };
 
 export default function NutricionPage() {
@@ -134,7 +134,7 @@ export default function NutricionPage() {
 
   const handleEdit = (r: Recipe) => {
     setEditing(r);
-    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min || 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g || 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "" });
+    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min || 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g || 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "", breed_sizes: (r as any).breed_sizes || [] });
     setShowNew(false);
     loadSubEntities(r.id);
   };
@@ -154,6 +154,7 @@ export default function NutricionPage() {
       is_detox: recipe.is_detox || false,
       source_book: recipe.source_book || "",
       protein_type: recipe.protein_type || "",
+      breed_sizes: recipe.breed_sizes || [],
     };
     setForm(aiRecipe);
 
@@ -443,6 +444,15 @@ export default function NutricionPage() {
                   <button key={t} onClick={() => toggleTag(t)}
                     className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-all ${form.health_tags.includes(t) ? "border-primary-400 bg-primary-50 text-primary-700" : "border-zinc-200 text-zinc-500"}`}>{t}</button>
                 ))}</div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Tamaños de raza (para croquetas)</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {["miniatura", "pequena", "mediana", "grande", "gigante"].map(s => (
+                    <button key={s} onClick={() => setForm(f => ({...f, breed_sizes: f.breed_sizes.includes(s) ? f.breed_sizes.filter(x => x !== s) : [...f.breed_sizes, s] }))}
+                      className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-all ${form.breed_sizes.includes(s) ? "border-primary-400 bg-primary-50 text-primary-700" : "border-zinc-200 text-zinc-500"}`}>{s}</button>
+                  ))}
+                </div>
               </div>
               <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Libro fuente</label>
                 <input value={form.source_book} onChange={e => setForm({...form, source_book: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { determinarTamano } from "@/lib/breed-sizes";
 import type { Dog, DogMealSlot, MealSchedule, NutritionRecipe, DogMetabolicProfile } from "@/types/database";
 import {
   ChevronLeft, ChevronRight, Check, X, Sparkles, Clock, ChefHat, Circle,
@@ -137,8 +138,26 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
   const generateDay = async () => {
     const emptySlots = activeSlots.filter((slot) => !daySchedule.some((s) => s.meal_slot_index === slot.slot_index));
     if (emptySlots.length === 0) return;
+
+    // Get dog's breed size
+    const dogSize = determinarTamano(dog.raza, dog.peso_kg, dog.edad_meses, dog.tamano);
+    const sizeMap: Record<string, string> = { miniatura: "miniatura", pequena: "pequena", mediana: "mediana", grande: "grande", gigante: "gigante" };
+    const lookupSize = sizeMap[dogSize] || dogSize;
+
+    // Prioritize recipes matching the dog's breed size
+    const matchingCroquetas = recipes.filter(r =>
+      r.category === "croquetas" && r.breed_sizes?.includes(lookupSize)
+    );
+    const otherRecipes = recipes.filter(r =>
+      !(r.category === "croquetas" && r.breed_sizes?.includes(lookupSize))
+    );
+
     for (const slot of emptySlots) {
-      const randomRecipe = recipes[Math.floor(Math.random() * recipes.length)];
+      // Pick from matching croquetas first (50% chance), or any other recipe
+      const pool = matchingCroquetas.length > 0 && Math.random() < 0.5
+        ? matchingCroquetas
+        : otherRecipes;
+      const randomRecipe = pool[Math.floor(Math.random() * pool.length)] || recipes[Math.floor(Math.random() * recipes.length)];
       if (!randomRecipe) continue;
       const grams = Math.round(totalGramsTarget / activeSlots.length);
       const { data } = await supabase.from("meal_schedule").insert({

@@ -31,6 +31,7 @@ export interface Dog {
   edad_meses: number;
   fecha_nacimiento: string | null;
   peso_kg: number;
+  tamano: string | null;
   objetivo_principal: string | null;
   foto_url: string | null;
   breed_image_url: string | null;
@@ -83,6 +84,7 @@ export interface NutritionRecipe {
   kcal_per_100g: number | null;
   is_detox: boolean;
   protein_type: string | null;
+  breed_sizes: string[];
   created_at: string;
 }
 

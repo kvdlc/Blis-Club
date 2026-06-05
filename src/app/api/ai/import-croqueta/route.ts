@@ -18,57 +18,65 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "query is required" }, { status: 400 });
     }
 
-    const prompt = `You are a pet nutrition database assistant. The user wants to import a commercial dog food (croqueta/kibble) into a recipe database.
+    const prompt = `You are a pet nutrition database assistant. The user provides product information for a commercial dog food (croqueta/kibble). Parse the provided information into the exact JSON structure below.
 
-Search query from user: "${query}"
+Do NOT search for additional data. Do NOT guess or fill missing values. Leave fields as null or empty if the info is not present in the text.
 
-Find the most accurate official product name and nutritional data. Return ONLY a JSON object with this exact structure (no markdown, no code blocks):
+User's product information:
+"""
+${query}
+"""
+
+Return ONLY a JSON object with this exact structure (no markdown, no code blocks):
 
 {
-  "official_name": "Exact official product name, well-formatted",
-  "brand": "Brand name",
-  "description": "Short description of the product",
+  "official_name": "Exact official product name from the text, or null",
+  "brand": "Brand name from the text, or null",
+  "description": "One-sentence description of the product extracted from the text, or null",
   "category": "croquetas",
   "difficulty": "facil",
   "prep_time_min": 0,
-  "kcal_per_100g": 0,
+  "kcal_per_100g": null,
   "protein_type": "Croqueta comercial",
   "is_therapeutic": false,
   "is_detox": false,
   "health_tags": [],
   "nutrition_facts": {
-    "protein_g": 0,
-    "fat_g": 0,
-    "carbs_g": 0,
-    "fiber_g": 0,
-    "moisture_g": 0,
-    "ash_g": 0,
-    "calcium_mg": 0,
-    "phosphorus_mg": 0,
-    "iron_mg": 0,
-    "zinc_mg": 0,
-    "vitamin_a_ui": 0,
-    "vitamin_d_ui": 0,
-    "vitamin_e_mg": 0,
-    "omega3_g": 0,
-    "omega6_g": 0
+    "protein_g": null,
+    "fat_g": null,
+    "carbs_g": null,
+    "fiber_g": null,
+    "moisture_g": null,
+    "ash_g": null,
+    "calcium_mg": null,
+    "phosphorus_mg": null,
+    "iron_mg": null,
+    "zinc_mg": null,
+    "vitamin_a_ui": null,
+    "vitamin_d_ui": null,
+    "vitamin_e_mg": null,
+    "omega3_g": null,
+    "omega6_g": null
   },
   "ingredients": [
-    {"ingredient_name": "Nombre del ingrediente", "quantity_per_serving_g": 0, "ingredient_type": "otro", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"}
+    {"ingredient_name": "Ingredient from the list", "quantity_per_serving_g": 0, "ingredient_type": "otro", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"}
   ],
   "steps": [
     {"instruction": "Servir la cantidad recomendada según el peso del perro.", "duration_min": 0}
   ],
-  "breed_sizes": ["pequeña", "mediana", "grande"],
-  "image_search_query": "best search query to find product photo"
+  "breed_sizes": [],
+  "calories_per_kg": null,
+  "benefits": [],
+  "storage_instructions": null
 }
 
-Important:
-- official_name: Use the REAL official product name. Suggest corrections if the user's query was approximate.
-- nutrition_facts: Use real values from the product's guaranteed analysis (%). Convert percentages to grams per 100g (e.g., 26% protein = 26g).
-- breed_sizes: Array of breed sizes this product is for ("pequeña", "mediana", "grande", "gigante").
-- image_search_query: Generate a precise search query to find the official product photo online.
-- If you cannot find exact data, estimate from similar products by the same brand but clearly mark estimates.
+Important rules:
+- Extract values EXACTLY as provided in the text. Do not invent or estimate.
+- nutrition_facts: Extract from "Análisis Garantizado" or "Análisis Nutricional" sections. Convert percentages to grams per 100g (e.g., 26% protein = 26g). Leave null if not found.
+- ingredients: Extract from "Lista de Ingredientes" section. Do not change the ingredient names.
+- breed_sizes: Extract from "Tamaño de Raza" section if present. Valid values: "miniatura", "pequena", "mediana", "grande", "gigante".
+- kcal_per_100g: If "Energía Metabolizable" is provided with a value like "3800 Kcal/kg", convert: 3800/10 = 380 kcal/100g.
+- health_tags: Extract any health claims ("alta proteina", "bajo en grasa", etc.) as array.
 - Respond ONLY with the JSON object.`;
 
     const { text, json } = await generateStructuredContent(prompt);

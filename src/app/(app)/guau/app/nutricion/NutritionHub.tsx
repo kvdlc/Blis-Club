@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { NutritionRecipe, ToxicFood, Dog, DogMetabolicProfile, DogMealSlot, MealSchedule, Walk } from "@/types/database";
 import { MealCalendarWidget } from "@/components/MealCalendarWidget";
+import { determinarTamano } from "@/lib/breed-sizes";
 import {
   Search, Plus, Minus, ChefHat, Lock, Check, ShoppingCart,
   AlertTriangle, ShieldCheck, X, Trash2, Sparkles, Clock,
@@ -72,6 +73,7 @@ export function NutritionHub(props: Props) {
           userId={props.userId}
           favoriteIds={props.favoriteRecipeIds}
           hiddenMap={props.hiddenRecipeIds}
+          dog={props.dog}
         />
       )}
       {activeTab === "plan" && (
@@ -105,18 +107,23 @@ const CATEGORY_META: Record<string, { label: string; icon: string; bg: string; b
 };
 
 function RecetarioView({
-  recipes, onOpenScanner, userId, favoriteIds, hiddenMap
+  recipes, onOpenScanner, userId, favoriteIds, hiddenMap, dog
 }: {
   recipes: NutritionRecipe[];
   onOpenScanner: () => void;
   userId: string;
   favoriteIds: Set<string>;
   hiddenMap: Map<string, string | null>;
+  dog: Dog | null;
 }) {
   const [selectedCategory, setSelectedCategory] = useState<string | "all" | "hidden">("all");
   const [selectedProtein, setSelectedProtein] = useState<string>("");
+  const [showAllCroquetas, setShowAllCroquetas] = useState(false);
+
+  const dogSize = dog ? determinarTamano(dog.raza, dog.peso_kg, dog.edad_meses, dog.tamano) : null;
 
   const categories = [...new Set(recipes.map((r) => r.category))];
+  const hasHidden = hiddenMap.size > 0;
 
   // Visible recipes (exclude hidden by default)
   const visibleRecipes = useMemo(() => {
@@ -139,13 +146,17 @@ function RecetarioView({
     let result = visibleRecipes;
     if (selectedCategory !== "all" && selectedCategory !== "hidden") result = result.filter((r) => r.category === selectedCategory);
     if (selectedProtein) result = result.filter((r) => r.protein_type === selectedProtein);
+    // Filter croquetas by breed size if dog has a size and "Ver todas" is off
+    if (selectedCategory === "croquetas" && dogSize && !showAllCroquetas) {
+      const sizeMap: Record<string, string> = { miniatura: "miniatura", pequena: "pequena", mediana: "mediana", grande: "grande", gigante: "gigante" };
+      const lookupSize = sizeMap[dogSize] || dogSize;
+      result = result.filter(r => r.breed_sizes?.includes(lookupSize));
+    }
     return result;
-  }, [visibleRecipes, selectedCategory, selectedProtein]);
+  }, [visibleRecipes, selectedCategory, selectedProtein, dogSize, showAllCroquetas]);
 
-  // Favorites
-  const favoriteRecipes = useMemo(() => {
-    return recipes.filter((r) => favoriteIds.has(r.id) && !hiddenMap.has(r.id));
-  }, [recipes, favoriteIds, hiddenMap]);
+  const favoriteRecipes = useMemo(() => recipes.filter(r => favoriteIds.has(r.id) && !hiddenMap.has(r.id)), [recipes, favoriteIds, hiddenMap]);
+  const hasFavorites = favoriteRecipes.length > 0;
 
   // Popular (diverse, not detox)
   const popular = useMemo(() => {
@@ -182,11 +193,36 @@ function RecetarioView({
   // Newest
   const newest = [...visibleRecipes].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 4);
 
-  const hasFavorites = favoriteRecipes.length > 0;
-  const hasHidden = hiddenMap.size > 0;
+  // Croquetas recomendadas para el tamaño del perro
+  const recommendedCroquetas = useMemo(() => {
+    if (!dogSize) return [];
+    const sizeMap: Record<string, string> = { miniatura: "miniatura", pequena: "pequena", mediana: "mediana", grande: "grande", gigante: "gigante" };
+    const lookupSize = sizeMap[dogSize] || dogSize;
+    return visibleRecipes.filter(r =>
+      r.category === "croquetas" &&
+      r.breed_sizes &&
+      r.breed_sizes.includes(lookupSize)
+    );
+  }, [visibleRecipes, dogSize]);
 
   return (
     <div className="space-y-6">
+      {/* Recomendado para el tamaño del perro */}
+      {dogSize && recommendedCroquetas.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+              Recomendado para {dogSize === "miniatura" ? "razas miniatura" : dogSize === "pequena" ? "razas pequeñas" : dogSize === "mediana" ? "razas medianas" : dogSize === "grande" ? "razas grandes" : "razas gigantes"} 🐾
+            </h3>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
+            {recommendedCroquetas.map((r) => (
+              <RecipeCard key={r.id} recipe={r} size="large" />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Scanner banner */}
       <button
         onClick={onOpenScanner}
@@ -267,6 +303,23 @@ function RecetarioView({
           {selectedProtein && (
             <button onClick={() => setSelectedProtein("")} className="text-[10px] text-zinc-400 hover:text-zinc-600 font-semibold px-2 py-1">Limpiar</button>
           )}
+        </div>
+      )}
+
+      {/* Breed size filter for croquetas */}
+      {selectedCategory === "croquetas" && dogSize && (
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-semibold text-zinc-500 whitespace-nowrap">Tamaño:</label>
+          <div className="flex gap-1">
+            <button onClick={() => setShowAllCroquetas(false)}
+              className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-all ${!showAllCroquetas ? "border-primary-400 bg-primary-50 text-primary-700" : "border-zinc-200 text-zinc-500"}`}>
+              Recomendadas
+            </button>
+            <button onClick={() => setShowAllCroquetas(true)}
+              className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-all ${showAllCroquetas ? "border-primary-400 bg-primary-50 text-primary-700" : "border-zinc-200 text-zinc-500"}`}>
+              Ver todas
+            </button>
+          </div>
         </div>
       )}
 

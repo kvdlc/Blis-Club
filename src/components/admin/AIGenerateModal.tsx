@@ -12,6 +12,8 @@ interface Props {
   moduleTitle?: string;
 }
 
+const BREED_SIZES = ["miniatura", "pequena", "mediana", "grande", "gigante"];
+
 export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, lessonType, moduleTitle }: Props) {
   const [prompt, setPrompt] = useState("");
   const [category, setCategory] = useState("");
@@ -20,6 +22,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
   const [error, setError] = useState("");
   const [preview, setPreview] = useState<any>(null);
   const [importMode, setImportMode] = useState<"generate" | "import">("generate");
+  const [breedSizes, setBreedSizes] = useState<string[]>([]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -57,8 +60,9 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
       }
 
       if (importMode === "import") {
-        // Transform import response to recipe format
         const imported = data.data;
+        const bs = imported.breed_sizes || [];
+        setBreedSizes(Array.isArray(bs) ? bs : []);
         setPreview({
           title: imported.official_name || imported.title,
           description: imported.description,
@@ -76,7 +80,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
           ingredients: imported.ingredients || [],
           steps: imported.steps || [],
           nutrition_facts: imported.nutrition_facts || null,
-          breed_sizes: imported.breed_sizes || [],
+          breed_sizes: bs,
           image_search_query: imported.image_search_query || "",
         });
       } else {
@@ -91,11 +95,12 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
 
   const handleUse = async () => {
     if (!preview) return;
-    await onGenerate(preview);
+    await onGenerate({ ...preview, breed_sizes: breedSizes });
     onClose();
     setPrompt("");
     setPreview(null);
     setImportMode("generate");
+    setBreedSizes([]);
   };
 
   const handleRegenerate = () => {
@@ -134,13 +139,13 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
           {isRecipe && (
             <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-0.5">
               <button
-                onClick={() => { setImportMode("generate"); setPreview(null); }}
+                onClick={() => { setImportMode("generate"); setPreview(null); setBreedSizes([]); }}
                 className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${importMode === "generate" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}
               >
                 Generar receta
               </button>
               <button
-                onClick={() => { setImportMode("import"); setPreview(null); }}
+                onClick={() => { setImportMode("import"); setPreview(null); setBreedSizes([]); }}
                 className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${importMode === "import" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}
               >
                 Importar croqueta
@@ -151,19 +156,19 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
           {/* Prompt input */}
           <div>
             <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 block mb-1">
-              {importMode === "import" ? "Nombre aproximado de la croqueta" : "Describe lo que quieres generar"}
+              {importMode === "import" ? "Pega la información del producto" : "Describe lo que quieres generar"}
             </label>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder={
                 importMode === "import"
-                  ? "Ej: AVANT ADULTO RAZA MEDIANA GRANDE..."
+                  ? "Pega aquí el nombre, análisis garantizado, ingredientes, etc. del producto..."
                   : isRecipe
                     ? "Ej: Receta de pollo con zanahoria para perro diabético de 10kg, baja en grasa..."
                     : "Ej: Lección sobre cómo enseñar 'sentado' a un cachorro de 3 meses, con teoría y quiz..."
               }
-              rows={4}
+              rows={6}
               className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 text-sm"
             />
           </div>
@@ -209,9 +214,9 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
             className="w-full rounded-xl bg-accent-600 hover:bg-accent-700 text-white py-3 text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> {importMode === "import" ? "Buscando..." : "Generando con Gemini 2.5 Pro..."}</>
+              <><Loader2 className="w-4 h-4 animate-spin" /> {importMode === "import" ? "Parseando..." : "Generando con Gemini 2.5 Pro..."}</>
             ) : (
-              <>{importMode === "import" ? <Search className="w-4 h-4" /> : <Wand2 className="w-4 h-4" />} {importMode === "import" ? "Buscar e importar" : "Generar"}</>
+              <>{importMode === "import" ? <Search className="w-4 h-4" /> : <Wand2 className="w-4 h-4" />} {importMode === "import" ? "Parsear producto" : "Generar"}</>
             )}
           </button>
 
@@ -227,27 +232,49 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
               <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Vista previa generada</p>
 
               {isRecipe && (
-                <div className="card-soft rounded-xl p-3 space-y-2">
+                <div className="card-soft rounded-xl p-3 space-y-3">
                   <p className="text-sm font-bold text-zinc-900 dark:text-white">{preview.title}</p>
-                  <p className="text-xs text-zinc-500 line-clamp-3">{preview.description}</p>
+                  {preview.description && <p className="text-xs text-zinc-500 line-clamp-3">{preview.description}</p>}
                   <div className="flex gap-2 flex-wrap">
                     <span className="text-[10px] bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">{preview.category}</span>
                     <span className="text-[10px] bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full">{preview.difficulty}</span>
                     <span className="text-[10px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">{preview.prep_time_min} min</span>
+                    {preview.kcal_per_100g > 0 && <span className="text-[10px] bg-danger-100 text-danger-700 px-2 py-0.5 rounded-full">{Math.round(preview.kcal_per_100g)} kcal</span>}
                   </div>
-                  {preview.breed_sizes && preview.breed_sizes.length > 0 && (
-                    <div className="flex gap-1 flex-wrap">
-                      {preview.breed_sizes.map((bs: string) => (
-                        <span key={bs} className="text-[9px] bg-secondary-100 text-secondary-700 px-1.5 py-0.5 rounded-full">{bs}</span>
+                  {preview.source_book && (
+                    <p className="text-xs text-zinc-500"><span className="font-semibold">Marca:</span> {preview.source_book}</p>
+                  )}
+
+                  {/* Breed sizes checkbox */}
+                  <div>
+                    <p className="text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Tamaños de raza</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {BREED_SIZES.map(s => (
+                        <button key={s} onClick={() => setBreedSizes(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+                          className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-all ${breedSizes.includes(s) ? "border-primary-400 bg-primary-50 text-primary-700" : "border-zinc-200 text-zinc-500"}`}>{s}</button>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Nutrition facts summary if available */}
+                  {preview.nutrition_facts && (
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-zinc-500">Nutrientes extraídos:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(preview.nutrition_facts as Record<string, string | number | null | undefined>)
+                          .filter(([_, v]) => v !== null && v !== 0 && v !== undefined)
+                          .map(([k, v]) => (
+                            <span key={k} className="text-[9px] bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded-full">{k.replace(/_/g, " ")}: {String(v)}</span>
+                          ))}
+                      </div>
+                    </div>
                   )}
-                  {preview.image_search_query && (
-                    <p className="text-[10px] text-zinc-400">Buscar imagen: {preview.image_search_query}</p>
+
+                  {preview.ingredients?.length > 0 && (
+                    <p className="text-xs text-zinc-600">
+                      <strong>{preview.ingredients.length}</strong> ingredientes · <strong>{preview.steps?.length || 0}</strong> pasos
+                    </p>
                   )}
-                  <p className="text-xs text-zinc-600">
-                    <strong>{preview.ingredients?.length || 0}</strong> ingredientes · <strong>{preview.steps?.length || 0}</strong> pasos
-                  </p>
                 </div>
               )}
 

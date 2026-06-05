@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { sugerirTamanoPorRaza, BREED_SIZE_LABELS } from "@/lib/breed-sizes";
 import { ArrowLeft, PawPrint, Check, PenLine, Search, ChevronDown, Camera, Loader2 } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { uploadDogPhoto, uploadPhotoFromDataUrl } from "@/lib/storage";
@@ -33,9 +34,18 @@ export function NewDogClient({ userId }: Props) {
   const [showBreeds, setShowBreeds] = useState(false);
   const [birthDate, setBirthDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [weightDisplay, setWeightDisplay] = useState("10");
+  const [tamano, setTamano] = useState("");
   const [uploading, setUploading] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSrc, setEditorSrc] = useState("");
+
+  // Auto-detect size from breed
+  useEffect(() => {
+    if (breed && !tamano) {
+      const suggested = sugerirTamanoPorRaza(breed);
+      if (suggested) setTamano(suggested);
+    }
+  }, [breed]);
 
   const getAgeMonths = (birth: string) => {
     const b = new Date(birth);
@@ -57,7 +67,7 @@ export function NewDogClient({ userId }: Props) {
     const edadMeses = getAgeMonths(birthDate);
     const { data: newDog } = await supabase.from("dogs").insert({
       owner_id: userId, nombre: name, raza: breed, edad_meses: edadMeses,
-      fecha_nacimiento: birthDate,
+      fecha_nacimiento: birthDate, tamano: tamano || null,
       peso_kg: getWeight(), foto_url: photo || "/icons/dog-default.png",
     }).select("id").single();
 
@@ -149,8 +159,8 @@ export function NewDogClient({ userId }: Props) {
         )}
       </div>
 
-      {/* Birth date + Weight */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Birth date + Weight + Tamaño */}
+      <div className="grid grid-cols-3 gap-2">
         <div>
           <label className="text-xs text-zinc-500 block mb-1">Fecha de nacimiento</label>
           <DatePicker value={birthDate} onChange={setBirthDate} />
@@ -162,6 +172,14 @@ export function NewDogClient({ userId }: Props) {
             onChange={(e) => setWeightDisplay(e.target.value)}
             placeholder="10,5"
             className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label className="text-xs text-zinc-500 block mb-1">Tamaño de raza</label>
+          <select value={tamano} onChange={(e) => setTamano(e.target.value)}
+            className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-2 py-2 text-xs">
+            <option value="">Auto</option>
+            {Object.entries(BREED_SIZE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
         </div>
       </div>
 

@@ -37,6 +37,7 @@ export async function POST(request: Request) {
     difficulty: body.difficulty || "facil",
     kcal_per_100g: body.kcal_per_100g,
     is_detox: body.is_detox || false,
+    breed_sizes: body.breed_sizes || [],
     application_id: body.application_id,
   };
 
@@ -62,7 +63,7 @@ export async function PUT(request: Request) {
   if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
   const validFields: Record<string, unknown> = {};
-  const allowed = ["title", "description", "category", "image_url", "video_url", "is_therapeutic", "health_tags", "source_book", "prep_time_min", "difficulty", "kcal_per_100g", "is_detox"];
+  const allowed = ["title", "description", "category", "image_url", "video_url", "is_therapeutic", "health_tags", "source_book", "prep_time_min", "difficulty", "kcal_per_100g", "is_detox", "breed_sizes"];
   for (const key of allowed) {
     if (updates[key] !== undefined) validFields[key] = updates[key];
   }
