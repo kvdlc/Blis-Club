@@ -18,59 +18,61 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "query is required" }, { status: 400 });
     }
 
-    const prompt = `Eres un asistente experto en nutrición canina. El usuario provee información de un alimento comercial (croqueta) y debes extraer los datos al JSON exacto abajo.
+    const prompt = `Eres un asistente experto en nutrición canina. Parsea la información del producto abajo EXACTAMENTE como se indica.
 
-NO busques información adicional. NO inventes ni adivines valores faltantes. Deja los campos como null o [] si no están presentes.
+REGLAS ESTRICTAS:
+- NO inventes datos. Si algo no está en el texto, usa null o [] .
+- Para porcentajes, extrae SOLO el número (ej: "30%" → 30, "15% (mín.)" → 15).
+- Si hay "30% / 28%", usa 30 (el primero).
 
-INSTRUCCIONES POR CAMPO:
+EJEMPLOS DE EXTRACCIÓN:
 
-1. **official_name**: El nombre EXACTO del producto tal como aparece en "Nombre del Producto". NO modifiques, NO agregues números ni prefijos/sufijos. Copiar textualmente. null si no aparece.
+Ejemplo 1 - "Sabor Principal / Primer Ingrediente: Pollo (Proteína de pollo)" + "Proteína Cruda: 30%":
+  protein_type → "Pollo 30%"
 
-2. **brand**: El fabricante/marca del campo "Fabricante". null si no aparece.
+Ejemplo 2 - "Lista de Ingredientes: Proteína de pollo (ingrediente principal), arroz, maíz":
+  ingredients → [
+    {"ingredient_name": "Proteína de pollo", "quantity_per_serving_g": 0, "ingredient_type": "croqueta", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"},
+    {"ingredient_name": "arroz", "quantity_per_serving_g": 0, "ingredient_type": "croqueta", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"},
+    {"ingredient_name": "maíz", "quantity_per_serving_g": 0, "ingredient_type": "croqueta", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"}
+  ]
 
-3. **description**: Una frase corta describiendo el producto, extraída del texto. null si no hay.
+Ejemplo 3 - "Tamaño de Raza: Medianas y Grandes":
+  breed_sizes → ["mediana", "grande"]
 
-4. **category**: Siempre "croquetas".
+Ejemplo 4 - "Fabricante: Pronaca" + "Página web: https://www.pronaca.com":
+  source_book → "Pronaca (pronaca.com)"
 
-5. **protein_type**: Extraer el sabor principal + porcentaje de proteína. Buscar en "Sabor Principal" o "Primer Ingrediente" para obtener el ingrediente (ej: "Pollo"). Buscar "Proteína Cruda" para obtener el % (ej: "30%" → 30). Formato EXACTO: "Pollo 30%". Si no hay %, solo el ingrediente. Si no hay información, "Croqueta comercial".
+Ejemplo 5 - "Beneficios Clave: 1. Óptimo desarrollo... 2. Refuerza sistema inmune...":
+  benefits → ["Óptimo desarrollo inicial con niveles balanceados para músculos y huesos fuertes.", "Refuerza el sistema inmune mediante vitaminas, minerales y antioxidantes naturales."]
 
-6. **kcal_per_100g**: Si aparece "Energía Metabolizable" o "Kcal/kg", convertir el valor: ej. "3800 Kcal/kg" → 380. Si no hay valor, null.
-
-7. **nutrition_facts**: Extraer del "Análisis Nutricional" o "Análisis Garantizado". Reglas:
-   - Valores en % → poner el mismo número en _g (ej: "Proteína: 27%" → protein_g: 27)
-   - Calcio/Fósforo en % → convertir a mg (ej: "1.2%" → 1200mg)
-   - Si hay múltiples valores (ej: "30% / 28%"), usar el PRIMER valor (30)
-   - Omega-3/6: extraer número si existe, si no, null
-   - Dejar null si el campo no aparece en el texto
-
-8. **ingredients**: Extraer de "Lista de Ingredientes" o "Lista de Ingredientes Completa". Separar por comas. Para cada ítem, limpiar el nombre (quitar textos entre paréntesis como "(ingrediente principal)" o "(lista parcial...)"):
-   {"ingredient_name": "nombre limpio", "quantity_per_serving_g": 0, "ingredient_type": "croqueta", "unit_type": "g", "unit_weight_g": 1, "display_unit": "g"}
-
-9. **breed_sizes**: Extraer del campo "Tamaño de Raza". MAPEAR valores en español:
-   - "Razas Pequeñas" o "Miniatura" → "miniatura"
-   - "Razas Pequeñas" o "Pequeñas" → "pequena"
-   - "Razas Medianas" → "mediana"
-   - "Razas Grandes" → "grande"
-   - "Razas Gigantes" → "gigante"
-   - "Todos los tamaños" o "Todas las razas" → ["miniatura", "pequena", "mediana", "grande", "gigante"]
-   Siempre retornar un array, aunque sea vacío.
-
-10. **steps**: Siempre poner el step por defecto de servir la ración.
-
-11. **benefits**: Extraer los "Beneficios Clave" como array de strings. Si no hay, [].
-
-12. **health_tags**: Extraer claims de salud como array (ej: "alta digestibilidad", "salud intestinal", "piel saludable").
-
-13. **storage_instructions**: Las "Indicaciones de Almacenamiento", o null.
-
-14. **source_book**: Mismo valor que brand (fabricante). Si aparece una página web o dominio en la información del producto (ej: "www.bioalimentar.com"), incluirla al final: "Bioalimentar (bioalimentar.com)".
+CAMPOS A EXTRAER:
+1. official_name → campo "Nombre del Producto", copiar exacto
+2. brand → campo "Fabricante"
+3. description → "Tecnología o Fórmula Especial" o primera frase descriptiva
+4. category → siempre "croquetas"
+5. protein_type → ingrediente principal + % proteína (ej: "Pollo 30%")
+6. kcal_per_100g → "Energía Metabolizable (Kcal/kg)" ÷ 10, o null
+7. nutrition_facts → parsear % a números:
+   protein_g, fat_g, fiber_g, moisture_g de los valores en % (ej: 30% → 30)
+   calcium_mg, phosphorus_mg: si son %, multiplicar × 1000 (1% → 1000)
+   carbs_g: calcular 100 - protein_g - fat_g - fiber_g - moisture_g - ash_g, o 0
+   ash_g: si no está, usar 0
+   omega3_g, omega6_g: extraer si hay números, si no 0
+   El resto: 0
+8. ingredients → array de objetos, uno por cada ítem en "Lista de Ingredientes", limpiando textos entre paréntesis
+9. breed_sizes → mapear "Medianas y Grandes" → ["mediana","grande"]
+10. benefits → array de strings de "Beneficios Clave"
+11. health_tags → claims de salud cortos ("desarrollo muscular", "sistema inmune", etc.)
+12. storage_instructions → "Indicaciones de Almacenamiento", o null
+13. source_book → "brand (dominio.com)" si hay web
 
 Información del producto:
 """
 ${query}
 """
 
-Responde SOLO con el JSON. Sin markdown, sin bloques de código, sin texto adicional.
+Responde SOLO con JSON válido. Sin markdown. Sin explicaciones.
 
 {
   "official_name": null,
@@ -80,27 +82,27 @@ Responde SOLO con el JSON. Sin markdown, sin bloques de código, sin texto adici
   "difficulty": "facil",
   "prep_time_min": 0,
   "kcal_per_100g": null,
-  "protein_type": "Croqueta comercial",
+  "protein_type": null,
   "is_therapeutic": false,
   "is_detox": false,
   "health_tags": [],
   "source_book": null,
   "nutrition_facts": {
-    "protein_g": null,
-    "fat_g": null,
-    "carbs_g": null,
-    "fiber_g": null,
-    "moisture_g": null,
-    "ash_g": null,
-    "calcium_mg": null,
-    "phosphorus_mg": null,
-    "iron_mg": null,
-    "zinc_mg": null,
-    "vitamin_a_ui": null,
-    "vitamin_d_ui": null,
-    "vitamin_e_mg": null,
-    "omega3_g": null,
-    "omega6_g": null
+    "protein_g": 0,
+    "fat_g": 0,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "moisture_g": 0,
+    "ash_g": 0,
+    "calcium_mg": 0,
+    "phosphorus_mg": 0,
+    "iron_mg": 0,
+    "zinc_mg": 0,
+    "vitamin_a_ui": 0,
+    "vitamin_d_ui": 0,
+    "vitamin_e_mg": 0,
+    "omega3_g": 0,
+    "omega6_g": 0
   },
   "ingredients": [],
   "steps": [

@@ -393,14 +393,22 @@ export default function NutricionPage() {
                 <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Kcal/100g</label>
                   <input type="number" value={form.kcal_per_100g} onChange={e => setForm({...form, kcal_per_100g: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
                 <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Proteína principal</label>
-                  <select value={form.protein_type} onChange={e => { const val = e.target.value; if (val === "__new__") { setNewProtein(""); setForm(f => ({...f, protein_type: ""})); } else { setForm(f => ({...f, protein_type: val})); } }} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
-                    <option value="">Sin especificar</option>
-                    {existingProteinTypes.map(pt => <option key={pt} value={pt}>{pt}</option>)}
-                    <option value="__new__">+ Nueva proteína...</option>
-                  </select>
-                  {form.protein_type === "" && newProtein !== undefined && (
-                    <input value={newProtein} onChange={e => { setNewProtein(e.target.value); setForm(f => ({...f, protein_type: e.target.value})); }} placeholder="Escribe la proteína..." className="w-full mt-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
-                  )}
+                  {(() => {
+                    const isCustom = form.protein_type && !existingProteinTypes.includes(form.protein_type);
+                    return (
+                      <>
+                        <select value={isCustom ? "__custom__" : form.protein_type} onChange={e => { const val = e.target.value; if (val === "__new__") { setNewProtein(""); setForm(f => ({...f, protein_type: ""})); } else if (val === "__custom__") { /* keep current */ } else { setForm(f => ({...f, protein_type: val})); } }} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                          <option value="">Sin especificar</option>
+                          {existingProteinTypes.map(pt => <option key={pt} value={pt}>{pt}</option>)}
+                          {isCustom && <option value="__custom__">{form.protein_type}</option>}
+                          <option value="__new__">+ Nueva proteína...</option>
+                        </select>
+                        {(form.protein_type === "" || isCustom) && (
+                          <input value={isCustom ? form.protein_type : newProtein} onChange={e => { setNewProtein(e.target.value); setForm(f => ({...f, protein_type: e.target.value})); }} placeholder="Ej: Pollo 30%" className="w-full mt-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Imagen de la Receta</label>
