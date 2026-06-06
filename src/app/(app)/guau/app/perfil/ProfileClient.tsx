@@ -249,7 +249,7 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
           </div>
           <div className="text-left">
             <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ver tutorial de bienvenida</p>
-            <p className="text-[10px] text-zinc-500">Conocé todo lo que podés hacer en Blis Club</p>
+            <p className="text-[10px] text-zinc-500">Conoce todo lo que puedes hacer en Blis Club</p>
           </div>
         </div>
         <ChevronRight className="w-4 h-4 text-zinc-400" />

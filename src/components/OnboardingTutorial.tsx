@@ -18,7 +18,7 @@ const SLIDES: Slide[] = [
   },
   {
     title: "Tu perro, tu centro",
-    subtitle: "Registrá uno o varios perros. Controlá su perfil completo.",
+    subtitle: "Registra uno o varios perros. Controla su perfil completo.",
     image: "/icons/cards de perros.webp",
   },
   {
