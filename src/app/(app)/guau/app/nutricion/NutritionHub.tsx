@@ -752,7 +752,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
         {/* Detalle mixta */}
         {dietType === "mixta" && (
           <div className="text-center space-y-0.5 -mt-2">
-            <p className="text-[10px] text-zinc-500">🥩 Natural: {barfGrams}g · 🦴 Croquetas: {croqGrams}g</p>
+            <p className="text-[10px] text-zinc-500">🦴 Croquetas: {croqGrams}g · 🥩 Natural: {barfGrams}g</p>
           </div>
         )}
         {dietType === "croquetas" && (
@@ -827,7 +827,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
               className="w-full accent-zinc-400" />
             {mixtaBarfProp > 0 && mixtaBarfProp < 100 && (
               <p className="text-[10px] text-zinc-500 text-center pt-1">
-                🥩 {barfGrams}g natural + 🦴 {croqGrams}g croquetas
+                🦴 {croqGrams}g croquetas + 🥩 {barfGrams}g natural
               </p>
             )}
           </div>

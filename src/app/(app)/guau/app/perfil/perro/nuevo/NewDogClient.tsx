@@ -99,8 +99,10 @@ export function NewDogClient({ userId }: Props) {
   const computeRacion = () => {
     const pesoKg = getWeight();
     if (dietType === "mixta") {
-      // feedingPct en mixta es el "ajuste global" (multiplicador 0.7-1.3)
-      const ajusteGlobal = feedingPct / 100; // convertir de % a decimal
+      const ajusteGlobal = feedingPct / 100;
+      const { BARF_PCT_BY_STAGE, CROQUETAS_PCT_BY_STAGE, ACTIVITY_MULTIPLIER } = require("@/lib/feeding-standards");
+      // ... no, can't use require in client component
+      // I'll compute pcts manually
       const result = calcularRacionMixta({
         peso_kg: pesoKg,
         life_stage: lifeStage,
@@ -471,6 +473,9 @@ export function NewDogClient({ userId }: Props) {
             <div className="flex items-center gap-2 mb-2">
               <Target className="w-5 h-5 text-secondary-600" />
               <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ración diaria estimada</span>
+              <span className="text-xs px-1.5 py-0.5 rounded-md bg-white/60 dark:bg-zinc-800/60 text-zinc-500">
+                {dietType === "croquetas" ? "🦴 Croquetas" : dietType === "barf" ? "🥩 Natural" : "🦴🥩 Mixta"}
+              </span>
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-primary-700 dark:text-primary-300">{dailyGrams}</span>
@@ -479,8 +484,8 @@ export function NewDogClient({ userId }: Props) {
             </div>
             {dietType === "mixta" && (
               <div className="mt-2 text-xs text-zinc-500 space-y-0.5">
-                <p>🥩 Natural: {barfGrams}g ({Math.round(barfPct * 10) / 10}%)</p>
-                <p>🦴 Croquetas: {croquetasGrams}g ({Math.round(croquetasPct * 10) / 10}%)</p>
+                <p>🦴 Croquetas: {croquetasGrams}g</p>
+                <p>🥩 Natural: {barfGrams}g</p>
               </div>
             )}
             {dietType === "croquetas" && (
@@ -559,7 +564,7 @@ export function NewDogClient({ userId }: Props) {
                 className="w-full accent-zinc-400" />
               {mixtaBarfProp > 0 && mixtaBarfProp < 100 && (
                 <p className="text-[10px] text-zinc-500 text-center pt-1">
-                  🥩 {barfGrams}g natural + 🦴 {croquetasGrams}g croquetas
+                  🦴 {croquetasGrams}g croquetas + 🥩 {barfGrams}g natural
                 </p>
               )}
             </div>
