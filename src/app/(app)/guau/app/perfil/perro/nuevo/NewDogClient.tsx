@@ -96,15 +96,14 @@ export function NewDogClient({ userId }: Props) {
   const computeRacion = () => {
     const pesoKg = getWeight();
     if (dietType === "mixta") {
-      const barfParte = (feedingPct * mixtaBarfProp) / 100;
-      const croqParte = (feedingPct * (100 - mixtaBarfProp)) / 100;
-      setBarfPct(barfParte);
-      setCroquetasPct(croqParte);
+      // feedingPct en mixta es el "ajuste global" (multiplicador 0.7-1.3)
+      const ajusteGlobal = feedingPct / 100; // convertir de % a decimal
       const result = calcularRacionMixta({
         peso_kg: pesoKg,
-        barf_pct: barfParte,
-        croquetas_pct: croqParte,
+        life_stage: lifeStage,
+        proporcion_barf: mixtaBarfProp,
         activity_level: activity,
+        ajuste_global: ajusteGlobal,
       });
       setBarfGrams(result.barf_grams);
       setCroquetasGrams(result.croquetas_grams);
@@ -157,7 +156,8 @@ export function NewDogClient({ userId }: Props) {
         tamano_guardado: tamano || null, diet_type_override: dietType,
         activity_override: activity,
       });
-      setFeedingPct(defaults.feeding_pct);
+      // Para mixta, el ajuste global empieza en 100% (estándar). Para BARF/croquetas, usa el % recomendado.
+      setFeedingPct(dietType === "mixta" ? 100 : defaults.feeding_pct);
       setMixtaBarfProp(50);
       setLifeStage(defaults.life_stage);
       computeRacion();
@@ -472,21 +472,28 @@ export function NewDogClient({ userId }: Props) {
             )}
           </div>
 
-          {/* % Total */}
+          {/* % del peso (solo BARF o croquetas) / Ajuste global (mixta) */}
           <div className="card-soft rounded-[1.25rem] p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs text-zinc-500">% del peso corporal</label>
-              <span className="text-sm font-bold text-primary-700 dark:text-primary-300">{Math.round(feedingPct * 10) / 10}%</span>
+              <label className="text-xs text-zinc-500">
+                {dietType === "mixta" ? "Ajuste de cantidad total" : "% del peso corporal"}
+              </label>
+              <span className="text-sm font-bold text-primary-700 dark:text-primary-300">
+                {dietType === "mixta" ? `${Math.round(feedingPct)}%` : `${Math.round(feedingPct * 10) / 10}%`}
+              </span>
             </div>
             <input type="range"
-              min={pctRange?.min ?? 1.5}
-              max={pctRange?.max ?? 8}
-              step={0.1}
+              min={dietType === "mixta" ? 70 : (pctRange?.min ?? 1.5)}
+              max={dietType === "mixta" ? 130 : (pctRange?.max ?? 8)}
+              step={dietType === "mixta" ? 5 : 0.1}
               value={feedingPct}
               onChange={(e) => setFeedingPct(Number(e.target.value))}
               className="w-full accent-primary-600" />
             <p className="text-[10px] text-zinc-400">
-              Recomendado para {lifeStage === "cachorro" ? "cachorros" : lifeStage === "adolescente" ? "adolescentes" : "adultos"} con {dietType === "barf" ? "dieta natural" : dietType === "croquetas" ? "croquetas" : "dieta mixta"}: {pctRange?.min}-{pctRange?.max}%
+              {dietType === "mixta"
+                ? "100% = ración estándar mixta. Sube si tu perro necesita más, baja si necesita menos."
+                : `Recomendado para ${lifeStage === "cachorro" ? "cachorros" : lifeStage === "adolescente" ? "adolescentes" : "adultos"}: ${pctRange?.min}-${pctRange?.max}%`
+              }
             </p>
           </div>
 
@@ -501,9 +508,14 @@ export function NewDogClient({ userId }: Props) {
                 onChange={(e) => setMixtaBarfProp(Number(e.target.value))}
                 className="w-full accent-accent-600" />
               <div className="flex justify-between text-[10px] text-zinc-400">
-                <span>🦴 100% Croquetas</span>
-                <span>🥩 100% Natural</span>
+                <span>🦴 Solo Croquetas</span>
+                <span>🥩 Solo Natural</span>
               </div>
+              {mixtaBarfProp > 0 && mixtaBarfProp < 100 && (
+                <p className="text-[10px] text-zinc-500 text-center pt-1">
+                  🥩 {barfGrams}g natural + 🦴 {croquetasGrams}g croquetas
+                </p>
+              )}
             </div>
           )}
 

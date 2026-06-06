@@ -206,11 +206,13 @@ export function getFeedingDefaults(params: {
     dailyGrams = Math.round(params.peso_kg * 1000 * (feedingPct / 100) * multiplier);
     dailyCups = Math.round((dailyGrams / 110) * 10) / 10; // ~110g por taza
   } else {
-    // Mixta
-    const mixtaPctInfo = MIXTA_PCT_BY_STAGE[lifeStage];
-    feedingPct = mixtaPctInfo.default;
-    barfPct = feedingPct * 0.5; // Default 50/50 split
-    croquetasPct = feedingPct * 0.5;
+    // Mixta: feeding_pct = 100 representa "ajuste global al 100%" (estándar)
+    // barf_pct y croquetas_pct son los % del peso corporal estándar para cada tipo
+    feedingPct = 100; // ajuste global default 100%
+    const barfPctStd = BARF_PCT_BY_STAGE[lifeStage].default;
+    const croqPctStd = CROQUETAS_PCT_BY_STAGE[lifeStage].default;
+    barfPct = barfPctStd * 0.5; // proporción 50/50 por defecto
+    croquetasPct = croqPctStd * 0.5;
     const barfGrams = Math.round(params.peso_kg * 1000 * (barfPct / 100) * multiplier);
     const croqGrams = Math.round(params.peso_kg * 1000 * (croquetasPct / 100) * multiplier);
     dailyGrams = barfGrams + croqGrams;
@@ -254,16 +256,32 @@ export function calcularRacionDiaria(params: {
 
 /**
  * Calcula gramos separados para dieta mixta.
+ * Lógica correcta: calcula cada dieta al 100% con su % estándar de etapa,
+ * luego aplica la proporción elegida por el usuario.
+ * El ajuste global (0.7-1.3) permite subir/bajar la ración total.
  */
 export function calcularRacionMixta(params: {
   peso_kg: number;
-  barf_pct: number;
-  croquetas_pct: number;
+  life_stage: LifeStage;
+  proporcion_barf: number; // 0-100
   activity_level: ActivityLevel;
+  ajuste_global?: number; // default 1.0 (multiplicador)
 }): { barf_grams: number; croquetas_grams: number; total_kcal: number } {
   const multiplier = ACTIVITY_MULTIPLIER[params.activity_level];
-  const barfGrams = Math.round(params.peso_kg * 1000 * (params.barf_pct / 100) * multiplier);
-  const croqGrams = Math.round(params.peso_kg * 1000 * (params.croquetas_pct / 100) * multiplier);
+  const ajuste = params.ajuste_global ?? 1.0;
+
+  // Gramos si fuera 100% BARF (usando % estándar BARF para la etapa)
+  const barfPctStd = BARF_PCT_BY_STAGE[params.life_stage].default;
+  const barfGrams100 = params.peso_kg * 1000 * (barfPctStd / 100) * multiplier;
+
+  // Gramos si fuera 100% Croquetas (usando % estándar croquetas para la etapa)
+  const croqPctStd = CROQUETAS_PCT_BY_STAGE[params.life_stage].default;
+  const croqGrams100 = params.peso_kg * 1000 * (croqPctStd / 100) * multiplier;
+
+  // Aplicar proporción del usuario + ajuste global
+  const barfGrams = Math.round(barfGrams100 * (params.proporcion_barf / 100) * ajuste);
+  const croqGrams = Math.round(croqGrams100 * ((100 - params.proporcion_barf) / 100) * ajuste);
+
   const totalKcal = Math.round(barfGrams * 1.8 + croqGrams * 3.8);
   return { barf_grams: barfGrams, croquetas_grams: croqGrams, total_kcal: totalKcal };
 }

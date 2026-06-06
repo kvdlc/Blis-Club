@@ -651,9 +651,11 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
   // Computed racion
   let total = 0, kcalTotal = 0, barfGrams = 0, croqGrams = 0;
   if (dietType === "mixta") {
-    const barfParte = (feedingPct * mixtaBarfProp) / 100;
-    const croqParte = (feedingPct * (100 - mixtaBarfProp)) / 100;
-    const result = calcularRacionMixta({ peso_kg: weight, barf_pct: barfParte, croquetas_pct: croqParte, activity_level: activity });
+    const ajusteGlobal = feedingPct / 100;
+    const result = calcularRacionMixta({
+      peso_kg: weight, life_stage: lifeStage,
+      proporcion_barf: mixtaBarfProp, activity_level: activity, ajuste_global: ajusteGlobal,
+    });
     barfGrams = result.barf_grams; croqGrams = result.croquetas_grams;
     total = barfGrams + croqGrams; kcalTotal = result.total_kcal;
   } else {
@@ -744,21 +746,28 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
           </p>
         )}
 
-        {/* Slider % total */}
+        {/* Slider principal: % peso para BARF/Croquetas, ajuste global para mixta */}
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-zinc-500">% del peso corporal</span>
-            <span className="text-sm font-bold text-primary-700 dark:text-primary-300">{feedingPct.toFixed(1)}%</span>
+            <span className="text-xs text-zinc-500">
+              {dietType === "mixta" ? "Ajuste de cantidad total" : "% del peso corporal"}
+            </span>
+            <span className="text-sm font-bold text-primary-700 dark:text-primary-300">
+              {dietType === "mixta" ? `${Math.round(feedingPct)}%` : `${feedingPct.toFixed(1)}%`}
+            </span>
           </div>
           <input type="range"
-            min={pctRange?.min ?? 1.5}
-            max={pctRange?.max ?? 8}
-            step={0.1}
+            min={dietType === "mixta" ? 70 : (pctRange?.min ?? 1.5)}
+            max={dietType === "mixta" ? 130 : (pctRange?.max ?? 8)}
+            step={dietType === "mixta" ? 5 : 0.1}
             value={feedingPct}
             onChange={(e) => setFeedingPct(Number(e.target.value))}
             className="w-full accent-primary-600" />
           <p className="text-[10px] text-zinc-400">
-            Recomendado: {pctRange?.min}-{pctRange?.max}% ({lifeStage === "cachorro" ? "cachorro" : lifeStage === "adolescente" ? "adolescente" : "adulto"})
+            {dietType === "mixta"
+              ? "100% = ración estándar mixta. Sube si tu perro necesita más, baja si necesita menos."
+              : `Recomendado: ${pctRange?.min}-${pctRange?.max}% (${lifeStage === "cachorro" ? "cachorro" : lifeStage === "adolescente" ? "adolescente" : "adulto"})`
+            }
           </p>
         </div>
 
@@ -776,6 +785,11 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
               <span>🦴 Solo croquetas</span>
               <span>🥩 Solo natural</span>
             </div>
+            {mixtaBarfProp > 0 && mixtaBarfProp < 100 && (
+              <p className="text-[10px] text-zinc-500 text-center pt-1">
+                🥩 {barfGrams}g natural + 🦴 {croqGrams}g croquetas
+              </p>
+            )}
           </div>
         )}
 
