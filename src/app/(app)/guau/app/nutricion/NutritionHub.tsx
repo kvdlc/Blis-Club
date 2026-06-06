@@ -713,7 +713,16 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
             { key: "barf" as DietType, label: "Natural", icon: "🥩" },
             { key: "mixta" as DietType, label: "Mixta", icon: "⚖️" },
           ].map((opt) => (
-            <button key={opt.key} onClick={() => setDietType(opt.key)}
+            <button key={opt.key} onClick={() => {
+              setDietType(opt.key);
+              if (opt.key === "mixta") {
+                setFeedingPct(100);
+              } else if (opt.key === "croquetas") {
+                setFeedingPct(CROQUETAS_PCT_BY_STAGE[lifeStage].default);
+              } else {
+                setFeedingPct(BARF_PCT_BY_STAGE[lifeStage].default);
+              }
+            }}
               className={`rounded-xl py-2 text-xs font-bold transition-all border-2 ${
                 dietType === opt.key
                   ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300"

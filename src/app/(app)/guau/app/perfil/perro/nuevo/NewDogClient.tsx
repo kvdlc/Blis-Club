@@ -483,7 +483,16 @@ export function NewDogClient({ userId }: Props) {
               ].map((opt) => (
                 <button
                   key={opt.key}
-                  onClick={() => { setDietType(opt.key); if (opt.key === "mixta") setFeedingPct(100); }}
+                  onClick={() => {
+                    setDietType(opt.key);
+                    if (opt.key === "mixta") {
+                      setFeedingPct(100);
+                    } else if (opt.key === "croquetas") {
+                      setFeedingPct(CROQUETAS_PCT_BY_STAGE[lifeStage].default);
+                    } else {
+                      setFeedingPct(BARF_PCT_BY_STAGE[lifeStage].default);
+                    }
+                  }}
                   className={`text-[10px] px-2 py-1 rounded-lg font-semibold transition-all border ${
                     dietType === opt.key
                       ? "bg-white dark:bg-zinc-800 border-primary-400 text-primary-700 dark:text-primary-300 shadow-sm"
