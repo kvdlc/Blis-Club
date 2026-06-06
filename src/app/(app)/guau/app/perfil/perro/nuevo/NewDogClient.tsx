@@ -71,7 +71,7 @@ export function NewDogClient({ userId }: Props) {
   const [croquetasGrams, setCroquetasGrams] = useState(0);
 
   // Info modal
-  const [infoModal, setInfoModal] = useState<{ open: boolean; title: string; body: string }>({ open: false, title: "", body: "" });
+  const [infoModal, setInfoModal] = useState<{ open: boolean; title: string; icon: string; body: string; example: string }>({ open: false, title: "", icon: "💡", body: "", example: "" });
 
   // Auto-detect size from breed
   useEffect(() => {
@@ -380,7 +380,20 @@ export function NewDogClient({ userId }: Props) {
 
           {/* Tipo de dieta */}
           <div>
-            <label className="text-xs text-zinc-500 block mb-1.5">Tipo de alimentación</label>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <label className="text-xs text-zinc-500">Tipo de alimentación</label>
+              <button
+                onClick={() => setInfoModal({
+                  open: true, icon: "🍽️",
+                  title: "Tipos de alimentación",
+                  example: "Elegí según tu estilo de vida y el de tu perro",
+                  body: "🦴  Croquetas\nAlimento seco y procesado. Muy práctico: solo servís y listo. No necesita refrigeración y dura meses. Es concentrado (poca agua), por eso tu perro come menos gramos. Ideal si tenés poco tiempo.\n\n🥩  Natural / BARF\nComida cruda biológicamente apropiada: carne, huesos carnosos, vísceras y vegetales. Tiene ~70% de agua, así que tu perro come más volumen. Ventajas: hidratación natural, nutrientes sin procesar, mejor digestión. Requiere más preparación.\n\n⚖️  Mixta\nCombinás croquetas + comida natural. Podés dar croquetas en la mañana y BARF en la noche, o mezclar en cada comida. Lo mejor de dos mundos: la practicidad de las croquetas con los beneficios de la comida natural."
+                })}
+                className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
+              >
+                <Info className="w-3 h-3" />
+              </button>
+            </div>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { key: "croquetas" as DietType, label: "Croquetas", icon: "🦴" },
@@ -484,11 +497,14 @@ export function NewDogClient({ userId }: Props) {
                 </label>
                 <button
                   onClick={() => setInfoModal({
-                    open: true,
+                    open: true, icon: dietType === "mixta" ? "🎚️" : "📐",
                     title: dietType === "mixta" ? "Ajuste de cantidad total" : "% del peso corporal",
+                    example: dietType === "mixta"
+                      ? "100% = ración estándar · 70% = -30% de comida · 130% = +30% de comida"
+                      : "Peso del perro × porcentaje ÷ 100 = gramos diarios",
                     body: dietType === "mixta"
-                      ? "En una dieta mixta, el sistema ya calculó automáticamente la cantidad ideal combinando comida natural y croquetas. Este ajuste te permite subir o bajar esa cantidad total si tu perro necesita más o menos energía. 100% es la cantidad estándar recomendada."
-                      : "Es la forma de calcular cuánta comida necesita tu perro. Se toma su peso actual y se multiplica por este porcentaje. Ejemplo: si pesa 20 kg y eliges 3%, come 600 g al día. La comida natural (BARF) necesita un % más alto porque tiene mucha agua (~70%). Las croquetas son más concentradas, por eso su % es menor."
+                      ? "En una dieta mixta el sistema ya calculó automáticamente la cantidad ideal combinando comida natural y croquetas. Este ajuste te permite subir o bajar esa cantidad si tu perro necesita más o menos energía.\n\n📌  100% = ración estándar recomendada\n📉  Menos de 100% = perro con sobrepeso o poca actividad\n📈  Más de 100% = perro muy activo o necesita ganar peso"
+                      : "Es la forma de calcular cuánta comida necesita tu perro por día.\n\n📐  Fórmula: Peso actual (kg) × 1000 × (porcentaje ÷ 100)\n\n🧮  Ejemplo: 20 kg × 1000 × 3% = 600 g/día\n\n💧  La comida natural (BARF) necesita un % más alto (~7%) porque tiene ~70% de agua.\n🦴  Las croquetas necesitan un % menor (~2.2%) porque son más concentradas (solo ~10% de agua)."
                   })}
                   className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
                 >
@@ -522,8 +538,10 @@ export function NewDogClient({ userId }: Props) {
                   <label className="text-xs text-zinc-500">Proporción Natural (BARF)</label>
                   <button
                     onClick={() => setInfoModal({
-                      open: true, title: "¿Qué es la dieta Natural (BARF)?",
-                      body: "BARF significa Biologically Appropriate Raw Food (comida cruda biológicamente apropiada). Incluye carne cruda, huesos carnosos blandos, vísceras y vegetales. Ventajas: más hidratación natural, nutrientes sin procesar, mejor digestión y menos alergias. Como tiene ~70% de agua, tu perro necesita comer más gramos que con croquetas para obtener la misma energía. Es ideal combinarla con croquetas para aprovechar lo mejor de ambas."
+                      open: true, icon: "🥩",
+                      title: "¿Qué es la dieta Natural (BARF)?",
+                      example: "Comida cruda biológicamente apropiada para perros",
+                      body: "BARF = Biologically Appropriate Raw Food\n\nIncluye:\n🥩  Carne cruda magra (res, pollo, pavo, cerdo)\n🦴  Huesos carnosos blandos (cuellos, alas, carcasas)\n🫀  Vísceras (hígado, riñón, bazo)\n🥬  Vegetales y frutas trituradas\n\nVentajas:\n💧  Más hidratación natural (~70% agua)\n🧬  Nutrientes sin procesar\n🦷  Mejor salud dental\n🐕  Mejor digestión y menos alergias\n\nImportante: como tiene mucha agua, tu perro necesita comer MÁS gramos que con croquetas para obtener la misma energía. Por eso el % es más alto (6-8% del peso)."
                     })}
                     className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
                   >
@@ -555,8 +573,10 @@ export function NewDogClient({ userId }: Props) {
                 <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Distribución Natural</span>
                 <button
                   onClick={() => setInfoModal({
-                    open: true, title: "¿Cómo se compone la comida natural?",
-                    body: "Un plato BARF balanceado para perros tiene esta proporción ideal: 50% Carne magra (músculo como res, pollo o pavo), 20% Huesos carnosos blandos (cuellos de pollo, alas, carcasas), 10% Vísceras (5% hígado obligatorio + 5% riñón, bazo u otros), y 20% Vegetales y frutas permitidas trituradas (zanahoria, calabaza, manzana sin semillas). Siempre consulta con tu veterinario antes de cambiar la dieta de tu perro."
+                    open: true, icon: "🍖",
+                    title: "¿Cómo se compone un plato BARF?",
+                    example: "Proporciones ideales para un plato balanceado",
+                    body: "Un plato de comida natural balanceado se divide así:\n\n🔴  50% Carne magra\nMúsculo de res, pollo, pavo, cerdo o pescado. Es la base principal de proteína.\n\n🟠  20% Huesos carnosos blandos\nCuellos de pollo, alas, carcasas de pavo. NUNCA huesos cocidos (se astillan).\n\n🟣  10% Vísceras\n5% hígado (obligatorio) + 5% otras vísceras como riñón, bazo o corazón.\n\n🟢  20% Vegetales y frutas\nZanahoria, calabaza, espinaca, manzana (sin semillas), arándanos. Siempre triturados para que el perro los digiera.\n\n⚠️  Consultá con tu veterinario antes de cambiar la dieta de tu perro."
                   })}
                   className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
                 >
@@ -594,21 +614,31 @@ export function NewDogClient({ userId }: Props) {
 
       {/* ═══ INFO MODAL ═══ */}
       {infoModal.open && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setInfoModal({ ...infoModal, open: false })} />
-          <div className="relative bg-white dark:bg-zinc-900 rounded-[1.5rem] p-5 max-w-sm w-full shadow-2xl border border-zinc-100 dark:border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-accent-100 dark:bg-accent-950/40 flex items-center justify-center">
-                <Info className="w-4 h-4 text-accent-600" />
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setInfoModal({ ...infoModal, open: false })} />
+          <div className="relative bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-[1.5rem] px-5 pt-6 pb-8 max-w-md w-full shadow-2xl border border-zinc-100 dark:border-zinc-800 space-y-4 overflow-hidden animate-slide-up">
+            {/* Fondo decorativo */}
+            <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-accent-100/40 dark:from-accent-950/30 to-transparent pointer-events-none" />
+            {/* Header */}
+            <div className="relative flex items-start gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-accent-100 dark:bg-accent-950/50 flex items-center justify-center text-2xl shrink-0">
+                {infoModal.icon}
               </div>
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{infoModal.title}</h3>
+              <div>
+                <h3 className="text-base font-extrabold text-zinc-900 dark:text-zinc-100">{infoModal.title}</h3>
+                {infoModal.example && (
+                  <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">{infoModal.example}</p>
+                )}
+              </div>
             </div>
-            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{infoModal.body}</p>
+            {/* Cuerpo */}
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-line">{infoModal.body}</p>
+            {/* Botón */}
             <button
               onClick={() => setInfoModal({ ...infoModal, open: false })}
-              className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-2.5 text-xs font-bold transition-all"
+              className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-3 text-sm font-bold transition-all active:scale-[0.98]"
             >
-              Entendido
+              ¡Entendido!
             </button>
           </div>
         </div>
