@@ -799,15 +799,15 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
                   <Info className="w-3 h-3" />
                 </button>
               </div>
-              <span className="text-sm font-bold text-accent-700 dark:text-accent-300">{mixtaBarfProp}%</span>
+            </div>
+            {/* Porcentajes explícitos */}
+            <div className="flex items-center justify-between text-xs font-bold">
+              <span className="text-primary-600 dark:text-primary-400">🦴 Croquetas {100 - mixtaBarfProp}%</span>
+              <span className="text-accent-600 dark:text-accent-400">{mixtaBarfProp}% Natural 🥩</span>
             </div>
             <input type="range" min={0} max={100} step={5} value={mixtaBarfProp}
               onChange={(e) => setMixtaBarfProp(Number(e.target.value))}
-              className="w-full accent-accent-600" />
-            <div className="flex justify-between text-[10px] text-zinc-400">
-              <span>🦴 Solo croquetas</span>
-              <span>🥩 Solo natural</span>
-            </div>
+              className="w-full accent-zinc-400" />
             {mixtaBarfProp > 0 && mixtaBarfProp < 100 && (
               <p className="text-[10px] text-zinc-500 text-center pt-1">
                 🥩 {barfGrams}g natural + 🦴 {croqGrams}g croquetas
