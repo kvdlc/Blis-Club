@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { ChevronRight, Sparkles, X } from "lucide-react";
+import { ChevronRight, ChevronLeft, Sparkles, X } from "lucide-react";
 
 interface Slide {
   title: string;
@@ -29,7 +29,7 @@ const SLIDES: Slide[] = [
   {
     title: "Academia Canina",
     subtitle: "Entrenamiento por etapas, lecciones progresivas y streaks.",
-    image: "/icons/Screen de academia.png",
+    image: "/icons/academia canina.webp",
   },
   {
     title: "Salud y bienestar",
@@ -64,9 +64,19 @@ export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow 
   const shouldShow = forceShow || !hasSeenTutorial;
   if (!shouldShow || hidden) return null;
 
-  const finish = useCallback(() => {
+  // Reset state when reopened from profile
+  useEffect(() => {
+    if (forceShow) {
+      setHidden(false);
+      setStep(0);
+    }
+  }, [forceShow]);
+
+  const finish = useCallback(async () => {
     if (!hasSeenTutorial) {
-      supabase.from("profiles").update({ has_seen_tutorial: true }).eq("id", userId).then();
+      try {
+        await supabase.from("profiles").update({ has_seen_tutorial: true }).eq("id", userId);
+      } catch {}
     }
     setHidden(true);
     onComplete?.();
@@ -79,6 +89,12 @@ export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow 
       finish();
     }
   }, [step, finish]);
+
+  const prevStep = useCallback(() => {
+    if (step > 0) {
+      setStep((s) => s - 1);
+    }
+  }, [step]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStartX(e.touches[0].clientX);
@@ -145,7 +161,7 @@ export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow 
       </div>
 
       {/* Bottom controls */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 pb-14 flex flex-col items-center gap-5">
+      <div className="absolute bottom-0 left-0 right-0 p-6 pb-14 flex flex-col items-center gap-4">
         {/* Dots */}
         <div className="flex items-center gap-2">
           {SLIDES.map((_, i) => (
@@ -160,21 +176,34 @@ export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow 
           ))}
         </div>
 
-        {/* Next / Start button */}
-        <button
-          onClick={nextStep}
-          className="w-full max-w-xs flex items-center justify-center gap-2 rounded-[1.25rem] bg-white text-zinc-900 py-3.5 text-sm font-extrabold shadow-lg shadow-black/20 active:scale-[0.97] transition-transform"
-        >
-          {isLast ? (
-            <>
-              ¡Empezar! <Sparkles className="w-4 h-4 text-accent-500" />
-            </>
-          ) : (
-            <>
-              Siguiente <ChevronRight className="w-4 h-4" />
-            </>
+        {/* Buttons */}
+        <div className="w-full max-w-xs flex flex-col gap-2">
+          {/* Next / Start button */}
+          <button
+            onClick={nextStep}
+            className="w-full flex items-center justify-center gap-2 rounded-[1.25rem] bg-white text-zinc-900 py-3.5 text-sm font-extrabold shadow-lg shadow-black/20 active:scale-[0.97] transition-transform"
+          >
+            {isLast ? (
+              <>
+                ¡Empezar! <Sparkles className="w-4 h-4 text-accent-500" />
+              </>
+            ) : (
+              <>
+                Siguiente <ChevronRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+
+          {/* Back button */}
+          {step > 0 && (
+            <button
+              onClick={prevStep}
+              className="w-full flex items-center justify-center gap-2 rounded-[1.25rem] bg-white/10 backdrop-blur-md text-white py-3 text-sm font-bold active:scale-[0.97] transition-transform"
+            >
+              <ChevronLeft className="w-4 h-4" /> Atrás
+            </button>
           )}
-        </button>
+        </div>
       </div>
     </div>
   );
