@@ -9,7 +9,7 @@ import { determinarTamano } from "@/lib/breed-sizes";
 import {
   getFeedingDefaults, ACTIVITY_LABELS as FS_ACTIVITY_LABELS, MEAL_FREQUENCY,
   calcularRacionDiaria, calcularRacionMixta,
-  BARF_PCT_BY_STAGE, CROQUETAS_PCT_BY_STAGE, MIXTA_PCT_BY_STAGE,
+  BARF_PCT_BY_STAGE, CROQUETAS_PCT_BY_STAGE, MIXTA_AJUSTE_RANGE,
 } from "@/lib/feeding-standards";
 import type { DietType, ActivityLevel, LifeStage } from "@/lib/feeding-standards";
 import {
@@ -668,7 +668,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
 
   const pctRange = dietType === "barf" ? BARF_PCT_BY_STAGE[lifeStage] :
     dietType === "croquetas" ? CROQUETAS_PCT_BY_STAGE[lifeStage] :
-    MIXTA_PCT_BY_STAGE[lifeStage];
+    null; // mixta usa ajuste global, no pctRange
 
   const handleSave = async () => {
     if (!dog) return;
@@ -772,15 +772,15 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
             </span>
           </div>
           <input type="range"
-            min={dietType === "mixta" ? 70 : (pctRange?.min ?? 1.5)}
-            max={dietType === "mixta" ? 130 : (pctRange?.max ?? 8)}
+            min={dietType === "mixta" ? MIXTA_AJUSTE_RANGE.min : (pctRange?.min ?? 1.5)}
+            max={dietType === "mixta" ? MIXTA_AJUSTE_RANGE.max : (pctRange?.max ?? 8)}
             step={dietType === "mixta" ? 5 : 0.1}
             value={feedingPct}
             onChange={(e) => setFeedingPct(Number(e.target.value))}
             className="w-full accent-primary-600" />
           <p className="text-[10px] text-zinc-400">
             {dietType === "mixta"
-              ? "100% = ración estándar mixta. Sube si tu perro necesita más, baja si necesita menos."
+              ? `${MIXTA_AJUSTE_RANGE.min}-${MIXTA_AJUSTE_RANGE.max}% = ración estándar ajustable. 100% es la cantidad recomendada.`
               : `Recomendado: ${pctRange?.min}-${pctRange?.max}% (${lifeStage === "cachorro" ? "cachorro" : lifeStage === "adolescente" ? "adolescente" : "adulto"})`
             }
           </p>

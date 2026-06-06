@@ -53,19 +53,18 @@ export const BARF_PCT_BY_STAGE: Record<LifeStage, { min: number; max: number; de
   adulto:      { min: 2, max: 3, default: 2.5 },
 };
 
-/** Croquetas: % del peso corporal según etapa de vida */
+/** Croquetas: % del peso corporal según etapa de vida.
+ *  Las croquetas son ~3x más densas en calorías que BARF,
+ *  por eso el % es mucho menor. Basado en tablas reales de fabricantes.
+ */
 export const CROQUETAS_PCT_BY_STAGE: Record<LifeStage, { min: number; max: number; default: number }> = {
-  cachorro:    { min: 3, max: 5, default: 4 },
-  adolescente: { min: 2.5, max: 4, default: 3 },
-  adulto:      { min: 2, max: 3, default: 2.5 },
+  cachorro:    { min: 2, max: 2.5, default: 2.2 },
+  adolescente: { min: 1.8, max: 2.2, default: 2 },
+  adulto:      { min: 1.5, max: 2, default: 1.8 },
 };
 
-/** Mixta (BARF + Croquetas): % total del peso corporal según etapa */
-export const MIXTA_PCT_BY_STAGE: Record<LifeStage, { min: number; max: number; default: number }> = {
-  cachorro:    { min: 4, max: 6, default: 5 },
-  adolescente: { min: 3, max: 5, default: 4 },
-  adulto:      { min: 2.5, max: 3.5, default: 3 },
-};
+/** Mixta: % de ajuste global (70%-130%). 100% = ración estándar mixta. */
+export const MIXTA_AJUSTE_RANGE = { min: 70, max: 130, default: 100 };
 
 /* ═══════════════════════════════════════════════════════════════ */
 /* 3. FRECUENCIA DE COMIDAS POR ETAPA                              */

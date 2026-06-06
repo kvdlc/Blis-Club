@@ -7,7 +7,7 @@ import { sugerirTamanoPorRaza, BREED_SIZE_LABELS } from "@/lib/breed-sizes";
 import {
   getFeedingDefaults, ACTIVITY_LABELS, MEAL_FREQUENCY,
   sugerirMealSlots, calcularRacionDiaria, calcularRacionMixta,
-  BARF_PCT_BY_STAGE, CROQUETAS_PCT_BY_STAGE, MIXTA_PCT_BY_STAGE,
+  BARF_PCT_BY_STAGE, CROQUETAS_PCT_BY_STAGE, MIXTA_AJUSTE_RANGE,
 } from "@/lib/feeding-standards";
 import type { ActivityLevel, DietType, LifeStage } from "@/lib/feeding-standards";
 import {
@@ -231,7 +231,7 @@ export function NewDogClient({ userId }: Props) {
   const canProceedStep1 = name.trim().length > 0 && breed.trim().length > 0;
   const pctRange = dietType === "barf" ? BARF_PCT_BY_STAGE[lifeStage] :
     dietType === "croquetas" ? CROQUETAS_PCT_BY_STAGE[lifeStage] :
-    MIXTA_PCT_BY_STAGE[lifeStage];
+    null; // mixta usa ajuste global
 
   return (
     <div className="space-y-4 pb-8">
@@ -500,16 +500,16 @@ export function NewDogClient({ userId }: Props) {
               </span>
             </div>
             <input type="range"
-              min={dietType === "mixta" ? 70 : (pctRange?.min ?? 1.5)}
-              max={dietType === "mixta" ? 130 : (pctRange?.max ?? 8)}
+              min={dietType === "mixta" ? MIXTA_AJUSTE_RANGE.min : (pctRange?.min ?? 1.5)}
+              max={dietType === "mixta" ? MIXTA_AJUSTE_RANGE.max : (pctRange?.max ?? 8)}
               step={dietType === "mixta" ? 5 : 0.1}
               value={feedingPct}
               onChange={(e) => setFeedingPct(Number(e.target.value))}
               className="w-full accent-primary-600" />
             <p className="text-[10px] text-zinc-400">
               {dietType === "mixta"
-                ? "100% = ración estándar mixta. Sube si tu perro necesita más, baja si necesita menos."
-                : `Recomendado para ${lifeStage === "cachorro" ? "cachorros" : lifeStage === "adolescente" ? "adolescentes" : "adultos"}: ${pctRange?.min}-${pctRange?.max}%`
+                ? `${MIXTA_AJUSTE_RANGE.min}-${MIXTA_AJUSTE_RANGE.max}% = ración estándar ajustable. 100% es la cantidad recomendada.`
+                : `Recomendado para ${lifeStage === "cachorro" ? "cachorros" : lifeStage === "adolescente" ? "adolescentes" : "adultos"} con ${dietType === "barf" ? "dieta natural" : "croquetas"}: ${pctRange?.min}-${pctRange?.max}%`
               }
             </p>
           </div>
