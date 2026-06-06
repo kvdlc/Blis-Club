@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ChevronRight, ChevronLeft, Sparkles, X } from "lucide-react";
 
@@ -14,37 +14,37 @@ const SLIDES: Slide[] = [
   {
     title: "¡Bienvenido a Blis Club!",
     subtitle: "Todo lo que tu perro necesita, en una sola app.",
-    image: "/icons/perros celebrando.webp",
+    image: "/icons/perros%20celebrando.webp",
   },
   {
     title: "Tu perro, tu centro",
     subtitle: "Registra uno o varios perros. Controla su perfil completo.",
-    image: "/icons/cards de perros.webp",
+    image: "/icons/cards%20de%20perros.webp",
   },
   {
     title: "Nutrición inteligente",
     subtitle: "Recetario, BARF, meal plan, detox y escáner de alimentos.",
-    image: "/icons/perros comiendo.webp",
+    image: "/icons/perros%20comiendo.webp",
   },
   {
     title: "Academia Canina",
     subtitle: "Entrenamiento por etapas, lecciones progresivas y streaks.",
-    image: "/icons/academia canina.webp",
+    image: "/icons/academia%20canina.webp",
   },
   {
     title: "Salud y bienestar",
     subtitle: "Vacunas, medicamentos, veterinarios y control de peso.",
-    image: "/icons/veterinario salud.webp",
+    image: "/icons/veterinario%20salud.webp",
   },
   {
     title: "Paseos y agilidad",
     subtitle: "Tracker en vivo, pipí/popo, evaluación de rutas y agilidad.",
-    image: "/icons/tracker de paseo.webp",
+    image: "/icons/tracker%20de%20paseo.webp",
   },
   {
     title: "Progreso de crecimiento",
     subtitle: "Seguimiento de peso, fotos y evolución de tu perro.",
-    image: "/icons/progreso de crecimiento.webp",
+    image: "/icons/progreso%20de%20crecimiento.webp",
   },
 ];
 
@@ -57,30 +57,36 @@ interface Props {
 
 export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow = false, onComplete }: Props) {
   const [step, setStep] = useState(0);
-  const [hidden, setHidden] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [exiting, setExiting] = useState(false);
   const supabase = createClient();
 
   const shouldShow = forceShow || !hasSeenTutorial;
-  if (!shouldShow || hidden) return null;
+  if (!shouldShow) return null;
 
-  // Reset state when reopened from profile
-  useEffect(() => {
-    if (forceShow) {
-      setHidden(false);
-      setStep(0);
-    }
-  }, [forceShow]);
+  const finish = useCallback(() => {
+    setExiting(true);
 
-  const finish = useCallback(async () => {
+    // Persist to Supabase (fire-and-forget)
     if (!hasSeenTutorial) {
-      try {
-        await supabase.from("profiles").update({ has_seen_tutorial: true }).eq("id", userId);
-      } catch {}
+      void supabase
+        .from("profiles")
+        .update({ has_seen_tutorial: true })
+        .eq("id", userId);
     }
-    setHidden(true);
-    onComplete?.();
+
+    // Call onComplete after animation starts
+    setTimeout(() => {
+      onComplete?.();
+    }, 300);
   }, [hasSeenTutorial, supabase, userId, onComplete]);
+
+  const close = useCallback(() => {
+    setExiting(true);
+    setTimeout(() => {
+      onComplete?.();
+    }, 300);
+  }, [onComplete]);
 
   const nextStep = useCallback(() => {
     if (step < SLIDES.length - 1) {
@@ -115,14 +121,14 @@ export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow 
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-hidden bg-black"
+      className={`fixed inset-0 z-50 overflow-hidden bg-black transition-opacity duration-300 ${exiting ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       {/* Close button (only in replay mode / forceShow) */}
       {forceShow && (
         <button
-          onClick={finish}
+          onClick={close}
           className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white/80 hover:text-white transition-colors"
         >
           <X className="w-5 h-5" />
