@@ -773,10 +773,10 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
                   open: true, icon: dietType === "mixta" ? "🎚️" : "📐",
                   title: dietType === "mixta" ? "Ajuste de cantidad total" : "% del peso corporal",
                   example: dietType === "mixta"
-                    ? "100% = ración estándar · 70% = -30% de comida · 130% = +30%"
+                    ? "Ejemplo real: 960g estándar → 70% = 672g → 130% = 1.248g"
                     : "Peso del perro × porcentaje ÷ 100 = gramos diarios",
                   body: dietType === "mixta"
-                    ? "En una dieta mixta el sistema ya calculó automáticamente la cantidad ideal combinando comida natural y croquetas. Este ajuste te permite subir o bajar esa cantidad si tu perro necesita más o menos energía.\n\n📌  100% = ración estándar recomendada\n📉  Menos de 100% = perro con sobrepeso o poca actividad\n📈  Más de 100% = perro muy activo o necesita ganar peso"
+                    ? "El sistema ya calculó la cantidad ideal combinando croquetas y comida natural según peso, edad y actividad de tu perro.\n\nEste ajuste te permite adaptar esa ración a la vida real:\n\n🏠  Perro casero → 80-90% para evitar sobrepeso\n🐕  Perro normal con paseos → 100%\n🏃  Perro muy activo o de trabajo → 110-120%\n\n📐  Ejemplo práctico:\nSi el sistema calculó 960g/día como ración estándar:\n· 80% = 768g (perro sedentario)\n· 100% = 960g (perro normal)\n· 120% = 1.152g (perro muy activo)"
                     : "Es la forma de calcular cuánta comida necesita tu perro por día.\n\n📐  Fórmula: Peso actual (kg) × 1000 × (porcentaje ÷ 100)\n\n🧮  Ejemplo: 20 kg × 1000 × 3% = 600 g/día\n\n💧  La comida natural (BARF) necesita un % más alto (~7%) porque tiene ~70% de agua.\n🦴  Las croquetas necesitan un % menor (~2.2%) porque son más concentradas."
                 })}
                 className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"

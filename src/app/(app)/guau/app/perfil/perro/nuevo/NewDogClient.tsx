@@ -473,9 +473,26 @@ export function NewDogClient({ userId }: Props) {
             <div className="flex items-center gap-2 mb-2">
               <Target className="w-5 h-5 text-secondary-600" />
               <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ración diaria estimada</span>
-              <span className="text-xs px-1.5 py-0.5 rounded-md bg-white/60 dark:bg-zinc-800/60 text-zinc-500">
-                {dietType === "croquetas" ? "🦴 Croquetas" : dietType === "barf" ? "🥩 Natural" : "🦴🥩 Mixta"}
-              </span>
+            </div>
+            {/* Selector rápido de tipo de dieta */}
+            <div className="flex gap-1.5 mb-2">
+              {[
+                { key: "croquetas" as DietType, label: "🦴 Croquetas" },
+                { key: "barf" as DietType, label: "🥩 Natural" },
+                { key: "mixta" as DietType, label: "⚖️ Mixta" },
+              ].map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => { setDietType(opt.key); if (opt.key === "mixta") setFeedingPct(100); }}
+                  className={`text-[10px] px-2 py-1 rounded-lg font-semibold transition-all border ${
+                    dietType === opt.key
+                      ? "bg-white dark:bg-zinc-800 border-primary-400 text-primary-700 dark:text-primary-300 shadow-sm"
+                      : "bg-white/40 dark:bg-zinc-800/40 border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-primary-700 dark:text-primary-300">{dailyGrams}</span>
@@ -505,10 +522,10 @@ export function NewDogClient({ userId }: Props) {
                     open: true, icon: dietType === "mixta" ? "🎚️" : "📐",
                     title: dietType === "mixta" ? "Ajuste de cantidad total" : "% del peso corporal",
                     example: dietType === "mixta"
-                      ? "100% = ración estándar · 70% = -30% de comida · 130% = +30% de comida"
+                      ? "Ejemplo real: 960g estándar → 70% = 672g → 130% = 1.248g"
                       : "Peso del perro × porcentaje ÷ 100 = gramos diarios",
                     body: dietType === "mixta"
-                      ? "En una dieta mixta el sistema ya calculó automáticamente la cantidad ideal combinando comida natural y croquetas. Este ajuste te permite subir o bajar esa cantidad si tu perro necesita más o menos energía.\n\n📌  100% = ración estándar recomendada\n📉  Menos de 100% = perro con sobrepeso o poca actividad\n📈  Más de 100% = perro muy activo o necesita ganar peso"
+                      ? "El sistema ya calculó la cantidad ideal de comida combinando croquetas y comida natural según el peso, edad y actividad de tu perro.\n\nEste ajuste te permite adaptar esa ración a la vida real:\n\n🏠  Si tu perro es casero y no hace mucho ejercicio, bajalo a 80-90% para evitar sobrepeso.\n🐕  Si es un perro normal con paseos diarios, deja el 100%.\n🏃  Si es muy activo, perro de trabajo o necesita ganar peso, subilo a 110-120%.\n\n📐  Ejemplo práctico:\nSi el sistema calculó 960g/día como ración estándar:\n· 80% = 768g (perro sedentario)\n· 100% = 960g (perro normal)\n· 120% = 1.152g (perro muy activo)"
                       : "Es la forma de calcular cuánta comida necesita tu perro por día.\n\n📐  Fórmula: Peso actual (kg) × 1000 × (porcentaje ÷ 100)\n\n🧮  Ejemplo: 20 kg × 1000 × 3% = 600 g/día\n\n💧  La comida natural (BARF) necesita un % más alto (~7%) porque tiene ~70% de agua.\n🦴  Las croquetas necesitan un % menor (~2.2%) porque son más concentradas (solo ~10% de agua)."
                   })}
                   className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
