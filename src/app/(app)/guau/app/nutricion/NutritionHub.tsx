@@ -16,7 +16,7 @@ import {
   Search, Plus, Minus, ChefHat, Lock, Check, ShoppingCart,
   AlertTriangle, ShieldCheck, X, Trash2, Sparkles, Clock,
   Flame, ChevronRight, ScanBarcode, UtensilsCrossed, ArrowRight,
-  CalendarDays, Heart, EyeOff
+  CalendarDays, Heart, EyeOff, Info
 } from "lucide-react";
 
 type Tab = "recetario" | "calculadora" | "detox" | "escaner" | "lista" | "plan";
@@ -647,6 +647,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
   const [bonePct, setBonePct] = useState(metabolicProfile?.custom_bone_pct ?? 20);
   const [organPct, setOrganPct] = useState(metabolicProfile?.custom_organ_pct ?? 10);
   const [veggiePct, setVeggiePct] = useState(metabolicProfile?.custom_veggie_pct ?? 20);
+  const [infoModal, setInfoModal] = useState<{ open: boolean; title: string; body: string }>({ open: false, title: "", body: "" });
 
   // Computed racion
   let total = 0, kcalTotal = 0, barfGrams = 0, croqGrams = 0;
@@ -749,9 +750,23 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
         {/* Slider principal: % peso para BARF/Croquetas, ajuste global para mixta */}
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-zinc-500">
-              {dietType === "mixta" ? "Ajuste de cantidad total" : "% del peso corporal"}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-zinc-500">
+                {dietType === "mixta" ? "Ajuste de cantidad total" : "% del peso corporal"}
+              </span>
+              <button
+                onClick={() => setInfoModal({
+                  open: true,
+                  title: dietType === "mixta" ? "Ajuste de cantidad total" : "% del peso corporal",
+                  body: dietType === "mixta"
+                    ? "En una dieta mixta, el sistema ya calculó automáticamente la cantidad ideal combinando comida natural y croquetas. Este ajuste te permite subir o bajar esa cantidad total si tu perro necesita más o menos energía. 100% es la cantidad estándar recomendada."
+                    : "Es la forma de calcular cuánta comida necesita tu perro. Se toma su peso actual y se multiplica por este porcentaje. Ejemplo: si pesa 20 kg y eliges 3%, come 600 g al día. La comida natural (BARF) necesita un % más alto porque tiene mucha agua (~70%). Las croquetas son más concentradas, por eso su % es menor."
+                })}
+                className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
+              >
+                <Info className="w-3 h-3" />
+              </button>
+            </div>
             <span className="text-sm font-bold text-primary-700 dark:text-primary-300">
               {dietType === "mixta" ? `${Math.round(feedingPct)}%` : `${feedingPct.toFixed(1)}%`}
             </span>
@@ -775,7 +790,15 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
         {dietType === "mixta" && (
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-500">Proporción Natural</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-zinc-500">Proporción Natural</span>
+                <button
+                  onClick={() => setInfoModal({ open: true, title: "¿Qué es la dieta Natural (BARF)?", body: "BARF significa Biologically Appropriate Raw Food (comida cruda biológicamente apropiada). Incluye carne cruda, huesos carnosos blandos, vísceras y vegetales. Ventajas: más hidratación natural, nutrientes sin procesar, mejor digestión y menos alergias. Como tiene ~70% de agua, tu perro necesita comer más gramos que con croquetas para obtener la misma energía. Es ideal combinarla con croquetas para aprovechar lo mejor de ambas." })}
+                  className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
+                >
+                  <Info className="w-3 h-3" />
+                </button>
+              </div>
               <span className="text-sm font-bold text-accent-700 dark:text-accent-300">{mixtaBarfProp}%</span>
             </div>
             <input type="range" min={0} max={100} step={5} value={mixtaBarfProp}
@@ -829,6 +852,26 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
             Guardar
           </button>
         </div>
+
+        {/* Info Modal */}
+        {infoModal.open && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setInfoModal({ ...infoModal, open: false })} />
+            <div className="relative bg-white dark:bg-zinc-900 rounded-[1.5rem] p-5 max-w-sm w-full shadow-2xl border border-zinc-100 dark:border-zinc-800 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-accent-100 dark:bg-accent-950/40 flex items-center justify-center">
+                  <Info className="w-4 h-4 text-accent-600" />
+                </div>
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{infoModal.title}</h3>
+              </div>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{infoModal.body}</p>
+              <button onClick={() => setInfoModal({ ...infoModal, open: false })}
+                className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-2.5 text-xs font-bold transition-all">
+                Entendido
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
