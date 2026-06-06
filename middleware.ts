@@ -6,7 +6,33 @@ import { matchRateLimit, checkInMemory } from "@/lib/rate-limit";
 import { injectHeaders } from "@/lib/security-headers";
 import { logSecurityEvent } from "@/lib/access-logs";
 
-const SUPABASE_TIMEOUT_MS = 3000;
+const SUPABASE_TIMEOUT_MS = 2000;
+
+// Cache simple en memoria para security config (5 min TTL)
+let cachedSecConfig: Awaited<ReturnType<typeof getSecurityConfig>> | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
+
+async function getCachedSecurityConfig(): Promise<Awaited<ReturnType<typeof getSecurityConfig>>> {
+  const now = Date.now();
+  if (cachedSecConfig && (now - cacheTimestamp) < CACHE_TTL_MS) {
+    return cachedSecConfig;
+  }
+  try {
+    cachedSecConfig = await Promise.race([
+      getSecurityConfig(),
+      new Promise<typeof cachedSecConfig>((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), SUPABASE_TIMEOUT_MS)
+      ),
+    ]);
+    cacheTimestamp = now;
+    return cachedSecConfig!;
+  } catch {
+    // Si falla, usar cache anterior si existe
+    if (cachedSecConfig) return cachedSecConfig;
+    return { geobloqueo: null, security_headers: null, rate_limiting: null, alerts: null };
+  }
+}
 
 function getClientIP(request: NextRequest): string {
   return (
@@ -65,16 +91,7 @@ export async function middleware(request: NextRequest) {
   };
 
   if (isProtected) {
-    try {
-      secConfig = await Promise.race([
-        getSecurityConfig(),
-        new Promise<typeof secConfig>((_, reject) =>
-          setTimeout(() => reject(new Error("timeout")), SUPABASE_TIMEOUT_MS)
-        ),
-      ]);
-    } catch {
-      // fallback vacío, sigue sin bloquear
-    }
+    secConfig = await getCachedSecurityConfig();
   }
 
   // ═══════════════════════════════════════════

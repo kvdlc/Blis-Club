@@ -33,7 +33,7 @@ export default function AppNav() {
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-60 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-r border-zinc-100 dark:border-zinc-800/60 p-6 z-40">
-        <Link href="/guau/app" className="flex items-center gap-2.5 px-2 py-2 mb-10">
+        <Link href="/guau/app" prefetch={false} className="flex items-center gap-2.5 px-2 py-2 mb-10">
           <div className="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center">
             <span className="text-white font-bold text-sm">B</span>
           </div>
@@ -46,6 +46,7 @@ export default function AppNav() {
               <Link
                 key={tab.href}
                 href={tab.href}
+                prefetch={false}
                 className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
                   active
                     ? "bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-300 shadow-sm"
@@ -72,6 +73,7 @@ export default function AppNav() {
                 <Link
                   key={tab.href}
                   href={tab.href}
+                  prefetch={false}
                   className="relative -mt-8 flex flex-col items-center justify-center"
                 >
                   <div className="w-16 h-16 rounded-full bg-primary-600 text-white flex items-center justify-center shadow-[0_8px_24px_-4px_rgba(89,86,233,0.55)] border-4 border-white dark:border-zinc-950 transition-transform active:scale-95">
@@ -85,6 +87,7 @@ export default function AppNav() {
               <Link
                 key={tab.href}
                 href={tab.href}
+                prefetch={false}
                 className={`flex items-center justify-center rounded-2xl p-3 transition-colors ${
                   active
                     ? "text-primary-600 dark:text-primary-400"
