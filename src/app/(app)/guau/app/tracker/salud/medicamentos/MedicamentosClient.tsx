@@ -12,6 +12,12 @@ interface Props {
   medications: DogMedication[];
 }
 
+const FREQ_LABELS: Record<string, string> = {
+  daily: "Todos los días",
+  every_other_day: "Cada 2 días",
+  weekly: "Semanal",
+};
+
 export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
   const router = useRouter();
   const supabase = createClient();
@@ -19,6 +25,7 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
   const [formStartDate, setFormStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [formEndDate, setFormEndDate] = useState("");
   const [dosesPerDay, setDosesPerDay] = useState(1);
+  const [frequency, setFrequency] = useState<"daily" | "every_other_day" | "weekly">("daily");
   const [editing, setEditing] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<DogMedication>>({});
 
@@ -39,12 +46,14 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
       end_date: formEndDate || null,
       doses_per_day: dosesPerDay,
       dose_hours: hours,
+      frequency,
     }).select("*").single();
     if (data) setMeds((prev) => [...prev, data as DogMedication]);
     form.reset();
     setFormStartDate(new Date().toISOString().slice(0, 10));
     setFormEndDate("");
     setDosesPerDay(1);
+    setFrequency("daily");
   };
 
   const toggleMedStatus = async (medId: string, currentStatus: string) => {
@@ -67,6 +76,7 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
       end_date: med.end_date || "",
       doses_per_day: med.doses_per_day,
       dose_hours: med.dose_hours,
+      frequency: med.frequency || "daily",
     });
   };
 
@@ -97,7 +107,7 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
               <div className="space-y-2">
                 <input value={editForm.medication_name || ""} onChange={(e) => setEditForm((f) => ({ ...f, medication_name: e.target.value }))} placeholder="Nombre" className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 text-xs" />
                 <input value={editForm.dosage || ""} onChange={(e) => setEditForm((f) => ({ ...f, dosage: e.target.value }))} placeholder="Dosis" className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 text-xs" />
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <div className="flex-1">
                     <DatePicker value={editForm.start_date || ""} onChange={(d) => setEditForm((f) => ({ ...f, start_date: d }))} />
                   </div>
@@ -130,9 +140,12 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-zinc-500 dark:text-zinc-400">
+                <div className="flex items-center gap-2 text-[10px] text-zinc-500 dark:text-zinc-400 flex-wrap">
                   <span>{new Date(med.start_date + "T00:00:00").toLocaleDateString("es")} - {med.end_date ? new Date(med.end_date + "T00:00:00").toLocaleDateString("es") : "Indefinido"}</span>
                   <span>· {med.doses_per_day} dosis/día</span>
+                  {med.frequency && med.frequency !== "daily" && (
+                    <span>· {FREQ_LABELS[med.frequency] || med.frequency}</span>
+                  )}
                 </div>
                 {med.dose_hours && med.dose_hours.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
@@ -169,7 +182,7 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="flex-1">
               <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">📅 Inicio</span></div>
               <DatePicker value={formStartDate} onChange={setFormStartDate} />
@@ -177,6 +190,19 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
             <div className="flex-1">
               <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">🏁 Fin</span></div>
               <DatePicker value={formEndDate} onChange={setFormEndDate} label="Indefinido" />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">🔄 Frecuencia</span></div>
+            <div className="flex gap-1.5">
+              {(["daily", "every_other_day", "weekly"] as const).map((f) => (
+                <button key={f} type="button" onClick={() => setFrequency(f)}
+                  className={`flex-1 text-xs font-semibold rounded-lg py-2 transition-colors ${frequency === f ? "bg-accent-500 text-white shadow-sm" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"}`}
+                >
+                  {FREQ_LABELS[f]}
+                </button>
+              ))}
             </div>
           </div>
 

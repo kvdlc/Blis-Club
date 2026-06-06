@@ -437,6 +437,7 @@ export interface DogMedication {
   status: MedicationStatus;
   notes: string | null;
   created_at: string;
+  frequency?: "daily" | "every_other_day" | "weekly";
 }
 
 export interface DogMedicationLog {

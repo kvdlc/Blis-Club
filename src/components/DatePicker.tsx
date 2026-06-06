@@ -141,7 +141,7 @@ export function DatePicker({ value, onChange, min, max, label }: Props) {
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full min-w-[280px] bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-2xl p-4 space-y-3">
+        <div className="absolute z-50 mt-1 right-0 min-w-[260px] max-w-[calc(100vw-2rem)] bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-2xl p-4 space-y-3 max-h-[85vh] overflow-y-auto">
           {/* Month/Year nav */}
           <div className="flex items-center justify-between">
             <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors">
