@@ -68,6 +68,7 @@ export interface DogMetabolicProfile {
   custom_bone_pct: number;
   custom_organ_pct: number;
   custom_veggie_pct: number;
+  diet_type?: "barf" | "croquetas";
 }
 
 export interface NutritionRecipe {

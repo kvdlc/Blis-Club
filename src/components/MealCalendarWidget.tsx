@@ -3,6 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { determinarTamano } from "@/lib/breed-sizes";
+import { calcularRacionDiaria, getFeedingDefaults } from "@/lib/feeding-standards";
+import type { ActivityLevel, DietType } from "@/lib/feeding-standards";
 import type { Dog, DogMealSlot, MealSchedule, NutritionRecipe, DogMetabolicProfile } from "@/types/database";
 import {
   ChevronLeft, ChevronRight, Check, X, Sparkles, Clock, ChefHat, Circle,
@@ -17,9 +19,10 @@ interface Props {
   recipes: NutritionRecipe[];
   walksCount: number;
   greenWalksCount: number;
+  latestWeightKg?: number;
 }
 
-export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProfile, recipes, walksCount, greenWalksCount }: Props) {
+export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProfile, recipes, walksCount, greenWalksCount, latestWeightKg }: Props) {
   const supabase = createClient();
   const [view, setView] = useState<"today" | "week">("today");
   const [weekOffset, setWeekOffset] = useState(0);
@@ -36,9 +39,20 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
     setSchedule(mealSchedule);
   }, [mealSchedule]);
 
+  const weightKg = latestWeightKg ?? dog.peso_kg;
+  const dietType: DietType = (metabolicProfile?.diet_type as DietType) ?? "croquetas";
+  const activityLevel: ActivityLevel = metabolicProfile?.activity_level ?? "moderado";
   const feedingPct = metabolicProfile?.feeding_pct ?? 2.5;
-  const totalGramsTarget = Math.round(dog.peso_kg * 1000 * (feedingPct / 100));
-  const kcalTarget = Math.round(totalGramsTarget * 1.8);
+
+  const racion = calcularRacionDiaria({
+    peso_kg: weightKg,
+    feeding_pct: feedingPct,
+    diet_type: dietType,
+    activity_level: activityLevel,
+  });
+
+  const totalGramsTarget = racion.total_grams;
+  const kcalTarget = racion.total_kcal;
 
   const toLocalDateStr = (d: Date) => {
     const y = d.getFullYear();

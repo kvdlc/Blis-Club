@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { cookies } from "next/headers";
 import { NutritionHub } from "./NutritionHub";
-import type { NutritionRecipe, ToxicFood, DogMetabolicProfile, Dog, DetoxDay, ShoppingListItem, DogMealSlot, MealSchedule, Walk } from "@/types/database";
+import type { NutritionRecipe, ToxicFood, DogMetabolicProfile, Dog, DetoxDay, ShoppingListItem, DogMealSlot, MealSchedule, Walk, DogWeightHistory } from "@/types/database";
 
 export default async function NutricionPage({
   searchParams,
@@ -37,21 +37,24 @@ export default async function NutricionPage({
   let mealSlots: DogMealSlot[] = [];
   let mealSchedule: (MealSchedule & { recipe: NutritionRecipe | null })[] = [];
   let walks: Walk[] = [];
+  let latestWeightKg: number | undefined;
 
   if ((dog as Dog | null)?.id) {
     const dogId = (dog as Dog).id;
-    const [mpRes, dpRes, slotsRes, schedRes, walksRes] = await Promise.all([
+    const [mpRes, dpRes, slotsRes, schedRes, walksRes, weightRes] = await Promise.all([
       supabase.from("dog_metabolic_profiles").select("*").eq("dog_id", dogId).maybeSingle(),
       supabase.from("detox_progress").select("day_number, completed").eq("dog_id", dogId),
       supabase.from("dog_meal_slots").select("*").eq("dog_id", dogId).order("slot_index", { ascending: true }),
       supabase.from("meal_schedule").select("*, recipe:nutrition_recipes(*)").eq("dog_id", dogId).order("fecha", { ascending: true }),
       supabase.from("walks").select("*").eq("dog_id", dogId).order("start_time", { ascending: false }).limit(30),
+      supabase.from("dog_weight_history").select("peso_kg").eq("dog_id", dogId).order("fecha", { ascending: false }).limit(1).maybeSingle(),
     ]);
     metabolicProfile = mpRes.data as DogMetabolicProfile | null;
     detoxProgress = (dpRes.data as { day_number: number; completed: boolean }[] | null) ?? [];
     mealSlots = (slotsRes.data as DogMealSlot[] | null) ?? [];
     mealSchedule = (schedRes.data as (MealSchedule & { recipe: NutritionRecipe | null })[] | null) ?? [];
     walks = (walksRes.data as Walk[] | null) ?? [];
+    latestWeightKg = (weightRes.data as { peso_kg: number } | null)?.peso_kg;
   }
 
   const greenCount = walks.filter((w) => w.traffic_light === "green").length;
@@ -78,6 +81,7 @@ export default async function NutricionPage({
       initialTab={initialTab}
       favoriteRecipeIds={favoriteIds}
       hiddenRecipeIds={hiddenMap}
+      latestWeightKg={latestWeightKg}
     />
   );
 }
