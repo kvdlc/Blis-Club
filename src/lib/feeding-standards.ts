@@ -5,7 +5,7 @@
 
 export type BreedSize = "miniatura" | "pequena" | "mediana" | "grande" | "gigante";
 export type LifeStage = "cachorro" | "adolescente" | "adulto";
-export type DietType = "barf" | "croquetas";
+export type DietType = "barf" | "croquetas" | "mixta";
 export type ActivityLevel = "sedentario" | "moderado" | "activo" | "atletico";
 
 export interface SizeCategory {
@@ -19,6 +19,8 @@ export interface SizeCategory {
 export interface FeedingDefaults {
   diet_type: DietType;
   feeding_pct: number;
+  barf_pct: number;
+  croquetas_pct: number;
   daily_grams: number;
   daily_cups?: number;
   meal_frequency: number;
@@ -41,54 +43,7 @@ export const SIZE_CATEGORIES: SizeCategory[] = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════ */
-/* 2. MAPA DE RAZAS → TAMAÑO (corregido con datos FCI/veterinarios) */
-/* ═══════════════════════════════════════════════════════════════ */
-
-const RAZA_TO_SIZE: Record<string, BreedSize> = {
-  /* Miniatura */
-  chihuahua: "miniatura", "yorkshire terrier": "miniatura", "pinscher miniatura": "miniatura",
-  affenpinscher: "miniatura", "bichón frisé": "miniatura", maltés: "miniatura",
-  pekinés: "miniatura", pomerania: "miniatura", "shih tzu": "miniatura",
-  papillón: "miniatura", "grifón de bruselas": "miniatura", "crestado chino": "miniatura",
-  "toy fox terrier": "miniatura", caniche: "miniatura", poodle: "miniatura",
-
-  /* Pequeña */
-  pug: "pequena", "bulldog francés": "pequena", "boston terrier": "pequena",
-  dachshund: "pequena", teckel: "pequena", "jack russell terrier": "pequena",
-  "schnauzer miniatura": "pequena", "cavalier king charles": "pequena",
-  "west highland terrier": "pequena", "lhasa apso": "pequena",
-  corgi: "pequena", beagle: "pequena", basenji: "pequena", schnauzer: "pequena",
-
-  /* Mediana */
-  "border collie": "mediana", "cocker spaniel": "mediana", "bulldog inglés": "mediana",
-  "basset hound": "mediana", "bull terrier": "mediana", "schnauzer estándar": "mediana",
-  "shiba inu": "mediana", whippet: "mediana", "springer spaniel": "mediana",
-  "staffordshire bull terrier": "mediana", "american pitbull": "mediana",
-  "american staffordshire": "mediana", "chow chow": "mediana", dálmata: "mediana",
-  "american bully": "mediana", "pastor australiano": "mediana",
-  sharpei: "mediana", ridgeback: "mediana", collie: "mediana",
-  "pastor belga": "mediana", "perro crestado": "mediana",
-
-  /* Grande */
-  "dogo argentino": "grande", "pastor alemán": "grande", "golden retriever": "grande",
-  "labrador retriever": "grande", boxer: "grande", dóberman: "grande", doberman: "grande",
-  rottweiler: "grande", "husky siberiano": "grande", husky: "grande",
-  "akita inu": "grande", akita: "grande", "braco alemán": "grande",
-  "setter irlandés": "grande", "pastor belga malinois": "grande",
-  weimaraner: "grande", "pastor blanco suizo": "grande",
-  pointer: "grande", "alaskan malamute": "grande", samoyedo: "grande",
-  greyhound: "grande",
-
-  /* Gigante */
-  "gran danés": "gigante", "mastín napolitano": "gigante", "san bernardo": "gigante",
-  terranova: "gigante", "mastín inglés": "gigante", leonberger: "gigante",
-  "dogo de burdeos": "gigante", "mastín tibetano": "gigante", "lobero irlandés": "gigante",
-  bullmastiff: "gigante", "perro de montaña de los pirineos": "gigante",
-  "pastor del cáucaso": "gigante", "boyero de berna": "gigante", mastín: "gigante",
-};
-
-/* ═══════════════════════════════════════════════════════════════ */
-/* 3. PORCENTAJES DE ALIMENTACIÓN POR ETAPA DE VIDA                */
+/* 2. PORCENTAJES DE ALIMENTACIÓN POR DIETA Y ETAPA               */
 /* ═══════════════════════════════════════════════════════════════ */
 
 /** BARF: % del peso corporal según etapa de vida */
@@ -98,32 +53,22 @@ export const BARF_PCT_BY_STAGE: Record<LifeStage, { min: number; max: number; de
   adulto:      { min: 2, max: 3, default: 2.5 },
 };
 
-/**
- * Croquetas: gramos diarios estimados según peso adulto y etapa.
- * Valores basados en tablas de alimentos premium para cachorros de raza grande.
- * Retorna un rango [min, max] en gramos.
- */
-export function kibbleGramsRange(
-  peso_actual_kg: number,
-  lifeStage: LifeStage,
-  sizeCategory: SizeCategory,
-): { min: number; max: number } {
-  // La densidad calórica de croquetas premium es ~350-420 kcal/100g
-  // Perros adultos necesitan ~30-40 kcal/kg de peso ideal
-  // Cachorros necesitan ~2-3x eso según etapa
-  const kcalPerKg: Record<LifeStage, number> = {
-    cachorro: 80,
-    adolescente: 55,
-    adulto: 35,
-  };
-  const dailyKcal = peso_actual_kg * kcalPerKg[lifeStage];
-  const kcalPer100g = 380; // promedio croquetas premium
-  const grams = (dailyKcal / kcalPer100g) * 100;
-  return { min: Math.round(grams * 0.85), max: Math.round(grams * 1.15) };
-}
+/** Croquetas: % del peso corporal según etapa de vida */
+export const CROQUETAS_PCT_BY_STAGE: Record<LifeStage, { min: number; max: number; default: number }> = {
+  cachorro:    { min: 3, max: 5, default: 4 },
+  adolescente: { min: 2.5, max: 4, default: 3 },
+  adulto:      { min: 2, max: 3, default: 2.5 },
+};
+
+/** Mixta (BARF + Croquetas): % total del peso corporal según etapa */
+export const MIXTA_PCT_BY_STAGE: Record<LifeStage, { min: number; max: number; default: number }> = {
+  cachorro:    { min: 4, max: 6, default: 5 },
+  adolescente: { min: 3, max: 5, default: 4 },
+  adulto:      { min: 2.5, max: 3.5, default: 3 },
+};
 
 /* ═══════════════════════════════════════════════════════════════ */
-/* 4. FRECUENCIA DE COMIDAS POR ETAPA                               */
+/* 3. FRECUENCIA DE COMIDAS POR ETAPA                              */
 /* ═══════════════════════════════════════════════════════════════ */
 
 export const MEAL_FREQUENCY: Record<LifeStage, { min: number; max: number; recommended: number }> = {
@@ -133,7 +78,7 @@ export const MEAL_FREQUENCY: Record<LifeStage, { min: number; max: number; recom
 };
 
 /* ═══════════════════════════════════════════════════════════════ */
-/* 5. MULTIPLICADOR POR ACTIVIDAD                                   */
+/* 4. MULTIPLICADOR POR ACTIVIDAD                                 */
 /* ═══════════════════════════════════════════════════════════════ */
 
 export const ACTIVITY_MULTIPLIER: Record<ActivityLevel, number> = {
@@ -151,7 +96,7 @@ export const ACTIVITY_LABELS: Record<ActivityLevel, string> = {
 };
 
 /* ═══════════════════════════════════════════════════════════════ */
-/* 6. DISTRIBUCIÓN BARF POR DEFECTO                                 */
+/* 5. DISTRIBUCIÓN BARF POR DEFECTO                               */
 /* ═══════════════════════════════════════════════════════════════ */
 
 export const DEFAULT_BARF_SPLIT = {
@@ -162,36 +107,11 @@ export const DEFAULT_BARF_SPLIT = {
 };
 
 /* ═══════════════════════════════════════════════════════════════ */
-/* 7. FUNCIONES DEL MOTOR                                           */
+/* 6. FUNCIONES DEL MOTOR                                          */
 /* ═══════════════════════════════════════════════════════════════ */
 
 export function getSizeCategory(size: BreedSize): SizeCategory {
   return SIZE_CATEGORIES.find((c) => c.size === size) ?? SIZE_CATEGORIES[3]; // default grande
-}
-
-export function sugerirTamanoPorRazaEstricta(raza: string): BreedSize | null {
-  const key = raza.toLowerCase().trim();
-  if (RAZA_TO_SIZE[key]) return RAZA_TO_SIZE[key];
-  for (const [breedKey, size] of Object.entries(RAZA_TO_SIZE)) {
-    if (key.includes(breedKey) || breedKey.includes(key)) return size;
-  }
-  return null;
-}
-
-export function estimarTamanoPorPesoAdulto(pesoKg: number, edadMeses: number): BreedSize {
-  // Estimar peso adulto: cachorros < 12 meses
-  let estimado = pesoKg;
-  if (edadMeses < 12) {
-    // Distintos ratios según el punto de crecimiento
-    if (edadMeses <= 4) estimado = pesoKg / 0.35;
-    else if (edadMeses <= 6) estimado = pesoKg / 0.50;
-    else if (edadMeses <= 9) estimado = pesoKg / 0.65;
-    else estimado = pesoKg / 0.80;
-  }
-  for (const cat of SIZE_CATEGORIES) {
-    if (estimado >= cat.peso_adulto_min && estimado < cat.peso_adulto_max) return cat.size;
-  }
-  return "gigante";
 }
 
 export function determinarTamanoYEtapa(
@@ -200,16 +120,16 @@ export function determinarTamanoYEtapa(
   edadMeses: number,
   tamanoGuardado?: string | null,
 ): { sizeCategory: SizeCategory; lifeStage: LifeStage } {
-  // Determinar tamaño
+  // Usar sugerirTamanoPorRaza del módulo breed-sizes cuando sea posible
+  // Aquí usamos estimación por peso como fallback
   let sizeKey: BreedSize;
   if (tamanoGuardado && SIZE_CATEGORIES.some((c) => c.size === tamanoGuardado)) {
     sizeKey = tamanoGuardado as BreedSize;
   } else {
-    sizeKey = sugerirTamanoPorRazaEstricta(raza) ?? estimarTamanoPorPesoAdulto(pesoKg, edadMeses);
+    sizeKey = estimarTamanoPorPesoAdulto(pesoKg, edadMeses);
   }
   const sizeCategory = getSizeCategory(sizeKey);
 
-  // Determinar etapa de vida según madurez de la categoría
   const madurez = sizeCategory.madurez_meses;
   let lifeStage: LifeStage;
   if (edadMeses <= madurez * 0.35) {
@@ -221,6 +141,20 @@ export function determinarTamanoYEtapa(
   }
 
   return { sizeCategory, lifeStage };
+}
+
+export function estimarTamanoPorPesoAdulto(pesoKg: number, edadMeses: number): BreedSize {
+  let estimado = pesoKg;
+  if (edadMeses < 12) {
+    if (edadMeses <= 4) estimado = pesoKg / 0.35;
+    else if (edadMeses <= 6) estimado = pesoKg / 0.50;
+    else if (edadMeses <= 9) estimado = pesoKg / 0.65;
+    else estimado = pesoKg / 0.80;
+  }
+  for (const cat of SIZE_CATEGORIES) {
+    if (estimado >= cat.peso_adulto_min && estimado < cat.peso_adulto_max) return cat.size;
+  }
+  return "gigante";
 }
 
 export function sugerirActividadPorRaza(raza: string): ActivityLevel {
@@ -247,28 +181,47 @@ export function getFeedingDefaults(params: {
     params.raza, params.peso_kg, params.edad_meses, params.tamano_guardado,
   );
 
-  const barfPct = BARF_PCT_BY_STAGE[lifeStage];
   const dietType: DietType = params.diet_type_override ?? "croquetas";
   const activity: ActivityLevel = params.activity_override ?? sugerirActividadPorRaza(params.raza);
   const mealFreq = MEAL_FREQUENCY[lifeStage];
+  const multiplier = ACTIVITY_MULTIPLIER[activity];
 
   let feedingPct: number;
+  let barfPct: number;
+  let croquetasPct: number;
   let dailyGrams: number;
   let dailyCups: number | undefined;
 
   if (dietType === "barf") {
-    feedingPct = barfPct.default;
-    dailyGrams = Math.round(params.peso_kg * 1000 * (feedingPct / 100) * ACTIVITY_MULTIPLIER[activity]);
-  } else {
-    const kibble = kibbleGramsRange(params.peso_kg, lifeStage, sizeCategory);
-    dailyGrams = Math.round(((kibble.min + kibble.max) / 2) * ACTIVITY_MULTIPLIER[activity]);
-    feedingPct = Math.round((dailyGrams / (params.peso_kg * 1000)) * 100 * 10) / 10;
+    const barfPctInfo = BARF_PCT_BY_STAGE[lifeStage];
+    feedingPct = barfPctInfo.default;
+    barfPct = feedingPct;
+    croquetasPct = 0;
+    dailyGrams = Math.round(params.peso_kg * 1000 * (feedingPct / 100) * multiplier);
+  } else if (dietType === "croquetas") {
+    const croqPctInfo = CROQUETAS_PCT_BY_STAGE[lifeStage];
+    feedingPct = croqPctInfo.default;
+    barfPct = 0;
+    croquetasPct = feedingPct;
+    dailyGrams = Math.round(params.peso_kg * 1000 * (feedingPct / 100) * multiplier);
     dailyCups = Math.round((dailyGrams / 110) * 10) / 10; // ~110g por taza
+  } else {
+    // Mixta
+    const mixtaPctInfo = MIXTA_PCT_BY_STAGE[lifeStage];
+    feedingPct = mixtaPctInfo.default;
+    barfPct = feedingPct * 0.5; // Default 50/50 split
+    croquetasPct = feedingPct * 0.5;
+    const barfGrams = Math.round(params.peso_kg * 1000 * (barfPct / 100) * multiplier);
+    const croqGrams = Math.round(params.peso_kg * 1000 * (croquetasPct / 100) * multiplier);
+    dailyGrams = barfGrams + croqGrams;
+    dailyCups = Math.round((croqGrams / 110) * 10) / 10;
   }
 
   return {
     diet_type: dietType,
     feeding_pct: feedingPct,
+    barf_pct: barfPct,
+    croquetas_pct: croquetasPct,
     daily_grams: dailyGrams,
     daily_cups: dailyCups,
     meal_frequency: mealFreq.recommended,
@@ -292,11 +245,27 @@ export function calcularRacionDiaria(params: {
   const multiplier = ACTIVITY_MULTIPLIER[params.activity_level];
   const totalGrams = Math.round(params.peso_kg * 1000 * (params.feeding_pct / 100) * multiplier);
 
-  // kcal estimadas: BARF ~1.5-2.0 kcal/g, croquetas ~3.5-4.0 kcal/g
+  // kcal estimadas: BARF ~1.8 kcal/g, croquetas ~3.8 kcal/g
   const kcalPerGram = params.diet_type === "croquetas" ? 3.8 : 1.8;
   const totalKcal = Math.round(totalGrams * kcalPerGram);
 
   return { total_grams: totalGrams, total_kcal: totalKcal };
+}
+
+/**
+ * Calcula gramos separados para dieta mixta.
+ */
+export function calcularRacionMixta(params: {
+  peso_kg: number;
+  barf_pct: number;
+  croquetas_pct: number;
+  activity_level: ActivityLevel;
+}): { barf_grams: number; croquetas_grams: number; total_kcal: number } {
+  const multiplier = ACTIVITY_MULTIPLIER[params.activity_level];
+  const barfGrams = Math.round(params.peso_kg * 1000 * (params.barf_pct / 100) * multiplier);
+  const croqGrams = Math.round(params.peso_kg * 1000 * (params.croquetas_pct / 100) * multiplier);
+  const totalKcal = Math.round(barfGrams * 1.8 + croqGrams * 3.8);
+  return { barf_grams: barfGrams, croquetas_grams: croqGrams, total_kcal: totalKcal };
 }
 
 /**

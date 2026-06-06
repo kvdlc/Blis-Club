@@ -57,6 +57,7 @@ const RAZA_TO_SIZE: Record<string, string> = {
   "ridgeback": "mediana",
 
   /* Grande */
+  "dogo argentino": "grande",
   "pastor alemán": "grande",
   "golden retriever": "grande",
   "labrador retriever": "grande",
@@ -74,7 +75,6 @@ const RAZA_TO_SIZE: Record<string, string> = {
   /* Gigante */
   "gran danés": "gigante",
   "boyero de berna": "gigante",
-  "dogo argentino": "gigante",
   "dogo de burdeos": "gigante",
   mastín: "gigante",
   "san bernardo": "gigante",

@@ -6,8 +6,12 @@ import { createClient } from "@/lib/supabase/client";
 import type { NutritionRecipe, ToxicFood, Dog, DogMetabolicProfile, DogMealSlot, MealSchedule, Walk } from "@/types/database";
 import { MealCalendarWidget } from "@/components/MealCalendarWidget";
 import { determinarTamano } from "@/lib/breed-sizes";
-import { getFeedingDefaults, ACTIVITY_LABELS as FS_ACTIVITY_LABELS, MEAL_FREQUENCY, calcularRacionDiaria } from "@/lib/feeding-standards";
-import type { DietType, ActivityLevel } from "@/lib/feeding-standards";
+import {
+  getFeedingDefaults, ACTIVITY_LABELS as FS_ACTIVITY_LABELS, MEAL_FREQUENCY,
+  calcularRacionDiaria, calcularRacionMixta,
+  BARF_PCT_BY_STAGE, CROQUETAS_PCT_BY_STAGE, MIXTA_PCT_BY_STAGE,
+} from "@/lib/feeding-standards";
+import type { DietType, ActivityLevel, LifeStage } from "@/lib/feeding-standards";
 import {
   Search, Plus, Minus, ChefHat, Lock, Check, ShoppingCart,
   AlertTriangle, ShieldCheck, X, Trash2, Sparkles, Clock,
@@ -628,6 +632,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
   const defaults = dog ? getFeedingDefaults({
     raza: dog.raza, peso_kg: weight, edad_meses: dog.edad_meses, tamano_guardado: dog.tamano,
   }) : null;
+  const lifeStage: LifeStage = defaults?.life_stage ?? "adulto";
 
   const [dietType, setDietType] = useState<DietType>(
     (metabolicProfile?.diet_type as DietType) ?? defaults?.diet_type ?? "croquetas"
@@ -636,27 +641,45 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
     metabolicProfile?.activity_level ?? defaults?.activity_level ?? "moderado"
   );
   const [feedingPct, setFeedingPct] = useState(metabolicProfile?.feeding_pct ?? defaults?.feeding_pct ?? 2.5);
+  const [mixtaBarfProp, setMixtaBarfProp] = useState(50);
   const [expertMode, setExpertMode] = useState(false);
   const [meatPct, setMeatPct] = useState(metabolicProfile?.custom_meat_pct ?? 50);
   const [bonePct, setBonePct] = useState(metabolicProfile?.custom_bone_pct ?? 20);
   const [organPct, setOrganPct] = useState(metabolicProfile?.custom_organ_pct ?? 10);
   const [veggiePct, setVeggiePct] = useState(metabolicProfile?.custom_veggie_pct ?? 20);
 
-  const racion = calcularRacionDiaria({ peso_kg: weight, feeding_pct: feedingPct, diet_type: dietType, activity_level: activity });
-  const total = racion.total_grams;
-  const kcalTotal = racion.total_kcal;
+  // Computed racion
+  let total = 0, kcalTotal = 0, barfGrams = 0, croqGrams = 0;
+  if (dietType === "mixta") {
+    const barfParte = (feedingPct * mixtaBarfProp) / 100;
+    const croqParte = (feedingPct * (100 - mixtaBarfProp)) / 100;
+    const result = calcularRacionMixta({ peso_kg: weight, barf_pct: barfParte, croquetas_pct: croqParte, activity_level: activity });
+    barfGrams = result.barf_grams; croqGrams = result.croquetas_grams;
+    total = barfGrams + croqGrams; kcalTotal = result.total_kcal;
+  } else {
+    const result = calcularRacionDiaria({ peso_kg: weight, feeding_pct: feedingPct, diet_type: dietType, activity_level: activity });
+    total = result.total_grams; kcalTotal = result.total_kcal;
+    if (dietType === "barf") barfGrams = total;
+    else croqGrams = total;
+  }
 
-  const barfMeat = Math.round(total * (meatPct / 100));
-  const barfBone = Math.round(total * (bonePct / 100));
-  const barfOrgan = Math.round(total * (organPct / 100));
-  const barfVeggie = Math.round(total * (veggiePct / 100));
+  const pctRange = dietType === "barf" ? BARF_PCT_BY_STAGE[lifeStage] :
+    dietType === "croquetas" ? CROQUETAS_PCT_BY_STAGE[lifeStage] :
+    MIXTA_PCT_BY_STAGE[lifeStage];
 
   const handleSave = async () => {
     if (!dog) return;
-    await supabase.from("dog_metabolic_profiles").upsert(
-      { dog_id: dog.id, feeding_pct: feedingPct, activity_level: activity, diet_type: dietType, custom_meat_pct: meatPct, custom_bone_pct: bonePct, custom_organ_pct: organPct, custom_veggie_pct: veggiePct },
-      { onConflict: "dog_id" }
-    );
+    const payload: any = {
+      dog_id: dog.id, feeding_pct: feedingPct, activity_level: activity,
+      diet_type: dietType, custom_meat_pct: meatPct, custom_bone_pct: bonePct,
+      custom_organ_pct: organPct, custom_veggie_pct: veggiePct,
+    };
+    const { error } = await supabase.from("dog_metabolic_profiles").upsert(payload, { onConflict: "dog_id" });
+    if (error) {
+      console.warn("diet_type puede no existir, guardando sin ella:", error.message);
+      delete payload.diet_type;
+      await supabase.from("dog_metabolic_profiles").upsert(payload, { onConflict: "dog_id" });
+    }
   };
 
   if (!dog) return <p className="text-zinc-500 dark:text-zinc-400 text-center py-8">Registra un perro primero.</p>;
@@ -666,19 +689,27 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
       <div className="card-soft rounded-[1.5rem] p-5 space-y-4">
         <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Calculadora de ración diaria</h3>
 
-        {/* Diet type toggle */}
-        <div className="flex gap-2">
-          <button onClick={() => setDietType("croquetas")}
-            className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all border-2 ${dietType === "croquetas" ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300" : "bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500"}`}>
-            🦴 Croquetas
-          </button>
-          <button onClick={() => setDietType("barf")}
-            className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all border-2 ${dietType === "barf" ? "bg-accent-50 dark:bg-accent-950/30 border-accent-500 text-accent-700 dark:text-accent-300" : "bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500"}`}>
-            🥩 BARF
-          </button>
+        {/* Tipo de dieta: 3 botones */}
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { key: "croquetas" as DietType, label: "Croquetas", icon: "🦴" },
+            { key: "barf" as DietType, label: "Natural", icon: "🥩" },
+            { key: "mixta" as DietType, label: "Mixta", icon: "⚖️" },
+          ].map((opt) => (
+            <button key={opt.key} onClick={() => setDietType(opt.key)}
+              className={`rounded-xl py-2 text-xs font-bold transition-all border-2 ${
+                dietType === opt.key
+                  ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300"
+                  : "bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500"
+              }`}
+            >
+              <span className="text-base block">{opt.icon}</span>
+              {opt.label}
+            </button>
+          ))}
         </div>
 
-        {/* Activity */}
+        {/* Actividad */}
         <div>
           <label className="text-[10px] text-zinc-400 block mb-1">Nivel de actividad</label>
           <select value={activity} onChange={(e) => setActivity(e.target.value as ActivityLevel)}
@@ -687,6 +718,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
           </select>
         </div>
 
+        {/* Resumen gramos */}
         <div className="flex items-center justify-center py-4">
           <div className="relative w-40 h-40">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 64 64">
@@ -700,48 +732,75 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
           </div>
         </div>
 
+        {/* Detalle mixta */}
+        {dietType === "mixta" && (
+          <div className="text-center space-y-0.5 -mt-2">
+            <p className="text-[10px] text-zinc-500">🥩 Natural: {barfGrams}g · 🦴 Croquetas: {croqGrams}g</p>
+          </div>
+        )}
         {dietType === "croquetas" && (
           <p className="text-[10px] text-zinc-400 text-center -mt-2">
-            ≈ {Math.round((total / 110) * 10) / 10} tazas/día (1 taza ≈ 110g de croquetas)
+            ≈ {Math.round((total / 110) * 10) / 10} tazas/día
           </p>
         )}
 
-        <div className="flex items-center justify-center gap-3">
-          <button onClick={() => setFeedingPct(Math.max(dietType === "barf" ? 1.5 : 0.5, feedingPct - 0.5))} className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-lg font-bold text-zinc-700 dark:text-zinc-300">-</button>
-          <div className="text-center">
-            <span className="text-xl font-bold text-primary-600 dark:text-primary-400">{feedingPct.toFixed(1)}%</span>
-            <p className="text-[10px] text-zinc-400">del peso corporal</p>
-            {defaults && (
-              <p className="text-[9px] text-zinc-400">
-                Sugerido: {defaults.feeding_pct}% ({defaults.life_stage})
-              </p>
-            )}
+        {/* Slider % total */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-zinc-500">% del peso corporal</span>
+            <span className="text-sm font-bold text-primary-700 dark:text-primary-300">{feedingPct.toFixed(1)}%</span>
           </div>
-          <button onClick={() => setFeedingPct(Math.min(dietType === "barf" ? 8 : 5, feedingPct + 0.5))} className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-lg font-bold text-zinc-700 dark:text-zinc-300">+</button>
+          <input type="range"
+            min={pctRange?.min ?? 1.5}
+            max={pctRange?.max ?? 8}
+            step={0.1}
+            value={feedingPct}
+            onChange={(e) => setFeedingPct(Number(e.target.value))}
+            className="w-full accent-primary-600" />
+          <p className="text-[10px] text-zinc-400">
+            Recomendado: {pctRange?.min}-{pctRange?.max}% ({lifeStage === "cachorro" ? "cachorro" : lifeStage === "adolescente" ? "adolescente" : "adulto"})
+          </p>
         </div>
 
-        {/* Meal frequency recommendation */}
+        {/* Slider proporción BARF (solo mixta) */}
+        {dietType === "mixta" && (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-zinc-500">Proporción Natural</span>
+              <span className="text-sm font-bold text-accent-700 dark:text-accent-300">{mixtaBarfProp}%</span>
+            </div>
+            <input type="range" min={0} max={100} step={5} value={mixtaBarfProp}
+              onChange={(e) => setMixtaBarfProp(Number(e.target.value))}
+              className="w-full accent-accent-600" />
+            <div className="flex justify-between text-[10px] text-zinc-400">
+              <span>🦴 Solo croquetas</span>
+              <span>🥩 Solo natural</span>
+            </div>
+          </div>
+        )}
+
+        {/* Frecuencia recomendada */}
         {defaults && (
           <div className="text-center">
             <p className="text-[10px] text-zinc-500">
-              🕐 Recomendado: {MEAL_FREQUENCY[defaults.life_stage]?.recommended ?? 3} comidas al día ({defaults.life_stage === "cachorro" ? "cachorro" : defaults.life_stage === "adolescente" ? "adolescente" : "adulto"})
+              🕐 {MEAL_FREQUENCY[defaults.life_stage]?.recommended ?? 3} comidas/día recomendadas
             </p>
           </div>
         )}
 
         {expertMode && (
           <div className="space-y-3 pt-2">
-            <p className="text-[10px] text-zinc-400 text-center">Distribución BARF (válida solo para dieta natural)</p>
+            <p className="text-[10px] text-zinc-400 text-center">Distribución BARF</p>
             {[
-              { label: "Carne", pct: meatPct, set: setMeatPct, color: "text-red-500" },
-              { label: "Hueso", pct: bonePct, set: setBonePct, color: "text-orange-500" },
-              { label: "Víscera", pct: organPct, set: setOrganPct, color: "text-purple-500" },
-              { label: "Verdura", pct: veggiePct, set: setVeggiePct, color: "text-green-500" },
+              { label: "Carne", pct: meatPct, set: setMeatPct },
+              { label: "Hueso carnoso", pct: bonePct, set: setBonePct },
+              { label: "Vísceras", pct: organPct, set: setOrganPct },
+              { label: "Vegetales", pct: veggiePct, set: setVeggiePct },
             ].map((item) => (
               <div key={item.label}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">{item.label}</span>
-                  <span className="text-[10px] text-zinc-400">{item.pct}% · {Math.round(total * (item.pct / 100))}g</span>
+                  <span className="text-[10px] text-zinc-400">{item.pct}% · {Math.round((dietType === "mixta" ? barfGrams : total) * (item.pct / 100))}g</span>
                 </div>
                 <input type="range" min={0} max={100} value={item.pct} onChange={(e) => item.set(Number(e.target.value))} className="w-full accent-primary-600" />
               </div>

@@ -6,10 +6,14 @@ import { createClient } from "@/lib/supabase/client";
 import { sugerirTamanoPorRaza, BREED_SIZE_LABELS } from "@/lib/breed-sizes";
 import {
   getFeedingDefaults, ACTIVITY_LABELS, MEAL_FREQUENCY,
-  sugerirMealSlots, calcularRacionDiaria,
+  sugerirMealSlots, calcularRacionDiaria, calcularRacionMixta,
+  BARF_PCT_BY_STAGE, CROQUETAS_PCT_BY_STAGE, MIXTA_PCT_BY_STAGE,
 } from "@/lib/feeding-standards";
 import type { ActivityLevel, DietType, LifeStage } from "@/lib/feeding-standards";
-import { ArrowLeft, PawPrint, Check, PenLine, Search, ChevronDown, Camera, Loader2, ChevronRight, UtensilsCrossed, Clock, Flame, Target } from "lucide-react";
+import {
+  ArrowLeft, PawPrint, Check, PenLine, Search, ChevronDown, Camera, Loader2,
+  ChevronRight, UtensilsCrossed, Clock, Flame, Target, Bone, Beef,
+} from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { uploadPhotoFromDataUrl } from "@/lib/storage";
 import { ImageEditor } from "@/components/ImageEditor";
@@ -22,8 +26,8 @@ const BREEDS = [
   "Affenpinscher", "Afgano", "Akita", "Alaskan Malamute", "American Bully", "American Pitbull", "American Staffordshire",
   "Basenji", "Basset Hound", "Beagle", "Border Collie", "Boston Terrier", "Boxer", "Bulldog Francés", "Bulldog Inglés",
   "Caniche", "Cavalier King Charles", "Chihuahua", "Chow Chow", "Cocker Spaniel", "Collie", "Corgi",
-  "Dálmata", "Doberman", "Dogo Argentino", "Golden Retriever", "Gran Danés", "Husky Siberiano",
-  "Jack Russell Terrier", "Labrador Retriever", "Maltés", "Mestizo", "Pastor Alemán", "Pastor Belga",
+  "Dálmata", "Doberman", "Dogo Argentino", "Dogo de Burdeos", "Golden Retriever", "Gran Danés", "Husky Siberiano",
+  "Jack Russell Terrier", "Labrador Retriever", "Lhasa Apso", "Maltés", "Mestizo", "Pastor Alemán", "Pastor Australiano", "Pastor Belga",
   "Pinscher Miniatura", "Pomerania", "Poodle", "Pug", "Rottweiler", "Schnauzer", "Shar Pei", "Shiba Inu", "Shih Tzu",
   "Weimaraner", "Yorkshire Terrier", "Criollo / Mestizo"
 ].sort();
@@ -34,7 +38,7 @@ export function NewDogClient({ userId }: Props) {
 
   const [step, setStep] = useState(1);
 
-  // Step 1 fields
+  // Step 1: Datos básicos
   const [photo, setPhoto] = useState("");
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
@@ -47,15 +51,24 @@ export function NewDogClient({ userId }: Props) {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSrc, setEditorSrc] = useState("");
 
-  // Step 2 fields (feeding config)
-  const [dietType, setDietType] = useState<DietType>("croquetas");
+  // Step 2: Configuración de alimentación
   const [activity, setActivity] = useState<ActivityLevel>("moderado");
-  const [feedingPct, setFeedingPct] = useState(2.5);
+  const [dietType, setDietType] = useState<DietType>("croquetas");
   const [mealFreq, setMealFreq] = useState(3);
-  const [lifeStage, setLifeStage] = useState<LifeStage>("cachorro");
   const [mealSlots, setMealSlots] = useState<{ label: string; time: string }[]>([]);
+
+  // Step 3: Porcentajes
+  const [lifeStage, setLifeStage] = useState<LifeStage>("cachorro");
+  const [feedingPct, setFeedingPct] = useState(2.5);
+  const [barfPct, setBarfPct] = useState(0);
+  const [croquetasPct, setCroquetasPct] = useState(2.5);
+  const [mixtaBarfProp, setMixtaBarfProp] = useState(50); // proporción BARF en dieta mixta (0-100)
+
+  // Computed
   const [dailyGrams, setDailyGrams] = useState(0);
   const [dailyKcal, setDailyKcal] = useState(0);
+  const [barfGrams, setBarfGrams] = useState(0);
+  const [croquetasGrams, setCroquetasGrams] = useState(0);
 
   // Auto-detect size from breed
   useEffect(() => {
@@ -80,106 +93,80 @@ export function NewDogClient({ userId }: Props) {
     ? BREEDS.filter((b) => b.toLowerCase().includes(breedSearch.toLowerCase()))
     : BREEDS;
 
+  const computeRacion = () => {
+    const pesoKg = getWeight();
+    if (dietType === "mixta") {
+      const barfParte = (feedingPct * mixtaBarfProp) / 100;
+      const croqParte = (feedingPct * (100 - mixtaBarfProp)) / 100;
+      setBarfPct(barfParte);
+      setCroquetasPct(croqParte);
+      const result = calcularRacionMixta({
+        peso_kg: pesoKg,
+        barf_pct: barfParte,
+        croquetas_pct: croqParte,
+        activity_level: activity,
+      });
+      setBarfGrams(result.barf_grams);
+      setCroquetasGrams(result.croquetas_grams);
+      setDailyGrams(result.barf_grams + result.croquetas_grams);
+      setDailyKcal(result.total_kcal);
+    } else {
+      const racion = calcularRacionDiaria({
+        peso_kg: pesoKg, feeding_pct: feedingPct,
+        diet_type: dietType, activity_level: activity,
+      });
+      setDailyGrams(racion.total_grams);
+      setDailyKcal(racion.total_kcal);
+      if (dietType === "barf") { setBarfPct(feedingPct); setCroquetasPct(0); }
+      else { setBarfPct(0); setCroquetasPct(feedingPct); }
+      setBarfGrams(dietType === "barf" ? racion.total_grams : 0);
+      setCroquetasGrams(dietType === "croquetas" ? racion.total_grams : 0);
+    }
+  };
+
   const goToStep2 = () => {
     if (!name || !breed) return;
     try {
       const edadMeses = getAgeMonths(birthDate);
-      const pesoKg = getWeight();
-
       const defaults = getFeedingDefaults({
-        raza: breed,
-        peso_kg: pesoKg,
-        edad_meses: edadMeses,
+        raza: breed, peso_kg: getWeight(), edad_meses: edadMeses,
         tamano_guardado: tamano || null,
       });
-
-      setDietType(defaults.diet_type);
       setActivity(defaults.activity_level);
-      setFeedingPct(defaults.feeding_pct);
+      setDietType(defaults.diet_type);
       setMealFreq(defaults.meal_frequency);
-      setLifeStage(defaults.life_stage);
-      setDailyGrams(defaults.daily_grams);
-      setDailyKcal(Math.round(defaults.daily_grams * (defaults.diet_type === "croquetas" ? 3.8 : 1.8)));
       setMealSlots(sugerirMealSlots(defaults.life_stage));
+      setLifeStage(defaults.life_stage);
       setStep(2);
     } catch (err) {
       console.error("Error al calcular defaults:", err);
-      // Fallback: ir al paso 2 con valores por defecto
-      setDietType("croquetas");
       setActivity("moderado");
-      setFeedingPct(2.5);
+      setDietType("croquetas");
       setMealFreq(3);
-      setLifeStage("adulto");
-      setDailyGrams(Math.round(getWeight() * 1000 * 0.025));
-      setDailyKcal(Math.round(getWeight() * 1000 * 0.025 * 3.8));
       setMealSlots(sugerirMealSlots("adulto"));
+      setLifeStage("adulto");
       setStep(2);
     }
   };
 
-  const createWithDefaults = async () => {
-    if (!name || !breed) return;
+  const goToStep3 = () => {
     try {
       const edadMeses = getAgeMonths(birthDate);
-      const pesoKg = getWeight();
-
       const defaults = getFeedingDefaults({
-        raza: breed,
-        peso_kg: pesoKg,
-        edad_meses: edadMeses,
-        tamano_guardado: tamano || null,
+        raza: breed, peso_kg: getWeight(), edad_meses: edadMeses,
+        tamano_guardado: tamano || null, diet_type_override: dietType,
+        activity_override: activity,
       });
-
-      const { data: newDog, error: dogError } = await supabase.from("dogs").insert({
-        owner_id: userId, nombre: name, raza: breed, edad_meses: edadMeses,
-        fecha_nacimiento: birthDate, tamano: tamano || null,
-        peso_kg: pesoKg, foto_url: photo || "/icons/dog-default.png",
-      }).select("id").single();
-
-      if (dogError || !newDog) {
-        console.error("Error al crear perro:", dogError);
-        return;
-      }
-      const dogId = (newDog as { id: string }).id;
-
-      const { error: mpError } = await supabase.from("dog_metabolic_profiles").insert({
-        dog_id: dogId, activity_level: defaults.activity_level,
-        feeding_pct: defaults.feeding_pct, diet_type: defaults.diet_type,
-      });
-      if (mpError) {
-        console.warn("diet_type may not exist yet, retrying without:", mpError.message);
-        await supabase.from("dog_metabolic_profiles").insert({
-          dog_id: dogId, activity_level: defaults.activity_level,
-          feeding_pct: defaults.feeding_pct,
-        });
-      }
-
-      const slots = sugerirMealSlots(defaults.life_stage);
-      for (let i = 0; i < slots.length; i++) {
-        await supabase.from("dog_meal_slots").insert({
-          dog_id: dogId, slot_index: i,
-          label: slots[i].label, time_of_day: `${slots[i].time}:00`, active: true,
-        });
-      }
-      await supabase.from("dog_weight_history").insert({
-        dog_id: dogId, peso_kg: pesoKg,
-        fecha: new Date().toISOString().slice(0, 10), notas: "Peso inicial al registro",
-      });
-      router.push(`/guau/app/perfil/perro/${dogId}/editar`);
+      setFeedingPct(defaults.feeding_pct);
+      setMixtaBarfProp(50);
+      setLifeStage(defaults.life_stage);
+      computeRacion();
+      setStep(3);
     } catch (err) {
-      console.error("Error al crear perro:", err);
+      console.error("Error al calcular porcentajes:", err);
+      setFeedingPct(2.5);
+      setStep(3);
     }
-  };
-
-  const recalcGrams = (pct: number, act: ActivityLevel, dt: DietType) => {
-    const result = calcularRacionDiaria({
-      peso_kg: getWeight(),
-      feeding_pct: pct,
-      diet_type: dt,
-      activity_level: act,
-    });
-    setDailyGrams(result.total_grams);
-    setDailyKcal(result.total_kcal);
   };
 
   const handleCreate = async () => {
@@ -194,20 +181,23 @@ export function NewDogClient({ userId }: Props) {
         peso_kg: pesoKg, foto_url: photo || "/icons/dog-default.png",
       }).select("id").single();
 
-      if (dogError) {
+      if (dogError || !newDog) {
         console.error("Error al crear perro:", dogError);
         return;
       }
-      if (!newDog) return;
-
       const dogId = (newDog as { id: string }).id;
 
-      // Insert metabolic profile — fallback sin diet_type si la columna no existe
-      const { error: mpError } = await supabase.from("dog_metabolic_profiles").insert({
-        dog_id: dogId, activity_level: activity, feeding_pct: feedingPct, diet_type: dietType,
-      });
+      const mpPayload: any = {
+        dog_id: dogId, activity_level: activity,
+        feeding_pct: feedingPct, diet_type: dietType,
+      };
+      if (dietType === "mixta") {
+        mpPayload.feeding_pct = feedingPct;
+      }
+
+      const { error: mpError } = await supabase.from("dog_metabolic_profiles").insert(mpPayload);
       if (mpError) {
-        console.warn("diet_type may not exist yet, retrying without:", mpError.message);
+        console.warn("diet_type puede no existir, reintentando sin ella:", mpError.message);
         await supabase.from("dog_metabolic_profiles").insert({
           dog_id: dogId, activity_level: activity, feeding_pct: feedingPct,
         });
@@ -231,19 +221,32 @@ export function NewDogClient({ userId }: Props) {
     }
   };
 
+  useEffect(() => {
+    computeRacion();
+  }, [feedingPct, dietType, activity, mixtaBarfProp, weightDisplay]);
+
+  const canProceedStep1 = name.trim().length > 0 && breed.trim().length > 0;
+  const pctRange = dietType === "barf" ? BARF_PCT_BY_STAGE[lifeStage] :
+    dietType === "croquetas" ? CROQUETAS_PCT_BY_STAGE[lifeStage] :
+    MIXTA_PCT_BY_STAGE[lifeStage];
+
   return (
     <div className="space-y-4 pb-8">
-      {/* Header */}
+      {/* Header con indicador de pasos */}
       <div className="flex items-center gap-3 pt-1">
-        <button onClick={() => step === 2 ? setStep(1) : router.back()} className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center">
+        <button onClick={() => step === 1 ? router.back() : setStep(step - 1)}
+          className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-          {step === 1 ? "Nuevo Perro" : "Plan de Alimentación"}
+          {step === 1 ? "Nuevo Perro" : step === 2 ? "Alimentación" : "Ración Diaria"}
         </h1>
         <div className="ml-auto flex items-center gap-1.5">
-          <div className={`w-2.5 h-2.5 rounded-full ${step === 1 ? "bg-primary-500" : "bg-secondary-400"}`} />
-          <div className={`w-2.5 h-2.5 rounded-full ${step === 2 ? "bg-primary-500" : "bg-zinc-300 dark:bg-zinc-700"}`} />
+          {[1, 2, 3].map((s) => (
+            <div key={s} className={`w-2.5 h-2.5 rounded-full transition-colors ${
+              s === step ? "bg-primary-500" : s < step ? "bg-secondary-400" : "bg-zinc-300 dark:bg-zinc-700"
+            }`} />
+          ))}
         </div>
       </div>
 
@@ -282,7 +285,7 @@ export function NewDogClient({ userId }: Props) {
           <div>
             <label className="text-xs text-zinc-500 block mb-1">Nombre *</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm" placeholder="Tank" />
+              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm" placeholder="Rex" />
           </div>
 
           {/* Breed */}
@@ -326,7 +329,7 @@ export function NewDogClient({ userId }: Props) {
             <div>
               <label className="text-xs text-zinc-500 block mb-1">Fecha de nacimiento</label>
               <DatePicker value={birthDate} onChange={setBirthDate} />
-              <p className="text-[10px] text-zinc-400 mt-0.5">{getAgeMonths(birthDate)} meses calculados</p>
+              <p className="text-[10px] text-zinc-400 mt-0.5">{getAgeMonths(birthDate)} meses</p>
             </div>
             <div>
               <label className="text-xs text-zinc-500 block mb-1">Peso actual (kg)</label>
@@ -336,7 +339,7 @@ export function NewDogClient({ userId }: Props) {
                 className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="text-xs text-zinc-500 block mb-1">Tamaño de raza</label>
+              <label className="text-xs text-zinc-500 block mb-1">Tamaño</label>
               <select value={tamano} onChange={(e) => setTamano(e.target.value)}
                 className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-2 py-2 text-xs">
                 <option value="">Auto</option>
@@ -345,142 +348,66 @@ export function NewDogClient({ userId }: Props) {
             </div>
           </div>
 
-          {/* Step 1 buttons */}
-          <div className="space-y-2">
-            <button onClick={createWithDefaults} disabled={!name || !breed}
-              className={`w-full rounded-xl py-3.5 text-sm font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${!name || !breed ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed" : "bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-600/20"}`}>
-              <PawPrint className="w-4 h-4" /> Crear Perro
-            </button>
-            <button onClick={goToStep2} disabled={!name || !breed}
-              className={`w-full rounded-xl py-3 text-sm font-semibold transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 ${!name || !breed ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed" : "bg-white dark:bg-zinc-800 border-2 border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-950/30"}`}>
-              <UtensilsCrossed className="w-4 h-4" /> Personalizar Alimentación <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <button onClick={goToStep2} disabled={!canProceedStep1}
+            className={`w-full rounded-xl py-3.5 text-sm font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${!canProceedStep1 ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed" : "bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-600/20"}`}>
+            Siguiente: Configurar Alimentación <ChevronRight className="w-4 h-4" />
+          </button>
         </>
       )}
 
       {/* ══════════════════════════════════════════════════════════ */}
-      {/* STEP 2: PLAN DE ALIMENTACIÓN                                */}
+      {/* STEP 2: CONFIGURACIÓN DE ALIMENTACIÓN                       */}
       {/* ══════════════════════════════════════════════════════════ */}
       {step === 2 && (
         <>
-          {/* Resumen visual */}
-          <div className="card-soft rounded-[1.5rem] p-5 space-y-3 bg-gradient-to-br from-primary-50/60 to-secondary-50/40 dark:from-primary-950/30 dark:to-secondary-950/20 border border-primary-100 dark:border-primary-900/30">
-            <div className="flex items-center gap-2">
-              <UtensilsCrossed className="w-5 h-5 text-primary-600" />
-              <h2 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
-                Plan para {name || "tu perro"}
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white/80 dark:bg-zinc-800/80 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-zinc-500 mb-0.5">Etapa de vida</p>
-                <p className="text-sm font-bold text-primary-700 dark:text-primary-300 capitalize">
-                  {lifeStage === "cachorro" ? "Cachorro" : lifeStage === "adolescente" ? "Adolescente" : "Adulto"}
-                </p>
-                <p className="text-[10px] text-zinc-400">
-                  {breed} · {getAgeMonths(birthDate)} meses · {getWeight()} kg
-                </p>
-              </div>
-              <div className="bg-white/80 dark:bg-zinc-800/80 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-zinc-500 mb-0.5">Tamaño de raza</p>
-                <p className="text-sm font-bold text-secondary-700 dark:text-secondary-300">
-                  {BREED_SIZE_LABELS[tamano] ?? tamano ?? "Auto-detectado"}
-                </p>
-              </div>
-            </div>
+          {/* Resumen del perro */}
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-950/20 dark:to-secondary-950/20 border border-primary-100 dark:border-primary-900/30">
+            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{name}</p>
+            <p className="text-xs text-zinc-500">{breed} · {getAgeMonths(birthDate)} meses · {getWeight()} kg</p>
           </div>
 
-          {/* Tipo de dieta */}
+          {/* Actividad */}
           <div>
-            <label className="text-xs text-zinc-500 block mb-1">Tipo de alimentación</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => { setDietType("croquetas"); recalcGrams(feedingPct, activity, "croquetas"); }}
-                className={`rounded-xl p-3 text-sm font-semibold transition-all border-2 ${
-                  dietType === "croquetas"
-                    ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300"
-                    : "bg-zinc-50 dark:bg-zinc-800 border-transparent text-zinc-600 dark:text-zinc-400"
-                }`}
-              >
-                <span className="text-lg block mb-0.5">🦴</span>
-                Croquetas / Pienso
-              </button>
-              <button
-                onClick={() => { setDietType("barf"); recalcGrams(feedingPct, activity, "barf"); }}
-                className={`rounded-xl p-3 text-sm font-semibold transition-all border-2 ${
-                  dietType === "barf"
-                    ? "bg-accent-50 dark:bg-accent-950/30 border-accent-500 text-accent-700 dark:text-accent-300"
-                    : "bg-zinc-50 dark:bg-zinc-800 border-transparent text-zinc-600 dark:text-zinc-400"
-                }`}
-              >
-                <span className="text-lg block mb-0.5">🥩</span>
-                Dieta BARF / Natural
-              </button>
-            </div>
-          </div>
-
-          {/* Nivel de actividad */}
-          <div>
-            <label className="text-xs text-zinc-500 block mb-1">Nivel de actividad</label>
-            <select value={activity} onChange={(e) => { const v = e.target.value as ActivityLevel; setActivity(v); recalcGrams(feedingPct, v, dietType); }}
-              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm">
+            <label className="text-xs text-zinc-500 block mb-1.5">Nivel de actividad</label>
+            <select value={activity} onChange={(e) => setActivity(e.target.value as ActivityLevel)}
+              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 text-sm">
               {Object.entries(ACTIVITY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
 
-          {/* % alimentación */}
+          {/* Tipo de dieta */}
           <div>
-            <label className="text-xs text-zinc-500 block mb-1">% de alimentación diaria</label>
-            <div className="flex items-center gap-3">
-              <input type="range"
-                min={dietType === "barf" ? 1.5 : 1}
-                max={dietType === "barf" ? 8 : 5}
-                step={0.1}
-                value={feedingPct}
-                onChange={(e) => { const v = Number(e.target.value); setFeedingPct(v); recalcGrams(v, activity, dietType); }}
-                className="flex-1 accent-primary-600" />
-              <span className="text-sm font-mono font-bold w-12 text-right">{feedingPct}%</span>
+            <label className="text-xs text-zinc-500 block mb-1.5">Tipo de alimentación</label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { key: "croquetas" as DietType, label: "Croquetas", icon: "🦴" },
+                { key: "barf" as DietType, label: "Natural / BARF", icon: "🥩" },
+                { key: "mixta" as DietType, label: "Mixta", icon: "⚖️" },
+              ].map((opt) => (
+                <button key={opt.key} onClick={() => setDietType(opt.key)}
+                  className={`rounded-xl p-3 text-xs font-bold transition-all border-2 ${
+                    dietType === opt.key
+                      ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300"
+                      : "bg-zinc-50 dark:bg-zinc-800 border-transparent text-zinc-600 dark:text-zinc-400"
+                  }`}
+                >
+                  <span className="text-lg block mb-0.5">{opt.icon}</span>
+                  {opt.label}
+                </button>
+              ))}
             </div>
-            <p className="text-[10px] text-zinc-400 mt-0.5">
-              {dietType === "barf"
-                ? `Recomendado para ${lifeStage === "cachorro" ? "cachorros" : lifeStage === "adolescente" ? "adolescentes" : "adultos"}: cachorro 6-8%, adolescente 4-5%, adulto 2-3%`
-                : "En croquetas, el % es menor porque el alimento es más denso calóricamente"}
-            </p>
-          </div>
-
-          {/* Resultado */}
-          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-r from-secondary-50 to-primary-50 dark:from-secondary-950/20 dark:to-primary-950/20 border border-secondary-200 dark:border-secondary-900/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-secondary-600" />
-                <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ración diaria estimada</span>
-              </div>
-            </div>
-            <div className="flex items-baseline gap-2 mt-2">
-              <span className="text-3xl font-black text-primary-700 dark:text-primary-300">{dailyGrams}</span>
-              <span className="text-sm text-zinc-500">gramos/día</span>
-              <span className="text-sm text-zinc-400 ml-1">· {dailyKcal} kcal</span>
-            </div>
-            {dietType === "croquetas" && (
-              <p className="text-xs text-zinc-500 mt-1">
-                ≈ {Math.round((dailyGrams / 110) * 10) / 10} tazas/día (1 taza ≈ 110g)
-              </p>
-            )}
           </div>
 
           {/* Frecuencia de comidas */}
           <div>
-            <label className="text-xs text-zinc-500 block mb-1">Frecuencia de comidas diarias</label>
+            <label className="text-xs text-zinc-500 block mb-1.5">Comidas al día</label>
             <div className="flex gap-2">
               {[1, 2, 3, 4].map((n) => (
-                <button key={n}
-                  onClick={() => {
-                    setMealFreq(n);
-                    const stage = n >= 3 ? "cachorro" : n === 2 ? "adulto" : "adulto";
-                    setMealSlots(sugerirMealSlots(stage as LifeStage).slice(0, n));
-                  }}
+                <button key={n} onClick={() => {
+                  setMealFreq(n);
+                  const stage = n >= 3 ? "cachorro" : "adulto";
+                  setMealSlots(sugerirMealSlots(stage as LifeStage).slice(0, n));
+                }}
                   className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-all border-2 ${
                     mealFreq === n
                       ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300"
@@ -491,50 +418,127 @@ export function NewDogClient({ userId }: Props) {
                 </button>
               ))}
             </div>
-            <p className="text-[10px] text-zinc-400 mt-1">
-              Recomendado: {MEAL_FREQUENCY[lifeStage]?.recommended ?? 3} tomas para {lifeStage === "cachorro" ? "cachorros" : lifeStage === "adolescente" ? "adolescentes" : "adultos"}
-              {lifeStage === "cachorro" && " (previene torsión gástrica en razas de pecho profundo)"}
-            </p>
           </div>
 
-          {/* Horarios sugeridos */}
+          {/* Horarios */}
           <div>
-            <label className="text-xs text-zinc-500 block mb-1">Horarios de comida sugeridos</label>
+            <label className="text-xs text-zinc-500 block mb-1.5">Horarios de comida</label>
             <div className="space-y-1.5">
               {mealSlots.map((slot, i) => (
                 <div key={i} className="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800">
                   <Clock className="w-4 h-4 text-zinc-400" />
-                  <input
-                    type="text"
-                    value={slot.label}
-                    onChange={(e) => {
-                      const updated = [...mealSlots];
-                      updated[i] = { ...updated[i], label: e.target.value };
-                      setMealSlots(updated);
-                    }}
-                    className="flex-1 min-w-0 bg-transparent text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none"
-                  />
-                  <input
-                    type="time"
-                    value={slot.time}
-                    onChange={(e) => {
-                      const updated = [...mealSlots];
-                      updated[i] = { ...updated[i], time: e.target.value };
-                      setMealSlots(updated);
-                    }}
-                    className="bg-zinc-100 dark:bg-zinc-700 rounded-lg px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                  />
-                  <span className="text-[10px] text-zinc-400">≈ {Math.round(dailyGrams / mealSlots.length)}g</span>
+                  <input type="text" value={slot.label}
+                    onChange={(e) => { const u = [...mealSlots]; u[i] = { ...u[i], label: e.target.value }; setMealSlots(u); }}
+                    className="flex-1 min-w-0 bg-transparent text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none" />
+                  <input type="time" value={slot.time}
+                    onChange={(e) => { const u = [...mealSlots]; u[i] = { ...u[i], time: e.target.value }; setMealSlots(u); }}
+                    className="bg-zinc-100 dark:bg-zinc-700 rounded-lg px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                 </div>
               ))}
             </div>
-            <p className="text-[10px] text-zinc-400 mt-1">Puedes editarlos ahora o después desde el perfil del perro</p>
           </div>
 
-          {/* Create button */}
+          <button onClick={goToStep3}
+            className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-3.5 text-sm font-bold transition-all active:scale-[0.98] shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2">
+            Siguiente: Ajustar Porcentajes <ChevronRight className="w-4 h-4" />
+          </button>
+        </>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════ */}
+      {/* STEP 3: PORCENTAJES DE ALIMENTACIÓN                        */}
+      {/* ══════════════════════════════════════════════════════════ */}
+      {step === 3 && (
+        <>
+          {/* Resumen */}
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-r from-secondary-50 to-primary-50 dark:from-secondary-950/20 dark:to-primary-950/20 border border-secondary-200 dark:border-secondary-900/30">
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-5 h-5 text-secondary-600" />
+              <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ración diaria estimada</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-primary-700 dark:text-primary-300">{dailyGrams}</span>
+              <span className="text-sm text-zinc-500">gramos/día</span>
+              <span className="text-sm text-zinc-400">· {dailyKcal} kcal</span>
+            </div>
+            {dietType === "mixta" && (
+              <div className="mt-2 text-xs text-zinc-500 space-y-0.5">
+                <p>🥩 Natural: {barfGrams}g ({Math.round(barfPct * 10) / 10}%)</p>
+                <p>🦴 Croquetas: {croquetasGrams}g ({Math.round(croquetasPct * 10) / 10}%)</p>
+              </div>
+            )}
+            {dietType === "croquetas" && (
+              <p className="text-xs text-zinc-500 mt-1">≈ {Math.round((dailyGrams / 110) * 10) / 10} tazas/día</p>
+            )}
+          </div>
+
+          {/* % Total */}
+          <div className="card-soft rounded-[1.25rem] p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs text-zinc-500">% del peso corporal</label>
+              <span className="text-sm font-bold text-primary-700 dark:text-primary-300">{Math.round(feedingPct * 10) / 10}%</span>
+            </div>
+            <input type="range"
+              min={pctRange?.min ?? 1.5}
+              max={pctRange?.max ?? 8}
+              step={0.1}
+              value={feedingPct}
+              onChange={(e) => setFeedingPct(Number(e.target.value))}
+              className="w-full accent-primary-600" />
+            <p className="text-[10px] text-zinc-400">
+              Recomendado para {lifeStage === "cachorro" ? "cachorros" : lifeStage === "adolescente" ? "adolescentes" : "adultos"} con {dietType === "barf" ? "dieta natural" : dietType === "croquetas" ? "croquetas" : "dieta mixta"}: {pctRange?.min}-{pctRange?.max}%
+            </p>
+          </div>
+
+          {/* Mixta: proporción BARF vs Croquetas */}
+          {dietType === "mixta" && (
+            <div className="card-soft rounded-[1.25rem] p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs text-zinc-500">Proporción Natural (BARF)</label>
+                <span className="text-sm font-bold text-accent-700 dark:text-accent-300">{mixtaBarfProp}%</span>
+              </div>
+              <input type="range" min={0} max={100} step={5} value={mixtaBarfProp}
+                onChange={(e) => setMixtaBarfProp(Number(e.target.value))}
+                className="w-full accent-accent-600" />
+              <div className="flex justify-between text-[10px] text-zinc-400">
+                <span>🦴 100% Croquetas</span>
+                <span>🥩 100% Natural</span>
+              </div>
+            </div>
+          )}
+
+          {/* Distribución BARF (solo si BARF o mixta con BARF > 0) */}
+          {(dietType === "barf" || (dietType === "mixta" && mixtaBarfProp > 0)) && (
+            <div className="card-soft rounded-[1.25rem] p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Beef className="w-4 h-4 text-red-500" />
+                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Distribución Natural</span>
+              </div>
+              {[
+                { label: "Carne", pct: 50, color: "bg-red-500" },
+                { label: "Hueso carnoso", pct: 20, color: "bg-orange-500" },
+                { label: "Vísceras", pct: 10, color: "bg-purple-500" },
+                { label: "Vegetales", pct: 20, color: "bg-green-500" },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${item.color}`} />
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400 flex-1">{item.label}</span>
+                  <span className="text-xs font-mono text-zinc-500">{item.pct}%</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Info etapa de vida */}
+          <div className="text-center">
+            <p className="text-[10px] text-zinc-400">
+              {lifeStage === "cachorro" ? "Cachorro" : lifeStage === "adolescente" ? "Adolescente" : "Adulto"} · {BREED_SIZE_LABELS[tamano] ?? tamano ?? "Tamaño auto-detectado"}
+            </p>
+          </div>
+
           <button onClick={handleCreate}
             className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-3.5 text-sm font-bold transition-all active:scale-[0.98] shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2">
-            <Flame className="w-4 h-4" /> Crear Perro y Plan de Alimentación
+            <PawPrint className="w-4 h-4" /> Crear Perro
           </button>
         </>
       )}
