@@ -9,6 +9,8 @@ import { BackgroundPaws } from "@/components/BackgroundPaws";
 import { Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
+import { cookies } from "next/headers";
+import { getCachedDog, getCachedMetabolicProfile, getCachedMealSlots, getCachedRecipes, getCachedWalks, getCachedWeightLatest, getCachedMealSchedule } from "@/lib/data-cache";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -16,12 +18,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (!user) redirect("/");
 
-  // Trial check using user_apps table
+  // Trial check
   const trial = await checkTrialServer(supabase, user.id, "guau");
+  if (trial.isExpired) redirect("/guau/app/suscripcion");
 
-  // If trial expired, redirect to subscription page
-  if (trial.isExpired) {
-    redirect("/guau/app/suscripcion");
+  // Precargar datos del perro actual en cache compartido
+  // Las páginas hijas reutilizan estos datos sin llamar a Supabase de nuevo
+  const cookieStore = await cookies();
+  const savedDogId = cookieStore.get("blis_current_dog")?.value ?? null;
+  if (savedDogId) {
+    getCachedDog(savedDogId, user.id);
+    getCachedMetabolicProfile(savedDogId);
+    getCachedMealSlots(savedDogId);
+    getCachedRecipes();
   }
 
   return (

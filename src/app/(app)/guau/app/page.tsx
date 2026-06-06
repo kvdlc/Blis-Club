@@ -9,6 +9,7 @@ import QuickToolsCarousel from "@/components/QuickToolsCarousel";
 import { DashboardWidgets } from "./DashboardWidgets";
 import { HeatmapWidget } from "./HeatmapWidget";
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
+import { getCachedDog, getCachedMetabolicProfile, getCachedWalks } from "@/lib/data-cache";
 
 async function getDashboardData(userId: string, dogId: string | null) {
   const supabase = await createClient();
@@ -22,28 +23,26 @@ async function getDashboardData(userId: string, dogId: string | null) {
     return { dog: null, logs: [], walks: [], mealSlots: [], mealSchedule: [], recipes: [], metabolicProfile: null, breedImg: null, lessons: [], progress: [], vaccines: [] };
   }
 
-  const [dogRes, logsRes, walksRes, slotsRes, scheduleRes, recipesRes, profileRes, lessonsRes, progressRes, vaccinesRes] = await Promise.all([
-    supabase.from("dogs").select("*").eq("id", dogId).eq("owner_id", userId).single(),
+  const [dogRes, walksRes, logsRes, scheduleRes, recipesRes, slotsRes, profileRes, lessonsRes, progressRes, vaccinesRes] = await Promise.all([
+    getCachedDog(dogId, userId),
+    getCachedWalks(dogId),
     supabase.from("daily_logs").select("*").order("fecha", { ascending: false }).limit(3),
-    supabase.from("walks").select("*").eq("dog_id", dogId).order("start_time", { ascending: false }).limit(30),
-    supabase.from("dog_meal_slots").select("*").eq("dog_id", dogId).order("slot_index", { ascending: true }),
     supabase.from("meal_schedule").select("*").eq("dog_id", dogId).order("fecha", { ascending: true }),
     supabase.from("nutrition_recipes").select("*"),
-    supabase.from("dog_metabolic_profiles").select("*").eq("dog_id", dogId).single(),
+    supabase.from("dog_meal_slots").select("*").eq("dog_id", dogId).order("slot_index", { ascending: true }),
+    getCachedMetabolicProfile(dogId),
     supabase.from("lessons").select("*").order("order"),
     supabase.from("user_progress").select("*").eq("user_id", userId),
     supabase.from("dog_vaccines").select("*").eq("dog_id", dogId).order("created_at", { ascending: false }),
   ]);
 
-  const dog = dogRes.data as Dog | null;
+  const dog = dogRes as Dog | null;
   let breedImg: string | null = null;
   if (dog?.raza) {
-    // Try exact match first, then partial match
     const { data: breed } = await supabase.from("breed_images").select("image_url").eq("breed_name", dog.raza).limit(1).single();
     if (breed) {
       breedImg = (breed as { image_url: string } | null)?.image_url ?? null;
     } else {
-      // Fallback: case-insensitive partial match
       const { data: breeds } = await supabase.from("breed_images").select("image_url");
       const allBreeds = (breeds as { breed_name?: string; image_url: string }[] | null) ?? [];
       const match = allBreeds.find((b) => b.breed_name?.toLowerCase().includes(dog.raza.toLowerCase()));
@@ -54,11 +53,11 @@ async function getDashboardData(userId: string, dogId: string | null) {
   return {
     dog,
     logs: (logsRes.data as DailyLog[] | null) ?? [],
-    walks: (walksRes.data as Walk[] | null) ?? [],
+    walks: walksRes as Walk[],
     mealSlots: (slotsRes.data as DogMealSlot[] | null) ?? [],
     mealSchedule: (scheduleRes.data as (MealSchedule & { recipe: NutritionRecipe | null })[] | null) ?? [],
     recipes: (recipesRes.data as NutritionRecipe[] | null) ?? [],
-    metabolicProfile: (profileRes.data as DogMetabolicProfile | null) ?? null,
+    metabolicProfile: profileRes as DogMetabolicProfile | null,
     breedImg,
     lessons: (lessonsRes.data as Lesson[] | null) ?? [],
     progress: (progressRes.data as UserProgress[] | null) ?? [],

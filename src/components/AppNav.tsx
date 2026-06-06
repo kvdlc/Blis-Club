@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { GraduationCap, UtensilsCrossed, Activity, User, Dog, Siren } from "lucide-react";
 
 const desktopTabs = [
@@ -23,6 +23,7 @@ const mobileTabs = [
 
 export default function AppNav() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const isActive = (href: string) => {
     if (href === "/guau/app") return pathname === href;
@@ -47,6 +48,7 @@ export default function AppNav() {
                 key={tab.href}
                 href={tab.href}
                 prefetch={false}
+                onMouseEnter={() => router.prefetch(tab.href)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
                   active
                     ? "bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-300 shadow-sm"
