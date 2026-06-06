@@ -52,7 +52,7 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
 
   return (
     <>
-      <OnboardingTutorial key={showTutorial ? "tutorial-open" : "tutorial-closed"} userId={userId} forceShow={showTutorial} onComplete={() => setShowTutorial(false)} />
+      <OnboardingTutorial key={showTutorial ? "tutorial-open" : "tutorial-closed"} userId={userId} hasSeenTutorial={profile?.has_seen_tutorial ?? false} forceShow={showTutorial} onComplete={() => setShowTutorial(false)} />
       <div className="space-y-5">
       {/* ═══ TOP BAR: Suscripción + Blis Corp ═══ */}
       <div className="flex items-center justify-between card-soft rounded-[1.25rem] px-4 py-3">
