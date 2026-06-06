@@ -132,10 +132,7 @@ export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow 
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/60" />
 
             {/* Top text */}
-            <div className="absolute top-0 left-0 right-0 p-8 pt-16 text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-4">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
+            <div className="absolute top-0 left-0 right-0 p-8 pt-12 text-center">
               <h2 className="text-2xl font-extrabold text-white leading-tight drop-shadow-lg">
                 {slide.title}
               </h2>
@@ -148,7 +145,7 @@ export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow 
       </div>
 
       {/* Bottom controls */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 flex flex-col items-center gap-5">
+      <div className="absolute bottom-0 left-0 right-0 p-6 pb-14 flex flex-col items-center gap-5">
         {/* Dots */}
         <div className="flex items-center gap-2">
           {SLIDES.map((_, i) => (
@@ -178,11 +175,6 @@ export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow 
             </>
           )}
         </button>
-
-        {/* Step counter */}
-        <p className="text-[10px] text-white/50 font-medium">
-          {step + 1} de {SLIDES.length}
-        </p>
       </div>
     </div>
   );
