@@ -20,7 +20,9 @@ const RAZA_TO_SIZE: Record<string, string> = {
   pekinés: "miniatura",
   pomerania: "miniatura",
   "shih tzu": "miniatura",
-  "west highland terrier": "miniatura",
+  papillón: "miniatura",
+  "crestado chino": "miniatura",
+  "toy fox terrier": "miniatura",
 
   /* Pequeña */
   beagle: "pequena",
@@ -38,13 +40,15 @@ const RAZA_TO_SIZE: Record<string, string> = {
   poodle: "pequena",
   basenji: "pequena",
   "schnauzer": "pequena",
+  dachshund: "pequena",
+  teckel: "pequena",
+  "west highland terrier": "pequena",
 
   /* Mediana */
   "american pitbull": "mediana",
   "american staffordshire": "mediana",
   "american bully": "mediana",
   "border collie": "mediana",
-  boxer: "mediana",
   "bulldog inglés": "mediana",
   "bull terrier": "mediana",
   "chow chow": "mediana",
@@ -53,8 +57,12 @@ const RAZA_TO_SIZE: Record<string, string> = {
   "pastor australiano": "mediana",
   "pastor belga": "mediana",
   sharpei: "mediana",
-  "perro crestado": "mediana",
+  whippet: "mediana",
+  "springer spaniel": "mediana",
+  "staffordshire bull terrier": "mediana",
+  "schnauzer estándar": "mediana",
   "ridgeback": "mediana",
+  "basset hound": "mediana",
 
   /* Grande */
   "dogo argentino": "grande",
@@ -71,6 +79,7 @@ const RAZA_TO_SIZE: Record<string, string> = {
   weimaraner: "grande",
   samoyedo: "grande",
   greyhound: "grande",
+  boxer: "grande",
 
   /* Gigante */
   "gran danés": "gigante",
@@ -79,6 +88,8 @@ const RAZA_TO_SIZE: Record<string, string> = {
   mastín: "gigante",
   "san bernardo": "gigante",
   terranova: "gigante",
+  leonberger: "gigante",
+  bullmastiff: "gigante",
 };
 
 /* ─── Pesos referenciales por talla adulta ─── */
@@ -107,10 +118,16 @@ export function sugerirTamanoPorRaza(raza: string): string | null {
 
 /**
  * Sugiere el tamaño basado en peso + edad.
- * Para cachorros (< 12 meses), estima el peso adulto dividiendo entre 0.6.
+ * Para cachorros (< 12 meses), estima el peso adulto con ratios por etapa.
  */
 export function sugerirTamanoPorPeso(pesoKg: number, edadMeses: number): string {
-  const estimated = edadMeses < 12 ? pesoKg / 0.6 : pesoKg;
+  let estimated = pesoKg;
+  if (edadMeses < 12) {
+    if (edadMeses <= 4) estimated = pesoKg / 0.35;
+    else if (edadMeses <= 6) estimated = pesoKg / 0.50;
+    else if (edadMeses <= 9) estimated = pesoKg / 0.65;
+    else estimated = pesoKg / 0.80;
+  }
   for (const [size, [min, max]] of Object.entries(SIZE_WEIGHT_RANGES)) {
     if (estimated >= min && estimated < max) return size;
   }

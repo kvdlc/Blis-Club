@@ -1,6 +1,11 @@
 /**
  * Motor de estándares nutricionales caninos.
  * Basado en las 5 categorías de tamaño de la FCI y guías veterinarias estándar.
+ * 
+ * Etapas de vida (según datos nutricionales del usuario):
+ * - Cachorro: 0 a 6 meses (pico de crecimiento, igual para todas las razas)
+ * - Adolescente: 6 meses hasta madurez ósea (varía por tamaño)
+ * - Adulto: después de la madurez ósea (mantenimiento)
  */
 
 export type BreedSize = "miniatura" | "pequena" | "mediana" | "grande" | "gigante";
@@ -119,19 +124,27 @@ export function determinarTamanoYEtapa(
   edadMeses: number,
   tamanoGuardado?: string | null,
 ): { sizeCategory: SizeCategory; lifeStage: LifeStage } {
-  // Usar sugerirTamanoPorRaza del módulo breed-sizes cuando sea posible
-  // Aquí usamos estimación por peso como fallback
+  // 1. Determinar tamaño de raza
   let sizeKey: BreedSize;
   if (tamanoGuardado && SIZE_CATEGORIES.some((c) => c.size === tamanoGuardado)) {
     sizeKey = tamanoGuardado as BreedSize;
   } else {
-    sizeKey = estimarTamanoPorPesoAdulto(pesoKg, edadMeses);
+    // Intentar por nombre de raza (importado abajo dinámicamente)
+    const breedSize = trySuggestBreedSize(raza);
+    if (breedSize) {
+      sizeKey = breedSize;
+    } else {
+      sizeKey = estimarTamanoPorPesoAdulto(pesoKg, edadMeses);
+    }
   }
   const sizeCategory = getSizeCategory(sizeKey);
 
+  // 2. Determinar etapa de vida
+  // La transición cachorro→adolescente es a los 6 meses para TODAS las razas
+  // La transición adolescente→adulto depende de la madurez ósea de la categoría
   const madurez = sizeCategory.madurez_meses;
   let lifeStage: LifeStage;
-  if (edadMeses <= madurez * 0.35) {
+  if (edadMeses < 6) {
     lifeStage = "cachorro";
   } else if (edadMeses < madurez) {
     lifeStage = "adolescente";
@@ -140,6 +153,50 @@ export function determinarTamanoYEtapa(
   }
 
   return { sizeCategory, lifeStage };
+}
+
+function trySuggestBreedSize(raza: string): BreedSize | null {
+  // Mapa de razas a tamaño (sincronizado con breed-sizes.ts pero contenido aquí para evitar dependencia circular)
+  const map: Record<string, BreedSize> = {
+    /* Miniatura */
+    chihuahua: "miniatura", "yorkshire": "miniatura", "pinscher miniatura": "miniatura",
+    affenpinscher: "miniatura", "bichón frisé": "miniatura", maltés: "miniatura",
+    pekinés: "miniatura", pomerania: "miniatura", "shih tzu": "miniatura",
+    papillón: "miniatura", "crestado chino": "miniatura",
+    /* Pequeña */
+    beagle: "pequena", "boston terrier": "pequena", "bulldog francés": "pequena",
+    "cavalier": "pequena", "cocker spaniel": "pequena", corgi: "pequena",
+    "jack russell": "pequena", "lhasa apso": "pequena", pug: "pequena",
+    "schnauzer miniatura": "pequena", "shiba inu": "pequena",
+    caniche: "pequena", poodle: "pequena", basenji: "pequena",
+    dachshund: "pequena", teckel: "pequena",
+    /* Mediana */
+    "american pitbull": "mediana", "american bully": "mediana",
+    "border collie": "mediana", "bulldog inglés": "mediana",
+    "bull terrier": "mediana", "chow chow": "mediana", collie: "mediana",
+    dálmata: "mediana", "pastor australiano": "mediana",
+    "pastor belga": "mediana", sharpei: "mediana", whippet: "mediana",
+    "springer spaniel": "mediana", "staffordshire bull terrier": "mediana",
+    "schnauzer estándar": "mediana", "ridgeback": "mediana",
+    /* Grande */
+    "dogo argentino": "grande", "pastor alemán": "grande",
+    "golden retriever": "grande", "labrador": "grande",
+    husky: "grande", doberman: "grande", rottweiler: "grande",
+    akita: "grande", "alaskan malamute": "grande", pointer: "grande",
+    "setter irlandés": "grande", weimaraner: "grande",
+    samoyedo: "grande", greyhound: "grande", boxer: "grande",
+    /* Gigante */
+    "gran danés": "gigante", "boyero de berna": "gigante",
+    "dogo de burdeos": "gigante", mastín: "gigante",
+    "san bernardo": "gigante", terranova: "gigante",
+    leonberger: "gigante", bullmastiff: "gigante",
+  };
+  const key = raza.toLowerCase().trim();
+  if (map[key]) return map[key];
+  for (const [breedKey, size] of Object.entries(map)) {
+    if (key.includes(breedKey) || breedKey.includes(key)) return size;
+  }
+  return null;
 }
 
 export function estimarTamanoPorPesoAdulto(pesoKg: number, edadMeses: number): BreedSize {
