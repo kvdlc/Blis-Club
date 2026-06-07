@@ -262,6 +262,13 @@ export function WebLandingClient({ plans }: Props) {
     setRegisterLoading(false);
   };
 
+  const handleShowRegister = () => {
+    setShowRegister(true);
+    setTimeout(() => {
+      document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
+  };
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
@@ -380,112 +387,6 @@ export function WebLandingClient({ plans }: Props) {
         })}
       </div>
 
-      {/* ═══ REGISTER FORM (slide-up) ═══ */}
-      <AnimatePresence>
-        {showRegister && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="relative z-20 overflow-hidden bg-white border-b border-zinc-100 shadow-sm"
-          >
-            <div className="max-w-md mx-auto px-4 py-8">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <p className="text-sm font-extrabold text-zinc-800">Datos de cliente</p>
-                  <p className="text-[11px] text-zinc-400">Completa tus datos para continuar al pago</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowRegister(false)}
-                  className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center transition-colors"
-                >
-                  <X className="w-4 h-4 text-zinc-500" />
-                </button>
-              </div>
-
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div>
-                  <label htmlFor="reg-email" className="block text-xs font-semibold text-zinc-600 mb-1.5">
-                    Correo electrónico
-                  </label>
-                  <input
-                    id="reg-email"
-                    type="email"
-                    required
-                    placeholder="tutor@ejemplo.com"
-                    value={registerEmail}
-                    onChange={(e) => setRegisterEmail(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="reg-first" className="block text-xs font-semibold text-zinc-600 mb-1.5">
-                      Nombre
-                    </label>
-                    <input
-                      id="reg-first"
-                      type="text"
-                      required
-                      placeholder="Juan"
-                      value={registerFirstName}
-                      onChange={(e) => setRegisterFirstName(e.target.value)}
-                      className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="reg-last" className="block text-xs font-semibold text-zinc-600 mb-1.5">
-                      Apellido
-                    </label>
-                    <input
-                      id="reg-last"
-                      type="text"
-                      required
-                      placeholder="Pérez"
-                      value={registerLastName}
-                      onChange={(e) => setRegisterLastName(e.target.value)}
-                      className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
-                    />
-                  </div>
-                </div>
-
-                {registerError && (
-                  <p className="text-xs text-red-600 bg-red-50 rounded-xl p-3">{registerError}</p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={registerLoading}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-3.5 font-bold text-sm shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98] disabled:opacity-50"
-                >
-                  {registerLoading ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Creando cuenta...
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-4 h-4" />
-                      Continuar al pago seguro
-                    </>
-                  )}
-                </button>
-
-                <p className="text-[10px] text-zinc-400 text-center">
-                  Al continuar, aceptas nuestros{" "}
-                  <Link href="/legal/terminos" className="text-primary-600 hover:underline">Términos</Link>{" "}
-                  y{" "}
-                  <Link href="/legal/privacidad" className="text-primary-600 hover:underline">Privacidad</Link>
-                </p>
-              </form>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* ═══ NAVBAR ═══ */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm border-b border-zinc-100 dark:border-zinc-800" : "bg-transparent"}`}>
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -531,7 +432,7 @@ export function WebLandingClient({ plans }: Props) {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
           <button
             type="button"
-            onClick={() => setShowRegister(true)}
+            onClick={handleShowRegister}
             className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-4 px-8 font-extrabold text-sm shadow-xl shadow-primary-500/30 transition-all active:scale-[0.97] animate-glow-brand"
           >
             <Zap className="w-4 h-4" />
@@ -859,14 +760,95 @@ export function WebLandingClient({ plans }: Props) {
                 <span className="text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight">$9.99</span>
                 <span className="text-zinc-400 font-medium">/mes</span>
               </div>
-              <p className="text-xs text-zinc-400 mb-6">Precio real $49.99. Hoy solo $9.99 mensual. Cancela cuando quieras.</p>
-              <button
-                type="button"
-                onClick={() => setShowRegister(true)}
-                className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-3.5 font-bold text-sm shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98] relative overflow-hidden group/btn animate-glow-brand"
-              >
-                <Zap className="w-4 h-4" />Suscribirme ahora<ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-              </button>
+              <p className="text-xs text-zinc-400 mb-4">Precio real $49.99. Hoy solo $9.99 mensual. Cancela cuando quieras.</p>
+
+              {/* ═══ REGISTER FORM (dentro de la tarjeta) ═══ */}
+              <AnimatePresence>
+                {showRegister && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="border-t border-zinc-100 pt-4 mt-1 mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-extrabold text-zinc-800">Datos de cliente</p>
+                        <button
+                          type="button"
+                          onClick={() => setShowRegister(false)}
+                          className="w-7 h-7 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5 text-zinc-500" />
+                        </button>
+                      </div>
+
+                      <form onSubmit={handleRegister} className="space-y-3">
+                        <input
+                          type="email"
+                          required
+                          placeholder="Correo electrónico"
+                          value={registerEmail}
+                          onChange={(e) => setRegisterEmail(e.target.value)}
+                          className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
+                        />
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            required
+                            placeholder="Nombre"
+                            value={registerFirstName}
+                            onChange={(e) => setRegisterFirstName(e.target.value)}
+                            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
+                          />
+                          <input
+                            type="text"
+                            required
+                            placeholder="Apellido"
+                            value={registerLastName}
+                            onChange={(e) => setRegisterLastName(e.target.value)}
+                            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
+                          />
+                        </div>
+
+                        {registerError && (
+                          <p className="text-xs text-red-600 bg-red-50 rounded-xl p-2.5">{registerError}</p>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={registerLoading}
+                          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-3 font-bold text-sm shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98] disabled:opacity-50"
+                        >
+                          {registerLoading ? (
+                            <>
+                              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Creando cuenta...
+                            </>
+                          ) : (
+                            <>
+                              <Lock className="w-4 h-4" />
+                              Continuar al pago seguro
+                            </>
+                          )}
+                        </button>
+                      </form>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {!showRegister && (
+                <button
+                  type="button"
+                  onClick={handleShowRegister}
+                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-3.5 font-bold text-sm shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98] relative overflow-hidden group/btn animate-glow-brand"
+                >
+                  <Zap className="w-4 h-4" />Suscribirme ahora<ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                </button>
+              )}
               <div className="mt-4 flex items-center justify-center gap-1 text-[10px] text-zinc-400">
                 <Lock className="w-3 h-3 text-zinc-400" />
                 Pasarela de pago segura y privada
@@ -912,7 +894,7 @@ export function WebLandingClient({ plans }: Props) {
               </p>
               <button
                 type="button"
-                onClick={() => setShowRegister(true)}
+                onClick={handleShowRegister}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white py-4 px-8 font-extrabold text-sm shadow-xl transition-all active:scale-[0.98] hover:bg-zinc-50 animate-glow-gold"
                 style={{ color: "#6b63f3" }}
               >
