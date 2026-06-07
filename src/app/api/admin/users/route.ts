@@ -7,7 +7,7 @@ export async function GET() {
   // 1. Obtener perfiles
   const { data: profiles, error } = await supabase
     .from("profiles")
-    .select("id, email, display_name, role, avatar_url, created_at")
+    .select("id, email, display_name, role, avatar_url, created_at, is_lead")
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

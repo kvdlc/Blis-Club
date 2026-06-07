@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
-import { Plus, Edit, Trash2, Search, X, Save, Clock, Smartphone } from "lucide-react";
+import { Edit, Search, X, Save, Clock, Smartphone, Users, UserCheck, UserPlus, TrendingUp, Filter } from "lucide-react";
 
 interface User {
   id: string;
@@ -11,14 +11,18 @@ interface User {
   role: string;
   avatar_url: string;
   created_at: string;
+  is_lead: boolean;
   last_sign_in_at: string | null;
   assigned_app: { name: string; slug: string } | null;
 }
+
+type FilterType = "all" | "leads" | "clients";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<FilterType>("all");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ role: "", display_name: "" });
 
@@ -44,11 +48,22 @@ export default function UsersPage() {
 
   const roles = ["usuario", "institucion", "admin", "superadmin"];
 
-  const filtered = users.filter((u) =>
-    !search ||
-    u.email?.toLowerCase().includes(search.toLowerCase()) ||
-    u.display_name?.toLowerCase().includes(search.toLowerCase())
-  );
+  const totalUsers = users.length;
+  const totalLeads = users.filter((u) => u.is_lead).length;
+  const totalClients = users.filter((u) => !u.is_lead).length;
+  const conversionRate = totalUsers > 0 ? Math.round((totalClients / totalUsers) * 100) : 0;
+
+  const filtered = users.filter((u) => {
+    const matchesSearch = !search ||
+      u.email?.toLowerCase().includes(search.toLowerCase()) ||
+      u.display_name?.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesType = typeFilter === "all" ? true :
+      typeFilter === "leads" ? u.is_lead :
+      !u.is_lead;
+    
+    return matchesSearch && matchesType;
+  });
 
   const formatLastSignIn = (date: string | null) => {
     if (!date) return <span className="text-zinc-400 text-xs">—</span>;
@@ -69,19 +84,75 @@ export default function UsersPage() {
   return (
     <AdminGuard>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Usuarios</h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona roles, sesiones y aplicaciones</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Usuarios</h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona roles, sesiones y aplicaciones</p>
+          </div>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nombre o email..."
-            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-          />
+        {/* Stats cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="card-soft rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-lg font-extrabold text-zinc-800">{totalUsers}</p>
+              <p className="text-[10px] text-zinc-500 font-semibold uppercase">Total</p>
+            </div>
+          </div>
+          <div className="card-soft rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+              <UserPlus className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-lg font-extrabold text-zinc-800">{totalLeads}</p>
+              <p className="text-[10px] text-zinc-500 font-semibold uppercase">Leads</p>
+            </div>
+          </div>
+          <div className="card-soft rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-lg font-extrabold text-zinc-800">{totalClients}</p>
+              <p className="text-[10px] text-zinc-500 font-semibold uppercase">Clientes</p>
+            </div>
+          </div>
+          <div className="card-soft rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent-100 text-accent-600 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-lg font-extrabold text-zinc-800">{conversionRate}%</p>
+              <p className="text-[10px] text-zinc-500 font-semibold uppercase">Conversión</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nombre o email..."
+              className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            />
+          </div>
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as FilterType)}
+              className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-8 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 appearance-none cursor-pointer"
+            >
+              <option value="all">Todos</option>
+              <option value="leads">Leads</option>
+              <option value="clients">Clientes</option>
+            </select>
+          </div>
         </div>
 
         {loading ? (
@@ -95,6 +166,7 @@ export default function UsersPage() {
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Usuario</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Email</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Rol</th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Tipo</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">
                       <div className="flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" /> Última sesión
@@ -140,6 +212,17 @@ export default function UsersPage() {
                             "bg-zinc-100 text-zinc-600"
                           }`}>
                             {u.role}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {u.is_lead ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                            <UserPlus className="w-3 h-3" /> Lead
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                            <UserCheck className="w-3 h-3" /> Cliente
                           </span>
                         )}
                       </td>

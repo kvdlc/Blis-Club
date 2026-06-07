@@ -80,24 +80,31 @@ export async function POST(request: Request) {
       const periodEnd = new Date(now);
       periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-      await supabase
-        .from("subscriptions")
-        .update({
-          status: "active",
-          current_period_start: now.toISOString(),
-          current_period_end: periodEnd.toISOString(),
-          izipay_subscription_id: orderId,
-          metadata: {
-            ...((subscription.metadata as Record<string, unknown>) || {}),
-            izipay_status: "PAID",
-            izipay_webhook_received_at: new Date().toISOString(),
-            izipay_transaction_uuid: tx?.uuid || "",
-            izipay_payment_method: tx?.paymentMethodType || "",
-            izipay_card_brand: tx?.cardDetails?.brand || "",
-            izipay_card_last4: String(tx?.cardDetails?.pan || "").slice(-4),
-          },
-        })
-        .eq("id", subscription.id);
+      // Activar suscripción y convertir lead a cliente
+      await Promise.all([
+        supabase
+          .from("subscriptions")
+          .update({
+            status: "active",
+            current_period_start: now.toISOString(),
+            current_period_end: periodEnd.toISOString(),
+            izipay_subscription_id: orderId,
+            metadata: {
+              ...((subscription.metadata as Record<string, unknown>) || {}),
+              izipay_status: "PAID",
+              izipay_webhook_received_at: new Date().toISOString(),
+              izipay_transaction_uuid: tx?.uuid || "",
+              izipay_payment_method: tx?.paymentMethodType || "",
+              izipay_card_brand: tx?.cardDetails?.brand || "",
+              izipay_card_last4: String(tx?.cardDetails?.pan || "").slice(-4),
+            },
+          })
+          .eq("id", subscription.id),
+        supabase
+          .from("profiles")
+          .update({ is_lead: false })
+          .eq("id", subscription.user_id),
+      ]);
 
       if (tx?.paymentMethodToken) {
         const { data: existingToken } = await supabase
