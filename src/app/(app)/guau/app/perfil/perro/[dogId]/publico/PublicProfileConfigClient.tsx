@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { uploadDogPhoto } from "@/lib/storage";
 import {
   ArrowLeft, Check, Eye, Globe, Camera, Trash2, GripVertical,
-  Sparkles, Award, Zap, TrendingDown, Syringe, Utensils, Activity, Phone, Heart, Loader2,
+  Sparkles, Award, Zap, TrendingDown, Syringe, Utensils, Activity, Phone, Heart, Loader2, Copy,
 } from "lucide-react";
 import type { DogPublicProfile } from "@/types/database";
 
@@ -62,6 +62,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
   const [breedingDescription, setBreedingDescription] = useState(initialConfig?.breeding_description ?? "");
 
   const [saved, setSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [uploading, setUploading] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -126,6 +127,15 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
     setGalleryPhotos(arr);
   };
 
+  const shortSlug = dogId.replace(/-/g, "").substring(0, 8);
+  const shortUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/g/${shortSlug}`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shortUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="space-y-5 pb-24">
       {/* Header */}
@@ -141,6 +151,13 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
           </div>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={handleCopyLink}
+            className="flex items-center gap-1.5 text-xs font-bold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl px-3 py-2 transition-colors"
+          >
+            {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? "Copiado" : "Copiar link"}
+          </button>
           <a
             href={`/guau/perro/${dogId}`}
             target="_blank"
