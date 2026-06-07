@@ -35,7 +35,8 @@ interface SenderConfig {
 
 function buildWelcomeHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
-  const enlace = vars.enlace_acceso || `${process.env.NEXT_PUBLIC_SITE_URL}/guau/app`;
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://blis.club') || "https://blis.club";
+  const enlace = vars.enlace_acceso || `${siteUrl}/guau/app`;
   return `
   <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
     <div style="text-align:center;margin-bottom:24px;">
@@ -94,7 +95,7 @@ function buildCommissionAvailableHTML(vars: Record<string, string>): string {
       <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
       <p style="text-align:center;color:#374151;">Tu comisión de <strong>${monto}</strong> por ${referido} ya está disponible para retirar.</p>
       <div style="text-align:center;margin:32px 0;">
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/guau/app/perfil/billetera" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Ir a mi Billetera →</a>
+        <a href="${(process.env.NEXT_PUBLIC_SITE_URL || 'https://blis.club')}/guau/app/perfil/billetera" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Ir a mi Billetera →</a>
       </div>
     </div>
     <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
@@ -160,7 +161,7 @@ function buildWithdrawalFailedHTML(vars: Record<string, string>): string {
       <p style="text-align:center;color:#6b7280;font-size:14px;margin-top:16px;"><strong>Motivo:</strong> ${razon}</p>
       <p style="text-align:center;color:#374151;margin-top:16px;">El saldo ha sido devuelto a tu billetera. Puedes intentar nuevamente.</p>
       <div style="text-align:center;margin:32px 0;">
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/guau/app/perfil/billetera" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Ir a mi Billetera →</a>
+        <a href="${(process.env.NEXT_PUBLIC_SITE_URL || 'https://blis.club')}/guau/app/perfil/billetera" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Ir a mi Billetera →</a>
       </div>
     </div>
     <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
