@@ -1,126 +1,180 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { verifySignature } from "@/lib/izipay/client";
+import { verifyKRHash } from "@/lib/izipay/client";
+import type { IzipayIPNAnswer } from "@/lib/izipay/types";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const signature = request.headers.get("x-izipay-signature");
+    const raw = await request.text();
+    console.log("[Izipay Webhook] Raw body (first 300):", raw.substring(0, 300));
 
-    // TODO: Verificar firma HMAC real cuando tengamos la clave
-    const hmacKey = process.env.IZIPAY_HMAC_KEY || "";
-    const isValid = verifySignature(JSON.stringify(body), signature || "", hmacKey);
-    if (!isValid) {
-      console.warn("[IziPay Webhook] Firma inválida (esqueleto)");
-      // En producción: return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    const params = new URLSearchParams(raw);
+    const krHash = params.get("kr-hash");
+    const krAnswer = params.get("kr-answer");
+
+    if (!krHash || !krAnswer) {
+      console.error("[Izipay Webhook] Falta kr-hash o kr-answer");
+      return NextResponse.json({ error: "Faltan parámetros requeridos" }, { status: 400 });
     }
 
-    const event = body;
+    let answerData: IzipayIPNAnswer;
+    try {
+      answerData = JSON.parse(krAnswer);
+    } catch {
+      console.error("[Izipay Webhook] kr-answer no es JSON válido");
+      return NextResponse.json({ error: "kr-answer inválido" }, { status: 400 });
+    }
+
+    console.log("[Izipay Webhook] orderStatus:", answerData.orderStatus);
+
     const supabase = await createClient();
 
-    // Eventos de suscripción (creación, actualización, pago recurrente)
-    const isPaymentEvent =
-      event.type === "subscription.created" ||
-      event.type === "subscription.updated" ||
-      event.type === "subscription.payment_succeeded" ||
-      event.type === "subscription.charge.succeeded" ||
-      event.type === "payment.succeeded";
+    const { data: keys } = await supabase
+      .from("api_keys")
+      .select("key_name, key_value")
+      .eq("is_global", true)
+      .eq("key_name", "izipay_hmac_key")
+      .single();
 
-    if (isPaymentEvent) {
+    const hmacKey = keys?.key_value;
+    if (!hmacKey) {
+      console.error("[Izipay Webhook] HMAC key no configurada en api_keys");
+      return NextResponse.json({ error: "Configuración incompleta" }, { status: 500 });
+    }
+
+    const isValid = verifyKRHash(krAnswer, krHash, hmacKey);
+    if (!isValid) {
+      console.error("[Izipay Webhook] Firma HMAC inválida");
+      return NextResponse.json({ error: "Firma inválida" }, { status: 401 });
+    }
+
+    console.log("[Izipay Webhook] HMAC verificado OK");
+
+    const orderDetails = (answerData as unknown as Record<string, unknown>).orderDetails as Record<string, unknown> | undefined;
+    const customer = (answerData as unknown as Record<string, unknown>).customer as Record<string, unknown> | undefined;
+    const orderId = answerData.orderId;
+    const tx = answerData.transactions?.[0];
+    const orderStatus = answerData.orderStatus;
+
+    const referenceOrderId = orderDetails?.orderId as string || orderId;
+
+    console.log(`[Izipay Webhook] Buscando orden: ${referenceOrderId}`);
+
+    const { data: subscription } = await supabase
+      .from("subscriptions")
+      .select("id, user_id, plan_id, status, metadata")
+      .eq("id", referenceOrderId)
+      .maybeSingle();
+
+    if (!subscription) {
+      console.error(`[Izipay Webhook] Suscripción no encontrada: ${referenceOrderId}`);
+      return NextResponse.json({ error: "Suscripción no encontrada" }, { status: 404 });
+    }
+
+    console.log(`[Izipay Webhook] Suscripción ${subscription.id} encontrada, estado actual: ${subscription.status}`);
+
+    if (orderStatus === "PAID") {
+      const now = new Date();
+      const periodEnd = new Date(now);
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+      await supabase
+        .from("subscriptions")
+        .update({
+          status: "active",
+          current_period_start: now.toISOString(),
+          current_period_end: periodEnd.toISOString(),
+          izipay_subscription_id: orderId,
+          metadata: {
+            ...((subscription.metadata as Record<string, unknown>) || {}),
+            izipay_status: "PAID",
+            izipay_webhook_received_at: new Date().toISOString(),
+            izipay_transaction_uuid: tx?.uuid || "",
+            izipay_payment_method: tx?.paymentMethodType || "",
+            izipay_card_brand: tx?.cardDetails?.brand || "",
+            izipay_card_last4: String(tx?.cardDetails?.pan || "").slice(-4),
+          },
+        })
+        .eq("id", subscription.id);
+
+      if (tx?.paymentMethodToken) {
+        const { data: existingToken } = await supabase
+          .from("payment_tokens")
+          .select("id")
+          .eq("card_token", tx.paymentMethodToken)
+          .eq("user_id", subscription.user_id)
+          .maybeSingle();
+
+        if (!existingToken) {
+          await supabase.from("payment_tokens").insert({
+            user_id: subscription.user_id,
+            card_token: tx.paymentMethodToken,
+            card_brand: tx.cardDetails?.brand || "",
+            card_last4: String(tx.cardDetails?.pan || "").slice(-4),
+            card_expiry: tx.cardDetails
+              ? `${tx.cardDetails.expiryMonth || ""}/${tx.cardDetails.expiryYear || ""}`
+              : "",
+            metadata: {
+              izipay_transaction_uuid: tx.uuid,
+              izipay_order_id: orderId,
+            },
+          });
+        }
+      }
+
       const { data: plan } = await supabase
         .from("plans")
-        .select("id, name, price_cents, billing_interval")
-        .eq("izipay_price_id", event.data.plan_id)
+        .select("id, name, price_cents")
+        .eq("id", subscription.plan_id)
         .single();
 
       if (plan) {
-        const { data: user } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("email", event.data.customer_email)
+        const txAmount = tx?.amount ? Math.round(tx.amount * 100) : plan.price_cents;
+
+        const { data: paymentRecord, error: paymentErr } = await supabase
+          .from("subscription_payments")
+          .upsert({
+            user_id: subscription.user_id,
+            subscription_id: subscription.id,
+            plan_id: plan.id,
+            amount_cents: txAmount,
+            currency: tx?.currency || "USD",
+            status: "succeeded",
+            payment_method: tx?.paymentMethodType || "card",
+            description: `Suscripción ${plan.name}`,
+            izipay_transaction_id: tx?.uuid || `${orderId}_${Date.now()}`,
+            izipay_subscription_id: orderId,
+            metadata: {
+              izipay_event_type: "webhook.paid",
+              izipay_order_id: orderId,
+              izipay_card_brand: tx?.cardDetails?.brand,
+              izipay_card_last4: String(tx?.cardDetails?.pan || "").slice(-4),
+            },
+          }, { onConflict: "izipay_transaction_id" })
+          .select()
           .single();
 
-        if (user) {
-          const now = new Date();
-          const periodEnd = new Date(now);
-          if ((plan as any).billing_interval === "year") {
-            periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-          } else {
-            periodEnd.setMonth(periodEnd.getMonth() + 1);
-          }
+        if (paymentErr) {
+          console.error("[Izipay Webhook] Error saving payment:", paymentErr);
+        }
 
-          const { data: subscriptionData } = await supabase.from("subscriptions").upsert({
-            user_id: user.id,
-            plan_id: plan.id,
-            status: event.data.status ?? "active",
-            current_period_start: now.toISOString(),
-            current_period_end: periodEnd.toISOString(),
-            izipay_subscription_id: event.data.subscription_id,
-          }, { onConflict: "user_id" }).select().single();
+        const paymentId = paymentRecord?.id;
 
-          // Guardar token de tarjeta si viene
-          const tx = event.data.transactions?.[0];
-          if (tx?.paymentMethodToken) {
-            await supabase.from("payment_tokens").insert({
-              user_id: user.id,
-              card_token: tx.paymentMethodToken,
-              card_brand: tx.paymentMethodType || "",
-              card_last4: tx.cardDetails?.pan?.slice(-4) || "",
-              card_expiry: `${tx.cardDetails?.expiryMonth || ""}/${tx.cardDetails?.expiryYear || ""}`,
-            });
-          }
-
-          // 1. Guardar historial de cobro en subscription_payments
-          const txAmount = tx?.amount ? Math.round(tx.amount * 100) : plan.price_cents;
-          const txUuid = tx?.uuid || `${event.data.subscription_id}_${now.getTime()}`;
-
-          const { data: paymentRecord, error: paymentErr } = await supabase
-            .from("subscription_payments")
-            .upsert({
-              user_id: user.id,
-              subscription_id: subscriptionData?.id,
-              plan_id: plan.id,
-              amount_cents: txAmount,
-              currency: tx?.currency || "USD",
-              status: tx?.status === "PAID" || !tx?.status ? "succeeded" : tx.status.toLowerCase(),
-              payment_method: tx?.paymentMethodType || "card",
-              description: `Suscripción ${plan.name} — ${event.type}`,
-              izipay_transaction_id: txUuid,
-              izipay_subscription_id: event.data.subscription_id,
-              metadata: {
-                izipay_event_type: event.type,
-                izipay_subscription_id: event.data.subscription_id,
-                izipay_order_id: event.data.order_id,
-                raw_event: event,
-              },
-            }, { onConflict: "izipay_transaction_id" })
-            .select()
-            .single();
-
-          if (paymentErr) {
-            console.error("[IziPay Webhook] Error saving payment:", paymentErr);
-          }
-
-          const paymentId = paymentRecord?.id;
-
-          // 2. Procesar comisiones multinivel (RECURRENT: every payment generates commissions)
-          // Check if this user was referred by anyone
+        if (paymentId) {
           const { data: referral } = await supabase
             .from("referrals")
             .select("id, referrer_user_id, status, subscription_id")
-            .eq("referred_user_id", user.id)
+            .eq("referred_user_id", subscription.user_id)
             .maybeSingle();
 
           if (referral) {
-            // Update referral subscription_id on first payment
-            if (!referral.subscription_id && subscriptionData?.id) {
+            if (!referral.subscription_id && subscription.id) {
               await supabase
                 .from("referrals")
-                .update({ subscription_id: subscriptionData.id })
+                .update({ subscription_id: subscription.id })
                 .eq("id", referral.id);
             }
 
-            // Check if commissions ALREADY generated for this specific payment
             const { data: existingCommissions } = await supabase
               .from("referral_commissions")
               .select("id")
@@ -130,7 +184,7 @@ export async function POST(request: Request) {
             if (!existingCommissions || existingCommissions.length === 0) {
               const { processMultiLevelCommissions } = await import("@/lib/referrals");
               const levels = await processMultiLevelCommissions(
-                user.id,
+                subscription.user_id,
                 plan.price_cents,
                 {
                   subscriptionPaymentId: paymentId,
@@ -138,33 +192,32 @@ export async function POST(request: Request) {
                   periodEnd: periodEnd.toISOString(),
                 }
               );
-              console.log(`[IziPay Webhook] Comisiones recurrentes aplicadas niveles: ${levels.join(", ")} para usuario ${user.id}, pago ${paymentId}`);
+              console.log(`[Izipay Webhook] Comisiones procesadas niveles: ${levels.join(", ")} para pago ${paymentId}`);
 
-              // Mark payment as commission_generated
-              if (paymentId) {
-                await supabase
-                  .from("subscription_payments")
-                  .update({ commission_generated: true })
-                  .eq("id", paymentId);
-              }
+              await supabase
+                .from("subscription_payments")
+                .update({ commission_generated: true })
+                .eq("id", paymentId);
             } else {
-              console.log(`[IziPay Webhook] Comisiones YA existen para pago ${paymentId}, skipping.`);
+              console.log(`[Izipay Webhook] Comisiones ya existen para pago ${paymentId}, skipping.`);
             }
           }
         }
       }
-    }
 
-    if (event.type === "subscription.canceled") {
+      console.log(`[Izipay Webhook] Suscripción ${subscription.id} ACTIVADA`);
+    } else if (orderStatus === "UNPAID" || orderStatus === "CANCELLED") {
       await supabase
         .from("subscriptions")
-        .update({ status: "canceled" })
-        .eq("izipay_subscription_id", event.data.subscription_id);
+        .update({ status: "canceled", metadata: { ...((subscription.metadata as Record<string, unknown>) || {}), izipay_status: orderStatus } })
+        .eq("id", subscription.id);
+      console.log(`[Izipay Webhook] Suscripción ${subscription.id} CANCELADA`);
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("[IziPay Webhook] Error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("[Izipay Webhook] Error:", msg);
     return NextResponse.json({ error: "Webhook error" }, { status: 400 });
   }
 }

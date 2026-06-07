@@ -626,3 +626,12 @@ export interface ShoppingPurchase {
   created_at: string;
   store?: PurchaseStore | null;
 }
+
+export interface ApiKey {
+  id: string;
+  key_name: string;
+  key_value: string;
+  is_global: boolean;
+  created_at: string;
+  updated_at: string;
+}

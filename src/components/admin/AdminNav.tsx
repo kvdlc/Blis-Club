@@ -7,6 +7,7 @@ import {
   LayoutDashboard, GraduationCap, UtensilsCrossed, BadgeCheck,
   DollarSign, Trophy, Image, Syringe, Users,
   Globe, Settings, Shield, ChevronDown, LogOut, Mail, ArrowUpCircle,
+  Key,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -26,6 +27,7 @@ const sections = [
   { href: "/superadmin/referidos", icon: ArrowUpCircle, label: "Referidos" },
   { href: "/superadmin/configuracion", icon: Settings, label: "Configuración" },
   { href: "/superadmin/seguridad", icon: Shield, label: "Seguridad" },
+  { href: "/superadmin/api-keys", icon: Key, label: "Claves API" },
   { divider: true },
   { href: "/superadmin/aplicaciones", icon: Globe, label: "Aplicaciones", global: true },
 ];

@@ -1,107 +1,322 @@
 "use client";
 
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Loader2, CheckCircle2, AlertCircle, Shield,
+  ArrowRight, Lock, CreditCard, X
+} from "lucide-react";
+import Link from "next/link";
 
-interface Props {
+interface IzipayCheckoutProps {
   formToken: string;
   publicKey: string;
-  onSuccess: () => void;
-  onError: (msg: string) => void;
-  onClose: () => void;
+  orderId: string;
+  totalLabel: string;
+  displayMode?: 'popup' | 'embedded';
+  onSuccess?: () => void;
+  onError?: (msg: string) => void;
+  onClose?: () => void;
+  successRedirect?: string;
+  successCtaLabel?: string;
+  isModal?: boolean;
 }
 
-export default function IzipayCheckout({ formToken, publicKey, onSuccess, onError, onClose }: Props) {
-  const [loading, setLoading] = useState(true);
+type FormState = 'loading' | 'ready' | 'processing' | 'success' | 'error';
+
+export default function IzipayCheckout({
+  formToken,
+  publicKey,
+  orderId,
+  totalLabel,
+  displayMode = 'popup',
+  onSuccess,
+  onError,
+  onClose,
+  successRedirect = "/guau/app",
+  successCtaLabel = "Ir a la App",
+  isModal = true,
+}: IzipayCheckoutProps) {
+  const [formState, setFormState] = useState<FormState>('loading');
+  const [errorMsg, setErrorMsg] = useState('');
+  const krContainerId = useRef(`kr-container-${Math.random().toString(36).slice(2)}`).current;
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    if (initializedRef.current || typeof window === 'undefined') return;
+    initializedRef.current = true;
+
+    let container = document.getElementById(krContainerId);
+    if (!container) {
+      container = document.createElement('div');
+      container.id = krContainerId;
+      container.style.width = '100%';
+      container.style.minHeight = displayMode === 'embedded' ? '500px' : '0';
+      if (displayMode === 'popup') {
+        container.style.height = '0';
+        container.style.overflow = 'hidden';
+      }
+      const parent = document.getElementById('kr-root-anchor');
+      if (parent) parent.appendChild(container);
+    }
+
+    const krDiv = document.createElement('div');
+    krDiv.className = 'kr-embedded';
+    krDiv.setAttribute('kr-form-token', formToken);
+    krDiv.setAttribute('kr-public-key', publicKey);
+    krDiv.setAttribute('kr-language', 'es-ES');
+    krDiv.style.width = '100%';
+    krDiv.style.minHeight = displayMode === 'embedded' ? '500px' : '0';
+    container.appendChild(krDiv);
+
+    const loadScript = () => {
+      const script = document.createElement('script');
+      const baseUrl = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
+      script.src = displayMode === 'embedded'
+        ? `${baseUrl}?mode=embedded&container=.kr-embedded`
+        : `${baseUrl}?mode=popup`;
+      script.async = true;
+      script.onload = () => {
+        let attempts = 0;
+        const wait = () => {
+          attempts++;
+          if (window.KR) {
+            try { window.KR.setFormToken?.(formToken); } catch { /* ignore */ }
+
+            window.KR.onFormReady(() => setFormState('ready'));
+            window.KR.onSubmit((response) => {
+              console.log('[KR] onSubmit:', orderId, response?.clientAnswer?.orderStatus);
+              const st = response?.clientAnswer?.orderStatus;
+              if (st === 'PAID') {
+                setFormState('success');
+                onSuccess?.();
+              } else {
+                setFormState('error');
+                setErrorMsg(st ? `Pago rechazado (${st})` : 'El pago fue rechazado.');
+              }
+              return true;
+            });
+            window.KR.onError((error) => {
+              setFormState('error');
+              setErrorMsg(error?.message || 'Error en la pasarela de pago.');
+              onError?.(error?.message || 'Error en la pasarela de pago.');
+              return true;
+            });
+            setTimeout(() => { if (formState === 'loading') setFormState('ready'); }, 10000);
+          } else if (attempts < 30) {
+            setTimeout(wait, 300);
+          } else {
+            setFormState('error');
+            setErrorMsg('La pasarela no respondió. Intenta de nuevo.');
+          }
+        };
+        wait();
+      };
+      script.onerror = () => {
+        setFormState('error');
+        setErrorMsg('Error al cargar el SDK de pago.');
+      };
+      document.head.appendChild(script);
+    };
+
+    loadScript();
+
+    return () => {
+      try { window.KR?.removeForms(); } catch { /* ignore */ }
+    };
+  }, []);
+
+  const cardBrands = ['visa', 'mastercard', 'amex', 'diners'];
+
+  const headerBar = (
+    <div className="flex items-center justify-between p-5">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg shadow-primary-500/25">
+          <CreditCard className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <p className="font-extrabold text-zinc-800 text-sm">Blis Bank</p>
+          <p className="text-[10px] text-zinc-400 font-medium">Pasarela de pago segura</p>
+        </div>
+      </div>
+      {isModal && onClose && (
+        <button onClick={onClose} className="w-9 h-9 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center transition-colors">
+          <X className="w-4 h-4 text-zinc-500" />
+        </button>
+      )}
+    </div>
+  );
+
+  const trustBar = (
+    <div className="flex items-center justify-center gap-3 px-5 pb-2">
+      <span className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
+        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> SSL 256-bit
+      </span>
+      <span className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
+        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> PCI-DSS L1
+      </span>
+      <div className="flex items-center gap-1.5 ml-2">
+        {cardBrands.map((brand) => (
+          <div key={brand} className="w-5 h-3.5 rounded bg-zinc-200 opacity-40" title={brand} />
+        ))}
+      </div>
+    </div>
+  );
+
+  const confidenceFooter = (
+    <div className="flex items-center justify-center gap-6 py-3 border-t border-zinc-100">
+      <span className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+        <Shield className="w-3 h-3" /> E2E Encryption
+      </span>
+      <span className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Pago instantáneo
+      </span>
+      <span className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+        <Lock className="w-3 h-3" /> Respaldo bancario
+      </span>
+    </div>
+  );
+
+  const content = (
+    <>
+      <AnimatePresence mode="wait">
+        {formState === 'loading' && (
+          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-5 pb-8 space-y-5">
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <div className="h-3 w-20 bg-zinc-100 rounded-full animate-pulse" />
+                <div className="h-12 bg-zinc-100 rounded-2xl animate-pulse" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <div className="h-3 w-16 bg-zinc-100 rounded-full animate-pulse" />
+                  <div className="h-12 bg-zinc-100 rounded-2xl animate-pulse" />
+                </div>
+                <div className="space-y-1.5">
+                  <div className="h-3 w-12 bg-zinc-100 rounded-full animate-pulse" />
+                  <div className="h-12 bg-zinc-100 rounded-2xl animate-pulse" />
+                </div>
+              </div>
+              <div className="h-14 bg-zinc-100 rounded-2xl animate-pulse" />
+            </div>
+            <div className="flex items-center justify-center gap-3 py-2">
+              <Loader2 className="w-5 h-5 text-primary-500 animate-spin" />
+              <p className="text-sm text-zinc-400 font-medium">Conectando con la pasarela de pago...</p>
+            </div>
+          </motion.div>
+        )}
+
+        {formState === 'ready' && displayMode === 'popup' && (
+          <motion.div key="ready-popup" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="px-5 pb-8 text-center">
+            <div className="py-6 space-y-5">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-primary-50 border border-primary-100 flex items-center justify-center">
+                <Shield className="w-8 h-8 text-primary-500" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-black text-zinc-800">Verificación de pago</h3>
+                <p className="text-sm text-zinc-400 max-w-sm mx-auto">Se abrirá una ventana emergente con el formulario de pago seguro de Izipay.</p>
+                {totalLabel && (
+                  <p className="text-xs text-zinc-500 font-medium">{totalLabel}</p>
+                )}
+              </div>
+              <div className="inline-flex gap-2 px-4 py-2 bg-primary-50 border border-primary-100 rounded-full">
+                <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse mt-1" />
+                <span className="text-xs text-primary-600 font-bold">Esperando pasarela...</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {formState === 'ready' && displayMode === 'embedded' && (
+          <motion.div key="ready-embedded" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5 pb-4">
+            <div className="border-t border-zinc-100 pt-4 mt-2">
+              <div className="flex items-center justify-center gap-2 text-xs text-zinc-400">
+                <Lock className="w-3 h-3" />
+                <span>Tus datos están protegidos con encriptación de extremo a extremo</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {formState === 'processing' && (
+          <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-5 pb-8 text-center py-8">
+            <Loader2 className="w-8 h-8 text-primary-500 animate-spin mx-auto mb-4" />
+            <p className="text-zinc-600 font-medium">Procesando tu pago...</p>
+            <p className="text-xs text-zinc-400 mt-1">No cierres esta ventana</p>
+          </motion.div>
+        )}
+
+        {formState === 'success' && (
+          <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ type: "spring", bounce: 0.4 }} className="px-5 pb-8 text-center py-10">
+            <motion.div initial={{ scale: 0, rotate: -15 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", bounce: 0.5, delay: 0.05 }} className="relative mx-auto mb-8 w-28 h-28">
+              <div className="absolute inset-0 bg-emerald-400/20 rounded-[2rem] blur-2xl animate-pulse" />
+              <div className="relative w-full h-full bg-emerald-100 border-2 border-emerald-200 rounded-3xl flex items-center justify-center shadow-[0_0_60px_rgba(16,185,129,0.15)]">
+                <CheckCircle2 className="w-14 h-14 text-emerald-500" />
+              </div>
+            </motion.div>
+            <div className="space-y-3 mb-10">
+              <h3 className="text-3xl font-black text-zinc-800">¡Suscripción Activada!</h3>
+              <p className="text-zinc-500">Hemos procesado tu suscripción{totalLabel ? ` por ${totalLabel}` : ''}.</p>
+              <div className="inline-flex gap-2 px-4 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1" />
+                <span className="text-xs text-emerald-700 font-medium">Pago confirmado</span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Link href={successRedirect} className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-black uppercase text-sm rounded-2xl transition-all shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 group">
+                {successCtaLabel} <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+          </motion.div>
+        )}
+
+        {formState === 'error' && (
+          <motion.div key="error" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="px-5 pb-8 text-center py-10">
+            <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-red-400" />
+            </div>
+            <h3 className="text-xl font-black text-zinc-800 mb-2">Pago no completado</h3>
+            <p className="text-sm text-zinc-500 mb-8 max-w-sm mx-auto">{errorMsg || 'No se pudo procesar el pago.'}</p>
+            <div className="space-y-3">
+              <button onClick={() => window.location.reload()} className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-primary-500/25">
+                <Shield className="w-4 h-4" /> Reintentar Pago
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div id="kr-root-anchor" className="w-full" />
+    </>
+  );
+
+  if (!isModal) {
+    return (
+      <div className="bg-white rounded-3xl shadow-xl border border-zinc-100 overflow-hidden">
+        {headerBar}
+        {trustBar}
+        {content}
+        {confidenceFooter}
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
-              <span className="text-white font-bold text-xs">B</span>
-            </div>
-            <span className="font-bold text-sm text-zinc-800 dark:text-zinc-200">Pago seguro con IziPay</span>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden"
+      >
+        {headerBar}
+        {trustBar}
+        <div className="flex-1 overflow-y-auto">
+          {content}
         </div>
-
-        {/* Form container */}
-        <div className="flex-1 overflow-y-auto p-4 bg-[#f1f2f4] dark:bg-zinc-800/50">
-          <div
-            className="kr-embedded"
-            data-kr-form-token={formToken}
-            data-kr-public-key={publicKey}
-            data-kr-language="es-ES"
-          >
-            <div className="kr-pan" />
-            <div className="kr-expiry" />
-            <div className="kr-security-code" />
-            <button className="kr-payment-button" />
-            <div className="kr-form-error" />
-          </div>
-          {loading && (
-            <div className="text-center py-8 text-zinc-500 text-sm">
-              Cargando formulario seguro...
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 text-center">
-          <p className="text-[10px] text-zinc-400">
-            Tus datos de tarjeta están protegidos por IziPay. No almacenamos información de pago.
-          </p>
-        </div>
-      </div>
-
-      {/* Script loader */}
-      <IzipayScriptLoader
-        publicKey={publicKey}
-        onReady={() => setLoading(false)}
-        onSuccess={onSuccess}
-        onError={onError}
-      />
+        {confidenceFooter}
+      </motion.div>
     </div>
-  );
-}
-
-function IzipayScriptLoader({
-  publicKey,
-  onReady,
-  onSuccess,
-  onError,
-}: {
-  publicKey: string;
-  onReady: () => void;
-  onSuccess: () => void;
-  onError: (msg: string) => void;
-}) {
-  // Este componente inyecta el script del SDK de IziPay
-  // En producción, usará el script real de Micuentaweb
-
-  return (
-    <script
-      dangerouslySetInnerHTML={{
-        __html: `
-          (function() {
-            if (window.KR_READY) return;
-            window.KR_READY = true;
-            console.warn("[IziPay] SDK esqueleto cargado. Falta script real de Micuentaweb.");
-            setTimeout(() => { window.dispatchEvent(new Event("kr-ready")); }, 500);
-          })();
-          window.addEventListener("kr-ready", function() {
-            // onReady callback simulado
-          });
-        `,
-      }}
-    />
   );
 }

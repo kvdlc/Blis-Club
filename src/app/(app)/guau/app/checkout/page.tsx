@@ -12,6 +12,8 @@ export default function CheckoutPage() {
 
   const [formToken, setFormToken] = useState("");
   const [publicKey, setPublicKey] = useState("");
+  const [orderId, setOrderId] = useState("");
+  const [displayMode, setDisplayMode] = useState<"popup" | "embedded">("popup");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -21,17 +23,18 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Crear orden en backend y obtener formToken
     fetch("/api/izipay/create-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planId }),
+      body: JSON.stringify({ planId, appId: "guau" }),
     })
       .then((r) => r.json())
       .then((data) => {
         if (data.formToken) {
           setFormToken(data.formToken);
           setPublicKey(data.publicKey || "");
+          setOrderId(data.orderId || "");
+          setDisplayMode(data.displayMode || "popup");
         } else {
           setError(data.error || "No se pudo iniciar el pago");
         }
@@ -76,11 +79,26 @@ export default function CheckoutPage() {
       <IzipayCheckout
         formToken={formToken}
         publicKey={publicKey}
-        onSuccess={() => {
+        orderId={orderId}
+        totalLabel="$9.99/mes"
+        displayMode={displayMode}
+        onSuccess={async () => {
+          if (orderId) {
+            try {
+              await fetch("/api/izipay/confirm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId }),
+              });
+            } catch { /* webhook handles it */ }
+          }
           router.push("/guau/app?payment=success");
         }}
         onError={(msg) => setError(msg)}
         onClose={() => router.push("/guau/app/suscripcion")}
+        successRedirect="/guau/app"
+        successCtaLabel="Ir a la App"
+        isModal={true}
       />
     </div>
   );

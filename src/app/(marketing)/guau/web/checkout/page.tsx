@@ -20,44 +20,41 @@ function CheckoutContent() {
 
   const [formToken, setFormToken] = useState("");
   const [publicKey, setPublicKey] = useState("");
+  const [orderId, setOrderId] = useState("");
+  const [displayMode, setDisplayMode] = useState<"popup" | "embedded">("popup");
   const [paymentLoading, setPaymentLoading] = useState(true);
   const [paymentError, setPaymentError] = useState("");
 
   const supabase = createClient();
 
-  // Check if user is already authenticated (e.g. returned from magic link)
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setStep("payment");
-      }
+      if (user) setStep("payment");
     });
   }, []);
 
-  // Listen for auth state changes (magic link callback sets session)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") {
-        setStep("payment");
-      }
+      if (event === "SIGNED_IN") setStep("payment");
     });
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch formToken when entering payment step
   useEffect(() => {
     if (step !== "payment") return;
     setPaymentLoading(true);
     fetch("/api/izipay/create-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planId }),
+      body: JSON.stringify({ planId, appId: "guau" }),
     })
       .then((r) => r.json())
       .then((data) => {
         if (data.formToken) {
           setFormToken(data.formToken);
           setPublicKey(data.publicKey || "");
+          setOrderId(data.orderId || "");
+          setDisplayMode(data.displayMode || "popup");
         } else {
           setPaymentError(data.error || "No se pudo iniciar el pago");
         }
@@ -84,7 +81,6 @@ function CheckoutContent() {
     setAuthLoading(false);
   };
 
-  // ═══ Auth step ═══
   if (step === "auth") {
     return (
       <div className="min-h-[100dvh] bg-primary-50 flex items-center justify-center px-4">
@@ -94,11 +90,11 @@ function CheckoutContent() {
           </Link>
 
           {magicSent ? (
-            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 text-center space-y-4 shadow-xl border border-primary-100">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-secondary-100 dark:bg-secondary-900 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-secondary-600" />
+            <div className="bg-white rounded-3xl p-8 text-center space-y-4 shadow-xl border border-primary-100">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-100 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-emerald-600" />
               </div>
-              <h2 className="text-xl font-extrabold text-zinc-900 dark:text-white">¡Magic Link enviado!</h2>
+              <h2 className="text-xl font-extrabold text-zinc-800">Magic Link enviado</h2>
               <p className="text-sm text-zinc-500">
                 Revisa <span className="font-semibold text-zinc-700">{email}</span>. Te enviamos un enlace mágico para continuar con tu compra.
               </p>
@@ -107,10 +103,10 @@ function CheckoutContent() {
               </p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-xl border border-primary-100 space-y-6">
+            <div className="bg-white rounded-3xl p-8 shadow-xl border border-primary-100 space-y-6">
               <div className="text-center">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-extrabold text-lg mx-auto mb-4">B</div>
-                <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Casi listo</h1>
+                <h1 className="text-2xl font-extrabold text-zinc-800">Casi listo</h1>
                 <p className="text-sm text-zinc-500 mt-2">
                   Ingresa tu correo para continuar al pago seguro.
                 </p>
@@ -145,7 +141,7 @@ function CheckoutContent() {
                 </div>
 
                 {authError && (
-                  <p className="text-sm text-danger-600 bg-danger-50 rounded-xl p-3">{authError}</p>
+                  <p className="text-sm text-red-600 bg-red-50 rounded-xl p-3">{authError}</p>
                 )}
 
                 <button
@@ -173,22 +169,19 @@ function CheckoutContent() {
     );
   }
 
-  // ═══ Payment step ═══
   return (
-    <div className="min-h-[100dvh] bg-primary-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <Link href="/guau/web" className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-primary-600 mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Volver
-        </Link>
-
-        {paymentLoading ? (
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-12 text-center space-y-4 shadow-xl border border-primary-100">
+    <div className="min-h-[100dvh] bg-primary-50">
+      {paymentLoading ? (
+        <div className="flex items-center justify-center min-h-[100dvh]">
+          <div className="bg-white rounded-3xl p-12 text-center space-y-4 shadow-xl border border-primary-100">
             <Loader2 className="w-8 h-8 text-primary-500 animate-spin mx-auto" />
             <p className="text-sm text-zinc-500">Preparando tu pago seguro...</p>
           </div>
-        ) : paymentError ? (
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 text-center space-y-4 shadow-xl border border-danger-100">
-            <p className="text-sm text-danger-600 font-semibold">{paymentError}</p>
+        </div>
+      ) : paymentError ? (
+        <div className="flex items-center justify-center min-h-[100dvh] px-4">
+          <div className="bg-white rounded-3xl p-8 text-center space-y-4 shadow-xl border border-red-100 max-w-md w-full">
+            <p className="text-sm text-red-600 font-semibold">{paymentError}</p>
             <button
               onClick={() => router.push("/guau/web")}
               className="flex items-center gap-2 mx-auto text-sm text-primary-600 font-semibold"
@@ -196,18 +189,33 @@ function CheckoutContent() {
               <ArrowLeft className="w-4 h-4" /> Volver al inicio
             </button>
           </div>
-        ) : (
-          <IzipayCheckout
-            formToken={formToken}
-            publicKey={publicKey}
-            onSuccess={() => {
-              router.push("/guau/web?payment=success");
-            }}
-            onError={(msg) => setPaymentError(msg)}
-            onClose={() => router.push("/guau/web")}
-          />
-        )}
-      </div>
+        </div>
+      ) : (
+        <IzipayCheckout
+          formToken={formToken}
+          publicKey={publicKey}
+          orderId={orderId}
+          totalLabel="$9.99/mes"
+          displayMode={displayMode}
+          onSuccess={async () => {
+            if (orderId) {
+              try {
+                await fetch("/api/izipay/confirm", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ orderId }),
+                });
+              } catch { /* webhook handles it anyway */ }
+            }
+            setTimeout(() => router.push("/guau/web?payment=success"), 1500);
+          }}
+          onError={(msg) => setPaymentError(msg)}
+          onClose={() => router.push("/guau/web")}
+          successRedirect="/guau/app"
+          successCtaLabel="Ir a la App"
+          isModal={true}
+        />
+      )}
     </div>
   );
 }
