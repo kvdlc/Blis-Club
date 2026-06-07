@@ -2,10 +2,17 @@
 
 import Link from "next/link";
 import { Play } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Props {
   isLost?: boolean;
 }
+
+const SPA_TABS: Record<string, string> = {
+  paseo: "tracker",
+  perdido: "perdido",
+  comida: "nutricion",
+};
 
 const TOOLS = [
   {
@@ -111,6 +118,15 @@ const TOOLS = [
 ];
 
 export default function QuickToolsCarousel({ isLost = false }: Props) {
+  const router = useRouter();
+  const handleClick = (e: React.MouseEvent, tool: typeof TOOLS[0]) => {
+    const spaTab = SPA_TABS[tool.key];
+    if (spaTab && (window as any).__blisSetTab) {
+      e.preventDefault();
+      (window as any).__blisSetTab(spaTab);
+    }
+  };
+
   return (
     <div>
       {/* Mobile: horizontal scroll */}
@@ -128,6 +144,7 @@ export default function QuickToolsCarousel({ isLost = false }: Props) {
             <Link
               key={tool.key}
               href={tool.href}
+              onClick={(e) => handleClick(e, tool)}
               className={`flex flex-col items-center gap-2 min-w-[72px] snap-start transition-transform active:scale-95`}
             >
               <div
@@ -173,6 +190,7 @@ export default function QuickToolsCarousel({ isLost = false }: Props) {
             <Link
               key={tool.key}
               href={tool.href}
+              onClick={(e) => handleClick(e, tool)}
               className={`flex flex-col items-center gap-2 transition-transform active:scale-95`}
             >
               <div

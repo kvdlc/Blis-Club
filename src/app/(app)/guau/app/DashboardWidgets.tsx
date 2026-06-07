@@ -2,6 +2,18 @@
 
 import Link from "next/link";
 import { Flame, UtensilsCrossed, GraduationCap, ShieldCheck, Pill, Clock, AlertTriangle, ArrowRight } from "lucide-react";
+
+/* Link SPA interno: usa el sistema de tabs sin navegación completa */
+function SPAButton({ tab, children, className }: { tab: string; children: React.ReactNode; className: string }) {
+  return (
+    <button
+      onClick={() => { if ((window as any).__blisSetTab) (window as any).__blisSetTab(tab); }}
+      className={className}
+    >
+      {children}
+    </button>
+  );
+}
 import type { DogVaccine, DogMedication, DogMedicationLog } from "@/types/database";
 import { VACCINES } from "@/lib/vaccines-wiki";
 import { useDisabledVaccines } from "@/lib/use-disabled-vaccines";
@@ -143,14 +155,14 @@ export function DashboardWidgets({
 
       <div className="grid grid-cols-2 gap-3">
         {/* ═══ 1. Academia — ring gauge ═══ */}
-        <Link href="/guau/app/academia" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
+        <SPAButton tab="academia" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
           <RingGauge pct={academyPct} color="text-accent-500" darkColor="text-accent-400" />
           <p className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300">Academia</p>
           <span className="text-[10px] text-zinc-400 truncate max-w-full">{academyCompleted}/{academyTotal} lecciones</span>
-        </Link>
+        </SPAButton>
 
         {/* ═══ 2. Calma — segmented ring ═══ */}
-        <Link href="/guau/app/tracker" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
+        <SPAButton tab="tracker" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
           <div className="relative w-16 h-16">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 64 64">
               <circle cx="32" cy="32" r={calmaR} fill="none" stroke="currentColor" strokeWidth="5" className="text-zinc-200 dark:text-zinc-700" />
@@ -177,17 +189,17 @@ export function DashboardWidgets({
             <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-warning-400" />{yellowPct}%</span>
             <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-danger-400" />{redPct}%</span>
           </div>
-        </Link>
+        </SPAButton>
 
         {/* ═══ 3. Gramos — ring gauge ═══ */}
-        <Link href="/guau/app/nutricion" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
+        <SPAButton tab="nutricion" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
           <RingGauge pct={gramsPct} color="text-primary-500" darkColor="text-primary-400" />
           <div className="text-center max-w-full">
             <span className="text-base font-extrabold text-primary-600 dark:text-primary-400 truncate">{gramsEaten}g</span>
             <span className="text-[10px] text-zinc-400"> / {gramsTarget}g</span>
           </div>
           <span className="text-[10px] text-zinc-400">Comida hoy</span>
-        </Link>
+        </SPAButton>
 
         {/* ═══ 4. Vacunas — ring gauge ═══ */}
         <Link href="/guau/app/tracker/salud" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
