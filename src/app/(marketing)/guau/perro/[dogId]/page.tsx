@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: { params: Promise<{ dogId: st
   const baseUrl = `${protocol}://${host}`;
   const profileUrl = `${baseUrl}/guau/perro/${dog.id}`;
   const edadTexto = getEdadTexto(dog.edad_meses);
-  const photoUrl = dog.poster_photo_url || dog.foto_url || dog.breed_image_url;
+  const photoUrl = dog.foto_url || dog.poster_photo_url || dog.breed_image_url;
 
   const title = dog.is_lost
     ? `🚨 ${dog.nombre} está perdido | Blis Club`

@@ -6,6 +6,7 @@ import { PosterCanvas } from "./PosterCanvas";
 import { POSTER_FIELDS } from "@/lib/poster";
 import { ensureShortLink, getShortUrl } from "@/lib/shorten";
 import { createClient } from "@/lib/supabase/client";
+import { compressImage } from "@/lib/image-compression";
 import { Download, Share2, Camera, Loader2 } from "lucide-react";
 import type { Dog } from "@/types/database";
 
@@ -102,10 +103,12 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    const compressed = await compressImage(file);
+
     const fileName = `posters/${user?.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
     const { data, error } = await supabase.storage
       .from("dog-photos")
-      .upload(fileName, file, { upsert: true, contentType: file.type || "image/jpeg" });
+      .upload(fileName, compressed, { upsert: true, contentType: "image/jpeg" });
 
     if (!error && data) {
       const { data: urlData } = supabase.storage.from("dog-photos").getPublicUrl(data.path);
