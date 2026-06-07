@@ -2,10 +2,21 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
-import { Plus, Edit, Trash2, Search, X, Save } from "lucide-react";
+import { Plus, Edit, Trash2, Search, X, Save, Clock, Smartphone } from "lucide-react";
+
+interface User {
+  id: string;
+  email: string;
+  display_name: string;
+  role: string;
+  avatar_url: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+  assigned_app: { name: string; slug: string } | null;
+}
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -39,12 +50,28 @@ export default function UsersPage() {
     u.display_name?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const formatLastSignIn = (date: string | null) => {
+    if (!date) return <span className="text-zinc-400 text-xs">—</span>;
+    const d = new Date(date);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return <span className="text-emerald-600 text-xs font-semibold">Ahora</span>;
+    if (diffMins < 60) return <span className="text-emerald-600 text-xs font-semibold">Hace {diffMins}m</span>;
+    if (diffHours < 24) return <span className="text-emerald-600 text-xs">Hace {diffHours}h</span>;
+    if (diffDays < 7) return <span className="text-zinc-500 text-xs">Hace {diffDays}d</span>;
+    return <span className="text-zinc-400 text-xs">{d.toLocaleDateString()}</span>;
+  };
+
   return (
     <AdminGuard>
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Usuarios</h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona roles y permisos</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona roles, sesiones y aplicaciones</p>
         </div>
 
         <div className="relative">
@@ -68,6 +95,16 @@ export default function UsersPage() {
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Usuario</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Email</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Rol</th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" /> Última sesión
+                      </div>
+                    </th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">
+                      <div className="flex items-center gap-1">
+                        <Smartphone className="w-3.5 h-3.5" /> App
+                      </div>
+                    </th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Registro</th>
                     <th className="px-4 py-3" />
                   </tr>
@@ -104,6 +141,18 @@ export default function UsersPage() {
                           }`}>
                             {u.role}
                           </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {formatLastSignIn(u.last_sign_in_at)}
+                      </td>
+                      <td className="px-4 py-3">
+                        {u.assigned_app ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-primary-50 text-primary-700">
+                            <Smartphone className="w-3 h-3" /> {u.assigned_app.name}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-400">—</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-xs text-zinc-400">

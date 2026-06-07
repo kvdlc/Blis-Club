@@ -7,7 +7,7 @@ import {
   LayoutDashboard, GraduationCap, UtensilsCrossed, BadgeCheck,
   DollarSign, Trophy, Image, Syringe, Users,
   Globe, Settings, Shield, ChevronDown, LogOut, Mail, ArrowUpCircle,
-  Key,
+  Key, ShoppingCart, Package,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -20,6 +20,8 @@ const sections = [
   { href: "/superadmin/vacunas", icon: Syringe, label: "Vacunas" },
   { href: "/superadmin/badges", icon: BadgeCheck, label: "Badges" },
   { href: "/superadmin/planes", icon: DollarSign, label: "Planes" },
+  { href: "/superadmin/productos", icon: Package, label: "Productos" },
+  { href: "/superadmin/compras", icon: ShoppingCart, label: "Compras" },
   { href: "/superadmin/desafios", icon: Trophy, label: "Desafíos" },
   { href: "/superadmin/imagenes", icon: Image, label: "Imágenes" },
   { divider: true },
