@@ -130,13 +130,14 @@ function TrackerTab({ dog, userId, preloaded }: { dog: Dog | null; userId: strin
     if (data || !dog) return;
     (async () => {
       const supabase = createClient();
-      const [w, ad, ag, v] = await Promise.all([
+      const [w, ad, ag, v, st] = await Promise.all([
         supabase.from("walks").select("*").eq("dog_id", dog.id).order("start_time", { ascending: false }).limit(60),
         supabase.from("dogs").select("*").eq("owner_id", userId),
         supabase.from("agility_sessions").select("id, activity_type, duration_min, circuit_time_seconds, fecha").eq("dog_id", dog.id).order("fecha", { ascending: false }).limit(20),
         supabase.from("dog_vaccines").select("*").eq("dog_id", dog.id).order("created_at", { ascending: false }),
+        supabase.from("user_streaks").select("*").eq("user_id", userId).eq("streak_type", "walk").maybeSingle(),
       ]);
-      setData({ walks: w.data ?? [], allDogs: ad.data ?? [], agilitySessions: ag.data ?? [], vaccines: v.data ?? [] });
+      setData({ walks: w.data ?? [], allDogs: ad.data ?? [], agilitySessions: ag.data ?? [], vaccines: v.data ?? [], streakDays: (st.data as any)?.current_streak ?? 0 });
       setLoading(false);
     })();
   }, [dog?.id, userId, data]);
@@ -144,7 +145,7 @@ function TrackerTab({ dog, userId, preloaded }: { dog: Dog | null; userId: strin
   if (loading) return <TabSkeleton />;
   if (!data) return <p className="text-zinc-500 text-center py-8">Registrá un perro primero.</p>;
 
-  return <TrackerClient walks={data.walks} dog={dog} allDogs={data.allDogs} agilitySessions={data.agilitySessions} streakDays={0} userId={userId} vaccines={data.vaccines} />;
+  return <TrackerClient walks={data.walks} dog={dog} allDogs={data.allDogs} agilitySessions={data.agilitySessions} streakDays={data.streakDays} userId={userId} vaccines={data.vaccines} />;
 }
 
 /* ═══════════════════════════ Perdido ═══════════════════════ */
