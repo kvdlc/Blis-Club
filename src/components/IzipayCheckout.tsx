@@ -395,7 +395,7 @@ function injectKRGlueStyles(styleId: string) {
       font-family: inherit !important;
       transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
       outline: none !important;
-      margin: 0 !important;
+      margin: 0 0 0.75rem 0 !important;
       position: relative !important;
       cursor: pointer !important;
       display: flex !important;
@@ -409,7 +409,21 @@ function injectKRGlueStyles(styleId: string) {
       appearance: none !important;
     }
 
-    /* Ocultar flechas nativas del SDK en selects */
+    /* Ocultar flecha SVG negra del SDK dentro de selects */
+    .kr-embedded .kr-select svg,
+    .kr-embedded .kr-select .kr-caret,
+    .kr-embedded .kr-select .kr-arrow-icon,
+    .kr-embedded select svg,
+    .kr-embedded select .kr-caret,
+    .kr-embedded select .kr-arrow-icon {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    /* Ocultar pseudo-flechas nativas del SDK en selects */
     .kr-embedded .kr-select::after,
     .kr-embedded select::after,
     .kr-embedded .kr-select .kr-arrow,
@@ -423,7 +437,8 @@ function injectKRGlueStyles(styleId: string) {
     .kr-embedded > div:has(iframe),
     .kr-embedded .kr-pan,
     .kr-embedded .kr-expiry,
-    .kr-embedded .kr-cvv {
+    .kr-embedded .kr-cvv,
+    .kr-embedded .kr-security-code {
       background: #ffffff !important;
       border: 1.5px solid #e4e4e7 !important;
       border-radius: 0.875rem !important;
@@ -434,8 +449,22 @@ function injectKRGlueStyles(styleId: string) {
       box-sizing: border-box !important;
     }
 
+    /* MM/AA y CVV lado a lado */
+    .kr-embedded .kr-expiry,
+    .kr-embedded .kr-security-code {
+      display: inline-block !important;
+      width: calc(50% - 0.375rem) !important;
+      vertical-align: top !important;
+    }
+    .kr-embedded .kr-security-code {
+      margin-left: 0.75rem !important;
+    }
+
     /* Todos los iframes dentro del form */
-    .kr-embedded iframe {
+    .kr-embedded iframe,
+    .kr-embedded .kr-expiry iframe,
+    .kr-embedded .kr-security-code iframe,
+    .kr-embedded .kr-cvv iframe {
       width: 100% !important;
       height: 2.75rem !important;
       border: none !important;
