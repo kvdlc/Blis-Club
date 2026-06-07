@@ -403,7 +403,8 @@ function injectKRGlueStyles(styleId: string) {
       background-size: 1rem !important;
     }
 
-    /* Contenedores de campos con iframe (tarjeta, fecha, CVV) — PCI-DSS */
+    /* Contenedores de campos con iframe — captura cualquier div con iframe (incluye CVV dinámico) */
+    .kr-embedded > div:has(iframe),
     .kr-embedded .kr-pan,
     .kr-embedded .kr-expiry,
     .kr-embedded .kr-cvv {
@@ -415,9 +416,8 @@ function injectKRGlueStyles(styleId: string) {
       overflow: hidden !important;
     }
 
-    .kr-embedded .kr-pan iframe,
-    .kr-embedded .kr-expiry iframe,
-    .kr-embedded .kr-cvv iframe {
+    /* Todos los iframes dentro del form */
+    .kr-embedded iframe {
       width: 100% !important;
       height: 4.5rem !important;
       border: none !important;
