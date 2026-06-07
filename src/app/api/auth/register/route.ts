@@ -42,8 +42,35 @@ export async function POST(request: Request) {
 
     if (existing) {
       userId = existing.id;
-      // Actualizar contraseña del usuario existente
+      // Usuario existente: solo actualizar metadata, NO tocar password
       await serviceClient.auth.admin.updateUserById(existing.id, {
+        email_confirm: true,
+        user_metadata: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+        },
+      });
+
+      // Actualizar profiles
+      await serviceClient
+        .from("profiles")
+        .update({
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+        })
+        .eq("id", userId);
+
+      return NextResponse.json({
+        success: true,
+        existing: true,
+        message: "Ya tienes una cuenta. Por favor inicia sesión para continuar.",
+      });
+    }
+
+    // Crear nuevo usuario
+    const { data: newUser, error: createError } =
+      await serviceClient.auth.admin.createUser({
+        email: normalizedEmail,
         password,
         email_confirm: true,
         user_metadata: {
@@ -51,29 +78,16 @@ export async function POST(request: Request) {
           last_name: lastName.trim(),
         },
       });
-    } else {
-      // Crear nuevo usuario
-      const { data: newUser, error: createError } =
-        await serviceClient.auth.admin.createUser({
-          email: normalizedEmail,
-          password,
-          email_confirm: true,
-          user_metadata: {
-            first_name: firstName.trim(),
-            last_name: lastName.trim(),
-          },
-        });
 
-      if (createError || !newUser?.user) {
-        console.error("[Register] Error creating user:", createError);
-        return NextResponse.json(
-          { error: createError?.message || "Error al crear la cuenta" },
-          { status: 500 }
-        );
-      }
-
-      userId = newUser.user.id;
+    if (createError || !newUser?.user) {
+      console.error("[Register] Error creating user:", createError);
+      return NextResponse.json(
+        { error: createError?.message || "Error al crear la cuenta" },
+        { status: 500 }
+      );
     }
+
+    userId = newUser.user.id;
 
     // Actualizar profiles con nombre y apellido
     await serviceClient
@@ -102,7 +116,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Enviar email de bienvenida (no bloquea la respuesta)
+    // Enviar email de bienvenida con contraseña temporal (solo nuevos usuarios)
     sendTemplateEmail({
       evento: "bienvenida",
       to: normalizedEmail,

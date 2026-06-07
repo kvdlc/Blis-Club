@@ -252,7 +252,11 @@ export function WebLandingClient({ plans }: Props) {
       const data = await res.json();
 
       if (data.success) {
-        router.push(`/guau/web/checkout?plan=${planId}`);
+        if (data.existing) {
+          setRegisterError(data.message || "Ya tienes una cuenta. Inicia sesión para continuar.");
+        } else {
+          router.push(`/guau/web/checkout?plan=${planId}`);
+        }
       } else {
         setRegisterError(data.error || "Error al crear la cuenta. Intenta de nuevo.");
       }
