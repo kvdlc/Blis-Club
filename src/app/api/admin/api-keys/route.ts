@@ -58,6 +58,28 @@ export async function DELETE(request: Request) {
   return NextResponse.json({ success: true });
 }
 
+export async function PUT(request: Request) {
+  const supabase = createServiceClient();
+  const body = await request.json();
+  const { keys } = body as { keys?: Record<string, string> };
+
+  if (!keys || typeof keys !== "object" || Object.keys(keys).length === 0) {
+    return NextResponse.json({ error: "keys object required" }, { status: 400 });
+  }
+
+  const rows = Object.entries(keys).map(([key_name, key_value]) => ({
+    key_name: key_name.trim().toLowerCase(),
+    key_value,
+    is_global: true,
+  }));
+
+  const { error } = await supabase.from("api_keys").upsert(rows, { onConflict: "key_name" });
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ success: true, saved: rows.length });
+}
+
 function maskValue(value: string): string {
   if (!value || value.length <= 8) return "••••";
   return value.slice(0, 4) + "••••" + value.slice(-4);
