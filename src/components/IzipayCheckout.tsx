@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2, CheckCircle2, AlertCircle, Shield,
-  ArrowRight, Lock, CreditCard, X
+  ArrowRight, Lock, CreditCard, X, ExternalLink
 } from "lucide-react";
 import Link from "next/link";
 
@@ -39,13 +39,22 @@ export default function IzipayCheckout({
 }: IzipayCheckoutProps) {
   const [formState, setFormState] = useState<FormState>('loading');
   const [errorMsg, setErrorMsg] = useState('');
+  const [sdkLogs, setSdkLogs] = useState<string[]>([]);
   const krContainerId = useRef(`kr-container-${Math.random().toString(36).slice(2)}`).current;
   const initializedRef = useRef(false);
+  const scriptLoadedRef = useRef(false);
+
+  const addLog = useCallback((msg: string) => {
+    console.log(`[IzipayCheckout] ${msg}`);
+    setSdkLogs(prev => [...prev.slice(-20), `[${new Date().toLocaleTimeString()}] ${msg}`]);
+  }, []);
 
   useEffect(() => {
     if (initializedRef.current || typeof window === 'undefined') return;
     initializedRef.current = true;
+    addLog(`Iniciando SDK. formToken=${formToken.slice(0, 8)}... displayMode=${displayMode}`);
 
+    // Crear contenedor
     let container = document.getElementById(krContainerId);
     if (!container) {
       container = document.createElement('div');
@@ -60,6 +69,11 @@ export default function IzipayCheckout({
       if (parent) parent.appendChild(container);
     }
 
+    // Limpiar contenido previo
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
     const krDiv = document.createElement('div');
     krDiv.className = 'kr-embedded';
     krDiv.setAttribute('kr-form-token', formToken);
@@ -70,61 +84,128 @@ export default function IzipayCheckout({
     container.appendChild(krDiv);
 
     const loadScript = () => {
+      // Verificar si el script ya existe
+      const existingScript = document.querySelector('script[src*="kr-payment-form"]');
+      if (existingScript) {
+        addLog('Script ya existe en DOM, reutilizando...');
+        initKR();
+        return;
+      }
+
       const script = document.createElement('script');
       const baseUrl = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
       script.src = displayMode === 'embedded'
         ? `${baseUrl}?mode=embedded&container=.kr-embedded`
         : `${baseUrl}?mode=popup`;
       script.async = true;
+      script.id = 'kr-payment-script';
+      
       script.onload = () => {
-        let attempts = 0;
-        const wait = () => {
-          attempts++;
-          if (window.KR) {
-            try { window.KR.setFormToken?.(formToken); } catch { /* ignore */ }
-
-            window.KR.onFormReady(() => setFormState('ready'));
-            window.KR.onSubmit((response) => {
-              console.log('[KR] onSubmit:', orderId, response?.clientAnswer?.orderStatus);
-              const st = response?.clientAnswer?.orderStatus;
-              if (st === 'PAID') {
-                setFormState('success');
-                onSuccess?.();
-              } else {
-                setFormState('error');
-                setErrorMsg(st ? `Pago rechazado (${st})` : 'El pago fue rechazado.');
-              }
-              return true;
-            });
-            window.KR.onError((error) => {
-              setFormState('error');
-              setErrorMsg(error?.message || 'Error en la pasarela de pago.');
-              onError?.(error?.message || 'Error en la pasarela de pago.');
-              return true;
-            });
-            setTimeout(() => { if (formState === 'loading') setFormState('ready'); }, 10000);
-          } else if (attempts < 30) {
-            setTimeout(wait, 300);
-          } else {
-            setFormState('error');
-            setErrorMsg('La pasarela no respondió. Intenta de nuevo.');
-          }
-        };
-        wait();
+        addLog('Script cargado exitosamente');
+        scriptLoadedRef.current = true;
+        initKR();
       };
+      
       script.onerror = () => {
+        addLog('ERROR: Falló carga del script');
         setFormState('error');
-        setErrorMsg('Error al cargar el SDK de pago.');
+        setErrorMsg('Error al cargar el SDK de pago. Verifica tu conexión.');
       };
+      
       document.head.appendChild(script);
+    };
+
+    const initKR = () => {
+      let attempts = 0;
+      const maxAttempts = 40; // 12 segundos max
+      
+      const wait = () => {
+        attempts++;
+        if (window.KR) {
+          addLog(`KR SDK disponible (intento ${attempts})`);
+          
+          try {
+            window.KR.setFormToken?.(formToken);
+            addLog('setFormToken ejecutado');
+          } catch (e: any) {
+            addLog(`setFormToken error: ${e?.message}`);
+          }
+
+          // KR.onFormReady: el formulario está listo
+          window.KR.onFormReady(() => {
+            addLog('KR.onFormReady: Formulario listo');
+            setFormState('ready');
+          });
+
+          // KR.onSubmit: usuario envió el pago
+          window.KR.onSubmit((response: any) => {
+            addLog(`KR.onSubmit: orderStatus=${response?.clientAnswer?.orderStatus}`);
+            const st = response?.clientAnswer?.orderStatus;
+            if (st === 'PAID') {
+              setFormState('success');
+              onSuccess?.();
+            } else {
+              setFormState('error');
+              setErrorMsg(st ? `Pago rechazado (${st})` : 'El pago fue rechazado por la pasarela.');
+            }
+            return true;
+          });
+
+          // KR.onError: error en el formulario
+          window.KR.onError((error: any) => {
+            addLog(`KR.onError: ${JSON.stringify(error)}`);
+            setFormState('error');
+            setErrorMsg(error?.message || 'Error en la pasarela de pago. Intenta de nuevo.');
+            onError?.(error?.message || 'Error en la pasarela de pago.');
+            return true;
+          });
+
+          // Fallback: si onFormReady no dispara en 10s, mostrar botón manual
+          setTimeout(() => {
+            setFormState(prev => {
+              if (prev === 'loading') {
+                addLog('Fallback: onFormReady no disparó, mostrando botón manual');
+                return 'ready';
+              }
+              return prev;
+            });
+          }, 10000);
+
+        } else if (attempts < maxAttempts) {
+          setTimeout(wait, 300);
+        } else {
+          addLog('ERROR: KR SDK no disponible después de 40 intentos');
+          setFormState('error');
+          setErrorMsg('La pasarela de pago no respondió. Intenta recargar la página.');
+        }
+      };
+      
+      wait();
     };
 
     loadScript();
 
     return () => {
+      addLog('Cleanup: removeForms');
       try { window.KR?.removeForms(); } catch { /* ignore */ }
     };
-  }, []);
+  }, [formToken, publicKey, displayMode, addLog, onSuccess, onError]);
+
+  const handleOpenPopup = useCallback(() => {
+    addLog('Intentando abrir popup manualmente...');
+    try {
+      if (window.KR?.openPopup) {
+        window.KR.openPopup();
+        addLog('openPopup ejecutado');
+      } else {
+        addLog('KR.openPopup no disponible');
+        setErrorMsg('No se pudo abrir la ventana de pago. Intenta recargar la página.');
+        setFormState('error');
+      }
+    } catch (e: any) {
+      addLog(`Error en openPopup: ${e?.message}`);
+    }
+  }, [addLog]);
 
   const cardBrands = ['visa', 'mastercard', 'amex', 'diners'];
 
@@ -223,6 +304,18 @@ export default function IzipayCheckout({
                 <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse mt-1" />
                 <span className="text-xs text-primary-600 font-bold">Esperando pasarela...</span>
               </div>
+              
+              {/* Botón manual de fallback */}
+              <button
+                onClick={handleOpenPopup}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-primary-500/25"
+              >
+                <ExternalLink className="w-4 h-4" /> Abrir ventana de pago
+              </button>
+              
+              <p className="text-[10px] text-zinc-400">
+                Si la ventana no se abrió automáticamente, haz clic en el botón arriba.
+              </p>
             </div>
           </motion.div>
         )}
@@ -276,7 +369,22 @@ export default function IzipayCheckout({
               <AlertCircle className="w-8 h-8 text-red-400" />
             </div>
             <h3 className="text-xl font-black text-zinc-800 mb-2">Pago no completado</h3>
-            <p className="text-sm text-zinc-500 mb-8 max-w-sm mx-auto">{errorMsg || 'No se pudo procesar el pago.'}</p>
+            <p className="text-sm text-zinc-500 mb-6 max-w-sm mx-auto">{errorMsg || 'No se pudo procesar el pago.'}</p>
+            
+            {/* Logs de debug (solo visibles en desarrollo o si hay error) */}
+            {sdkLogs.length > 0 && (
+              <div className="mb-6 mx-auto max-w-sm">
+                <details className="text-left">
+                  <summary className="text-[10px] text-zinc-400 cursor-pointer hover:text-zinc-600">Ver logs técnicos</summary>
+                  <div className="mt-2 p-2 bg-zinc-100 rounded-lg text-[10px] text-zinc-600 font-mono max-h-32 overflow-y-auto">
+                    {sdkLogs.map((log, i) => (
+                      <div key={i} className="truncate">{log}</div>
+                    ))}
+                  </div>
+                </details>
+              </div>
+            )}
+            
             <div className="space-y-3">
               <button onClick={() => window.location.reload()} className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-primary-500/25">
                 <Shield className="w-4 h-4" /> Reintentar Pago
