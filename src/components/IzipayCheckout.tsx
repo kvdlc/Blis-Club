@@ -403,6 +403,22 @@ function injectKRGlueStyles(styleId: string) {
       background-size: 1rem !important;
     }
 
+    /* Contenedores de campos con iframe (tarjeta, fecha, CVV) — PCI-DSS */
+    .kr-embedded .kr-pan,
+    .kr-embedded .kr-expiry,
+    .kr-embedded .kr-cvv {
+      min-height: 2.75rem !important;
+      margin-bottom: 0.75rem !important;
+    }
+
+    .kr-embedded .kr-pan iframe,
+    .kr-embedded .kr-expiry iframe,
+    .kr-embedded .kr-cvv iframe {
+      width: 100% !important;
+      height: 2.75rem !important;
+      border: none !important;
+    }
+
     /* Botón de pago verde */
     .kr-embedded .kr-payment-button {
       background: #10b981 !important;
