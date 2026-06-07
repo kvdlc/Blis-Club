@@ -94,11 +94,10 @@ function CheckoutContent() {
                   });
                 } catch { /* webhook handles it anyway */ }
               }
-              setTimeout(() => router.push("/guau/web?payment=success"), 1500);
             }}
             onError={(msg) => setPaymentError(msg)}
-            successRedirect="/guau/app"
-            successCtaLabel="Ir a la App"
+            successRedirect="https://blis.club"
+            successCtaLabel="Iniciar sesión"
           />
         </div>
       )}

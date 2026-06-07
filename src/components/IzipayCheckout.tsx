@@ -229,7 +229,7 @@ export default function IzipayCheckout({
               </motion.div>
               <div className="space-y-3 mb-10">
                 <h3 className="text-3xl font-black text-zinc-800">¡Suscripción Activada!</h3>
-                <p className="text-zinc-500">Hemos procesado tu suscripción{totalLabel ? ` por ${totalLabel}` : ''}.</p>
+                <p className="text-zinc-500">Hemos procesado tu suscripción{totalLabel ? ` por ${totalLabel}` : ''}.<br/>Hemos enviado tu contraseña temporal a tu correo electrónico.</p>
                 <div className="inline-flex gap-2 px-4 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full">
                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1" />
                   <span className="text-xs text-emerald-700 font-medium">Pago confirmado</span>
@@ -273,7 +273,7 @@ export default function IzipayCheckout({
           )}
         </AnimatePresence>
 
-        <div id="kr-root-anchor" className={`w-full px-5 ${formState === 'loading' ? 'hidden' : ''}`} />
+        <div id="kr-root-anchor" className={`w-full px-5 ${formState === 'loading' || formState === 'success' ? 'hidden' : ''}`} />
       </div>
 
       {/* Footer - Badges + Card logos */}
