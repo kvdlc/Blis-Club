@@ -30,6 +30,11 @@ export interface IzipayCreatePaymentRequest {
   customer: {
     email: string
     reference?: string
+    shippingDetails?: {
+      firstName?: string
+      lastName?: string
+      country?: string
+    }
   }
 }
 

@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import IzipayCheckout from "@/components/IzipayCheckout";
-import { Loader2, ArrowLeft, Zap, ShieldCheck, Lock, Mail, CheckCircle } from "lucide-react";
+import { Loader2, ArrowLeft, Zap, ShieldCheck, Lock, Mail, CheckCircle, User, Pencil } from "lucide-react";
 import Link from "next/link";
 
 function CheckoutContent() {
@@ -12,11 +12,16 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const planId = searchParams.get("plan") ?? "monthly";
 
-  const [step, setStep] = useState<"auth" | "payment">("auth");
+  const [step, setStep] = useState<"auth" | "details" | "payment">("auth");
   const [email, setEmail] = useState("");
   const [magicSent, setMagicSent] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState("");
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
 
   const [formToken, setFormToken] = useState("");
   const [publicKey, setPublicKey] = useState("");
@@ -27,19 +32,45 @@ function CheckoutContent() {
 
   const supabase = createClient();
 
+  // Check if user is already authenticated (e.g. returned from magic link)
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setStep("payment");
+      if (user) {
+        // If already has first_name, skip details step
+        supabase.from("profiles").select("first_name, last_name").eq("id", user.id).single()
+          .then(({ data }) => {
+            if (data?.first_name && data?.last_name) {
+              setStep("payment");
+            } else {
+              setStep("details");
+            }
+          });
+      }
     });
   }, []);
 
+  // Listen for auth state changes (magic link callback sets session)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") setStep("payment");
+      if (event === "SIGNED_IN") {
+        supabase.auth.getUser().then(({ data: { user } }) => {
+          if (user) {
+            supabase.from("profiles").select("first_name, last_name").eq("id", user.id).single()
+              .then(({ data }) => {
+                if (data?.first_name && data?.last_name) {
+                  setStep("payment");
+                } else {
+                  setStep("details");
+                }
+              });
+          }
+        });
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
 
+  // Fetch formToken when entering payment step
   useEffect(() => {
     if (step !== "payment") return;
     setPaymentLoading(true);
@@ -81,6 +112,33 @@ function CheckoutContent() {
     setAuthLoading(false);
   };
 
+  const handleSaveDetails = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDetailsLoading(true);
+    setDetailsError("");
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setDetailsError("Sesión expirada. Por favor vuelve a ingresar tu correo.");
+      setStep("auth");
+      setDetailsLoading(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ first_name: firstName.trim(), last_name: lastName.trim() })
+      .eq("id", user.id);
+
+    if (error) {
+      setDetailsError("Error al guardar datos. Intenta de nuevo.");
+    } else {
+      setStep("payment");
+    }
+    setDetailsLoading(false);
+  };
+
+  // ═══ Auth step ═══
   if (step === "auth") {
     return (
       <div className="min-h-[100dvh] bg-primary-50 flex items-center justify-center px-4">
@@ -169,6 +227,83 @@ function CheckoutContent() {
     );
   }
 
+  // ═══ Details step ═══
+  if (step === "details") {
+    return (
+      <div className="min-h-[100dvh] bg-primary-50 flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <Link href="/guau/web" className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-primary-600 mb-8 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Volver
+          </Link>
+
+          <div className="bg-white rounded-3xl p-8 shadow-xl border border-primary-100 space-y-6">
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-extrabold text-lg mx-auto mb-4">
+                <User className="w-6 h-6" />
+              </div>
+              <h1 className="text-2xl font-extrabold text-zinc-800">Completa tus datos</h1>
+              <p className="text-sm text-zinc-500 mt-2">
+                Necesitamos tu nombre para el comprobante de pago.
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveDetails} className="space-y-4">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-semibold text-zinc-700 mb-2">Nombre</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                  <input
+                    id="firstName"
+                    type="text"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Juan"
+                    className="w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-semibold text-zinc-700 mb-2">Apellido</label>
+                <div className="relative">
+                  <Pencil className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                  <input
+                    id="lastName"
+                    type="text"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Pérez"
+                    className="w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  />
+                </div>
+              </div>
+
+              {detailsError && (
+                <p className="text-sm text-red-600 bg-red-50 rounded-xl p-3">{detailsError}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={detailsLoading}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-3.5 font-bold text-sm transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-primary-500/25"
+              >
+                {detailsLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Zap className="w-4 h-4" />
+                )}
+                {detailsLoading ? "Guardando..." : "Continuar al pago"}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══ Payment step ═══
   return (
     <div className="min-h-[100dvh] bg-primary-50">
       {paymentLoading ? (

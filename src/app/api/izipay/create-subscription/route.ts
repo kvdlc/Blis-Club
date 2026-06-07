@@ -74,6 +74,13 @@ export async function POST(request: Request) {
       }, { status: 500 });
     }
 
+    // Leer nombre/apellido del perfil
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", user.id)
+      .single();
+
     const { data: order, error: orderError } = await supabase
       .from("subscriptions")
       .insert({
@@ -100,7 +107,11 @@ export async function POST(request: Request) {
         orderId,
         customer: {
           email: user.email || "",
-          reference: `${user.id}|${planId}`,
+          reference: user.id,
+          shippingDetails: {
+            firstName: profile?.first_name || "",
+            lastName: profile?.last_name || "",
+          },
         },
       },
       config
