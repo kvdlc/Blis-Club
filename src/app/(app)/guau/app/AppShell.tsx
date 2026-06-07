@@ -189,6 +189,15 @@ function DashboardContent({ data, dog, userId }: { data: any; dog: Dog | null; u
             <div className="mt-2.5 space-y-1.5"><p className="text-white/85 text-sm">🐾 {dog.raza}</p><p className="text-white/85 text-sm">🎂 {dog.edad_meses} meses</p><p className="text-white/85 text-sm">⚖️ {dog.peso_kg} kg</p></div>
           </div>
         </div>
+        <a
+          href={`/guau/perro/${dog.id}`}
+          target="_blank"
+          rel="noopener"
+          className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-colors"
+          title="Perfil público del perro"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><rect x="2" y="4" width="20" height="16" rx="3" /><circle cx="12" cy="12" r="3"/><path d="M2 10h3"/><path d="M19 10h3"/><path d="M2 14h3"/><path d="M19 14h3"/></svg>
+        </a>
         <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/8 rounded-full" /><div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/8 rounded-full" />
       </div>
       <QuickToolsCarousel isLost={(dog as any).is_lost === true} />

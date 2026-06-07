@@ -1,5 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { headers } from "next/headers";
+import type { Metadata } from "next";
 import PublicProfileClient from "./PublicProfileClient";
 import { PawPrint } from "lucide-react";
 import type { AgilitySession, AgilitySessionObstacle, AgilityObstacle, DogPublicProfile, DogWeightHistory } from "@/types/database";
@@ -23,6 +24,13 @@ interface PublicDog {
   owner_id: string;
 }
 
+function getEdadTexto(meses: number): string {
+  if (meses < 12) return `${meses} meses`;
+  const anios = Math.floor(meses / 12);
+  const resto = meses % 12;
+  return `${anios} año${anios > 1 ? "s" : ""}${resto > 0 ? ` y ${resto} meses` : ""}`;
+}
+
 async function getPublicDog(dogId: string): Promise<PublicDog | null> {
   const supabase = createServiceClient();
   const { data: dog } = await supabase
@@ -43,6 +51,78 @@ async function getPublicDog(dogId: string): Promise<PublicDog | null> {
     ...(dog as PublicDog),
     breed_image_url: (breedImg as { image_url: string } | null)?.image_url ?? null,
   };
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ dogId: string }> }): Promise<Metadata> {
+  const { dogId } = await params;
+  const dog = await getPublicDog(dogId);
+
+  if (!dog) {
+    return {
+      title: "Perro no encontrado | Blis Club",
+      description: "El perfil que buscas no existe.",
+    };
+  }
+
+  const h = await headers();
+  const host = h.get("host") || "blis.club";
+  const forwardedProto = h.get("x-forwarded-proto");
+  const protocol = forwardedProto ? forwardedProto.split(",")[0] : "https";
+  const baseUrl = `${protocol}://${host}`;
+  const profileUrl = `${baseUrl}/guau/perro/${dog.id}`;
+  const edadTexto = getEdadTexto(dog.edad_meses);
+  const photoUrl = dog.poster_photo_url || dog.foto_url || dog.breed_image_url;
+
+  const title = dog.is_lost
+    ? `🚨 ${dog.nombre} está perdido | Blis Club`
+    : `${dog.nombre} · ${dog.raza} | Blis Club`;
+
+  const description = dog.is_lost
+    ? `${dog.nombre} - ${dog.raza} · ${edadTexto} · ${dog.peso_kg}kg. ${dog.lost_location ? `Visto por última vez en ${dog.lost_location}.` : ""} Ayúdanos a encontrarlo.`
+    : `${dog.raza} · ${edadTexto} · ${dog.peso_kg}kg. Conocé su perfil completo en Blis Club.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: profileUrl,
+      siteName: "Blis Club",
+      images: photoUrl ? [{
+        url: photoUrl,
+        width: 600,
+        height: 600,
+        alt: dog.nombre,
+      }] : [],
+      locale: "es_ES",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: photoUrl ? [photoUrl] : [],
+    },
+  };
+}
+
+async function ensureShortLink(dogId: string): Promise<string> {
+  const supabase = createServiceClient();
+  const slug = dogId.replace(/-/g, "").substring(0, 8);
+  const targetUrl = `/guau/perro/${dogId}`;
+
+  const { data: existing } = await supabase
+    .from("short_links")
+    .select("slug")
+    .eq("slug", slug)
+    .single();
+
+  if (!existing) {
+    await supabase.from("short_links").insert({ slug, target_url: targetUrl });
+  }
+
+  return slug;
 }
 
 async function getDogPublicProfile(dogId: string): Promise<DogPublicProfile | null> {
@@ -153,7 +233,10 @@ export default async function PublicDogProfile({ params }: { params: Promise<{ d
   const protocol = forwardedProto ? forwardedProto.split(",")[0] : "http";
   const shareUrl = `${protocol}://${host}/guau/perro/${dog.id}`;
 
-  const [publicProfile, metabolicProfile, weightHistory, vaccines, userBadges, agilitySessions, agilityObstacles] = await Promise.all([
+  const [
+    shortSlug, publicProfile, metabolicProfile, weightHistory, vaccines, userBadges, agilitySessions, agilityObstacles,
+  ] = await Promise.all([
+    ensureShortLink(dogId),
     getDogPublicProfile(dogId),
     getMetabolicProfile(dogId),
     getWeightHistory(dogId),
@@ -163,10 +246,13 @@ export default async function PublicDogProfile({ params }: { params: Promise<{ d
     getAgilitySessionObstacles(dogId),
   ]);
 
+  const shortUrl = `${protocol}://${host}/g/${shortSlug}`;
+
   return (
     <PublicProfileClient
       dog={dog}
       shareUrl={shareUrl}
+      shortUrl={shortUrl}
       agilitySessions={agilitySessions}
       agilityObstacles={agilityObstacles}
       publicProfile={publicProfile}

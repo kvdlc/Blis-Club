@@ -5,7 +5,7 @@ import { QRCodeSVG } from "qrcode.react";
 import {
   PawPrint, MapPin, Heart, MessageCircle, Share2, Award, Zap, Trophy,
   TrendingDown, Syringe, Utensils, Sparkles, Info, Phone, Mail, Download,
-  Activity, Target, Ruler, Scale, Calendar, ChevronLeft, ChevronRight,
+  Activity, Target, Ruler, Scale, Calendar, ChevronLeft, ChevronRight, ChevronDown,
 } from "lucide-react";
 import type { AgilitySession, AgilitySessionObstacle, AgilityObstacle, DogPublicProfile, DogWeightHistory } from "@/types/database";
 
@@ -33,6 +33,7 @@ interface MetabolicProfile {
 interface Props {
   dog: Dog;
   shareUrl: string;
+  shortUrl: string;
   agilitySessions: AgilitySession[];
   agilityObstacles: Record<string, (AgilitySessionObstacle & { obstacle: AgilityObstacle })[]>;
   publicProfile: DogPublicProfile | null;
@@ -171,7 +172,7 @@ function GalleryCarousel({ photos }: { photos: string[] }) {
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════════ */
 export default function DogShowcaseProfile({
-  dog, shareUrl, agilitySessions, agilityObstacles,
+  dog, shareUrl, shortUrl, agilitySessions, agilityObstacles,
   publicProfile, metabolicProfile, weightHistory, vaccines, userBadges,
 }: Props) {
   const [loaded, setLoaded] = useState(false);
@@ -184,7 +185,7 @@ export default function DogShowcaseProfile({
 
   const photoUrl = dog.foto_url || dog.breed_image_url;
   const edadTexto = getEdadTexto(dog.edad_meses);
-  const waText = encodeURIComponent(`🐾 Perfil de ${dog.nombre}\n\n${dog.raza} · ${edadTexto} · ${dog.peso_kg} kg\n\n${shareUrl}`);
+  const waText = encodeURIComponent(`🐾 Perfil de ${dog.nombre}\n\n${dog.raza} · ${edadTexto} · ${dog.peso_kg} kg\n\n${shortUrl}`);
 
   const bestCircuit = agilitySessions.length > 0
     ? Math.min(...agilitySessions.filter((s) => s.circuit_time_seconds).map((s) => s.circuit_time_seconds!))
@@ -483,27 +484,8 @@ export default function DogShowcaseProfile({
         {vis.medical && vaccines.length > 0 && (
           <Section>
             <FadeIn delay={650}>
-              <SectionHeader icon={<Syringe className="w-5 h-5 text-blue-500" />} title="Vacunas" subtitle={`${vaccines.length} registradas`} />
-              <div className="space-y-2">
-                {vaccines.map((v, i) => (
-                  <div key={i} className="card-soft rounded-xl p-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-zinc-700">{v.vaccine_name}</p>
-                      <p className="text-[10px] text-zinc-400">
-                        Dosis {v.dose_number}
-                        {v.date_administered && ` · ${new Date(v.date_administered).toLocaleDateString("es-ES")}`}
-                      </p>
-                    </div>
-                    {v.next_due_date && (
-                      <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${
-                        new Date(v.next_due_date) < new Date() ? "bg-red-100 text-red-600" : "bg-green-100 text-green-700"
-                      }`}>
-                        {new Date(v.next_due_date) < new Date() ? "Vencida" : "Al día"}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <SectionHeader icon={<Syringe className="w-5 h-5 text-blue-500" />} title="Vacunas" subtitle={`${vaccines.length} dosis registradas`} />
+              <VaccineAccordion vaccines={vaccines} />
             </FadeIn>
           </Section>
         )}
@@ -605,7 +587,7 @@ export default function DogShowcaseProfile({
                     navigator.share({
                       title: `${dog.nombre} - ${dog.raza}`,
                       text: `🐾 Perfil de ${dog.nombre}`,
-                      url: shareUrl,
+                      url: shortUrl,
                     });
                   }
                 }}
@@ -623,10 +605,10 @@ export default function DogShowcaseProfile({
           <FadeIn delay={900}>
             <div className="card-elevated rounded-2xl p-6 text-center space-y-4">
               <div className="inline-flex p-3 bg-white rounded-2xl border-2 border-primary-100 shadow-lg">
-                <QRCodeSVG value={shareUrl} size={160} level="M" fgColor="#4a47d4" />
-              </div>
-              <p className="text-xs text-zinc-400">Escanea este QR para ver el perfil completo</p>
-              <p className="text-[10px] text-zinc-300 break-all font-mono">{shareUrl}</p>
+              <QRCodeSVG value={shortUrl} size={160} level="M" fgColor="#4a47d4" />
+            </div>
+            <p className="text-xs text-zinc-400">Escanea este QR para ver el perfil completo</p>
+            <p className="text-[10px] text-zinc-300 break-all font-mono">{shortUrl}</p>
             </div>
           </FadeIn>
         </Section>
@@ -676,6 +658,115 @@ function DietRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 last:border-0">
       <span className="text-[10px] text-zinc-400 font-medium">{label}</span>
       <span className="text-xs font-bold text-zinc-700">{value}</span>
+    </div>
+  );
+}
+
+/* ── Vaccine Accordion ── */
+interface VaccineEntry {
+  vaccine_name: string;
+  dose_number: number;
+  date_administered: string | null;
+  next_due_date: string | null;
+}
+
+function groupVaccines(vaccines: VaccineEntry[]): Map<string, VaccineEntry[]> {
+  const map = new Map<string, VaccineEntry[]>();
+  for (const v of vaccines) {
+    const list = map.get(v.vaccine_name) ?? [];
+    list.push(v);
+    map.set(v.vaccine_name, list);
+  }
+  for (const [, list] of map) {
+    list.sort((a, b) => a.dose_number - b.dose_number);
+  }
+  return map;
+}
+
+function VaccineAccordion({ vaccines }: { vaccines: VaccineEntry[] }) {
+  const grouped = groupVaccines(vaccines);
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+
+  const toggle = (name: string) => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  };
+
+  return (
+    <div className="space-y-2">
+      {Array.from(grouped.entries()).map(([name, doses]) => {
+        const isOpen = openGroups.has(name);
+        const hasUpcoming = doses.some((d) => d.next_due_date && new Date(d.next_due_date) > new Date());
+        const hasOverdue = doses.some((d) => d.next_due_date && new Date(d.next_due_date) < new Date());
+
+        return (
+          <div key={name} className="card-soft rounded-xl overflow-hidden">
+            <button
+              onClick={() => toggle(name)}
+              className="w-full flex items-center justify-between p-3 hover:bg-zinc-50/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  hasOverdue ? "bg-red-100" : hasUpcoming ? "bg-green-100" : "bg-zinc-100"
+                }`}>
+                  <Syringe className={`w-4 h-4 ${
+                    hasOverdue ? "text-red-500" : hasUpcoming ? "text-green-600" : "text-zinc-400"
+                  }`} />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-zinc-700">{name}</p>
+                  <p className="text-[10px] text-zinc-400">
+                    {doses.length} dosis{doses.length > 1 ? "" : ""}
+                    {doses.some((d) => d.date_administered)
+                      ? ` · Última: ${new Date(doses.reduce((a, b) =>
+                          (a.date_administered ?? "") > (b.date_administered ?? "") ? a : b
+                        ).date_administered!).toLocaleDateString("es-ES")}`
+                      : " · Sin fechas"}
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isOpen && (
+              <div className="border-t border-zinc-100 px-3 py-2 space-y-1.5">
+                {doses.map((dose, idx) => (
+                  <div key={idx} className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-zinc-50/50">
+                    <div>
+                      <p className="text-[11px] font-semibold text-zinc-600">Dosis {dose.dose_number}</p>
+                      {dose.date_administered && (
+                        <p className="text-[10px] text-zinc-400">
+                          Administrada: {new Date(dose.date_administered).toLocaleDateString("es-ES")}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {dose.next_due_date && (
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${
+                          new Date(dose.next_due_date) < new Date()
+                            ? "bg-red-100 text-red-600"
+                            : "bg-green-100 text-green-700"
+                        }`}>
+                          {new Date(dose.next_due_date) < new Date()
+                            ? `Venció: ${new Date(dose.next_due_date).toLocaleDateString("es-ES")}`
+                            : `Próx: ${new Date(dose.next_due_date).toLocaleDateString("es-ES")}`}
+                        </span>
+                      )}
+                      {dose.date_administered && !dose.next_due_date && (
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500">Completada</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

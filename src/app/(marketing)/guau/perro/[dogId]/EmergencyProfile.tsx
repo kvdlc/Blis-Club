@@ -25,6 +25,7 @@ interface Dog {
 interface Props {
   dog: Dog;
   shareUrl: string;
+  shortUrl: string;
 }
 
 function getEdadTexto(meses: number): string {
@@ -84,14 +85,14 @@ function FloatingCircle({ size = 200, delay = 0, className }: { size?: number; d
   );
 }
 
-export default function EmergencyProfile({ dog, shareUrl }: Props) {
+export default function EmergencyProfile({ dog, shareUrl, shortUrl }: Props) {
   const photoUrl = dog.poster_photo_url || dog.foto_url || dog.breed_image_url;
   const edadTexto = getEdadTexto(dog.edad_meses);
   const waText = encodeURIComponent(
     `🚨 PERRO PERDIDO ${dog.nombre}\n\n` +
     `${dog.raza} · ${edadTexto} · ${dog.peso_kg} kg\n` +
     `${dog.lost_location ? `📍 ${dog.lost_location}\n` : ""}` +
-    `\n${shareUrl}`
+    `\n${shortUrl}`
   );
 
   return (
@@ -290,7 +291,7 @@ export default function EmergencyProfile({ dog, shareUrl }: Props) {
                   navigator.share({
                     title: `${dog.nombre} - ${dog.raza}`,
                     text: `🚨 PERRO PERDIDO ${dog.nombre}`,
-                    url: shareUrl,
+                    url: shortUrl,
                   });
                 }
               }}
@@ -306,10 +307,10 @@ export default function EmergencyProfile({ dog, shareUrl }: Props) {
         <FadeIn delay={900}>
           <div className="card-elevated rounded-2xl p-6 text-center space-y-4">
             <div className="inline-flex p-3 bg-white rounded-2xl border-2 border-primary-100 shadow-lg">
-              <QRCodeSVG value={shareUrl} size={160} level="M" fgColor="#4a47d4" />
+              <QRCodeSVG value={shortUrl} size={160} level="M" fgColor="#4a47d4" />
             </div>
             <p className="text-xs text-zinc-400">Escanea este QR para ver el perfil completo</p>
-            <p className="text-[10px] text-zinc-300 break-all font-mono">{shareUrl}</p>
+            <p className="text-[10px] text-zinc-300 break-all font-mono">{shortUrl}</p>
           </div>
         </FadeIn>
 

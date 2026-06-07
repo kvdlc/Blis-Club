@@ -35,6 +35,7 @@ interface MetabolicProfile {
 interface Props {
   dog: Dog;
   shareUrl: string;
+  shortUrl: string;
   agilitySessions: AgilitySession[];
   agilityObstacles: Record<string, (AgilitySessionObstacle & { obstacle: AgilityObstacle })[]>;
   publicProfile: DogPublicProfileType | null;
@@ -44,15 +45,16 @@ interface Props {
   userBadges: { badge: { name: string; icon_url: string | null; description: string | null; badge_type: string } }[];
 }
 
-export default function PublicProfileClient({ dog, shareUrl, agilitySessions, agilityObstacles, publicProfile, metabolicProfile, weightHistory, vaccines, userBadges }: Props) {
+export default function PublicProfileClient({ dog, shareUrl, shortUrl, agilitySessions, agilityObstacles, publicProfile, metabolicProfile, weightHistory, vaccines, userBadges }: Props) {
   if (dog.is_lost) {
-    return <EmergencyProfile dog={dog} shareUrl={shareUrl} />;
+    return <EmergencyProfile dog={dog} shareUrl={shareUrl} shortUrl={shortUrl} />;
   }
 
   return (
     <DogShowcaseProfile
       dog={dog}
       shareUrl={shareUrl}
+      shortUrl={shortUrl}
       agilitySessions={agilitySessions}
       agilityObstacles={agilityObstacles}
       publicProfile={publicProfile}
