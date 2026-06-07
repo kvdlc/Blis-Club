@@ -241,7 +241,7 @@ export default function IzipayCheckout({
           )}
 
           {formState === 'ready' && (
-            <motion.div key="ready" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5 py-4">
+            <motion.div key="ready" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-4 py-3">
               {/* El formulario de Izipay se renderiza aquí automáticamente por el SDK */}
             </motion.div>
           )}
@@ -368,11 +368,11 @@ function injectCustomStyles(styleId: string) {
     /* Contenedor principal */
     .kr-embedded {
       background: #f4f4f5 !important;
-      border-radius: 1.5rem !important;
-      padding: 1.25rem !important;
+      border-radius: 1.25rem !important;
+      padding: 0.75rem !important;
     }
 
-    /* Campos de entrada (contenedores) — igual que blis-corp */
+    /* Campos de entrada (contenedores) */
     .kr-embedded .kr-pan,
     .kr-embedded .kr-expiry,
     .kr-embedded .kr-security-code,
@@ -380,10 +380,13 @@ function injectCustomStyles(styleId: string) {
     .kr-embedded .kr-installment-number,
     .kr-embedded .kr-first-installment-delay {
       background: #ffffff !important;
-      border: 1.5px solid #e4e4e7 !important;
-      border-radius: 0.875rem !important;
-      margin-bottom: 0.75rem !important;
-      transition: border-color 0.2s ease !important;
+      border: 1px solid #e4e4e7 !important;
+      border-radius: 0.75rem !important;
+      margin-bottom: 0.5rem !important;
+      min-height: 48px !important;
+      height: auto !important;
+      overflow: hidden !important;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     }
 
     /* Focus state */
@@ -397,7 +400,7 @@ function injectCustomStyles(styleId: string) {
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important;
     }
 
-    /* Iframes transparentes */
+    /* Iframes: forzar altura compacta */
     .kr-embedded .kr-pan iframe,
     .kr-embedded .kr-expiry iframe,
     .kr-embedded .kr-security-code iframe,
@@ -405,16 +408,46 @@ function injectCustomStyles(styleId: string) {
     .kr-embedded .kr-first-installment-delay iframe,
     .kr-embedded .kr-card-holder-name iframe {
       background: transparent !important;
+      height: 44px !important;
+      min-height: 44px !important;
+      max-height: 44px !important;
+      border: none !important;
     }
 
-    /* Labels visibles */
+    /* Selects nativos (cuotas / diferido) */
+    .kr-embedded .kr-installment-number select,
+    .kr-embedded .kr-first-installment-delay select {
+      background: #ffffff !important;
+      border: none !important;
+      border-radius: 0.75rem !important;
+      height: 44px !important;
+      min-height: 44px !important;
+      padding: 0 0.75rem !important;
+      font-size: 0.875rem !important;
+      color: #27272a !important;
+      font-family: inherit !important;
+      width: 100% !important;
+      cursor: pointer !important;
+      outline: none !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+      background-position: right 0.5rem center !important;
+      background-repeat: no-repeat !important;
+      background-size: 1.25em !important;
+      padding-right: 2rem !important;
+    }
+
+    /* Labels visibles y compactos */
     .kr-embedded .kr-field-label {
       color: #71717a !important;
-      font-size: 0.6875rem !important;
+      font-size: 0.625rem !important;
       font-weight: 600 !important;
       text-transform: uppercase !important;
       letter-spacing: 0.05em !important;
-      margin-bottom: 0.25rem !important;
+      margin-bottom: 0.125rem !important;
+      padding-left: 0.25rem !important;
     }
 
     /* Botón de pago verde */
@@ -422,17 +455,18 @@ function injectCustomStyles(styleId: string) {
       background: #10b981 !important;
       color: #ffffff !important;
       font-weight: 800 !important;
-      font-size: 0.9375rem !important;
+      font-size: 0.875rem !important;
       text-transform: uppercase !important;
       letter-spacing: 0.025em !important;
       border: none !important;
-      border-radius: 1rem !important;
-      padding: 1rem 1.5rem !important;
+      border-radius: 0.875rem !important;
+      padding: 0.875rem 1.25rem !important;
       width: 100% !important;
       cursor: pointer !important;
       font-family: inherit !important;
       transition: all 0.2s ease !important;
       box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25) !important;
+      margin-top: 0.25rem !important;
     }
 
     .kr-embedded .kr-payment-button:hover {
@@ -444,13 +478,22 @@ function injectCustomStyles(styleId: string) {
     .kr-embedded .kr-form-error {
       color: #ef4444 !important;
       font-size: 0.75rem !important;
-      margin-top: 0.5rem !important;
+      margin-top: 0.25rem !important;
+      padding-left: 0.25rem !important;
     }
 
     .kr-embedded .kr-field-error .kr-pan,
     .kr-embedded .kr-field-error .kr-expiry,
     .kr-embedded .kr-field-error .kr-security-code {
       border-color: rgba(239, 68, 68, 0.5) !important;
+    }
+
+    /* Ocultar barra de test de Micuentaweb (solo sandbox) */
+    .kr-embedded .kr-test-bar,
+    .kr-embedded .kr-smart-form-test-bar,
+    .kr-test-bar,
+    .kr-smart-form-test-bar {
+      display: none !important;
     }
   `;
 
