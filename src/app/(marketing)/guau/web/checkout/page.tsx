@@ -345,10 +345,8 @@ function CheckoutContent() {
             setTimeout(() => router.push("/guau/web?payment=success"), 1500);
           }}
           onError={(msg) => setPaymentError(msg)}
-          onClose={() => router.push("/guau/web")}
           successRedirect="/guau/app"
           successCtaLabel="Ir a la App"
-          isModal={true}
         />
       )}
     </div>

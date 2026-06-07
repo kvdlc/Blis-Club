@@ -13,7 +13,7 @@ export default function CheckoutPage() {
   const [formToken, setFormToken] = useState("");
   const [publicKey, setPublicKey] = useState("");
   const [orderId, setOrderId] = useState("");
-  const [displayMode, setDisplayMode] = useState<"popup" | "embedded">("popup");
+  const [displayMode, setDisplayMode] = useState<"popup" | "embedded">("embedded");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -34,7 +34,7 @@ export default function CheckoutPage() {
           setFormToken(data.formToken);
           setPublicKey(data.publicKey || "");
           setOrderId(data.orderId || "");
-          setDisplayMode(data.displayMode || "popup");
+          setDisplayMode(data.displayMode || "embedded");
         } else {
           setError(data.error || "No se pudo iniciar el pago");
         }
@@ -95,10 +95,8 @@ export default function CheckoutPage() {
           router.push("/guau/app?payment=success");
         }}
         onError={(msg) => setError(msg)}
-        onClose={() => router.push("/guau/app/suscripcion")}
         successRedirect="/guau/app"
         successCtaLabel="Ir a la App"
-        isModal={true}
       />
     </div>
   );

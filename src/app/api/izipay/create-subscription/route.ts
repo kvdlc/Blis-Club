@@ -33,7 +33,7 @@ async function getIzipayConfig(): Promise<IzipayConfig | null> {
   const secretKey = map["izipay_secret_key"];
   const publicKey = map["izipay_public_key"];
   const hmacKey = map["izipay_hmac_key"];
-  const displayMode = (map["izipay_display_mode"] || "popup") as IzipayConfig["displayMode"];
+  const displayMode = (map["izipay_display_mode"] || "embedded") as IzipayConfig["displayMode"];
   const envRaw = (map["izipay_environment"] || "sandbox").toLowerCase();
   const environment = envRaw.includes("prod") ? "production" as const : "sandbox" as const;
 
