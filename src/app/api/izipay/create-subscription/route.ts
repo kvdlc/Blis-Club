@@ -87,6 +87,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         plan_id: planId,
         status: "pending",
+        plan_type: "premium",
         current_period_start: new Date().toISOString(),
         current_period_end: null,
         metadata: {

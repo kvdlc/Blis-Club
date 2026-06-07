@@ -151,6 +151,32 @@ export async function middleware(request: NextRequest) {
   }
 
   // ═══════════════════════════════════════════
+  // 5.5 TEMPORAL PLAN EXPIRY CHECK (app routes)
+  // ═══════════════════════════════════════════
+  if (user && isAppRoute) {
+    const { data: sub } = await supabase
+      .from("subscriptions")
+      .select("status, plan_type, expires_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (sub && sub.plan_type === "temporal" && sub.expires_at) {
+      const expiry = new Date(sub.expires_at).getTime();
+      if (Date.now() > expiry) {
+        // Expiró: marcar como lead y redirigir a checkout
+        await supabase.from("profiles").update({ is_lead: true }).eq("id", user.id);
+        await supabase.from("subscriptions").update({ status: "canceled" }).eq("id", sub.id);
+        const url = request.nextUrl.clone();
+        url.pathname = "/guau/web";
+        url.search = "?expired=true";
+        return NextResponse.redirect(url);
+      }
+    }
+  }
+
+  // ═══════════════════════════════════════════
   // 6. USER LOGIN ROUTING
   // ═══════════════════════════════════════════
   if (user && path === "/") {

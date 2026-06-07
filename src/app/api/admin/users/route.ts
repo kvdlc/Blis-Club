@@ -48,12 +48,12 @@ export async function GET() {
     }
   }
 
-  // 3. Obtener aplicación asignada por suscripción activa más reciente
+  // 3. Obtener suscripciones (activas o pendientes) más recientes por usuario
   const { data: subs } = await supabase
     .from("subscriptions")
-    .select("user_id, plan_id, status")
+    .select("user_id, plan_id, status, plan_type")
     .in("user_id", userIds)
-    .eq("status", "active");
+    .order("created_at", { ascending: false });
 
   const planIds = subs?.map((s) => s.plan_id).filter(Boolean) || [];
   const { data: plansWithApps } = await supabase
@@ -78,7 +78,14 @@ export async function GET() {
   });
 
   const userAppMap: Record<string, { name: string; slug: string }> = {};
+  const userPlanTypeMap: Record<string, string> = {};
+  const seenUserIds = new Set<string>();
   subs?.forEach((s) => {
+    // Tomar solo la suscripción más reciente por usuario
+    if (seenUserIds.has(s.user_id)) return;
+    seenUserIds.add(s.user_id);
+
+    userPlanTypeMap[s.user_id] = s.plan_type || "temporal";
     const plan = planMap[s.plan_id];
     if (plan) {
       const app = appMap[plan.application_id];
@@ -93,6 +100,7 @@ export async function GET() {
     ...p,
     last_sign_in_at: lastSignInMap[p.id] || null,
     assigned_app: userAppMap[p.id] || null,
+    plan_type: userPlanTypeMap[p.id] || "temporal",
   }));
 
   return NextResponse.json({ data: enrichedUsers });

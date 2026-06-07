@@ -80,14 +80,16 @@ export async function POST(request: Request) {
       const periodEnd = new Date(now);
       periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-      // Activar suscripción y convertir lead a cliente
+      // Activar suscripción Premium y mantener como cliente
       await Promise.all([
         supabase
           .from("subscriptions")
           .update({
             status: "active",
+            plan_type: "premium",
             current_period_start: now.toISOString(),
             current_period_end: periodEnd.toISOString(),
+            expires_at: null,
             izipay_subscription_id: orderId,
             metadata: {
               ...((subscription.metadata as Record<string, unknown>) || {}),
@@ -216,11 +218,17 @@ export async function POST(request: Request) {
 
       console.log(`[Izipay Webhook] Suscripción ${subscription.id} ACTIVADA`);
     } else if (orderStatus === "UNPAID" || orderStatus === "CANCELLED") {
-      await supabase
-        .from("subscriptions")
-        .update({ status: "canceled", metadata: { ...((subscription.metadata as Record<string, unknown>) || {}), izipay_status: orderStatus } })
-        .eq("id", subscription.id);
-      console.log(`[Izipay Webhook] Suscripción ${subscription.id} CANCELADA`);
+      await Promise.all([
+        supabase
+          .from("subscriptions")
+          .update({ status: "canceled", metadata: { ...((subscription.metadata as Record<string, unknown>) || {}), izipay_status: orderStatus } })
+          .eq("id", subscription.id),
+        supabase
+          .from("profiles")
+          .update({ is_lead: true })
+          .eq("id", subscription.user_id),
+      ]);
+      console.log(`[Izipay Webhook] Suscripción ${subscription.id} CANCELADA. Usuario marcado como lead.`);
     }
 
     return NextResponse.json({ received: true });
