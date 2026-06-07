@@ -14,10 +14,11 @@ function generatePassword(): string {
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { email, firstName, lastName } = body as {
+    const { email, firstName, lastName, sourceApp } = body as {
       email?: string;
       firstName?: string;
       lastName?: string;
+      sourceApp?: string;
     };
 
     if (!email || !firstName || !lastName) {
@@ -51,13 +52,15 @@ export async function POST(request: Request) {
         },
       });
 
-      // Actualizar profiles
+      // Actualizar profiles (actualizar source_app si viene)
+      const updateData: Record<string, unknown> = {
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+      };
+      if (sourceApp) updateData.source_app = sourceApp;
       await serviceClient
         .from("profiles")
-        .update({
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-        })
+        .update(updateData)
         .eq("id", userId);
 
       return NextResponse.json({
@@ -89,13 +92,14 @@ export async function POST(request: Request) {
 
     userId = newUser.user.id;
 
-    // Actualizar profiles con nombre, apellido y marcar como lead
+    // Actualizar profiles con nombre, apellido, source_app y marcar como lead
     await serviceClient
       .from("profiles")
       .update({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         is_lead: true,
+        source_app: sourceApp || null,
       })
       .eq("id", userId);
 

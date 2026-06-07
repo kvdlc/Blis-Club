@@ -246,6 +246,7 @@ export function WebLandingClient({ plans }: Props) {
           email: registerEmail,
           firstName: registerFirstName,
           lastName: registerLastName,
+          sourceApp: "guau",
         }),
       });
 

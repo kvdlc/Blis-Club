@@ -12,6 +12,7 @@ interface User {
   avatar_url: string;
   created_at: string;
   is_lead: boolean;
+  source_app: string | null;
   last_sign_in_at: string | null;
   assigned_app: { name: string; slug: string } | null;
 }
@@ -233,6 +234,10 @@ export default function UsersPage() {
                         {u.assigned_app ? (
                           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-primary-50 text-primary-700">
                             <Smartphone className="w-3 h-3" /> {u.assigned_app.name}
+                          </span>
+                        ) : u.source_app ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                            <Smartphone className="w-3 h-3" /> {u.source_app}
                           </span>
                         ) : (
                           <span className="text-xs text-zinc-400">—</span>
