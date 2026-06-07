@@ -126,21 +126,33 @@ function TrackerTab({ dog, userId, preloaded }: { dog: Dog | null; userId: strin
   const [data, setData] = useState<any>(preloaded ?? null);
   const [loading, setLoading] = useState(!preloaded);
 
+  const fetchData = useCallback(async () => {
+    if (!dog) return;
+    const supabase = createClient();
+    const [w, ad, ag, v, st] = await Promise.all([
+      supabase.from("walks").select("*").eq("dog_id", dog.id).order("start_time", { ascending: false }).limit(60),
+      supabase.from("dogs").select("*").eq("owner_id", userId),
+      supabase.from("agility_sessions").select("id, activity_type, duration_min, circuit_time_seconds, fecha").eq("dog_id", dog.id).order("fecha", { ascending: false }).limit(20),
+      supabase.from("dog_vaccines").select("*").eq("dog_id", dog.id).order("created_at", { ascending: false }),
+      supabase.from("user_streaks").select("*").eq("user_id", userId).eq("streak_type", "walk").maybeSingle(),
+    ]);
+    setData({ walks: w.data ?? [], allDogs: ad.data ?? [], agilitySessions: ag.data ?? [], vaccines: v.data ?? [], streakDays: (st.data as any)?.current_streak ?? 0 });
+    setLoading(false);
+  }, [dog?.id, userId]);
+
   useEffect(() => {
-    if (data || !dog) return;
-    (async () => {
-      const supabase = createClient();
-      const [w, ad, ag, v, st] = await Promise.all([
-        supabase.from("walks").select("*").eq("dog_id", dog.id).order("start_time", { ascending: false }).limit(60),
-        supabase.from("dogs").select("*").eq("owner_id", userId),
-        supabase.from("agility_sessions").select("id, activity_type, duration_min, circuit_time_seconds, fecha").eq("dog_id", dog.id).order("fecha", { ascending: false }).limit(20),
-        supabase.from("dog_vaccines").select("*").eq("dog_id", dog.id).order("created_at", { ascending: false }),
-        supabase.from("user_streaks").select("*").eq("user_id", userId).eq("streak_type", "walk").maybeSingle(),
-      ]);
-      setData({ walks: w.data ?? [], allDogs: ad.data ?? [], agilitySessions: ag.data ?? [], vaccines: v.data ?? [], streakDays: (st.data as any)?.current_streak ?? 0 });
-      setLoading(false);
-    })();
-  }, [dog?.id, userId, data]);
+    if (!dog) return;
+    fetchData();
+  }, [dog?.id, userId, fetchData]);
+
+  // Escuchar cuando se completa un paseo para refrescar la racha
+  useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      setData((prev: any) => prev ? { ...prev, streakDays: e.detail?.streak ?? 0 } : prev);
+    };
+    window.addEventListener("walk-saved" as any, handler);
+    return () => window.removeEventListener("walk-saved" as any, handler);
+  }, []);
 
   if (loading) return <TabSkeleton />;
   if (!data) return <p className="text-zinc-500 text-center py-8">Registrá un perro primero.</p>;
@@ -190,6 +202,7 @@ interface AppShellProps { userId: string; dog: Dog | null; initialTab: TabKey; d
 
 export default function AppShell({ userId, dog, initialTab, dashboardData }: AppShellProps) {
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+  const [tabRefresh, setTabRefresh] = useState<Record<string, number>>({});
 
   // Sincronizar con popstate (back/forward del navegador)
   useEffect(() => {
@@ -205,6 +218,7 @@ export default function AppShell({ userId, dog, initialTab, dashboardData }: App
 
   const goToTab = useCallback((tab: TabKey) => {
     setActiveTab(tab);
+    setTabRefresh((prev) => ({ ...prev, [tab]: (prev[tab] || 0) + 1 }));
     const url = tab === "inicio" ? "/guau/app" : `/guau/app?tab=${tab}`;
     window.history.replaceState(null, "", url);
   }, []);
@@ -221,7 +235,7 @@ export default function AppShell({ userId, dog, initialTab, dashboardData }: App
       <div style={{ display: activeTab === "nutricion" ? "block" : "none" }}><NutricionTab dog={dog} userId={userId} /></div>
       <div style={{ display: activeTab === "perfil" ? "block" : "none" }}><PerfilTab userId={userId} /></div>
       <div style={{ display: activeTab === "academia" ? "block" : "none" }}><AcademiaTab userId={userId} /></div>
-      <div style={{ display: activeTab === "tracker" ? "block" : "none" }}><TrackerTab dog={dog} userId={userId} /></div>
+       <div style={{ display: activeTab === "tracker" ? "block" : "none" }}><TrackerTab key={`tracker-${tabRefresh["tracker"] || 0}`} dog={dog} userId={userId} /></div>
       <div style={{ display: activeTab === "perdido" ? "block" : "none" }}><PerdidoTab dog={dog} /></div>
     </>
   );

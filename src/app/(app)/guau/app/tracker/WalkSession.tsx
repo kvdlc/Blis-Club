@@ -278,7 +278,6 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
         if (s.last_activity_date === yesterdayStr) {
           newStreak = s.current_streak + 1;
         }
-        // else: se rompió la racha, empieza de 1
         await supabase.from("user_streaks").upsert({
           user_id: userId, streak_type: "walk", current_streak: newStreak,
           longest_streak: Math.max(s.longest_streak, newStreak), last_activity_date: today,
@@ -289,6 +288,9 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
         user_id: userId, streak_type: "walk", current_streak: 1, longest_streak: 1, last_activity_date: today,
       }, { onConflict: "user_id,streak_type" });
     }
+
+    // Notificar a los componentes que se registró un paseo (para refrescar racha)
+    window.dispatchEvent(new CustomEvent("walk-saved", { detail: { streak: newStreak } }));
 
     localStorage.removeItem(STORAGE_KEY);
     setMainPhase("done");
