@@ -57,8 +57,8 @@ export async function createTrial(userId: string, appSlug: string) {
     metadata: { app_slug: appSlug, created_via: "webg_free_trial" },
   });
 
-  // Asegurar que is_lead = false (tiene acceso activo)
-  await supabase.from("profiles").update({ is_lead: false }).eq("id", userId);
+  // Usuario con plan temporal gratuito es Lead hasta que pague
+  await supabase.from("profiles").update({ is_lead: true }).eq("id", userId);
 
   return data;
 }

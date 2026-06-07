@@ -92,13 +92,13 @@ export async function POST(request: Request) {
 
     userId = newUser.user.id;
 
-    // Actualizar profiles con nombre, apellido, source_app. is_lead = false por defecto.
+    // Actualizar profiles con nombre, apellido, source_app. is_lead = true (aún no ha pagado).
     await serviceClient
       .from("profiles")
       .update({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
-        is_lead: false,
+        is_lead: true,
         source_app: sourceApp || null,
       })
       .eq("id", userId);

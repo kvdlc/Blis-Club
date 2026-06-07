@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
-import { Edit, Search, X, Save, Clock, Smartphone, Users, UserCheck, UserPlus, TrendingUp, Filter, Settings, Ban, CreditCard, History } from "lucide-react";
+import { Settings, Search, X, Clock, Smartphone, Users, UserCheck, UserPlus, TrendingUp, Filter, Ban, CreditCard, History, Save } from "lucide-react";
 
 interface User {
   id: string;
@@ -16,6 +16,9 @@ interface User {
   last_sign_in_at: string | null;
   assigned_app: { name: string; slug: string } | null;
   plan_type: string;
+  subscription_status: string;
+  expires_at: string | null;
+  current_period_end: string | null;
 }
 
 interface SubscriptionData {
@@ -30,17 +33,63 @@ interface SubscriptionData {
 
 type FilterType = "all" | "leads" | "clients";
 
+function getDaysRemaining(endDate: string | null): { text: string; expired: boolean } {
+  if (!endDate) return { text: "", expired: false };
+  const end = new Date(endDate).getTime();
+  const now = Date.now();
+  const daysLeft = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+  if (daysLeft <= 0) return { text: "Expirado", expired: true };
+  if (daysLeft > 30) {
+    const months = Math.floor(daysLeft / 30);
+    const days = daysLeft % 30;
+    return { text: `${months}m · ${days}d`, expired: false };
+  }
+  return { text: `${daysLeft}`, expired: false };
+}
+
+function planBadge(planType: string, status: string, expiresAt: string | null, currentPeriodEnd: string | null) {
+  const colors: Record<string, string> = {
+    premium: "bg-emerald-100 text-emerald-700",
+    temporal: "bg-amber-100 text-amber-700",
+    permanente: "bg-blue-100 text-blue-700",
+  };
+  const labels: Record<string, string> = {
+    premium: "Premium",
+    temporal: "Temporal",
+    permanente: "Permanente",
+  };
+
+  const endDate = planType === "temporal" ? expiresAt : currentPeriodEnd;
+  const { text: remaining, expired } = getDaysRemaining(endDate);
+  const isActive = status === "active" && !expired;
+
+  const color = colors[planType] || "bg-zinc-100 text-zinc-600";
+  const label = labels[planType] || planType;
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${color}`}>
+        {label}
+        {remaining && remaining !== "Ilimitado" ? ` · ${remaining}` : remaining === "Ilimitado" ? ` · ${remaining}` : ""}
+      </span>
+      <span className={`text-[10px] font-semibold ${isActive ? "text-emerald-600" : "text-red-500"}`}>
+        {isActive ? "Activo" : "Inactivo"}
+      </span>
+    </div>
+  );
+}
+
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<FilterType>("all");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ role: "", display_name: "" });
   const [manageUser, setManageUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [subLoading, setSubLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [editRole, setEditRole] = useState("");
+  const [roleSaving, setRoleSaving] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -52,18 +101,9 @@ export default function UsersPage() {
 
   useEffect(() => { load(); }, []);
 
-  const handleSave = async (id: string) => {
-    await fetch("/api/admin/users", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...editForm }),
-    });
-    setEditingId(null);
-    load();
-  };
-
   const openManage = async (u: User) => {
     setManageUser(u);
+    setEditRole(u.role);
     setSubLoading(true);
     try {
       const res = await fetch(`/api/admin/users/${u.id}/subscription`);
@@ -79,6 +119,19 @@ export default function UsersPage() {
     setSubLoading(false);
   };
 
+  const saveRole = async () => {
+    if (!manageUser || editRole === manageUser.role) return;
+    setRoleSaving(true);
+    await fetch("/api/admin/users", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: manageUser.id, role: editRole }),
+    });
+    setRoleSaving(false);
+    setManageUser({ ...manageUser, role: editRole });
+    load();
+  };
+
   const updatePlan = async (updates: Partial<SubscriptionData>) => {
     if (!manageUser) return;
     setActionLoading(true);
@@ -90,7 +143,7 @@ export default function UsersPage() {
     if (res.ok) {
       const json = await res.json();
       setSubscription(json.subscription || null);
-      load(); // refrescar lista
+      load();
     }
     setActionLoading(false);
   };
@@ -106,11 +159,10 @@ export default function UsersPage() {
     });
     setActionLoading(false);
     load();
-    // Actualizar usuario local
     setManageUser({ ...manageUser, role: isSuspended ? "usuario" : "suspended" });
   };
 
-  const roles = ["usuario", "institucion", "admin", "superadmin"];
+  const roles = ["usuario", "institucion", "admin", "superadmin", "suspended"];
 
   const totalUsers = users.length;
   const totalLeads = users.filter((u) => u.is_lead).length;
@@ -121,11 +173,11 @@ export default function UsersPage() {
     const matchesSearch = !search ||
       u.email?.toLowerCase().includes(search.toLowerCase()) ||
       u.display_name?.toLowerCase().includes(search.toLowerCase());
-    
+
     const matchesType = typeFilter === "all" ? true :
       typeFilter === "leads" ? u.is_lead :
       !u.is_lead;
-    
+
     return matchesSearch && matchesType;
   });
 
@@ -145,31 +197,13 @@ export default function UsersPage() {
     return <span className="text-zinc-400 text-xs">{d.toLocaleDateString()}</span>;
   };
 
-  const planBadge = (type: string) => {
-    const colors: Record<string, string> = {
-      premium: "bg-emerald-100 text-emerald-700",
-      temporal: "bg-amber-100 text-amber-700",
-      permanente: "bg-blue-100 text-blue-700",
-    };
-    const labels: Record<string, string> = {
-      premium: "Premium",
-      temporal: "Temporal",
-      permanente: "Permanente",
-    };
-    return (
-      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${colors[type] || "bg-zinc-100 text-zinc-600"}`}>
-        {labels[type] || type}
-      </span>
-    );
-  };
-
   return (
     <AdminGuard>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Usuarios</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona roles, sesiones y aplicaciones</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona roles, suscripciones y aplicaciones</p>
           </div>
         </div>
 
@@ -247,7 +281,6 @@ export default function UsersPage() {
                   <tr className="border-b border-zinc-100 dark:border-zinc-800">
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Usuario</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Email</th>
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Rol</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Plan</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Tipo</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">
@@ -257,7 +290,7 @@ export default function UsersPage() {
                     </th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">
                       <div className="flex items-center gap-1">
-                        <Smartphone className="w-3.5 h-3.5" /> App
+                        <Smartphone className="w-3.5 h-3.5" /> Origen
                       </div>
                     </th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Registro</th>
@@ -272,34 +305,24 @@ export default function UsersPage() {
                           <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-zinc-500 text-xs font-bold">
                             {(u.display_name || u.email || "?").charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">{u.display_name || "—"}</span>
+                          <div>
+                            <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">{u.display_name || "—"}</span>
+                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                              u.role === "superadmin" ? "bg-accent-100 text-accent-700" :
+                              u.role === "admin" ? "bg-primary-100 text-primary-700" :
+                              u.role === "institucion" ? "bg-secondary-100 text-secondary-700" :
+                              u.role === "suspended" ? "bg-red-100 text-red-700" :
+                              "bg-zinc-100 text-zinc-600"
+                            }`}>
+                              {u.role}
+                            </span>
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-zinc-500">{u.email}</td>
                       <td className="px-4 py-3">
-                        {editingId === u.id ? (
-                          <select
-                            value={editForm.role}
-                            onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                            className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1 text-xs"
-                          >
-                            {roles.map((r) => (
-                              <option key={r} value={r}>{r}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                            u.role === "superadmin" ? "bg-accent-100 text-accent-700" :
-                            u.role === "admin" ? "bg-primary-100 text-primary-700" :
-                            u.role === "institucion" ? "bg-secondary-100 text-secondary-700" :
-                            u.role === "suspended" ? "bg-red-100 text-red-700" :
-                            "bg-zinc-100 text-zinc-600"
-                          }`}>
-                            {u.role}
-                          </span>
-                        )}
+                        {planBadge(u.plan_type, u.subscription_status, u.expires_at, u.current_period_end)}
                       </td>
-                      <td className="px-4 py-3">{planBadge(u.plan_type)}</td>
                       <td className="px-4 py-3">
                         {u.is_lead ? (
                           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
@@ -315,9 +338,9 @@ export default function UsersPage() {
                         {formatLastSignIn(u.last_sign_in_at)}
                       </td>
                       <td className="px-4 py-3">
-                        {u.assigned_app || u.source_app ? (
+                        {u.source_app ? (
                           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
-                            <Smartphone className="w-3 h-3" /> {u.assigned_app?.name || u.source_app}
+                            <Smartphone className="w-3 h-3" /> {u.source_app}
                           </span>
                         ) : (
                           <span className="text-xs text-zinc-400">—</span>
@@ -327,35 +350,13 @@ export default function UsersPage() {
                         {new Date(u.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3">
-                        {editingId === u.id ? (
-                          <div className="flex gap-1">
-                            <button onClick={() => handleSave(u.id)}
-                              className="p-1.5 rounded-lg bg-primary-100 text-primary-600 hover:bg-primary-200">
-                              <Save className="w-3.5 h-3.5" />
-                            </button>
-                            <button onClick={() => setEditingId(null)}
-                              className="p-1.5 rounded-lg bg-zinc-100 text-zinc-500 hover:bg-zinc-200">
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => { setEditingId(u.id); setEditForm({ role: u.role, display_name: u.display_name }); }}
-                              className="p-1.5 rounded-lg text-zinc-400 hover:text-primary-600 hover:bg-primary-50"
-                              title="Editar"
-                            >
-                              <Edit className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => openManage(u)}
-                              className="p-1.5 rounded-lg text-zinc-400 hover:text-primary-600 hover:bg-primary-50"
-                              title="Gestionar suscripción"
-                            >
-                              <Settings className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        )}
+                        <button
+                          onClick={() => openManage(u)}
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-primary-600 hover:bg-primary-50"
+                          title="Gestionar usuario"
+                        >
+                          <Settings className="w-3.5 h-3.5" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -365,7 +366,7 @@ export default function UsersPage() {
           </div>
         )}
 
-        {/* Modal de gestión de suscripción */}
+        {/* Modal de gestión de usuario */}
         {manageUser && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
             <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -377,47 +378,82 @@ export default function UsersPage() {
                   </button>
                 </div>
 
+                {/* Info del usuario */}
                 <div className="flex items-center gap-3 p-4 bg-zinc-50 dark:bg-zinc-800 rounded-xl">
                   <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-zinc-500 text-sm font-bold">
                     {(manageUser.display_name || manageUser.email || "?").charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">{manageUser.display_name || "—"}</p>
-                    <p className="text-xs text-zinc-500">{manageUser.email}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">{manageUser.display_name || "—"}</p>
+                    <p className="text-xs text-zinc-500 truncate">{manageUser.email}</p>
                   </div>
                   {manageUser.is_lead ? (
-                    <span className="ml-auto inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
                       <UserPlus className="w-3 h-3" /> Lead
                     </span>
                   ) : (
-                    <span className="ml-auto inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
                       <UserCheck className="w-3 h-3" /> Cliente
                     </span>
                   )}
                 </div>
 
+                {/* Cambiar rol */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Rol</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={editRole}
+                      onChange={(e) => setEditRole(e.target.value)}
+                      className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                    >
+                      {roles.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={saveRole}
+                      disabled={roleSaving || editRole === manageUser.role}
+                      className="px-4 py-2.5 rounded-xl bg-primary-100 text-primary-700 hover:bg-primary-200 text-sm font-semibold disabled:opacity-40 transition-colors"
+                    >
+                      {roleSaving ? "..." : <Save className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Suscripción */}
                 {subLoading ? (
                   <div className="text-center py-8 text-zinc-500">Cargando suscripción...</div>
                 ) : subscription ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Plan actual</span>
-                      {planBadge(subscription.plan_type)}
+                      <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Plan</span>
+                      {planBadge(subscription.plan_type, subscription.status, subscription.expires_at, subscription.current_period_end)}
                     </div>
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Estado</span>
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        subscription.status === "active" ? "bg-emerald-100 text-emerald-700" :
-                        subscription.status === "canceled" ? "bg-red-100 text-red-700" :
-                        "bg-amber-100 text-amber-700"
+                        subscription.status === "active" && !getDaysRemaining(
+                          subscription.plan_type === "temporal" ? subscription.expires_at : subscription.current_period_end
+                        ).expired ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
                       }`}>
-                        {subscription.status}
+                        {subscription.status === "active" && !getDaysRemaining(
+                          subscription.plan_type === "temporal" ? subscription.expires_at : subscription.current_period_end
+                        ).expired ? "Activo" : "Inactivo"}
                       </span>
                     </div>
-                    {subscription.expires_at && (
+
+                    {subscription.expires_at && subscription.plan_type === "temporal" && (
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Expira</span>
                         <span className="text-sm text-zinc-800">{new Date(subscription.expires_at).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    {subscription.current_period_end && subscription.plan_type !== "temporal" && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Próximo pago</span>
+                        <span className="text-sm text-zinc-800">{new Date(subscription.current_period_end).toLocaleDateString()}</span>
                       </div>
                     )}
 

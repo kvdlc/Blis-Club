@@ -63,11 +63,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Si se cancela o el plan temporal expira, marcar como lead
-    if (status === "canceled" || (plan_type === "temporal" && expires_at && new Date(expires_at) < new Date())) {
+    // Lógica lead vs cliente:
+    // - Temporal (activo o no) = Lead
+    // - Cancelado = Lead
+    // - Premium o Permanente activo = Cliente
+    if (status === "canceled") {
       await supabase.from("profiles").update({ is_lead: true }).eq("id", userId);
-    } else if (status === "active" || plan_type === "premium" || plan_type === "permanente") {
+    } else if (plan_type === "premium" || plan_type === "permanente") {
       await supabase.from("profiles").update({ is_lead: false }).eq("id", userId);
+    } else if (plan_type === "temporal") {
+      await supabase.from("profiles").update({ is_lead: true }).eq("id", userId);
+    } else if (expires_at && new Date(expires_at) < new Date()) {
+      // Cualquier plan expirado = lead
+      await supabase.from("profiles").update({ is_lead: true }).eq("id", userId);
     }
 
     return NextResponse.json({ success: true, subscription: data });

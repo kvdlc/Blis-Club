@@ -51,7 +51,7 @@ export async function GET() {
   // 3. Obtener suscripciones (activas o pendientes) más recientes por usuario
   const { data: subs } = await supabase
     .from("subscriptions")
-    .select("user_id, plan_id, status, plan_type")
+    .select("user_id, plan_id, status, plan_type, expires_at, current_period_end, created_at")
     .in("user_id", userIds)
     .order("created_at", { ascending: false });
 
@@ -78,14 +78,14 @@ export async function GET() {
   });
 
   const userAppMap: Record<string, { name: string; slug: string }> = {};
-  const userPlanTypeMap: Record<string, string> = {};
+  const userSubMap: Record<string, any> = {};
   const seenUserIds = new Set<string>();
   subs?.forEach((s) => {
     // Tomar solo la suscripción más reciente por usuario
     if (seenUserIds.has(s.user_id)) return;
     seenUserIds.add(s.user_id);
 
-    userPlanTypeMap[s.user_id] = s.plan_type || "temporal";
+    userSubMap[s.user_id] = s;
     const plan = planMap[s.plan_id];
     if (plan) {
       const app = appMap[plan.application_id];
@@ -96,12 +96,18 @@ export async function GET() {
   });
 
   // 4. Combinar datos
-  const enrichedUsers = profiles?.map((p) => ({
-    ...p,
-    last_sign_in_at: lastSignInMap[p.id] || null,
-    assigned_app: userAppMap[p.id] || null,
-    plan_type: userPlanTypeMap[p.id] || "temporal",
-  }));
+  const enrichedUsers = profiles?.map((p) => {
+    const sub = userSubMap[p.id];
+    return {
+      ...p,
+      last_sign_in_at: lastSignInMap[p.id] || null,
+      assigned_app: userAppMap[p.id] || null,
+      plan_type: sub?.plan_type || "temporal",
+      subscription_status: sub?.status || "pending",
+      expires_at: sub?.expires_at || null,
+      current_period_end: sub?.current_period_end || null,
+    };
+  });
 
   return NextResponse.json({ data: enrichedUsers });
 }

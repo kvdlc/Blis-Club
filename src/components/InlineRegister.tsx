@@ -88,7 +88,7 @@ export default function InlineRegister({
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await createTrial(user.id, appSlug);
-      await supabase.from("profiles").update({ source_app: appSlug, is_lead: false }).eq("id", user.id);
+      await supabase.from("profiles").update({ source_app: appSlug }).eq("id", user.id);
       const next = redirectTo || `/${appSlug}/app`;
       router.push(next);
     } else {
