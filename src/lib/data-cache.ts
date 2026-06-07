@@ -80,3 +80,12 @@ export const getCachedMealSchedule = cache(async (dogId: string) => {
     .order("fecha", { ascending: true });
   return data ?? [];
 });
+
+export const getCachedToxicFoods = cache(async () => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("toxic_foods")
+    .select("*")
+    .order("name");
+  return data ?? [];
+});

@@ -188,6 +188,7 @@ export interface ToxicFood {
   severity: SeverityLevel;
   explanation: string | null;
   symptoms: string | null;
+  category?: string | null;
 }
 
 export interface WeeklyChallenge {

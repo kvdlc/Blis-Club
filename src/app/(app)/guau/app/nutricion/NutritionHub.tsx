@@ -593,31 +593,287 @@ function DetoxTab({ dog, detoxDays, detoxProgress }: { dog: Dog | null; detoxDay
 /*  ESCANER                                                          */
 /* ================================================================ */
 function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
-  const [search, setSearch] = useState("");
-  const filtered = toxicFoods.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
+  const [query, setQuery] = useState("");
+  const [searched, setSearched] = useState(false);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [filter, setFilter] = useState<"todos" | "mortal" | "alto" | "bajo" | "seguros">("todos");
+  const [recents, setRecents] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(localStorage.getItem("blis_food_recents") || "[]"); } catch { return []; }
+  });
+
+  const saveRecent = (q: string) => {
+    const updated = [q, ...recents.filter((r) => r !== q)].slice(0, 15);
+    setRecents(updated);
+    localStorage.setItem("blis_food_recents", JSON.stringify(updated));
+  };
+
+  // Búsqueda fuzzy simple (compara normalizando caracteres)
+  const fuzzyMatch = (text: string, q: string): number => {
+    const t = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const s = q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (t.includes(s)) return 10; // coincidencia exacta
+    // Buscar palabras individuales
+    const words = s.split(/\s+/).filter((w) => w.length > 1);
+    let score = 0;
+    for (const w of words) {
+      if (t.includes(w)) score += 5;
+      // Tolerancia a 1 caracter de diferencia por cada 4 letras
+      else if (w.length >= 4) {
+        for (let i = 0; i <= t.length - w.length + 1; i++) {
+          let matches = 0;
+          for (let j = 0; j < w.length; j++) {
+            if (t[i + j] === w[j]) matches++;
+          }
+          if (matches >= w.length - 1) { score += 3; break; }
+        }
+      }
+    }
+    return score;
+  };
+
+  const doSearch = () => {
+    if (!query.trim()) return;
+    setSearched(true);
+    saveRecent(query.trim());
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") doSearch();
+  };
+
+  // Resultados
+  const results = searched && query.trim()
+    ? toxicFoods
+        .map((f) => ({ food: f, score: fuzzyMatch(f.name, query) + fuzzyMatch(f.explanation || "", query) * 0.5 + fuzzyMatch(f.symptoms || "", query) * 0.3 }))
+        .filter((r) => r.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map((r) => r.food)
+    : [];
+
+  // Filtrar por tipo
+  const filtered = results.filter((f) => {
+    if (filter === "todos") return true;
+    if (filter === "seguros") return !f.is_toxic;
+    if (filter === "mortal") return f.severity === "mortal";
+    if (filter === "alto") return f.severity === "alto";
+    if (filter === "bajo") return f.severity === "bajo" || f.severity === "medio";
+    return true;
+  });
+
+  // Sugerencias (misma categoría, excluyendo resultados)
+  const mainResult = results[0];
+  const suggestions = mainResult
+    ? toxicFoods
+        .filter((f) => f.category === mainResult.category && f.id !== mainResult.id && !results.some((r) => r.id === f.id))
+        .slice(0, 3)
+    : [];
+
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const highlight = (text: string, q: string) => {
+    if (!q.trim()) return text;
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+    return parts.map((p, i) =>
+      p.toLowerCase() === q.toLowerCase()
+        ? `<mark class="bg-warning-200 dark:bg-warning-800 text-warning-900 dark:text-warning-100 rounded px-0.5">${p}</mark>`
+        : p
+    ).join("");
+  };
+
+  const severityBadge = (f: ToxicFood) => {
+    if (!f.is_toxic) return { emoji: "✅", label: "Seguro", bg: "bg-secondary-100 dark:bg-secondary-900/30", text: "text-secondary-700 dark:text-secondary-300" };
+    if (f.severity === "mortal") return { emoji: "☠️", label: "Mortal", bg: "bg-danger-100 dark:bg-danger-900/30", text: "text-danger-700 dark:text-danger-300" };
+    if (f.severity === "alto") return { emoji: "🔴", label: "Alto", bg: "bg-danger-100 dark:bg-danger-900/30", text: "text-danger-700 dark:text-danger-300" };
+    if (f.severity === "bajo" || f.severity === "medio") return { emoji: "🟡", label: "Precaución", bg: "bg-warning-100 dark:bg-warning-900/30", text: "text-warning-700 dark:text-warning-300" };
+    return { emoji: "ℹ️", label: "", bg: "bg-zinc-100 dark:bg-zinc-800", text: "text-zinc-500" };
+  };
+
   return (
     <div className="space-y-4">
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Buscar alimento..."
-        className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-4 py-2.5 text-sm"
-      />
-      {filtered.length === 0 && <p className="text-center text-sm text-zinc-400 py-4">No encontrado.</p>}
-      <div className="space-y-2">
-        {filtered.map((f) => (
-          <div key={f.id} className="card-soft rounded-xl p-3 flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${f.severity === "alto" || f.severity === "mortal" ? "bg-danger-100 text-danger-600" : f.severity === "medio" ? "bg-warning-100 text-warning-600" : "bg-secondary-100 text-secondary-600"}`}>
-              {f.severity === "alto" || f.severity === "mortal" ? "☠️" : f.severity === "medio" ? "⚠️" : "ℹ️"}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{f.name}</p>
-              {f.symptoms && <p className="text-xs text-zinc-500 dark:text-zinc-400">{f.symptoms}</p>}
-            </div>
+      {/* Buscador */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setSearched(false); }}
+          onKeyDown={handleKeyDown}
+          placeholder="Ej: chocolate, uvas, cebolla..."
+          className="flex-1 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+        />
+        <button onClick={doSearch}
+          className="rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 text-sm font-bold transition-all active:scale-95 flex items-center gap-1.5">
+          <Search className="w-4 h-4" /> Buscar
+        </button>
+      </div>
+
+      {/* Recientes (scroll horizontal) */}
+      {recents.length > 0 && !searched && (
+        <div className="space-y-1.5">
+          <p className="text-[10px] text-zinc-400 pl-1">Recientes</p>
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            {recents.map((r, i) => (
+              <button key={i} onClick={() => { setQuery(r); setSearched(true); saveRecent(r); }}
+                className="shrink-0 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full px-3 py-1.5 text-zinc-600 dark:text-zinc-400 transition-colors whitespace-nowrap">
+                {r}
+              </button>
+            ))}
           </div>
+        </div>
+      )}
+
+      {/* Filtros */}
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        {[
+          { key: "todos", label: "🌐 Todos" },
+          { key: "mortal", label: "☠️ Mortal" },
+          { key: "alto", label: "🔴 Alto" },
+          { key: "bajo", label: "🟡 Precaución" },
+          { key: "seguros", label: "✅ Seguros" },
+        ].map((f) => (
+          <button key={f.key} onClick={() => setFilter(f.key as typeof filter)}
+            className={`shrink-0 text-[10px] font-semibold rounded-full px-2.5 py-1.5 transition-all border ${
+              filter === f.key
+                ? "bg-primary-50 dark:bg-primary-950/30 border-primary-400 text-primary-700 dark:text-primary-300"
+                : "bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500"
+            }`}
+          >
+            {f.label}
+          </button>
         ))}
       </div>
+
+      {/* Resultados */}
+      {searched && query.trim() && (
+        <>
+          <p className="text-[10px] text-zinc-400 pl-1">
+            {filtered.length > 0 ? `Resultados: ${filtered.length}` : "Sin resultados"}
+          </p>
+
+          {filtered.length === 0 && (
+            <p className="text-center text-sm text-zinc-400 py-6">
+              No se encontraron alimentos. Probá con otra palabra.
+            </p>
+          )}
+
+          <div className="space-y-2">
+            {filtered.map((f, idx) => {
+              const badge = severityBadge(f);
+              const isOpen = expanded.has(f.id);
+              const isHighlighted = idx === 0 && mainResult?.id === f.id;
+              return (
+                <div key={f.id}
+                  className={`card-soft rounded-xl overflow-hidden transition-all cursor-pointer ${
+                    isHighlighted ? "ring-2 ring-warning-400 dark:ring-warning-600 shadow-md" : ""
+                  }`}
+                  onClick={() => toggleExpand(f.id)}
+                >
+                  <div className="p-3 flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-base ${badge.bg}`}>
+                      {badge.emoji}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate"
+                          dangerouslySetInnerHTML={{ __html: highlight(f.name, query) }} />
+                        <span className={`text-[9px] font-semibold rounded-full px-1.5 py-0.5 shrink-0 ${badge.bg} ${badge.text}`}>
+                          {badge.label}
+                        </span>
+                      </div>
+                      {f.is_toxic && f.explanation && (
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                          {f.explanation.slice(0, 80)}...
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-zinc-400 text-sm shrink-0">{isOpen ? "▲" : "▶"}</span>
+                  </div>
+
+                  {/* Expandido */}
+                  {isOpen && (
+                    <div className="px-3 pb-3 pt-0 space-y-2 border-t border-zinc-100 dark:border-zinc-800">
+                      {f.is_toxic && f.explanation && (
+                        <div>
+                          <p className="text-[10px] font-semibold text-zinc-500 mb-0.5">📋 Explicación</p>
+                          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: highlight(f.explanation, query) }} />
+                        </div>
+                      )}
+                      {f.symptoms && (
+                        <div>
+                          <p className="text-[10px] font-semibold text-zinc-500 mb-0.5">🩺 Síntomas</p>
+                          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{f.symptoms}</p>
+                        </div>
+                      )}
+                      {f.category && (
+                        <p className="text-[10px] text-zinc-400">
+                          📂 {f.category.charAt(0).toUpperCase() + f.category.slice(1)}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Sugerencias */}
+          {suggestions.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <p className="text-[10px] text-zinc-400 pl-1">También te puede interesar</p>
+              {suggestions.map((f) => {
+                const badge = severityBadge(f);
+                const isOpen = expanded.has(f.id);
+                return (
+                  <div key={f.id}
+                    className="card-soft rounded-xl overflow-hidden transition-all cursor-pointer opacity-80 hover:opacity-100"
+                    onClick={() => toggleExpand(f.id)}
+                  >
+                    <div className="p-3 flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-sm ${badge.bg}`}>
+                        {badge.emoji}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 truncate">{f.name}</p>
+                          <span className={`text-[8px] font-semibold rounded-full px-1.5 py-0.5 shrink-0 ${badge.bg} ${badge.text}`}>
+                            {badge.label}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-zinc-400 mt-0.5">Misma categoría: {f.category}</p>
+                      </div>
+                      <span className="text-zinc-400 text-xs shrink-0">{isOpen ? "▲" : "▶"}</span>
+                    </div>
+                    {isOpen && f.explanation && (
+                      <div className="px-3 pb-3 pt-0 border-t border-zinc-100 dark:border-zinc-800">
+                        <p className="text-[10px] text-zinc-500 mb-0.5">📋 Explicación</p>
+                        <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{f.explanation}</p>
+                        {f.symptoms && <p className="text-xs text-zinc-500 mt-1"><b>Síntomas:</b> {f.symptoms}</p>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Estado inicial sin búsqueda */}
+      {!searched && (
+        <div className="text-center py-8 space-y-2">
+          <div className="text-4xl mb-3">🔍</div>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Escribí un alimento y tocá <b>Buscar</b></p>
+          <p className="text-xs text-zinc-400">Ej: chocolate, uvas, cebolla, pollo, zanahoria...</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import type { NutritionRecipe, ToxicFood, DogMetabolicProfile, Dog, DetoxDay, Do
 import {
   getCachedDog, getCachedMetabolicProfile, getCachedMealSlots,
   getCachedRecipes, getCachedWalks, getCachedWeightLatest, getCachedMealSchedule,
+  getCachedToxicFoods,
 } from "@/lib/data-cache";
 
 export default async function NutricionPage({
@@ -21,9 +22,9 @@ export default async function NutricionPage({
   const savedDogId = cookieStore.get("blis_current_dog")?.value ?? null;
 
   // Datos compartidos con el layout (cache deduplicado)
-  const [recipes, toxicRes, detoxDaysRes, favRes, hiddenRes, detoxProgressRes] = await Promise.all([
+  const [recipes, toxicFoods, detoxDaysRes, favRes, hiddenRes, detoxProgressRes] = await Promise.all([
     getCachedRecipes(),
-    supabase.from("toxic_foods").select("*").order("name"),
+    getCachedToxicFoods(),
     supabase.from("detox_days").select("*").order("day_number"),
     supabase.from("user_favorite_recipes").select("recipe_id").eq("user_id", user.id),
     supabase.from("user_hidden_recipes").select("recipe_id, reason").eq("user_id", user.id),
@@ -77,7 +78,6 @@ export default async function NutricionPage({
   }
 
   const greenCount = walks.filter((w: Walk) => w.traffic_light === "green").length;
-  const toxicFoods = (toxicRes.data as ToxicFood[] | null) ?? [];
   const detoxDays = (detoxDaysRes.data as DetoxDay[] | null) ?? [];
   const detoxProgress = (detoxProgressRes.data as { day_number: number; completed: boolean }[] | null) ?? [];
   const favoriteIds = new Set((favRes.data ?? []).map((f: any) => f.recipe_id));
