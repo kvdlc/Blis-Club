@@ -306,44 +306,10 @@ export default function IzipayCheckout({
 
         {/* Card brand logos */}
         <div className="flex items-center justify-center gap-3 px-5 py-3 border-t border-zinc-100">
-          {/* Visa */}
-          <div className="w-8 h-5 relative">
-            <svg viewBox="0 0 48 32" className="w-full h-full" fill="none">
-              <rect width="48" height="32" rx="3" fill="#1A1F71"/>
-              <path d="M19.5 21.5L21.5 10.5H24L22 21.5H19.5Z" fill="white"/>
-              <path d="M32 10.5C31.2 10.2 30 10 28.5 10C25.2 10 22.8 11.8 22.8 14.2C22.8 15.8 24.3 16.7 25.3 17.2C26.4 17.7 26.8 18 26.8 18.5C26.8 19.2 25.9 19.5 25 19.5C23.6 19.5 22.8 19.2 22.1 18.9L21.7 18.7L21.2 21C22 21.4 23.4 21.7 24.8 21.7C28.3 21.7 30.6 19.9 30.6 17.3C30.6 16.1 29.7 15.2 28.1 14.5C27.1 14 26.4 13.7 26.4 13.1C26.4 12.6 27 12.2 28.1 12.2C29.2 12.2 30 12.5 30.5 12.7L30.8 12.9L32 10.5Z" fill="white"/>
-              <path d="M36.5 10.5H34.5C34 10.5 33.5 10.6 33.2 11.2L28.5 21.5H31.2L31.8 19.9H35.2L35.5 21.5H37.8L36.5 10.5ZM32.5 17.5L34 13.5L34.8 17.5H32.5Z" fill="white"/>
-              <path d="M15.5 10.5L12.8 21.5H15.3L17.9 10.5H15.5Z" fill="white"/>
-              <path d="M12.5 10.5L9.5 17.8L9.1 16.2C8.3 14 6.5 11.5 6.5 11.5L9.5 21.5H12.2L16.5 10.5H12.5Z" fill="white"/>
-            </svg>
-          </div>
-          {/* Mastercard */}
-          <div className="w-8 h-5 relative">
-            <svg viewBox="0 0 48 32" className="w-full h-full" fill="none">
-              <rect width="48" height="32" rx="3" fill="#F7F7F7"/>
-              <circle cx="18" cy="16" r="10" fill="#EB001B"/>
-              <circle cx="30" cy="16" r="10" fill="#F79E1B"/>
-              <path d="M24 8.5C26.2 10.2 27.5 12.9 27.5 16C27.5 19.1 26.2 21.8 24 23.5C21.8 21.8 20.5 19.1 20.5 16C20.5 12.9 21.8 10.2 24 8.5Z" fill="#FF5F00"/>
-            </svg>
-          </div>
-          {/* Amex */}
-          <div className="w-8 h-5 relative">
-            <svg viewBox="0 0 48 32" className="w-full h-full" fill="none">
-              <rect width="48" height="32" rx="3" fill="#016FD0"/>
-              <path d="M4 12H8L10 14V10H18L19.5 13L21 10H44V22H21L19.5 19L18 22H10V18L8 20H4V12Z" fill="white"/>
-              <text x="24" y="20" fontSize="7" fontWeight="bold" fill="#016FD0" textAnchor="middle">AMEX</text>
-            </svg>
-          </div>
-          {/* Diners */}
-          <div className="w-8 h-5 relative">
-            <svg viewBox="0 0 48 32" className="w-full h-full" fill="none">
-              <rect width="48" height="32" rx="3" fill="#F7F7F7"/>
-              <path d="M24 6C14 6 8 12 8 16C8 20 14 26 24 26C34 26 40 20 40 16C40 12 34 6 24 6Z" fill="#FFFFFF" stroke="#E0E0E0" strokeWidth="0.5"/>
-              <path d="M24 8C30 8 34 12 34 16C34 20 30 24 24 24C18 24 14 20 14 16C14 12 18 8 24 8Z" fill="#1A1F71"/>
-              <path d="M18 10C16 11 15 13 15 16C15 19 16 21 18 22V10Z" fill="white"/>
-              <path d="M30 10C32 11 33 13 33 16C33 19 32 21 30 22V10Z" fill="white"/>
-            </svg>
-          </div>
+          <img src="/marcas/visa.svg" alt="Visa" className="w-8 h-5" />
+          <img src="/marcas/mastercard.svg" alt="Mastercard" className="w-8 h-5" />
+          <img src="/marcas/amex.svg" alt="Amex" className="w-8 h-5" />
+          <img src="/marcas/diners-club.svg" alt="Diners" className="w-8 h-5" />
         </div>
       </div>
     </div>
@@ -362,9 +328,10 @@ function injectKRGlueStyles(styleId: string) {
   style.textContent = `
     /* ═══════════════════════════════════════════════
        KR-Glue Theme — Blis Corp Replica
+       Solo clases exactas del SDK Krypton V4
        ═══════════════════════════════════════════════ */
 
-    /* Contenedor gris del form */
+    /* Contenedor gris */
     .kr-embedded {
       background: #f4f4f5 !important;
       border-radius: 1.5rem !important;
@@ -372,132 +339,72 @@ function injectKRGlueStyles(styleId: string) {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     }
 
-    /* Cada grupo de campo */
-    .kr-embedded .kr-field,
-    .kr-embedded [class*="field"] {
+    /* Wrapper de cada campo: solo margin */
+    .kr-embedded .kr-field {
       margin-bottom: 0.75rem !important;
       position: relative !important;
     }
 
-    /* Labels ocultos (usamos placeholder como en blis-corp) */
-    .kr-embedded .kr-field-label,
-    .kr-embedded label,
+    /* Labels ocultos */
     .kr-embedded .kr-label {
       display: none !important;
     }
 
-    /* Inputs: número, fecha, CVV, nombre */
-    .kr-embedded input,
-    .kr-embedded .kr-field-input,
-    .kr-embedded [class*="input"],
-    .kr-embedded select,
-    .kr-embedded .kr-select,
-    .kr-embedded [class*="select"] {
+    /* Inputs reales (hijos de .kr-field o directos) */
+    .kr-embedded input {
       background: #ffffff !important;
       border: 1.5px solid #e4e4e7 !important;
       border-radius: 0.875rem !important;
       padding: 0.75rem 0.875rem !important;
-      padding-left: 0.75rem !important;
-      padding-right: 2.5rem !important;
       font-size: 0.875rem !important;
       color: #27272a !important;
       width: 100% !important;
       height: 2.75rem !important;
       box-sizing: border-box !important;
       font-family: inherit !important;
-      transition: all 0.2s ease !important;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
       outline: none !important;
       margin: 0 !important;
-      display: block !important;
     }
 
-    .kr-embedded input::placeholder,
-    .kr-embedded .kr-field-input::placeholder {
+    .kr-embedded input::placeholder {
       color: #a1a1aa !important;
       font-size: 0.875rem !important;
     }
 
-    .kr-embedded input:focus,
-    .kr-embedded .kr-field-input:focus,
-    .kr-embedded select:focus,
-    .kr-embedded .kr-select:focus {
+    .kr-embedded input:focus {
       border-color: #10b981 !important;
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important;
       background: #ffffff !important;
     }
 
-    /* Selects (cuotas, diferido) - forzar estilo nativo */
-    .kr-embedded select,
-    .kr-embedded .kr-select,
-    .kr-embedded [class*="select"] {
-      appearance: none !important;
-      -webkit-appearance: none !important;
-      -moz-appearance: none !important;
+    /* Selects custom (divs .kr-select) */
+    .kr-embedded .kr-select {
+      background: #ffffff !important;
+      border: 1.5px solid #e4e4e7 !important;
+      border-radius: 0.875rem !important;
+      padding: 0.75rem 2.5rem 0.75rem 0.875rem !important;
+      font-size: 0.875rem !important;
+      color: #27272a !important;
+      width: 100% !important;
+      height: 2.75rem !important;
+      box-sizing: border-box !important;
+      font-family: inherit !important;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+      outline: none !important;
+      margin: 0 !important;
+      position: relative !important;
+      cursor: pointer !important;
+      display: flex !important;
+      align-items: center !important;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
       background-repeat: no-repeat !important;
       background-position: right 0.75rem center !important;
       background-size: 1rem !important;
-      background-color: #ffffff !important;
-    }
-
-    /* Íconos a la derecha vía background-image en campos conocidos */
-    .kr-embedded .kr-pan,
-    .kr-embedded [class*="pan"],
-    .kr-embedded input[name*="pan"],
-    .kr-embedded input[placeholder*="tarjeta"] {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='1' y='4' width='22' height='16' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='1' y1='10' x2='23' y2='10'%3E%3C/line%3E%3C/svg%3E") !important;
-      background-repeat: no-repeat !important;
-      background-position: right 0.75rem center !important;
-      background-size: 1.125rem !important;
-      padding-right: 2.5rem !important;
-    }
-
-    .kr-embedded .kr-expiry,
-    .kr-embedded [class*="expiry"],
-    .kr-embedded input[placeholder*="MM"],
-    .kr-embedded input[placeholder*="AA"] {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E") !important;
-      background-repeat: no-repeat !important;
-      background-position: right 0.75rem center !important;
-      background-size: 1.125rem !important;
-      padding-right: 2.5rem !important;
-    }
-
-    .kr-embedded .kr-cvv,
-    .kr-embedded [class*="cvv"],
-    .kr-embedded input[placeholder*="CVV"] {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cpath d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'%3E%3C/path%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'%3E%3C/line%3E%3C/svg%3E") !important;
-      background-repeat: no-repeat !important;
-      background-position: right 0.75rem center !important;
-      background-size: 1.125rem !important;
-      padding-right: 2.5rem !important;
-    }
-
-    .kr-embedded .kr-card-holder,
-    .kr-embedded [class*="holder"],
-    .kr-embedded input[placeholder*="titular"] {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E") !important;
-      background-repeat: no-repeat !important;
-      background-position: right 0.75rem center !important;
-      background-size: 1.125rem !important;
-      padding-right: 2.5rem !important;
-    }
-
-    /* Layout de dos columnas para fecha + CVV */
-    .kr-embedded .kr-expiry-cvv-row,
-    .kr-embedded .kr-form-row,
-    .kr-embedded [class*="row"][class*="expiry"] {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-      gap: 0.75rem !important;
     }
 
     /* Botón de pago verde */
-    .kr-embedded .kr-payment-button,
-    .kr-embedded button[type="submit"],
-    .kr-embedded .kr-submit,
-    .kr-embedded [class*="submit"],
-    .kr-embedded [class*="payment-button"] {
+    .kr-embedded .kr-payment-button {
       background: #10b981 !important;
       color: #ffffff !important;
       font-weight: 800 !important;
@@ -515,45 +422,31 @@ function injectKRGlueStyles(styleId: string) {
       box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25) !important;
     }
 
-    .kr-embedded .kr-payment-button:hover,
-    .kr-embedded button[type="submit"]:hover {
+    .kr-embedded .kr-payment-button:hover {
       background: #059669 !important;
       transform: translateY(-1px) !important;
       box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35) !important;
     }
 
-    .kr-embedded .kr-payment-button:active,
-    .kr-embedded button[type="submit"]:active {
+    .kr-embedded .kr-payment-button:active {
       transform: translateY(0) !important;
     }
 
     /* Mensajes de error */
-    .kr-embedded .kr-form-error,
-    .kr-embedded [class*="error"] {
+    .kr-embedded .kr-error {
       color: #ef4444 !important;
       font-size: 0.75rem !important;
       margin-top: 0.25rem !important;
       padding-left: 0.25rem !important;
     }
 
-    /* Spinner de carga del SDK */
-    .kr-embedded .kr-spinner,
-    .kr-embedded [class*="spinner"] {
+    /* Spinner */
+    .kr-embedded .kr-spinner {
       color: #10b981 !important;
     }
 
-    /* Checkbox guardar tarjeta */
-    .kr-embedded .kr-save-card,
-    .kr-embedded [class*="save"] {
-      font-size: 0.75rem !important;
-      color: #71717a !important;
-      margin-top: 0.5rem !important;
-    }
-
-    /* Remove any default SDK borders/backgrounds */
-    .kr-embedded .kr-form,
-    .kr-embedded form,
-    .kr-embedded [class*="form"] {
+    /* Formulario sin bordes/fondo */
+    .kr-embedded .kr-form {
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
