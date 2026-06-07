@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { createPayment } from "@/lib/izipay/client";
 import type { IzipayConfig } from "@/lib/izipay/types";
 
-async function getIzipayConfig(supabase: Awaited<ReturnType<typeof createClient>>): Promise<IzipayConfig | null> {
+async function getIzipayConfig(): Promise<IzipayConfig | null> {
+  const supabase = createServiceClient();
   const { data: keys, error } = await supabase
     .from("api_keys")
     .select("key_name, key_value")
@@ -65,7 +67,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Plan no encontrado" }, { status: 404 });
     }
 
-    const config = await getIzipayConfig(supabase);
+    const config = await getIzipayConfig();
     if (!config) {
       return NextResponse.json({
         error: "Izipay no está configurado. Agrega las claves en tabla api_keys (izipay_shop_id, izipay_secret_key, izipay_public_key, izipay_hmac_key).",

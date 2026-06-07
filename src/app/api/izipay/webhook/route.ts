@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { verifyKRHash } from "@/lib/izipay/client";
 import type { IzipayIPNAnswer } from "@/lib/izipay/types";
 
@@ -27,9 +28,10 @@ export async function POST(request: Request) {
 
     console.log("[Izipay Webhook] orderStatus:", answerData.orderStatus);
 
+    const serviceSupabase = createServiceClient();
     const supabase = await createClient();
 
-    const { data: keys } = await supabase
+    const { data: keys } = await serviceSupabase
       .from("api_keys")
       .select("key_name, key_value")
       .eq("is_global", true)
