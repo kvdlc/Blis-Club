@@ -23,6 +23,8 @@ interface IzipayCheckoutProps {
 
 type FormState = 'loading' | 'ready' | 'processing' | 'success' | 'error';
 
+const BASE_URL = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable';
+
 export default function IzipayCheckout({
   formToken,
   publicKey,
@@ -54,10 +56,33 @@ export default function IzipayCheckout({
 
     const init = async () => {
       try {
-        // 1. Inyectar estilos KR-Glue
-        injectKRGlueStyles(styleId);
+        // 1. Cargar tema Classic CSS
+        if (!document.getElementById('izipay-kr-classic-css')) {
+          const link = document.createElement('link');
+          link.id = 'izipay-kr-classic-css';
+          link.rel = 'stylesheet';
+          link.href = `${BASE_URL}/ext/classic-reset.css`;
+          document.head.appendChild(link);
+        }
 
-        // 2. Crear contenedor
+        // 2. Cargar tema Classic JS
+        if (!document.getElementById('izipay-kr-classic-js')) {
+          const s = document.createElement('script');
+          s.id = 'izipay-kr-classic-js';
+          s.src = `${BASE_URL}/ext/classic.js`;
+          s.async = true;
+          document.head.appendChild(s);
+          // Esperar a que el tema JS cargue
+          await new Promise((resolve) => {
+            s.onload = resolve;
+            s.onerror = resolve; // continuar igual si falla
+          });
+        }
+
+        // 3. Inyectar estilos custom (después del tema)
+        injectCustomStyles(styleId);
+
+        // 4. Crear contenedor con sub-componentes explícitos
         let container = document.getElementById(krContainerId);
         if (!container) {
           container = document.createElement('div');
@@ -67,7 +92,6 @@ export default function IzipayCheckout({
           if (parent) parent.appendChild(container);
         }
 
-        // Limpiar contenido previo
         while (container.firstChild) {
           container.removeChild(container.firstChild);
         }
@@ -78,23 +102,36 @@ export default function IzipayCheckout({
         krDiv.setAttribute('kr-public-key', publicKey);
         krDiv.setAttribute('kr-language', 'es-ES');
         krDiv.style.width = '100%';
-        krDiv.style.minHeight = '400px';
+
+        // Sub-componentes explícitos (igual que blis-corp)
+        const panDiv = document.createElement('div');
+        panDiv.className = 'kr-pan';
+        krDiv.appendChild(panDiv);
+
+        const expiryDiv = document.createElement('div');
+        expiryDiv.className = 'kr-expiry';
+        krDiv.appendChild(expiryDiv);
+
+        const securityDiv = document.createElement('div');
+        securityDiv.className = 'kr-security-code';
+        krDiv.appendChild(securityDiv);
+
         container.appendChild(krDiv);
 
-        // 3. Cargar script
+        // 5. Cargar SDK principal
         const script = await loadScript(displayMode);
         addLog('Script cargado exitosamente');
 
-        // 4. Esperar a que KR esté disponible
+        // 6. Esperar a que KR esté disponible
         const KR = await waitForKR();
         addLog('KR SDK disponible');
 
-        // 5. KR.setFormToken es ASYNC - usar await
+        // 7. setFormToken es async
         addLog('Ejecutando setFormToken...');
         await KR.setFormToken(formToken);
         addLog('setFormToken completado');
 
-        // 6. Registrar callbacks DESPUÉS de setFormToken
+        // 8. Registrar callbacks
         KR.onFormReady(() => {
           addLog('KR.onFormReady: Formulario listo');
           setFormState('ready');
@@ -121,7 +158,7 @@ export default function IzipayCheckout({
           return true;
         });
 
-        // Fallback: si onFormReady no dispara en 15s
+        // Fallback
         setTimeout(() => {
           setFormState(prev => {
             if (prev === 'loading') {
@@ -144,7 +181,6 @@ export default function IzipayCheckout({
     return () => {
       addLog('Cleanup: removeForms');
       try { window.KR?.removeForms(); } catch { /* ignore */ }
-      // Remover estilos inyectados
       const existingStyle = document.getElementById(styleId);
       if (existingStyle) existingStyle.remove();
     };
@@ -185,17 +221,16 @@ export default function IzipayCheckout({
         <AnimatePresence mode="wait">
           {formState === 'loading' && (
             <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-5 py-6 space-y-4">
-              {/* Skeleton que replica el formulario de blis-corp */}
               <div className="bg-[#f4f4f5] rounded-3xl p-5 space-y-3">
-                <div className="h-11 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
+                <div className="h-12 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="h-11 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
-                  <div className="h-11 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
+                  <div className="h-12 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
+                  <div className="h-12 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
                 </div>
-                <div className="h-11 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
-                <div className="h-11 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
-                <div className="h-11 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
-                <div className="h-11 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
+                <div className="h-12 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
+                <div className="h-12 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
+                <div className="h-12 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
+                <div className="h-12 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
                 <div className="h-12 bg-emerald-500/30 rounded-xl animate-pulse mt-2" />
               </div>
               <div className="flex items-center justify-center gap-3 py-2">
@@ -273,7 +308,7 @@ export default function IzipayCheckout({
           )}
         </AnimatePresence>
 
-        <div id="kr-root-anchor" className="w-full px-5" />
+        <div id="kr-root-anchor" className={`w-full px-5 ${formState === 'loading' ? 'hidden' : ''}`} />
       </div>
 
       {/* Footer - Badges + Card logos */}
@@ -320,107 +355,66 @@ export default function IzipayCheckout({
 // Helpers
 // ═══════════════════════════════════════════════════════════
 
-function injectKRGlueStyles(styleId: string) {
+function injectCustomStyles(styleId: string) {
   if (document.getElementById(styleId)) return;
 
   const style = document.createElement('style');
   style.id = styleId;
   style.textContent = `
     /* ═══════════════════════════════════════════════
-       KR-Glue Theme — Blis Corp Replica
-       Solo clases exactas del SDK Krypton V4
+       Custom overrides sobre tema Classic
        ═══════════════════════════════════════════════ */
 
-    /* Contenedor gris */
+    /* Contenedor principal */
     .kr-embedded {
       background: #f4f4f5 !important;
       border-radius: 1.5rem !important;
       padding: 1.25rem !important;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     }
 
-    /* Wrapper de cada campo: solo margin */
-    .kr-embedded .kr-field {
-      margin-bottom: 0.75rem !important;
-      position: relative !important;
-    }
-
-    /* Labels ocultos */
-    .kr-embedded .kr-label {
-      display: none !important;
-    }
-
-    /* Inputs reales (hijos de .kr-field o directos) */
-    .kr-embedded input {
-      background: #ffffff !important;
-      border: 1.5px solid #e4e4e7 !important;
-      border-radius: 0.875rem !important;
-      padding: 0.75rem 0.875rem !important;
-      font-size: 0.875rem !important;
-      color: #27272a !important;
-      width: 100% !important;
-      height: 2.75rem !important;
-      box-sizing: border-box !important;
-      font-family: inherit !important;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-      outline: none !important;
-      margin: 0 !important;
-    }
-
-    .kr-embedded input::placeholder {
-      color: #a1a1aa !important;
-      font-size: 0.875rem !important;
-    }
-
-    .kr-embedded input:focus {
-      border-color: #10b981 !important;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important;
-      background: #ffffff !important;
-    }
-
-    /* Selects custom (divs .kr-select) */
-    .kr-embedded .kr-select {
-      background: #ffffff !important;
-      border: 1.5px solid #e4e4e7 !important;
-      border-radius: 0.875rem !important;
-      padding: 0.75rem 2.5rem 0.75rem 0.875rem !important;
-      font-size: 0.875rem !important;
-      color: #27272a !important;
-      width: 100% !important;
-      height: 2.75rem !important;
-      box-sizing: border-box !important;
-      font-family: inherit !important;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-      outline: none !important;
-      margin: 0 !important;
-      position: relative !important;
-      cursor: pointer !important;
-      display: flex !important;
-      align-items: center !important;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
-      background-repeat: no-repeat !important;
-      background-position: right 0.75rem center !important;
-      background-size: 1rem !important;
-    }
-
-    /* Contenedores de campos con iframe — captura cualquier div con iframe (incluye CVV dinámico) */
-    .kr-embedded > div:has(iframe),
+    /* Campos de entrada (contenedores) — igual que blis-corp */
     .kr-embedded .kr-pan,
     .kr-embedded .kr-expiry,
-    .kr-embedded .kr-cvv {
+    .kr-embedded .kr-security-code,
+    .kr-embedded .kr-card-holder-name,
+    .kr-embedded .kr-installment-number,
+    .kr-embedded .kr-first-installment-delay {
       background: #ffffff !important;
       border: 1.5px solid #e4e4e7 !important;
       border-radius: 0.875rem !important;
-      min-height: 4.5rem !important;
       margin-bottom: 0.75rem !important;
-      overflow: hidden !important;
+      transition: border-color 0.2s ease !important;
     }
 
-    /* Todos los iframes dentro del form */
-    .kr-embedded iframe {
-      width: 100% !important;
-      height: 4.5rem !important;
-      border: none !important;
+    /* Focus state */
+    .kr-embedded .kr-pan.kr-field-focused,
+    .kr-embedded .kr-expiry.kr-field-focused,
+    .kr-embedded .kr-security-code.kr-field-focused,
+    .kr-embedded .kr-card-holder-name.kr-field-focused,
+    .kr-embedded .kr-installment-number.kr-field-focused,
+    .kr-embedded .kr-first-installment-delay.kr-field-focused {
+      border-color: #10b981 !important;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important;
+    }
+
+    /* Iframes transparentes */
+    .kr-embedded .kr-pan iframe,
+    .kr-embedded .kr-expiry iframe,
+    .kr-embedded .kr-security-code iframe,
+    .kr-embedded .kr-installment-number iframe,
+    .kr-embedded .kr-first-installment-delay iframe,
+    .kr-embedded .kr-card-holder-name iframe {
+      background: transparent !important;
+    }
+
+    /* Labels visibles */
+    .kr-embedded .kr-field-label {
+      color: #71717a !important;
+      font-size: 0.6875rem !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      margin-bottom: 0.25rem !important;
     }
 
     /* Botón de pago verde */
@@ -435,7 +429,6 @@ function injectKRGlueStyles(styleId: string) {
       border-radius: 1rem !important;
       padding: 1rem 1.5rem !important;
       width: 100% !important;
-      margin-top: 0.5rem !important;
       cursor: pointer !important;
       font-family: inherit !important;
       transition: all 0.2s ease !important;
@@ -444,32 +437,20 @@ function injectKRGlueStyles(styleId: string) {
 
     .kr-embedded .kr-payment-button:hover {
       background: #059669 !important;
-      transform: translateY(-1px) !important;
       box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35) !important;
     }
 
-    .kr-embedded .kr-payment-button:active {
-      transform: translateY(0) !important;
-    }
-
-    /* Mensajes de error */
-    .kr-embedded .kr-error {
+    /* Errores */
+    .kr-embedded .kr-form-error {
       color: #ef4444 !important;
       font-size: 0.75rem !important;
-      margin-top: 0.25rem !important;
-      padding-left: 0.25rem !important;
+      margin-top: 0.5rem !important;
     }
 
-    /* Spinner */
-    .kr-embedded .kr-spinner {
-      color: #10b981 !important;
-    }
-
-    /* Formulario sin bordes/fondo */
-    .kr-embedded .kr-form {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
+    .kr-embedded .kr-field-error .kr-pan,
+    .kr-embedded .kr-field-error .kr-expiry,
+    .kr-embedded .kr-field-error .kr-security-code {
+      border-color: rgba(239, 68, 68, 0.5) !important;
     }
   `;
 
