@@ -273,7 +273,7 @@ export default function IzipayCheckout({
           )}
         </AnimatePresence>
 
-        <div id="kr-root-anchor" className="w-full px-5" />
+        <div id="kr-root-anchor" className={`w-full px-5 ${formState === 'loading' ? 'hidden' : ''}`} />
       </div>
 
       {/* Footer - Badges + Card logos */}
@@ -482,7 +482,7 @@ function injectKRGlueStyles(styleId: string) {
       border-radius: 1rem !important;
       padding: 1rem 1.5rem !important;
       width: 100% !important;
-      margin-top: 0.5rem !important;
+      margin-top: 1.25rem !important;
       cursor: pointer !important;
       font-family: inherit !important;
       transition: all 0.2s ease !important;
