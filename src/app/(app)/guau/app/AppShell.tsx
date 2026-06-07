@@ -1,25 +1,37 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { Dog, DogMetabolicProfile, DogMealSlot, NutritionRecipe, ToxicFood, MealSchedule, Walk } from "@/types/database";
+import type { Dog, DogMetabolicProfile, DogMealSlot, NutritionRecipe, ToxicFood, MealSchedule, Walk, DogVaccine, Stage, Module, Lesson, UserProgress, Profile, WeeklyChallenge, UserChallenge, Subscription, Plan, UserBadge, Badge } from "@/types/database";
 import { NutritionHub } from "./nutricion/NutritionHub";
 import { AddDogForm } from "./AddDogForm";
 import QuickToolsCarousel from "@/components/QuickToolsCarousel";
 import { DashboardWidgets } from "./DashboardWidgets";
+import { ProfileClient } from "./perfil/ProfileClient";
+import AcademiaClient from "./academia/AcademiaClient";
+import { TrackerClient } from "./tracker/TrackerClient";
+import { PerdidoClient } from "./perdido/PerdidoClient";
 
 export type TabKey = "inicio" | "nutricion" | "academia" | "tracker" | "perdido" | "perfil";
 
-/* ════════════════════════════════════════════ */
-/* Tab: Nutrición                               */
-/* ════════════════════════════════════════════ */
-function NutricionTab({ dog, userId }: { dog: Dog | null; userId: string }) {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+/* ═══════════════════════════ Skeleton ═══════════════════════ */
+function TabSkeleton() {
+  return (
+    <div className="space-y-3 animate-pulse pt-2">
+      <div className="h-8 w-40 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+      <div className="h-40 bg-zinc-100 dark:bg-zinc-800/60 rounded-[1.5rem]" />
+      <div className="h-20 bg-zinc-100 dark:bg-zinc-800/60 rounded-[1.25rem]" />
+    </div>
+  );
+}
+
+/* ═══════════════════════════ Nutrición ═══════════════════════ */
+function NutricionTab({ dog, userId, preloaded }: { dog: Dog | null; userId: string; preloaded?: any }) {
+  const [data, setData] = useState<any>(preloaded ?? null);
+  const [loading, setLoading] = useState(!preloaded);
 
   useEffect(() => {
-    if (!dog) return;
+    if (!dog || data) return;
     (async () => {
       const supabase = createClient();
       const [r1, r2, r3, r4, r5, r6] = await Promise.all([
@@ -30,70 +42,128 @@ function NutricionTab({ dog, userId }: { dog: Dog | null; userId: string }) {
         supabase.from("meal_schedule").select("*, recipe:nutrition_recipes(*)").eq("dog_id", dog.id).order("fecha", { ascending: true }),
         supabase.from("walks").select("*").eq("dog_id", dog.id).order("start_time", { ascending: false }).limit(30),
       ]);
-      setData({
-        recipes: (r1.data ?? []) as any[],
-        toxicFoods: (r2.data ?? []) as any[],
-        metabolicProfile: (r3.data ?? null) as any,
-        mealSlots: (r4.data ?? []) as any[],
-        mealSchedule: (r5.data ?? []) as any[],
-        walks: (r6.data ?? []) as any[],
-      });
+      setData({ recipes: r1.data ?? [], toxicFoods: r2.data ?? [], metabolicProfile: r3.data ?? null, mealSlots: r4.data ?? [], mealSchedule: r5.data ?? [], walks: r6.data ?? [] });
       setLoading(false);
     })();
-  }, [dog?.id]);
+  }, [dog?.id, data]);
 
-  if (loading) return <div className="space-y-3 animate-pulse pt-2"><div className="h-8 w-40 bg-zinc-200 dark:bg-zinc-800 rounded-xl" /><div className="h-40 bg-zinc-100 dark:bg-zinc-800/60 rounded-[1.5rem]" /></div>;
+  if (loading) return <TabSkeleton />;
   if (!dog || !data) return <p className="text-zinc-500 text-center py-8">Registrá un perro primero.</p>;
 
   return (
     <NutritionHub
-      initialRecipes={data.recipes}
-      toxicFoods={data.toxicFoods}
-      dog={dog}
-      metabolicProfile={data.metabolicProfile}
-      detoxDays={[]}
-      detoxProgress={[]}
-      userId={userId}
-      mealSlots={data.mealSlots}
-      mealSchedule={data.mealSchedule}
-      walks={data.walks}
-      greenCount={data.walks.filter((w: any) => w.traffic_light === "green").length}
-      favoriteRecipeIds={new Set()}
-      hiddenRecipeIds={new Map()}
+      initialRecipes={data.recipes} toxicFoods={data.toxicFoods} dog={dog} metabolicProfile={data.metabolicProfile}
+      detoxDays={[]} detoxProgress={[]} userId={userId} mealSlots={data.mealSlots} mealSchedule={data.mealSchedule}
+      walks={data.walks} greenCount={data.walks.filter((w: any) => w.traffic_light === "green").length}
+      favoriteRecipeIds={new Set()} hiddenRecipeIds={new Map()}
     />
   );
 }
 
-/* ════════════════════════════════════════════ */
-/* Placeholder tabs                             */
-/* ════════════════════════════════════════════ */
-function PlaceholderTab({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+/* ═══════════════════════════ Perfil ═══════════════════════ */
+function PerfilTab({ userId, preloaded }: { userId: string; preloaded?: any }) {
+  const [data, setData] = useState<any>(preloaded ?? null);
+  const [loading, setLoading] = useState(!preloaded);
+
+  useEffect(() => {
+    if (data) return;
+    (async () => {
+      const supabase = createClient();
+      const [p, d, mp, b, c, uc, s] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId).single(),
+        supabase.from("dogs").select("*").eq("owner_id", userId),
+        supabase.from("dog_metabolic_profiles").select("*"),
+        supabase.from("user_badges").select("*, badges(*)").eq("user_id", userId),
+        supabase.from("weekly_challenges").select("*").order("fecha_inicio", { ascending: false }).limit(5),
+        supabase.from("user_challenges").select("*").eq("user_id", userId),
+        supabase.from("subscriptions").select("*, plans(*)").eq("user_id", userId).maybeSingle(),
+      ]);
+      setData({ profile: p.data, dogs: d.data ?? [], metabolicProfiles: mp.data ?? [], userBadges: b.data ?? [], challenges: c.data ?? [], userChallenges: uc.data ?? [], subscription: s.data ?? null });
+      setLoading(false);
+    })();
+  }, [userId, data]);
+
+  if (loading) return <TabSkeleton />;
+  if (!data) return <p className="text-zinc-500 text-center py-8">Cargando perfil...</p>;
+
   return (
-    <div className="text-center py-16 space-y-4">
-      <p className="text-5xl">{icon}</p>
-      <h2 className="text-base font-bold text-zinc-700 dark:text-zinc-300">{title}</h2>
-      <p className="text-sm text-zinc-400">{desc}</p>
-    </div>
+    <ProfileClient
+      profile={data.profile} dogs={data.dogs} metabolicProfiles={data.metabolicProfiles}
+      userBadges={data.userBadges} challenges={data.challenges} userChallenges={data.userChallenges}
+      subscription={data.subscription} userId={userId}
+    />
   );
 }
 
-/* ════════════════════════════════════════════ */
-/* Dashboard Content (from SSR data)            */
-/* ════════════════════════════════════════════ */
+/* ═══════════════════════════ Academia ═══════════════════════ */
+function AcademiaTab({ userId, preloaded }: { userId: string; preloaded?: any }) {
+  const [data, setData] = useState<any>(preloaded ?? null);
+  const [loading, setLoading] = useState(!preloaded);
+
+  useEffect(() => {
+    if (data) return;
+    (async () => {
+      const supabase = createClient();
+      const [s, m, l, p] = await Promise.all([
+        supabase.from("stages").select("*").order("order"),
+        supabase.from("modules").select("*").order("order"),
+        supabase.from("lessons").select("*").order("order"),
+        supabase.from("user_progress").select("*").eq("user_id", userId),
+      ]);
+      setData({ stages: s.data ?? [], modules: m.data ?? [], lessons: l.data ?? [], progress: p.data ?? [] });
+      setLoading(false);
+    })();
+  }, [userId, data]);
+
+  if (loading) return <TabSkeleton />;
+  if (!data) return <p className="text-zinc-500 text-center py-8">Cargando academia...</p>;
+
+  return <AcademiaClient stages={data.stages} modules={data.modules} lessons={data.lessons} progress={data.progress} streak={0} />;
+}
+
+/* ═══════════════════════════ Tracker ═══════════════════════ */
+function TrackerTab({ dog, userId, preloaded }: { dog: Dog | null; userId: string; preloaded?: any }) {
+  const [data, setData] = useState<any>(preloaded ?? null);
+  const [loading, setLoading] = useState(!preloaded);
+
+  useEffect(() => {
+    if (data || !dog) return;
+    (async () => {
+      const supabase = createClient();
+      const [w, ad, ag, v] = await Promise.all([
+        supabase.from("walks").select("*").eq("dog_id", dog.id).order("start_time", { ascending: false }).limit(60),
+        supabase.from("dogs").select("*").eq("owner_id", userId),
+        supabase.from("agility_sessions").select("id, activity_type, duration_min, circuit_time_seconds, fecha").eq("dog_id", dog.id).order("fecha", { ascending: false }).limit(20),
+        supabase.from("dog_vaccines").select("*").eq("dog_id", dog.id).order("created_at", { ascending: false }),
+      ]);
+      setData({ walks: w.data ?? [], allDogs: ad.data ?? [], agilitySessions: ag.data ?? [], vaccines: v.data ?? [] });
+      setLoading(false);
+    })();
+  }, [dog?.id, userId, data]);
+
+  if (loading) return <TabSkeleton />;
+  if (!data) return <p className="text-zinc-500 text-center py-8">Registrá un perro primero.</p>;
+
+  return <TrackerClient walks={data.walks} dog={dog} allDogs={data.allDogs} agilitySessions={data.agilitySessions} streakDays={0} userId={userId} vaccines={data.vaccines} />;
+}
+
+/* ═══════════════════════════ Perdido ═══════════════════════ */
+function PerdidoTab({ dog, preloaded }: { dog: Dog | null; preloaded?: any }) {
+  if (!dog) return <p className="text-zinc-500 text-center py-8">Registrá un perro primero.</p>;
+  return <PerdidoClient dog={dog} latestWeightPhoto={null} />;
+}
+
+/* ═══════════════════════════ Dashboard ═══════════════════════ */
 function DashboardContent({ data, dog, userId }: { data: any; dog: Dog | null; userId: string }) {
   if (!dog) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
         <div className="w-24 h-24 rounded-full bg-primary-50 dark:bg-primary-950 flex items-center justify-center"><span className="text-4xl">🐾</span></div>
-        <div>
-          <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">¡Bienvenido a Blis Club!</h2>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-2 max-w-sm text-sm leading-relaxed">Registrá tu primer perro para empezar a usar la calculadora de nutrición, el tracker de paseos y la academia de entrenamiento.</p>
-        </div>
+        <div><h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">¡Bienvenido a Blis Club!</h2><p className="text-zinc-500 dark:text-zinc-400 mt-2 max-w-sm text-sm leading-relaxed">Registrá tu primer perro para empezar.</p></div>
         <AddDogForm userId={userId} />
       </div>
     );
   }
-
   return (
     <div className="space-y-4">
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary-500 to-primary-700 p-4 text-white shadow-lg shadow-primary-600/20">
@@ -102,54 +172,31 @@ function DashboardContent({ data, dog, userId }: { data: any; dog: Dog | null; u
             <img src={dog.foto_url || data.breedImgRaw || "/icons/dog-default.png"} alt={dog.nombre} className="w-full h-full object-cover object-center" />
           </div>
           <div className="flex-1 min-w-0 py-1 flex flex-col justify-center">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-xl font-bold">{dog.nombre}</h2>
-              {dog.objetivo_principal && <span className="text-[10px] font-semibold bg-white/15 backdrop-blur-md px-2 py-0.5 rounded-full shrink-0">{dog.objetivo_principal}</span>}
-            </div>
-            <div className="mt-2.5 space-y-1.5">
-              <p className="text-white/85 text-sm">🐾 {dog.raza}</p>
-              <p className="text-white/85 text-sm">🎂 {dog.edad_meses} meses</p>
-              <p className="text-white/85 text-sm">⚖️ {dog.peso_kg} kg</p>
-            </div>
+            <div className="flex items-center gap-2 flex-wrap"><h2 className="text-xl font-bold">{dog.nombre}</h2>{dog.objetivo_principal && <span className="text-[10px] font-semibold bg-white/15 backdrop-blur-md px-2 py-0.5 rounded-full shrink-0">{dog.objetivo_principal}</span>}</div>
+            <div className="mt-2.5 space-y-1.5"><p className="text-white/85 text-sm">🐾 {dog.raza}</p><p className="text-white/85 text-sm">🎂 {dog.edad_meses} meses</p><p className="text-white/85 text-sm">⚖️ {dog.peso_kg} kg</p></div>
           </div>
         </div>
-        <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/8 rounded-full" />
-        <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/8 rounded-full" />
+        <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/8 rounded-full" /><div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/8 rounded-full" />
       </div>
       <QuickToolsCarousel isLost={(dog as any).is_lost === true} />
-      <DashboardWidgets
-        academyPct={data.academyPct} academyCompleted={data.academyCompleted} academyTotal={data.academyTotal}
-        greenPct={data.greenPct} yellowPct={data.yellowPct} redPct={data.redPct}
-        gramsEaten={data.gramsEaten} gramsTarget={data.gramsTarget}
-        vaccines={data.vaccines} activeMeds={data.activeMeds || []} medLogs={data.medLogs || []}
-      />
+      <DashboardWidgets academyPct={data.academyPct} academyCompleted={data.academyCompleted} academyTotal={data.academyTotal} greenPct={data.greenPct} yellowPct={data.yellowPct} redPct={data.redPct} gramsEaten={data.gramsEaten} gramsTarget={data.gramsTarget} vaccines={data.vaccines} activeMeds={data.activeMeds || []} medLogs={data.medLogs || []} />
     </div>
   );
 }
 
-/* ════════════════════════════════════════════ */
-/* AppShell                                     */
-/* ════════════════════════════════════════════ */
-interface AppShellProps {
-  userId: string;
-  dog: Dog | null;
-  initialTab: TabKey;
-  dashboardData?: any;
-}
+/* ═══════════════════════════ AppShell ═══════════════════════ */
+interface AppShellProps { userId: string; dog: Dog | null; initialTab: TabKey; dashboardData?: any; }
 
 export default function AppShell({ userId, dog, initialTab, dashboardData }: AppShellProps) {
-  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
 
+  // Sincronizar con popstate (back/forward del navegador)
   useEffect(() => {
     const handlePopstate = () => {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get("tab") as TabKey | null;
-      if (tab && ["inicio", "nutricion", "academia", "tracker", "perdido", "perfil"].includes(tab)) {
-        setActiveTab(tab);
-      } else {
-        setActiveTab("inicio");
-      }
+      if (tab && ["inicio", "nutricion", "academia", "tracker", "perdido", "perfil"].includes(tab)) setActiveTab(tab);
+      else setActiveTab("inicio");
     };
     window.addEventListener("popstate", handlePopstate);
     return () => window.removeEventListener("popstate", handlePopstate);
@@ -161,20 +208,20 @@ export default function AppShell({ userId, dog, initialTab, dashboardData }: App
     window.history.replaceState(null, "", url);
   }, []);
 
-  // Exponer setTab al AppNav via evento custom
   useEffect(() => {
     (window as any).__blisSetTab = goToTab;
     return () => { delete (window as any).__blisSetTab; };
   }, [goToTab]);
 
+  // Renderizar SIEMPRE todos los tabs (los inactivos hidden) para que sus data fetches se ejecuten
   return (
     <>
-      {activeTab === "inicio" && <DashboardContent data={dashboardData} dog={dog} userId={userId} />}
-      {activeTab === "nutricion" && <NutricionTab dog={dog} userId={userId} />}
-      {activeTab === "academia" && <PlaceholderTab icon="🎓" title="Academia" desc="Usá el menú lateral para acceder a tus lecciones." />}
-      {activeTab === "tracker" && <PlaceholderTab icon="🏃" title="Tracker" desc="Usá el menú Track para paseos y agilidad." />}
-      {activeTab === "perdido" && <PlaceholderTab icon="🔍" title="Perdido" desc="Usá el menú Perdido para generar alertas." />}
-      {activeTab === "perfil" && <PlaceholderTab icon="👤" title="Perfil" desc="Usá el menú Perfil para ver tus datos." />}
+      <div style={{ display: activeTab === "inicio" ? "block" : "none" }}><DashboardContent data={dashboardData} dog={dog} userId={userId} /></div>
+      <div style={{ display: activeTab === "nutricion" ? "block" : "none" }}><NutricionTab dog={dog} userId={userId} /></div>
+      <div style={{ display: activeTab === "perfil" ? "block" : "none" }}><PerfilTab userId={userId} /></div>
+      <div style={{ display: activeTab === "academia" ? "block" : "none" }}><AcademiaTab userId={userId} /></div>
+      <div style={{ display: activeTab === "tracker" ? "block" : "none" }}><TrackerTab dog={dog} userId={userId} /></div>
+      <div style={{ display: activeTab === "perdido" ? "block" : "none" }}><PerdidoTab dog={dog} /></div>
     </>
   );
 }
