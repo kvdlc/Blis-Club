@@ -263,30 +263,31 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
       }
     }
 
-    // Streak
+    // Streak — upsert para evitar errores de duplicados
     const today = getTodayLocal();
     const { data: streak } = await supabase.from("user_streaks").select("*").eq("user_id", userId).eq("streak_type", "walk").maybeSingle();
+
+    let newStreak = 1;
     if (streak) {
       const s = streak as { id: string; last_activity_date: string; current_streak: number; longest_streak: number };
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = toLocalDateStr(yesterday);
+
       if (s.last_activity_date !== today) {
         if (s.last_activity_date === yesterdayStr) {
-          const newStreak = s.current_streak + 1;
-          await supabase.from("user_streaks").update({
-            current_streak: newStreak,
-            longest_streak: Math.max(s.longest_streak, newStreak),
-            last_activity_date: today,
-          }).eq("id", s.id);
-        } else {
-          await supabase.from("user_streaks").update({ current_streak: 1, last_activity_date: today }).eq("id", s.id);
+          newStreak = s.current_streak + 1;
         }
+        // else: se rompió la racha, empieza de 1
+        await supabase.from("user_streaks").upsert({
+          user_id: userId, streak_type: "walk", current_streak: newStreak,
+          longest_streak: Math.max(s.longest_streak, newStreak), last_activity_date: today,
+        }, { onConflict: "user_id,streak_type" });
       }
     } else {
-      await supabase.from("user_streaks").insert({
+      await supabase.from("user_streaks").upsert({
         user_id: userId, streak_type: "walk", current_streak: 1, longest_streak: 1, last_activity_date: today,
-      });
+      }, { onConflict: "user_id,streak_type" });
     }
 
     localStorage.removeItem(STORAGE_KEY);

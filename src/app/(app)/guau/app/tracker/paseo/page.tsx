@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Droplets, BadgeCheck, Flag, PawPrint, PenLine } from "lucide-react";
-import { getTodayLocal } from "@/lib/dates";
+import { getTodayLocal, toLocalDateStr } from "@/lib/dates";
 
 type Phase = "active" | "evaluate" | "triggers" | "digestive" | "done";
 
@@ -127,28 +127,24 @@ export default function WalkPage() {
     const today = getTodayLocal();
     const { data: streak } = await supabase.from("user_streaks").select("*").eq("user_id", user.id).eq("streak_type", "walk").maybeSingle();
 
+    let newStreak = 1;
     if (streak) {
       const s = streak as { id: string; last_activity_date: string; current_streak: number; longest_streak: number };
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().slice(0, 10);
-
-      if (s.last_activity_date === today) {
-        // Already logged today
-      } else if (s.last_activity_date === yesterdayStr) {
-        const newStreak = s.current_streak + 1;
-        await supabase.from("user_streaks").update({
-          current_streak: newStreak,
-          longest_streak: Math.max(s.longest_streak, newStreak),
-          last_activity_date: today,
-        }).eq("id", s.id);
-      } else {
-        await supabase.from("user_streaks").update({ current_streak: 1, last_activity_date: today }).eq("id", s.id);
+      if (s.last_activity_date !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (s.last_activity_date === toLocalDateStr(yesterday)) {
+          newStreak = s.current_streak + 1;
+        }
+        await supabase.from("user_streaks").upsert({
+          user_id: user.id, streak_type: "walk", current_streak: newStreak,
+          longest_streak: Math.max(s.longest_streak, newStreak), last_activity_date: today,
+        }, { onConflict: "user_id,streak_type" });
       }
     } else {
-      await supabase.from("user_streaks").insert({
+      await supabase.from("user_streaks").upsert({
         user_id: user.id, streak_type: "walk", current_streak: 1, longest_streak: 1, last_activity_date: today,
-      });
+      }, { onConflict: "user_id,streak_type" });
     }
 
     setPhase("done");
