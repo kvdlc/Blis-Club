@@ -156,7 +156,7 @@ export async function middleware(request: NextRequest) {
   if (user && isAppRoute) {
     const { data: sub } = await supabase
       .from("subscriptions")
-      .select("status, plan_type, expires_at")
+      .select("id, status, plan_type, expires_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(1)
