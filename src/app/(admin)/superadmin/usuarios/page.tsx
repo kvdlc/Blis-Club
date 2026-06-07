@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
-import { Settings, Search, X, Clock, Smartphone, Users, UserCheck, UserPlus, TrendingUp, Filter, Ban, CreditCard, History, Save } from "lucide-react";
+import { Settings, Search, X, Clock, Smartphone, Users, UserCheck, UserPlus, TrendingUp, Filter, Ban, CreditCard, History, Save, AlertTriangle, Trash2, Play, CalendarDays } from "lucide-react";
 
 interface User {
   id: string;
@@ -29,6 +29,14 @@ interface SubscriptionData {
   current_period_end: string | null;
   expires_at: string | null;
   created_at: string;
+}
+
+interface ConfirmAction {
+  title: string;
+  message: string;
+  confirmText: string;
+  confirmColor: string;
+  onConfirm: () => void;
 }
 
 type FilterType = "all" | "leads" | "clients";
@@ -90,6 +98,8 @@ export default function UsersPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [editRole, setEditRole] = useState("");
   const [roleSaving, setRoleSaving] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+  const [editDate, setEditDate] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -104,19 +114,34 @@ export default function UsersPage() {
   const openManage = async (u: User) => {
     setManageUser(u);
     setEditRole(u.role);
+    setConfirmAction(null);
     setSubLoading(true);
     try {
       const res = await fetch(`/api/admin/users/${u.id}/subscription`);
       if (res.ok) {
         const json = await res.json();
         setSubscription(json.subscription || null);
+        if (json.subscription) {
+          const dateField = json.subscription.plan_type === "temporal"
+            ? json.subscription.expires_at
+            : json.subscription.current_period_end;
+          setEditDate(dateField ? new Date(dateField).toISOString().split("T")[0] : "");
+        }
       } else {
         setSubscription(null);
+        setEditDate("");
       }
     } catch {
       setSubscription(null);
+      setEditDate("");
     }
     setSubLoading(false);
+  };
+
+  const closeManage = () => {
+    setManageUser(null);
+    setSubscription(null);
+    setConfirmAction(null);
   };
 
   const saveRole = async () => {
@@ -148,6 +173,12 @@ export default function UsersPage() {
     setActionLoading(false);
   };
 
+  const saveDate = async () => {
+    if (!manageUser || !editDate) return;
+    const field = subscription?.plan_type === "temporal" ? "expires_at" : "current_period_end";
+    await updatePlan({ [field]: new Date(editDate).toISOString() });
+  };
+
   const toggleSuspend = async () => {
     if (!manageUser) return;
     setActionLoading(true);
@@ -160,6 +191,70 @@ export default function UsersPage() {
     setActionLoading(false);
     load();
     setManageUser({ ...manageUser, role: isSuspended ? "usuario" : "suspended" });
+  };
+
+  const deleteUser = async () => {
+    if (!manageUser) return;
+    setActionLoading(true);
+    await fetch(`/api/admin/users/${manageUser.id}`, { method: "DELETE" });
+    setActionLoading(false);
+    closeManage();
+    load();
+  };
+
+  const askCancel = () => {
+    setConfirmAction({
+      title: "Cancelar suscripción",
+      message: `¿Estás seguro de cancelar la suscripción de ${manageUser?.display_name || manageUser?.email}? Perderá acceso inmediatamente y pasará a ser Lead.`,
+      confirmText: "Sí, cancelar",
+      confirmColor: "bg-red-600 hover:bg-red-700",
+      onConfirm: () => {
+        updatePlan({ status: "canceled" });
+        setConfirmAction(null);
+      },
+    });
+  };
+
+  const askReactivate = () => {
+    setConfirmAction({
+      title: "Reactivar suscripción",
+      message: `¿Reactivar la suscripción de ${manageUser?.display_name || manageUser?.email}? Se restaurará el acceso.`,
+      confirmText: "Sí, reactivar",
+      confirmColor: "bg-emerald-600 hover:bg-emerald-700",
+      onConfirm: () => {
+        updatePlan({ status: "active" });
+        setConfirmAction(null);
+      },
+    });
+  };
+
+  const askDelete = () => {
+    setConfirmAction({
+      title: "Eliminar usuario",
+      message: `⚠️ ESTA ACCIÓN NO SE PUEDE DESHACER.\n\n¿Eliminar permanentemente a ${manageUser?.display_name || manageUser?.email}? Se borrarán todos sus datos, suscripciones y pagos.`,
+      confirmText: "Eliminar permanentemente",
+      confirmColor: "bg-red-700 hover:bg-red-800",
+      onConfirm: () => {
+        deleteUser();
+        setConfirmAction(null);
+      },
+    });
+  };
+
+  const askSuspend = () => {
+    const isSuspended = manageUser?.role === "suspended";
+    setConfirmAction({
+      title: isSuspended ? "Reactivar cuenta" : "Suspender cuenta",
+      message: isSuspended
+        ? `¿Reactivar la cuenta de ${manageUser?.display_name || manageUser?.email}? Podrá iniciar sesión de nuevo.`
+        : `¿Suspender la cuenta de ${manageUser?.display_name || manageUser?.email}? No podrá iniciar sesión hasta que la reactives.`,
+      confirmText: isSuspended ? "Reactivar" : "Suspender",
+      confirmColor: isSuspended ? "bg-emerald-600 hover:bg-emerald-700" : "bg-zinc-700 hover:bg-zinc-800",
+      onConfirm: () => {
+        toggleSuspend();
+        setConfirmAction(null);
+      },
+    });
   };
 
   const roles = ["usuario", "institucion", "admin", "superadmin", "suspended"];
@@ -366,14 +461,15 @@ export default function UsersPage() {
           </div>
         )}
 
-        {/* Modal de gestión de usuario */}
+        {/* ====== MODAL GESTIÓN DE USUARIO ====== */}
         {manageUser && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
             <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 space-y-6">
+                {/* Header */}
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Gestionar usuario</h2>
-                  <button onClick={() => { setManageUser(null); setSubscription(null); }} className="p-2 hover:bg-zinc-100 rounded-lg">
+                  <button onClick={closeManage} className="p-2 hover:bg-zinc-100 rounded-lg">
                     <X className="w-5 h-5 text-zinc-500" />
                   </button>
                 </div>
@@ -398,7 +494,7 @@ export default function UsersPage() {
                   )}
                 </div>
 
-                {/* Cambiar rol */}
+                {/* ===== SECCIÓN 1: ROL ===== */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Rol</label>
                   <div className="flex gap-2">
@@ -421,45 +517,58 @@ export default function UsersPage() {
                   </div>
                 </div>
 
-                {/* Suscripción */}
+                {/* ===== SECCIÓN 2: SUSCRIPCIÓN ===== */}
                 {subLoading ? (
-                  <div className="text-center py-8 text-zinc-500">Cargando suscripción...</div>
+                  <div className="text-center py-6 text-zinc-500 text-sm">Cargando suscripción...</div>
                 ) : subscription ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Plan</span>
-                      {planBadge(subscription.plan_type, subscription.status, subscription.expires_at, subscription.current_period_end)}
+                  <div className="space-y-5">
+                    {/* Estado actual */}
+                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Plan</span>
+                        {planBadge(subscription.plan_type, subscription.status, subscription.expires_at, subscription.current_period_end)}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Estado</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                          subscription.status === "active" && !getDaysRemaining(
+                            subscription.plan_type === "temporal" ? subscription.expires_at : subscription.current_period_end
+                          ).expired ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
+                        }`}>
+                          {subscription.status === "active" && !getDaysRemaining(
+                            subscription.plan_type === "temporal" ? subscription.expires_at : subscription.current_period_end
+                          ).expired ? "Activo" : "Inactivo"}
+                        </span>
+                      </div>
+
+                      {/* Fecha editable */}
+                      <div className="space-y-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                        <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                          {subscription.plan_type === "temporal" ? "Expira el" : "Próximo pago"}
+                        </label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                            <input
+                              type="date"
+                              value={editDate}
+                              onChange={(e) => setEditDate(e.target.value)}
+                              className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                            />
+                          </div>
+                          <button
+                            onClick={saveDate}
+                            disabled={actionLoading || !editDate}
+                            className="px-4 py-2.5 rounded-xl bg-primary-100 text-primary-700 hover:bg-primary-200 text-sm font-semibold disabled:opacity-40 transition-colors"
+                          >
+                            <Save className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Estado</span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        subscription.status === "active" && !getDaysRemaining(
-                          subscription.plan_type === "temporal" ? subscription.expires_at : subscription.current_period_end
-                        ).expired ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
-                      }`}>
-                        {subscription.status === "active" && !getDaysRemaining(
-                          subscription.plan_type === "temporal" ? subscription.expires_at : subscription.current_period_end
-                        ).expired ? "Activo" : "Inactivo"}
-                      </span>
-                    </div>
-
-                    {subscription.expires_at && subscription.plan_type === "temporal" && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Expira</span>
-                        <span className="text-sm text-zinc-800">{new Date(subscription.expires_at).toLocaleDateString()}</span>
-                      </div>
-                    )}
-                    {subscription.current_period_end && subscription.plan_type !== "temporal" && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Próximo pago</span>
-                        <span className="text-sm text-zinc-800">{new Date(subscription.current_period_end).toLocaleDateString()}</span>
-                      </div>
-                    )}
-
-                    <hr className="border-zinc-100 dark:border-zinc-800" />
-
-                    <div className="space-y-3">
+                    {/* Cambiar plan */}
+                    <div className="space-y-2">
                       <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Cambiar plan</label>
                       <div className="grid grid-cols-3 gap-2">
                         {(["temporal", "premium", "permanente"] as const).map((plan) => (
@@ -467,7 +576,7 @@ export default function UsersPage() {
                             key={plan}
                             onClick={() => updatePlan({ plan_type: plan, status: "active" })}
                             disabled={actionLoading || subscription.plan_type === plan}
-                            className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                            className={`px-3 py-2.5 rounded-xl text-xs font-semibold border transition-colors ${
                               subscription.plan_type === plan
                                 ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed"
                                 : plan === "premium"
@@ -483,28 +592,49 @@ export default function UsersPage() {
                       </div>
                     </div>
 
+                    {/* Acciones principales */}
                     <div className="grid grid-cols-2 gap-3">
+                      {subscription.status === "canceled" || getDaysRemaining(
+                        subscription.plan_type === "temporal" ? subscription.expires_at : subscription.current_period_end
+                      ).expired ? (
+                        <button
+                          onClick={askReactivate}
+                          disabled={actionLoading}
+                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 transition-colors"
+                        >
+                          <Play className="w-4 h-4" /> Reactivar
+                        </button>
+                      ) : (
+                        <button
+                          onClick={askCancel}
+                          disabled={actionLoading}
+                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-40 transition-colors"
+                        >
+                          <Ban className="w-4 h-4" /> Cancelar
+                        </button>
+                      )}
                       <button
-                        onClick={() => updatePlan({ status: "canceled" })}
-                        disabled={actionLoading || subscription.status === "canceled"}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-40"
-                      >
-                        <Ban className="w-4 h-4" /> Cancelar
-                      </button>
-                      <button
-                        onClick={toggleSuspend}
+                        onClick={askSuspend}
                         disabled={actionLoading}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-zinc-200 text-zinc-700 hover:bg-zinc-50 disabled:opacity-40"
+                        className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border transition-colors ${
+                          manageUser.role === "suspended"
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                            : "bg-zinc-100 border-zinc-200 text-zinc-700 hover:bg-zinc-200"
+                        } disabled:opacity-40`}
                       >
-                        <Ban className="w-4 h-4" /> {manageUser.role === "suspended" ? "Reactivar" : "Suspender"}
+                        {manageUser.role === "suspended" ? (
+                          <><Play className="w-4 h-4" /> Reactivar cuenta</>
+                        ) : (
+                          <><Ban className="w-4 h-4" /> Suspender</>
+                        )}
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-zinc-500">
+                  <div className="text-center py-6 text-zinc-500">
                     <CreditCard className="w-10 h-10 mx-auto mb-3 text-zinc-300" />
-                    <p className="text-sm">Sin suscripción activa</p>
-                    <div className="grid grid-cols-3 gap-2 mt-4">
+                    <p className="text-sm mb-4">Sin suscripción activa</p>
+                    <div className="grid grid-cols-3 gap-2">
                       {(["temporal", "premium", "permanente"] as const).map((plan) => (
                         <button
                           key={plan}
@@ -525,14 +655,56 @@ export default function UsersPage() {
                   </div>
                 )}
 
-                <div className="pt-2">
+                {/* Historial */}
+                <div>
                   <a
                     href={`/superadmin/compras?userId=${manageUser.id}`}
-                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 transition-colors"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 transition-colors"
                   >
                     <History className="w-4 h-4" /> Ver historial de pagos
                   </a>
                 </div>
+
+                {/* Eliminar (zona peligrosa) */}
+                <div className="pt-4 border-t border-red-100">
+                  <button
+                    onClick={askDelete}
+                    disabled={actionLoading}
+                    className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-semibold border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" /> Eliminar usuario permanentemente
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ====== MODAL DE CONFIRMACIÓN ====== */}
+        {confirmAction && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{confirmAction.title}</h3>
+              </div>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-line">{confirmAction.message}</p>
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <button
+                  onClick={() => setConfirmAction(null)}
+                  className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-zinc-200 text-zinc-700 hover:bg-zinc-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmAction.onConfirm}
+                  disabled={actionLoading}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors ${confirmAction.confirmColor} disabled:opacity-50`}
+                >
+                  {actionLoading ? "..." : confirmAction.confirmText}
+                </button>
               </div>
             </div>
           </div>
