@@ -372,20 +372,23 @@ function injectKRGlueStyles(styleId: string) {
       font-size: 0.875rem !important;
     }
 
-    .kr-embedded input:focus {
+    .kr-embedded input:focus,
+    .kr-embedded .kr-select:focus,
+    .kr-embedded select:focus {
       border-color: #10b981 !important;
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important;
       background: #ffffff !important;
     }
 
-    /* Selects custom (divs .kr-select) */
-    .kr-embedded .kr-select {
+    /* Selects custom (divs .kr-select) y selects nativos */
+    .kr-embedded .kr-select,
+    .kr-embedded select {
       background: #ffffff !important;
       border: 1.5px solid #e4e4e7 !important;
       border-radius: 0.875rem !important;
       padding: 0.75rem 2.5rem 0.75rem 0.875rem !important;
       font-size: 0.875rem !important;
-      color: #27272a !important;
+      color: #71717a !important;
       width: 100% !important;
       height: 2.75rem !important;
       box-sizing: border-box !important;
@@ -401,6 +404,19 @@ function injectKRGlueStyles(styleId: string) {
       background-repeat: no-repeat !important;
       background-position: right 0.75rem center !important;
       background-size: 1rem !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+    }
+
+    /* Ocultar flechas nativas del SDK en selects */
+    .kr-embedded .kr-select::after,
+    .kr-embedded select::after,
+    .kr-embedded .kr-select .kr-arrow,
+    .kr-embedded select .kr-arrow {
+      display: none !important;
+      background: none !important;
+      border: none !important;
     }
 
     /* Contenedores de campos con iframe — captura cualquier div con iframe (incluye CVV dinámico) */
@@ -411,15 +427,17 @@ function injectKRGlueStyles(styleId: string) {
       background: #ffffff !important;
       border: 1.5px solid #e4e4e7 !important;
       border-radius: 0.875rem !important;
-      min-height: 4.5rem !important;
+      min-height: 2.75rem !important;
+      height: 2.75rem !important;
       margin-bottom: 0.75rem !important;
       overflow: hidden !important;
+      box-sizing: border-box !important;
     }
 
     /* Todos los iframes dentro del form */
     .kr-embedded iframe {
       width: 100% !important;
-      height: 4.5rem !important;
+      height: 2.75rem !important;
       border: none !important;
     }
 
