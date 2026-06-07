@@ -476,6 +476,32 @@ export interface TrustedVet {
   created_at: string;
 }
 
+export interface DogPublicProfile {
+  dog_id: string;
+  bio: string | null;
+  city: string | null;
+  contact_phone: string | null;
+  contact_email: string | null;
+  sections_visible: {
+    badges: boolean;
+    gallery: boolean;
+    stats: boolean;
+    agility: boolean;
+    weight: boolean;
+    medical: boolean;
+    diet: boolean;
+    breeding: boolean;
+    contact: boolean;
+  };
+  gallery_photos: string[];
+  breeding_active: boolean;
+  breeding_inquiry_only: boolean;
+  breeding_currency: string;
+  breeding_amount: string | null;
+  breeding_description: string | null;
+  updated_at: string;
+}
+
 export interface ShortLink {
   id: string;
   slug: string;

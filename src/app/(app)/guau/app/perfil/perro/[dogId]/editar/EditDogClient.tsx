@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Dog, DogMetabolicProfile, DogMealSlot, WeeklyChallenge, UserChallenge } from "@/types/database";
 import { sugerirTamanoPorRaza, BREED_SIZE_LABELS } from "@/lib/breed-sizes";
-import { ArrowLeft, Camera, PawPrint, Check, Search, PenLine, ChevronDown, Loader2, Trash2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Camera, PawPrint, Check, Search, PenLine, ChevronDown, Loader2, Trash2, AlertTriangle, Globe } from "lucide-react";
 import { MealSlotsConfig } from "../../../MealSlotsConfig";
 import { DatePicker } from "@/components/DatePicker";
 import { uploadDogPhoto, uploadPhotoFromDataUrl } from "@/lib/storage";
@@ -396,6 +396,23 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
           <Check className="w-4 h-4" /> Guardado
         </div>
       )}
+
+      {/* ═══ PERFIL PÚBLICO ═══ */}
+      <div className="pt-4 space-y-3">
+        <a
+          href={`/guau/app/perfil/perro/${dog.id}/publico`}
+          className="card-elevated rounded-2xl p-4 flex items-center gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all active:scale-[0.98]"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-primary-100 flex items-center justify-center shrink-0">
+            <Globe className="w-5 h-5 text-primary-600" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Perfil Público</p>
+            <p className="text-[10px] text-zinc-400">Configura lo que el mundo ve de {name}</p>
+          </div>
+          <ChevronDown className="w-5 h-5 text-zinc-400 -rotate-90" />
+        </a>
+      </div>
 
       {/* ═══ ELIMINAR PERRO ═══ */}
       <div className="pt-4 border-t border-zinc-200 dark:border-zinc-700">
