@@ -3,10 +3,10 @@
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import type { Walk, Dog, DogVaccine } from "@/types/database";
+import { getTodayLocal, toLocalDateStr } from "@/lib/dates";
 import { Pause, Flame, ChevronLeft, ChevronRight, Clock, Droplets, BadgeCheck, Footprints, CalendarDays } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { WalkSession } from "./WalkSession";
-import { getTodayLocal } from "@/lib/dates";
 
 interface Props {
   walks: Walk[];
@@ -35,7 +35,7 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
   const walkByDate = useMemo(() => {
     const map: Record<string, Walk[]> = {};
     walks.forEach((w) => {
-      const key = w.start_time.slice(0, 10);
+      const key = toLocalDateStr(new Date(w.start_time));
       if (!map[key]) map[key] = [];
       map[key].push(w);
     });
@@ -60,22 +60,22 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
 
     for (let i = mondayStart - 1; i >= 0; i--) {
       const d = new Date(calYear, calMonth, -i);
-      const dateStr = d.toISOString().slice(0, 10);
+      const dateStr = toLocalDateStr(d);
       cells.push({ date: dateStr, day: d.getDate(), isCurrentMonth: false, isToday: false, avg: dayAvgMap[dateStr] ?? null, count: walkByDate[dateStr]?.length ?? 0 });
     }
 
-    const today = new Date();
+    const todayDate = new Date();
     for (let i = 1; i <= daysInMonth; i++) {
       const d = new Date(calYear, calMonth, i);
-      const dateStr = d.toISOString().slice(0, 10);
-      cells.push({ date: dateStr, day: i, isCurrentMonth: true, isToday: d.toDateString() === today.toDateString(), avg: dayAvgMap[dateStr] ?? null, count: walkByDate[dateStr]?.length ?? 0 });
+      const dateStr = toLocalDateStr(d);
+      cells.push({ date: dateStr, day: i, isCurrentMonth: true, isToday: toLocalDateStr(d) === toLocalDateStr(todayDate), avg: dayAvgMap[dateStr] ?? null, count: walkByDate[dateStr]?.length ?? 0 });
     }
 
     const remaining = 7 - (cells.length % 7);
     if (remaining < 7) {
       for (let i = 1; i <= remaining; i++) {
         const d = new Date(calYear, calMonth + 1, i);
-        const dateStr = d.toISOString().slice(0, 10);
+        const dateStr = toLocalDateStr(d);
         cells.push({ date: dateStr, day: d.getDate(), isCurrentMonth: false, isToday: false, avg: dayAvgMap[dateStr] ?? null, count: walkByDate[dateStr]?.length ?? 0 });
       }
     }

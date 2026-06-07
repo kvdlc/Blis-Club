@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Dog } from "@/types/database";
-import { getTodayLocal } from "@/lib/dates";
+import { getTodayLocal, toLocalDateStr } from "@/lib/dates";
 import {
   Droplets, BadgeCheck, Flag, PenLine, X, Check, Loader2
 } from "lucide-react";
@@ -270,7 +270,7 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
       const s = streak as { id: string; last_activity_date: string; current_streak: number; longest_streak: number };
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().slice(0, 10);
+      const yesterdayStr = toLocalDateStr(yesterday);
       if (s.last_activity_date !== today) {
         if (s.last_activity_date === yesterdayStr) {
           const newStreak = s.current_streak + 1;
