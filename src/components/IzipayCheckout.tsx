@@ -407,14 +407,19 @@ function injectKRGlueStyles(styleId: string) {
     .kr-embedded .kr-pan,
     .kr-embedded .kr-expiry,
     .kr-embedded .kr-cvv {
+      background: #ffffff !important;
+      border: 1.5px solid #e4e4e7 !important;
+      border-radius: 0.875rem !important;
+      min-height: 4.5rem !important;
       margin-bottom: 0.75rem !important;
+      overflow: hidden !important;
     }
 
-    /* No forzar altura: el SDK la gestiona vía JS según contenido interno */
     .kr-embedded .kr-pan iframe,
     .kr-embedded .kr-expiry iframe,
     .kr-embedded .kr-cvv iframe {
       width: 100% !important;
+      height: 4.5rem !important;
       border: none !important;
     }
 
