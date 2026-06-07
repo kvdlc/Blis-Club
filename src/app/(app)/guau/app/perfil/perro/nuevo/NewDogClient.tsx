@@ -17,6 +17,7 @@ import {
 import { DatePicker } from "@/components/DatePicker";
 import { uploadPhotoFromDataUrl } from "@/lib/storage";
 import { ImageEditor } from "@/components/ImageEditor";
+import { getTodayLocal } from "@/lib/dates";
 
 interface Props {
   userId: string;
@@ -44,7 +45,7 @@ export function NewDogClient({ userId }: Props) {
   const [breed, setBreed] = useState("");
   const [breedSearch, setBreedSearch] = useState("");
   const [showBreeds, setShowBreeds] = useState(false);
-  const [birthDate, setBirthDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [birthDate, setBirthDate] = useState(() => getTodayLocal());
   const [weightDisplay, setWeightDisplay] = useState("10");
   const [tamano, setTamano] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -217,7 +218,7 @@ export function NewDogClient({ userId }: Props) {
 
       await supabase.from("dog_weight_history").insert({
         dog_id: dogId, peso_kg: pesoKg,
-        fecha: new Date().toISOString().slice(0, 10), notas: "Peso inicial al registro",
+        fecha: getTodayLocal(), notas: "Peso inicial al registro",
       });
 
       router.push(`/guau/app/perfil/perro/${dogId}/editar`);

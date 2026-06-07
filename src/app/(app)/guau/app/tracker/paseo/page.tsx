@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Droplets, BadgeCheck, Flag, PawPrint, PenLine } from "lucide-react";
+import { getTodayLocal } from "@/lib/dates";
 
 type Phase = "active" | "evaluate" | "triggers" | "digestive" | "done";
 
@@ -118,12 +119,12 @@ export default function WalkPage() {
     if (stool) {
       await supabase.from("digestive_logs").insert({
         dog_id: (dog as { id: string }).id,
-        fecha: new Date().toISOString().slice(0, 10),
+        fecha: getTodayLocal(),
         stool_type: stool,
       });
     }
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getTodayLocal();
     const { data: streak } = await supabase.from("user_streaks").select("*").eq("user_id", user.id).eq("streak_type", "walk").maybeSingle();
 
     if (streak) {

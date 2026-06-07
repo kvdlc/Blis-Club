@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { AgilityObstaclePicker } from "@/components/AgilityObstaclePicker";
 import type { Dog, AgilityObstacle, AgilitySessionType } from "@/types/database";
 import { X, Save, Calendar, Clock, Bookmark, Zap } from "lucide-react";
+import { getTodayLocal } from "@/lib/dates";
 
 interface Props {
   dog: Dog;
@@ -18,7 +19,7 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
 
   const [sessionTypeId, setSessionTypeId] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState("principiante");
-  const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10));
+  const [fecha, setFecha] = useState(getTodayLocal());
   const [durationMin, setDurationMin] = useState(15);
   const [circuitTimeSec, setCircuitTimeSec] = useState<number | null>(null);
   const [notes, setNotes] = useState("");

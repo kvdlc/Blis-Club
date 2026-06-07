@@ -6,6 +6,7 @@ import { Dog, Walk, DogVaccine, DogMedication, DogMedicationLog, Lesson, UserPro
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import AppShell from "./AppShell";
 import { getCachedDog, getCachedMetabolicProfile, getCachedWalks } from "@/lib/data-cache";
+import { getTodayLocal } from "@/lib/dates";
 
 async function getDashboardData(userId: string, dogId: string | null) {
   const supabase = await createClient();
@@ -100,7 +101,7 @@ export default async function DashboardPage({
   const yellowPct = Math.round(((walks || []).filter((w: Walk) => w.traffic_light === "yellow").length / totalWalks) * 100);
   const redPct = Math.round(((walks || []).filter((w: Walk) => w.traffic_light === "red").length / totalWalks) * 100);
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayLocal();
   const gramsEaten = (mealSchedule as any[]).filter((s: any) => typeof s.fecha === "string" && s.fecha.startsWith(todayStr) && s.status === "fed").reduce((sum: number, s: any) => sum + (s.gramos ?? 0), 0);
   const feedingPct = (metabolicProfile as any)?.feeding_pct ?? 2.5;
   const gramsTarget = Math.round((dog?.peso_kg ?? 0) * 1000 * (feedingPct / 100));

@@ -12,6 +12,7 @@ import {
   BARF_PCT_BY_STAGE, CROQUETAS_PCT_BY_STAGE, MIXTA_AJUSTE_RANGE,
 } from "@/lib/feeding-standards";
 import type { DietType, ActivityLevel, LifeStage } from "@/lib/feeding-standards";
+import { getTodayLocal } from "@/lib/dates";
 import {
   Search, Plus, Minus, ChefHat, Lock, Check, ShoppingCart,
   AlertTriangle, ShieldCheck, X, Trash2, Sparkles, Clock,
@@ -1260,7 +1261,7 @@ function ListaTab({ userId }: { userId: string }) {
         quantity_unit: purchaseForm.quantity_unit,
         currency: purchaseForm.currency,
         price_total: parseFloat(purchaseForm.price_total),
-        purchase_date: new Date().toISOString().slice(0, 10),
+        purchase_date: getTodayLocal(),
         notes: purchaseForm.notes,
       }),
     });

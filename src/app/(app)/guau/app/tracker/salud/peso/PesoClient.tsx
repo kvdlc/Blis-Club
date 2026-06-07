@@ -8,6 +8,7 @@ import { uploadPhotoFromDataUrl } from "@/lib/storage";
 import { ArrowLeft, Weight, Save, Camera, Trash2, Pencil, X, TrendingUp, TrendingDown } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { ImageEditor } from "@/components/ImageEditor";
+import { getTodayLocal } from "@/lib/dates";
 
 interface Props {
   dog: Dog;
@@ -18,7 +19,7 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const [weight, setWeight] = useState(initialWeight);
-  const [formDate, setFormDate] = useState(new Date().toISOString().slice(0, 10));
+  const [formDate, setFormDate] = useState(getTodayLocal());
   const [uploading, setUploading] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSrc, setEditorSrc] = useState("");
@@ -28,7 +29,7 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const resetForm = () => {
-    setFormDate(new Date().toISOString().slice(0, 10));
+    setFormDate(getTodayLocal());
     setPhotoUrl("");
   };
 

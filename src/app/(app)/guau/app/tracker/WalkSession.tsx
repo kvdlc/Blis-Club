@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Dog } from "@/types/database";
+import { getTodayLocal } from "@/lib/dates";
 import {
   Droplets, BadgeCheck, Flag, PenLine, X, Check, Loader2
 } from "lucide-react";
@@ -256,14 +257,14 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
       if (e.stool) {
         await supabase.from("digestive_logs").insert({
           dog_id: dogId,
-          fecha: new Date().toISOString().slice(0, 10),
+          fecha: getTodayLocal(),
           stool_type: e.stool,
         });
       }
     }
 
     // Streak
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getTodayLocal();
     const { data: streak } = await supabase.from("user_streaks").select("*").eq("user_id", userId).eq("streak_type", "walk").maybeSingle();
     if (streak) {
       const s = streak as { id: string; last_activity_date: string; current_streak: number; longest_streak: number };

@@ -6,6 +6,7 @@ import type { Walk, Dog, DogVaccine } from "@/types/database";
 import { Pause, Flame, ChevronLeft, ChevronRight, Clock, Droplets, BadgeCheck, Footprints, CalendarDays } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { WalkSession } from "./WalkSession";
+import { getTodayLocal } from "@/lib/dates";
 
 interface Props {
   walks: Walk[];
@@ -23,7 +24,7 @@ const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", 
 export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays, vaccines, userId }: Props) {
   const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
   const [calYear, setCalYear] = useState(() => new Date().getFullYear());
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
+  const [selectedDate, setSelectedDate] = useState(getTodayLocal());
   const [showWalk, setShowWalk] = useState(() => {
     if (typeof window !== "undefined") {
       try { return !!localStorage.getItem("blis_active_walk"); } catch { return false; }
@@ -108,7 +109,7 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
   };
 
   const selectedWalks = walkByDate[selectedDate] ?? [];
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayLocal();
   const todayWalks = walkByDate[todayStr] ?? [];
   const todayStats = useMemo(() => {
     if (todayWalks.length === 0) return null;

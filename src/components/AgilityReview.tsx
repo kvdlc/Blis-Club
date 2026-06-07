@@ -8,6 +8,7 @@ import { toPng } from "html-to-image";
 import type { Dog, AgilityFoulType, AgilityObstacle } from "@/types/database";
 import { X, Check, Trash2, ImagePlus, Download, Share2 } from "lucide-react";
 import type { RunData, SessionConfig } from "./AgilityRun";
+import { getTodayLocal } from "@/lib/dates";
 
 interface Props {
   dog: Dog;
@@ -117,7 +118,7 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
 
     const payload = {
       dog_id: dog.id,
-      fecha: new Date().toISOString().slice(0, 10),
+      fecha: getTodayLocal(),
       activity_type: config.sessionTypeName || "Entrenamiento libre",
       duration_min: Math.ceil(rawTime / 60),
       circuit_time_seconds: rawTime,

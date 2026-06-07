@@ -7,6 +7,7 @@ import type { Dog, DogVetVisit, TrustedVet } from "@/types/database";
 import { ArrowLeft, Stethoscope, Star, Plus, Pencil, Trash2, Save, X, ClipboardList } from "lucide-react";
 import { VetSelect } from "@/components/VetSelect";
 import { DatePicker } from "@/components/DatePicker";
+import { getTodayLocal } from "@/lib/dates";
 
 interface Props {
   dog: Dog;
@@ -19,13 +20,13 @@ export function VisitasClient({ dog, vetVisits: initialVisits, trustedVets }: Pr
   const supabase = createClient();
   const [vetVisits, setVetVisits] = useState(initialVisits);
   const [formVetId, setFormVetId] = useState("");
-  const [formFecha, setFormFecha] = useState(new Date().toISOString().slice(0, 10));
+  const [formFecha, setFormFecha] = useState(getTodayLocal());
   const [editing, setEditing] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<DogVetVisit>>({});
 
   const resetForm = () => {
     setFormVetId("");
-    setFormFecha(new Date().toISOString().slice(0, 10));
+    setFormFecha(getTodayLocal());
   };
 
   const addVetVisit = async (e: React.FormEvent<HTMLFormElement>) => {

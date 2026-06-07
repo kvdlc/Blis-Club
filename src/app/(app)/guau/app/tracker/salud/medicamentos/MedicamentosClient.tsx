@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Dog, DogMedication, DogMedicationLog } from "@/types/database";
 import { ArrowLeft, Pill, Clock, Plus, Pencil, Trash2, Save, X, Minus, CheckCircle2, XCircle, History, StopCircle } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
+import { getTodayLocal } from "@/lib/dates";
 
 interface Props {
   dog: Dog;
@@ -41,7 +42,7 @@ export function MedicamentosClient({ dog, medications: initialMeds, initialLogs 
   const [meds, setMeds] = useState(initialMeds);
   const [logs, setLogs] = useState(initialLogs);
   const [showForm, setShowForm] = useState(false);
-  const [formStartDate, setFormStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [formStartDate, setFormStartDate] = useState(getTodayLocal());
   const [formEndDate, setFormEndDate] = useState("");
   const [dosesPerDay, setDosesPerDay] = useState(1);
   const [intervalDays, setIntervalDays] = useState(1);
@@ -72,7 +73,7 @@ export function MedicamentosClient({ dog, medications: initialMeds, initialLogs 
     }).select("*").single();
     if (data) setMeds((prev) => [...prev, data as DogMedication]);
     form.reset();
-    setFormStartDate(new Date().toISOString().slice(0, 10));
+    setFormStartDate(getTodayLocal());
     setFormEndDate("");
     setDosesPerDay(1);
     setIntervalDays(1);
