@@ -100,6 +100,7 @@ export default function UsersPage() {
   const [roleSaving, setRoleSaving] = useState(false);
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const [editDate, setEditDate] = useState("");
+  const [actionError, setActionError] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -115,6 +116,7 @@ export default function UsersPage() {
     setManageUser(u);
     setEditRole(u.role);
     setConfirmAction(null);
+    setActionError("");
     setSubLoading(true);
     try {
       const res = await fetch(`/api/admin/users/${u.id}/subscription`);
@@ -142,6 +144,7 @@ export default function UsersPage() {
     setManageUser(null);
     setSubscription(null);
     setConfirmAction(null);
+    setActionError("");
   };
 
   const saveRole = async () => {
@@ -157,18 +160,32 @@ export default function UsersPage() {
     load();
   };
 
+  const [actionError, setActionError] = useState("");
+
   const updatePlan = async (updates: Partial<SubscriptionData>) => {
     if (!manageUser) return;
     setActionLoading(true);
-    const res = await fetch(`/api/admin/users/${manageUser.id}/subscription`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
-    if (res.ok) {
+    setActionError("");
+    try {
+      const res = await fetch(`/api/admin/users/${manageUser.id}/subscription`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
       const json = await res.json();
-      setSubscription(json.subscription || null);
-      load();
+      if (res.ok && json.subscription) {
+        setSubscription(json.subscription);
+        // Actualizar fecha editable
+        const dateField = json.subscription.plan_type === "temporal"
+          ? json.subscription.expires_at
+          : json.subscription.current_period_end;
+        setEditDate(dateField ? new Date(dateField).toISOString().split("T")[0] : "");
+        load();
+      } else {
+        setActionError(json.error || "Error al actualizar plan");
+      }
+    } catch {
+      setActionError("Error de conexión");
     }
     setActionLoading(false);
   };
@@ -493,6 +510,13 @@ export default function UsersPage() {
                     </span>
                   )}
                 </div>
+
+                {/* Error message */}
+                {actionError && (
+                  <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                    {actionError}
+                  </div>
+                )}
 
                 {/* ===== SECCIÓN 1: ROL ===== */}
                 <div className="space-y-2">
