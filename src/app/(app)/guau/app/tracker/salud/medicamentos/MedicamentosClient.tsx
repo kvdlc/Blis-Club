@@ -4,19 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Dog, DogMedication } from "@/types/database";
-import { ArrowLeft, Pill, Clock, Plus, Pencil, Trash2, Save, X } from "lucide-react";
+import { ArrowLeft, Pill, Clock, Plus, Pencil, Trash2, Save, X, Minus } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 
 interface Props {
   dog: Dog;
   medications: DogMedication[];
 }
-
-const FREQ_LABELS: Record<string, string> = {
-  daily: "Todos los días",
-  every_other_day: "Cada 2 días",
-  weekly: "Semanal",
-};
 
 export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
   const router = useRouter();
@@ -25,7 +19,7 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
   const [formStartDate, setFormStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [formEndDate, setFormEndDate] = useState("");
   const [dosesPerDay, setDosesPerDay] = useState(1);
-  const [frequency, setFrequency] = useState<"daily" | "every_other_day" | "weekly">("daily");
+  const [intervalDays, setIntervalDays] = useState(1);
   const [editing, setEditing] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<DogMedication>>({});
 
@@ -46,14 +40,14 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
       end_date: formEndDate || null,
       doses_per_day: dosesPerDay,
       dose_hours: hours,
-      frequency,
+      interval_days: intervalDays,
     }).select("*").single();
     if (data) setMeds((prev) => [...prev, data as DogMedication]);
     form.reset();
     setFormStartDate(new Date().toISOString().slice(0, 10));
     setFormEndDate("");
     setDosesPerDay(1);
-    setFrequency("daily");
+    setIntervalDays(1);
   };
 
   const toggleMedStatus = async (medId: string, currentStatus: string) => {
@@ -77,6 +71,7 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
       doses_per_day: med.doses_per_day,
       dose_hours: med.dose_hours,
       frequency: med.frequency || "daily",
+      interval_days: med.interval_days || 1,
     });
   };
 
@@ -143,8 +138,10 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
                 <div className="flex items-center gap-2 text-[10px] text-zinc-500 dark:text-zinc-400 flex-wrap">
                   <span>{new Date(med.start_date + "T00:00:00").toLocaleDateString("es")} - {med.end_date ? new Date(med.end_date + "T00:00:00").toLocaleDateString("es") : "Indefinido"}</span>
                   <span>· {med.doses_per_day} dosis/día</span>
-                  {med.frequency && med.frequency !== "daily" && (
-                    <span>· {FREQ_LABELS[med.frequency] || med.frequency}</span>
+                  {med.interval_days && med.interval_days > 1 ? (
+                    <span>· Cada {med.interval_days} días</span>
+                  ) : (
+                    <span>· A diario</span>
                   )}
                 </div>
                 {med.dose_hours && med.dose_hours.length > 0 && (
@@ -195,14 +192,20 @@ export function MedicamentosClient({ dog, medications: initialMeds }: Props) {
 
           <div>
             <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">🔄 Frecuencia</span></div>
-            <div className="flex gap-1.5">
-              {(["daily", "every_other_day", "weekly"] as const).map((f) => (
-                <button key={f} type="button" onClick={() => setFrequency(f)}
-                  className={`flex-1 text-xs font-semibold rounded-lg py-2 transition-colors ${frequency === f ? "bg-accent-500 text-white shadow-sm" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"}`}
-                >
-                  {FREQ_LABELS[f]}
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">Cada</span>
+              <button type="button" onClick={() => setIntervalDays(Math.max(1, intervalDays - 1))}
+                className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors">
+                <Minus className="w-3.5 h-3.5 text-zinc-500" />
+              </button>
+              <input type="number" min={1} value={intervalDays}
+                onChange={(e) => setIntervalDays(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-14 text-center rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-2 py-2 text-sm font-bold text-zinc-800 dark:text-zinc-200" />
+              <button type="button" onClick={() => setIntervalDays(intervalDays + 1)}
+                className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors">
+                <Plus className="w-3.5 h-3.5 text-zinc-500" />
+              </button>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">días</span>
             </div>
           </div>
 

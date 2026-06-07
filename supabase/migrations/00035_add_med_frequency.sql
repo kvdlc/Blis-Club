@@ -1,5 +1,5 @@
 -- 00035_add_med_frequency.sql
--- Agrega frecuencia de administración: diario, cada 2 días, semanal
+-- Agrega frecuencia de administración: número de días entre dosis
 
 ALTER TABLE dog_medications
-  ADD COLUMN IF NOT EXISTS frequency TEXT DEFAULT 'daily' CHECK (frequency IN ('daily', 'every_other_day', 'weekly'));
+  ADD COLUMN IF NOT EXISTS interval_days INTEGER DEFAULT 1 CHECK (interval_days >= 1);
