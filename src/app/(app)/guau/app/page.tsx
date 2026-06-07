@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { cookies } from "next/headers";
-import type { Dog, Walk, DailyLog, DogMealSlot, MealSchedule, NutritionRecipe, DogMetabolicProfile, Lesson, UserProgress, DogVaccine, Profile } from "@/types/database";
+import type { Dog, Walk, DailyLog, DogMealSlot, MealSchedule, NutritionRecipe, DogMetabolicProfile, Lesson, UserProgress, DogVaccine, Profile, DogMedication, DogMedicationLog } from "@/types/database";
 import { PawPrint } from "lucide-react";
 import { AddDogForm } from "./AddDogForm";
 import QuickToolsCarousel from "@/components/QuickToolsCarousel";
@@ -94,6 +94,20 @@ export default async function DashboardPage() {
   const savedDogId = cookieStore.get("blis_current_dog")?.value ?? null;
 
   const { dog, walks, mealSchedule, metabolicProfile, breedImg, lessons, progress, vaccines } = await getDashboardData(user.id, savedDogId);
+
+  // Medicamentos activos y sus logs para el widget
+  let activeMeds: DogMedication[] = [];
+  let medLogs: DogMedicationLog[] = [];
+  if (dog?.id) {
+    const [{ data: medsData }, { data: logsData }] = await Promise.all([
+      supabase.from("dog_medications").select("*").eq("dog_id", dog.id).eq("status", "active").order("created_at", { ascending: false }),
+      supabase.from("dog_medication_logs").select("*").in("medication_id",
+        ((await supabase.from("dog_medications").select("id").eq("dog_id", dog.id)).data?.map((m: any) => m.id) ?? ["none"])
+      ).order("scheduled_time", { ascending: false }).limit(100),
+    ]);
+    activeMeds = (medsData as DogMedication[] | null) ?? [];
+    medLogs = (logsData as DogMedicationLog[] | null) ?? [];
+  }
 
   const { data: profile } = await supabase.from("profiles").select("has_seen_tutorial").eq("id", user.id).single();
 
@@ -194,6 +208,8 @@ export default async function DashboardPage() {
         gramsEaten={gramsEaten}
         gramsTarget={gramsTarget}
         vaccines={vaccines}
+        activeMeds={activeMeds}
+        medLogs={medLogs}
       />
 
       {/* Mini Heatmap */}

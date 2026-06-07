@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Flame, UtensilsCrossed, GraduationCap, ShieldCheck } from "lucide-react";
-import type { DogVaccine } from "@/types/database";
+import { Flame, UtensilsCrossed, GraduationCap, ShieldCheck, Pill, Clock, AlertTriangle, ArrowRight } from "lucide-react";
+import type { DogVaccine, DogMedication, DogMedicationLog } from "@/types/database";
 import { VACCINES } from "@/lib/vaccines-wiki";
 import { useDisabledVaccines } from "@/lib/use-disabled-vaccines";
 
@@ -16,6 +16,8 @@ interface Props {
   gramsEaten: number;
   gramsTarget: number;
   vaccines: DogVaccine[];
+  activeMeds: DogMedication[];
+  medLogs: DogMedicationLog[];
 }
 
 function RingGauge({ pct, color, darkColor }: { pct: number; color: string; darkColor: string }) {
@@ -37,11 +39,25 @@ function RingGauge({ pct, color, darkColor }: { pct: number; color: string; dark
   );
 }
 
+/** Determina si una dosis toca hoy según la última toma real */
+function isDoseDueToday(med: DogMedication, logs: DogMedicationLog[]): { due: boolean; overdue: boolean; lastTaken: Date | null } {
+  const medLogs = logs.filter((l) => l.medication_id === med.id).sort((a, b) => new Date(b.scheduled_time).getTime() - new Date(a.scheduled_time).getTime());
+  const lastTakenLog = medLogs.find((l) => l.taken && l.taken_at);
+  const base = lastTakenLog?.taken_at ? new Date(lastTakenLog.taken_at) : new Date(med.start_date + "T00:00:00");
+  const now = new Date();
+  const dueDate = new Date(base.getTime() + (med.interval_days || 1) * 86400000);
+  const isDue = now >= dueDate;
+  // Check if already taken today
+  const takenToday = medLogs.some((l) => l.taken && new Date(l.taken_at!).toDateString() === now.toDateString());
+  return { due: isDue && !takenToday, overdue: isDue && dueDate.toDateString() < now.toDateString(), lastTaken: lastTakenLog?.taken_at ? new Date(lastTakenLog.taken_at) : null };
+}
+
 export function DashboardWidgets({
   academyPct, academyCompleted, academyTotal,
   greenPct, yellowPct, redPct,
   gramsEaten, gramsTarget,
   vaccines,
+  activeMeds, medLogs,
 }: Props) {
   const { isEnabled } = useDisabledVaccines();
 
@@ -54,15 +70,76 @@ export function DashboardWidgets({
   const gramsPct = Math.min(Math.round((gramsEaten / Math.max(gramsTarget, 1)) * 100), 100);
   const vaccinePct = Math.round((vaccineGiven / Math.max(vaccineTotal, 1)) * 100);
 
-  // Segmented ring for calma
+  // Calma ring
   const calmaR = 26, calmaCirc = 2 * Math.PI * calmaR;
   const greenDash = (greenPct / total) * calmaCirc;
   const yellowDash = (yellowPct / total) * calmaCirc;
   const redDash = (redPct / total) * calmaCirc;
 
+  // Medicamentos del día
+  const todayMeds: { med: DogMedication; overdue: boolean }[] = [];
+  const overdueMeds: { med: DogMedication; daysLate: number }[] = [];
+  for (const med of activeMeds) {
+    const { due, overdue } = isDoseDueToday(med, medLogs);
+    if (due) {
+      if (overdue) {
+        const dueDate = new Date(new Date(med.start_date + "T00:00:00").getTime() + (med.interval_days || 1) * 86400000);
+        const daysLate = Math.floor((new Date().getTime() - dueDate.getTime()) / 86400000);
+        overdueMeds.push({ med, daysLate: Math.max(1, daysLate) });
+      } else {
+        todayMeds.push({ med, overdue: false });
+      }
+    }
+  }
+
   return (
     <div className="space-y-3">
       <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">Resumen del día</h3>
+
+      {/* ═══ Widget Medicamentos ═══ */}
+      {(todayMeds.length > 0 || overdueMeds.length > 0) && (
+        <Link href="/guau/app/tracker/salud/medicamentos" className="card-soft rounded-[1.25rem] p-4 block space-y-2.5 transition-all active:scale-[0.98] hover:shadow-md border-l-4 border-warning-400 dark:border-warning-600">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-warning-100 dark:bg-warning-900 flex items-center justify-center">
+                <Pill className="w-3.5 h-3.5 text-warning-600" />
+              </div>
+              <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Medicamentos</span>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+          </div>
+
+          {/* Pendientes hoy */}
+          {todayMeds.map(({ med }) => {
+            const doseHour = med.dose_hours?.[0]?.slice(0, 5) || "—";
+            return (
+              <div key={med.id} className="flex items-center gap-2 text-xs">
+                <Clock className="w-3 h-3 text-warning-500 shrink-0" />
+                <span className="text-zinc-500">{doseHour}</span>
+                <span className="font-semibold text-zinc-700 dark:text-zinc-300 truncate flex-1">{med.medication_name}</span>
+                <span className="text-[10px] text-zinc-400 shrink-0">pendiente</span>
+              </div>
+            );
+          })}
+
+          {/* Atrasadas */}
+          {overdueMeds.length > 0 && (
+            <div className="space-y-1.5 pt-1 border-t border-danger-100 dark:border-danger-900/30">
+              <div className="flex items-center gap-1.5">
+                <AlertTriangle className="w-3 h-3 text-danger-500" />
+                <span className="text-[10px] font-semibold text-danger-600 dark:text-danger-400">Atrasadas</span>
+              </div>
+              {overdueMeds.map(({ med, daysLate }) => (
+                <div key={med.id} className="flex items-center gap-2 text-xs">
+                  <span className="text-danger-500 shrink-0">❌</span>
+                  <span className="font-semibold text-zinc-700 dark:text-zinc-300 truncate flex-1">{med.medication_name}</span>
+                  <span className="text-[10px] text-danger-500 shrink-0">+{daysLate} días</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Link>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         {/* ═══ 1. Academia — ring gauge ═══ */}

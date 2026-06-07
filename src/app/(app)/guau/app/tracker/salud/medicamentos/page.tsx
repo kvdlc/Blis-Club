@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import { MedicamentosClient } from "./MedicamentosClient";
-import type { Dog, DogMedication } from "@/types/database";
+import type { Dog, DogMedication, DogMedicationLog } from "@/types/database";
 import { notFound } from "next/navigation";
 
 export default async function MedicamentosPage() {
@@ -21,10 +21,17 @@ export default async function MedicamentosPage() {
   const dogId = (dog as Dog).id;
   const { data: meds } = await supabase.from("dog_medications").select("*").eq("dog_id", dogId).order("created_at", { ascending: false });
 
+  const medIds = (meds as DogMedication[] | null)?.map((m) => m.id) ?? [];
+
+  const { data: logs } = medIds.length > 0
+    ? await supabase.from("dog_medication_logs").select("*").in("medication_id", medIds).order("scheduled_time", { ascending: false }).limit(200)
+    : { data: [] };
+
   return (
     <MedicamentosClient
       dog={dog as Dog}
       medications={(meds as DogMedication[] | null) ?? []}
+      initialLogs={(logs as DogMedicationLog[] | null) ?? []}
     />
   );
 }
