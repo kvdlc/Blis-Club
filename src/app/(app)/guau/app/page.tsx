@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { cookies } from "next/headers";
-import type { Dog, Walk, DogVaccine, DogMedication, DogMedicationLog } from "@/types/database";
+import { Dog, Walk, DogVaccine, DogMedication, DogMedicationLog, Lesson, UserProgress } from "@/types/database";
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import AppShell from "./AppShell";
 import { getCachedDog, getCachedMetabolicProfile, getCachedWalks } from "@/lib/data-cache";
@@ -71,6 +71,15 @@ export default async function DashboardPage({
   const savedDogId = cookieStore.get("blis_current_dog")?.value ?? null;
   const { dog, walks, breedImg, vaccines, metabolicProfile, mealSchedule } = await getDashboardData(user.id, savedDogId);
 
+  // Academia progress (datos reales para el widget)
+  const [{ data: lessons }, { data: userProgress }] = await Promise.all([
+    supabase.from("lessons").select("*").order("order"),
+    supabase.from("user_progress").select("*").eq("user_id", user.id),
+  ]);
+  const academyTotal = (lessons as Lesson[] | null)?.length || 1;
+  const academyCompleted = ((userProgress as UserProgress[] | null) ?? []).filter((p) => p.completed).length;
+  const academyPct = Math.round((academyCompleted / Math.max(academyTotal, 1)) * 100);
+
   const { data: profile } = await supabase.from("profiles").select("has_seen_tutorial").eq("id", user.id).single();
 
   // Medicamentos para widget
@@ -88,13 +97,13 @@ export default async function DashboardPage({
   const totalWalks = (walks || []).length || 1;
   const greenCount = (walks || []).filter((w: Walk) => w.traffic_light === "green").length;
   const greenPct = Math.round((greenCount / totalWalks) * 100);
+  const yellowPct = Math.round(((walks || []).filter((w: Walk) => w.traffic_light === "yellow").length / totalWalks) * 100);
+  const redPct = Math.round(((walks || []).filter((w: Walk) => w.traffic_light === "red").length / totalWalks) * 100);
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const gramsEaten = (mealSchedule as any[]).filter((s: any) => typeof s.fecha === "string" && s.fecha.startsWith(todayStr) && s.status === "fed").reduce((sum: number, s: any) => sum + (s.gramos ?? 0), 0);
   const feedingPct = (metabolicProfile as any)?.feeding_pct ?? 2.5;
   const gramsTarget = Math.round((dog?.peso_kg ?? 0) * 1000 * (feedingPct / 100));
-
-  const academyPct = 0, academyCompleted = 0, academyTotal = 1;
 
   const breedImgRaw = breedImg ? breedImg.replace(/ /g, "%20") : null;
   const initialTab = (["inicio", "nutricion", "academia", "tracker", "perdido", "perfil"].includes(sp.tab || "") ? sp.tab : "inicio") as string;
@@ -103,8 +112,8 @@ export default async function DashboardPage({
     breedImgRaw,
     academyPct, academyCompleted, academyTotal,
     greenPct,
-    yellowPct: 0,
-    redPct: 0,
+    yellowPct,
+    redPct,
     gramsEaten, gramsTarget,
     vaccines,
     activeMeds, medLogs,
