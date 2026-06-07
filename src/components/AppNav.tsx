@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { GraduationCap, UtensilsCrossed, Activity, User, Dog, Siren } from "lucide-react";
 
@@ -25,12 +25,23 @@ const mobileTabs: { key: TabKey; icon: any; label: string; center?: boolean }[] 
 
 export default function AppNav() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const urlTab = (searchParams.get("tab") as TabKey) || "inicio";
   const [activeTab, setActiveTab] = useState<TabKey>(urlTab);
 
   const goToTab = (tab: TabKey) => {
     if (tab === activeTab) return;
     setActiveTab(tab);
+
+    // Si estamos en una ruta profunda (no en el dashboard), navegar completo
+    if (pathname !== "/guau/app") {
+      const url = tab === "inicio" ? "/guau/app" : `/guau/app?tab=${tab}`;
+      router.push(url);
+      return;
+    }
+
+    // En el dashboard: cambio instantáneo sin navegación
     if ((window as any).__blisSetTab) {
       (window as any).__blisSetTab(tab);
     }
