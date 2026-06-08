@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { ChevronRight, ChevronLeft, Sparkles, X } from "lucide-react";
 
 interface Slide {
@@ -49,6 +49,15 @@ const SLIDES: Slide[] = [
 
 const STORAGE_KEY = "blis_tutorial_completed";
 
+function readLocalStorage(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
 interface Props {
   userId: string;
   hasSeenTutorial?: boolean;
@@ -57,50 +66,40 @@ interface Props {
 }
 
 export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow = false, onComplete }: Props) {
-  const [step, setStep] = useState(0);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [exiting, setExiting] = useState(false);
-  const [localCompleted, setLocalCompleted] = useState(false);
+  // Leer localStorage sincrónicamente en el PRIMER render
+  const [localCompleted] = useState(() => readLocalStorage());
 
-  // Check localStorage on mount (fallback if DB update failed)
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === "true") {
-        setLocalCompleted(true);
-      }
-    } catch {
-      // localStorage not available
-    }
-  }, []);
-
-  // If already completed locally or in DB, don't show (unless forceShow)
   const alreadyCompleted = hasSeenTutorial || localCompleted;
   const shouldShow = forceShow || !alreadyCompleted;
 
+  // Si NO debe mostrarse, retornar null ANTES de cualquier otro hook
+  // Esto es seguro porque el orden de hooks nunca cambia:
+  // useState (localCompleted) → return null → siempre es 1 hook
   if (!shouldShow) return null;
 
+  // A partir de aquí, shouldShow SIEMPRE será true en este render y subsiguientes
+  // (porque localCompleted se leyó sincrónicamente y nunca cambia dentro de este mount)
+  const [step, setStep] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [exiting, setExiting] = useState(false);
+
   const persistCompletion = useCallback(async () => {
-    // 1. Save to localStorage immediately (always works)
+    // 1. localStorage (inmediato, siempre funciona)
     try {
       localStorage.setItem(STORAGE_KEY, "true");
     } catch {
       // ignore
     }
-    setLocalCompleted(true);
 
-    // 2. Save to database via API (service_role, bypasses RLS)
+    // 2. API a base de datos (service_role, bypass RLS)
     try {
-      const res = await fetch("/api/tutorial/complete", {
+      await fetch("/api/tutorial/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
       });
-      if (!res.ok) {
-        console.warn("[Tutorial] API save failed, but localStorage is set");
-      }
-    } catch (err) {
-      console.warn("[Tutorial] Network error saving completion, but localStorage is set");
+    } catch {
+      // ignore - localStorage ya lo guardó
     }
   }, [userId]);
 
