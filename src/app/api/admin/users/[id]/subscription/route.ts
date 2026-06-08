@@ -32,6 +32,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const body = await request.json();
     const { status, plan_type, expires_at } = body;
 
+    console.log(`[Admin PUT Subscription] userId=${userId}, status=${status}, plan_type=${plan_type}`);
+
     const validStatuses = ["active", "canceled", "past_due", "paused", "pending"];
     if (status && !validStatuses.includes(status)) {
       return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
@@ -45,20 +47,23 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     // 1. Buscar la suscripción más reciente del usuario
     const { data: latestSub, error: findError } = await supabase
       .from("subscriptions")
-      .select("id, status, plan_type, expires_at, current_period_end")
+      .select("id, status, plan_type, expires_at, current_period_end, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
     if (findError) {
+      console.error("[Admin PUT] Find error:", findError);
       return NextResponse.json({ error: findError.message }, { status: 500 });
     }
 
-    let data: any = latestSub;
+    console.log("[Admin PUT] Found subscription:", latestSub);
+
+    let updatedSub: any = null;
 
     if (latestSub) {
-      // 2. Actualizar solo esa suscripción específica por ID
+      // 2. Construir datos de actualización
       const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
       if (status) updateData.status = status;
       if (plan_type) updateData.plan_type = plan_type;
@@ -79,19 +84,36 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         updateData.current_period_end = thirtyDays.toISOString();
       }
 
-      const { data: updated, error: updateError } = await supabase
+      console.log("[Admin PUT] Updating subscription", latestSub.id, "with:", updateData);
+
+      // 3. Actualizar
+      const { error: updateError } = await supabase
         .from("subscriptions")
         .update(updateData)
-        .eq("id", latestSub.id)
-        .select()
-        .single();
+        .eq("id", latestSub.id);
 
       if (updateError) {
+        console.error("[Admin PUT] Update error:", updateError);
         return NextResponse.json({ error: updateError.message }, { status: 500 });
       }
-      data = updated;
+
+      // 4. Volver a leer la suscripción actualizada para devolverla
+      const { data: refreshed, error: refreshError } = await supabase
+        .from("subscriptions")
+        .select("id, status, plan_type, current_period_start, current_period_end, expires_at, created_at")
+        .eq("id", latestSub.id)
+        .single();
+
+      if (refreshError) {
+        console.error("[Admin PUT] Refresh error:", refreshError);
+        return NextResponse.json({ error: refreshError.message }, { status: 500 });
+      }
+
+      updatedSub = refreshed;
+      console.log("[Admin PUT] Refreshed subscription:", updatedSub);
     } else {
       // No hay suscripción: crear una nueva
+      console.log("[Admin PUT] No subscription found, creating new one");
       const newSub: Record<string, unknown> = {
         user_id: userId,
         status: status || "active",
@@ -117,15 +139,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         .single();
 
       if (createError) {
+        console.error("[Admin PUT] Create error:", createError);
         return NextResponse.json({ error: createError.message }, { status: 500 });
       }
-      data = created;
+      updatedSub = created;
     }
 
-    // Lógica lead vs cliente:
-    // - Temporal (activo o no) = Lead
-    // - Cancelado = Lead
-    // - Premium o Permanente activo = Cliente
+    // Actualizar is_lead según el plan
     if (status === "canceled") {
       await supabase.from("profiles").update({ is_lead: true }).eq("id", userId);
     } else if (plan_type === "premium" || plan_type === "permanente") {
@@ -133,11 +153,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     } else if (plan_type === "temporal") {
       await supabase.from("profiles").update({ is_lead: true }).eq("id", userId);
     } else if (expires_at && new Date(expires_at) < new Date()) {
-      // Cualquier plan expirado = lead
       await supabase.from("profiles").update({ is_lead: true }).eq("id", userId);
     }
 
-    return NextResponse.json({ success: true, subscription: data });
+    console.log("[Admin PUT] Success, returning:", updatedSub);
+    return NextResponse.json({ success: true, subscription: updatedSub });
   } catch (error) {
     console.error("[Admin Update Subscription] Error:", error);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
