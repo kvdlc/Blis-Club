@@ -160,8 +160,6 @@ export default function UsersPage() {
     load();
   };
 
-  const [actionError, setActionError] = useState("");
-
   const updatePlan = async (updates: Partial<SubscriptionData>) => {
     if (!manageUser) return;
     setActionLoading(true);
