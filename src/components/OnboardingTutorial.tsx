@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState, useCallback, useEffect } from "react";
 import { ChevronRight, ChevronLeft, Sparkles, X } from "lucide-react";
 
 interface Slide {
@@ -48,6 +47,8 @@ const SLIDES: Slide[] = [
   },
 ];
 
+const STORAGE_KEY = "blis_tutorial_completed";
+
 interface Props {
   userId: string;
   hasSeenTutorial?: boolean;
@@ -59,27 +60,57 @@ export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow 
   const [step, setStep] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [exiting, setExiting] = useState(false);
-  const supabase = createClient();
+  const [localCompleted, setLocalCompleted] = useState(false);
 
-  const shouldShow = forceShow || !hasSeenTutorial;
+  // Check localStorage on mount (fallback if DB update failed)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === "true") {
+        setLocalCompleted(true);
+      }
+    } catch {
+      // localStorage not available
+    }
+  }, []);
+
+  // If already completed locally or in DB, don't show (unless forceShow)
+  const alreadyCompleted = hasSeenTutorial || localCompleted;
+  const shouldShow = forceShow || !alreadyCompleted;
+
   if (!shouldShow) return null;
+
+  const persistCompletion = useCallback(async () => {
+    // 1. Save to localStorage immediately (always works)
+    try {
+      localStorage.setItem(STORAGE_KEY, "true");
+    } catch {
+      // ignore
+    }
+    setLocalCompleted(true);
+
+    // 2. Save to database via API (service_role, bypasses RLS)
+    try {
+      const res = await fetch("/api/tutorial/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      if (!res.ok) {
+        console.warn("[Tutorial] API save failed, but localStorage is set");
+      }
+    } catch (err) {
+      console.warn("[Tutorial] Network error saving completion, but localStorage is set");
+    }
+  }, [userId]);
 
   const finish = useCallback(() => {
     setExiting(true);
-
-    // Persist to Supabase (fire-and-forget)
-    if (!hasSeenTutorial) {
-      void supabase
-        .from("profiles")
-        .update({ has_seen_tutorial: true })
-        .eq("id", userId);
-    }
-
-    // Call onComplete after animation starts
+    void persistCompletion();
     setTimeout(() => {
       onComplete?.();
     }, 300);
-  }, [hasSeenTutorial, supabase, userId, onComplete]);
+  }, [persistCompletion, onComplete]);
 
   const close = useCallback(() => {
     setExiting(true);
