@@ -62,15 +62,55 @@ export async function POST(request: Request) {
 
     console.log(`[Izipay Webhook] Buscando orden: ${referenceOrderId}`);
 
-    const { data: subscription } = await supabase
+    let { data: subscription } = await supabase
       .from("subscriptions")
       .select("id, user_id, plan_id, status, metadata")
       .eq("id", referenceOrderId)
       .maybeSingle();
 
     if (!subscription) {
-      console.error(`[Izipay Webhook] Suscripción no encontrada: ${referenceOrderId}`);
-      return NextResponse.json({ error: "Suscripción no encontrada" }, { status: 404 });
+      console.error(`[Izipay Webhook] Suscripción no encontrada: ${referenceOrderId}. Creando nueva suscripción para el pago.`);
+      // Extraer user_id del customer.reference o customer.email
+      const customerEmail = customer?.email as string;
+      let userId: string | null = null;
+      if (customerEmail) {
+        const { data: profile } = await serviceSupabase
+          .from("profiles")
+          .select("id")
+          .eq("email", customerEmail.toLowerCase())
+          .maybeSingle();
+        userId = profile?.id || null;
+      }
+      if (!userId) {
+        return NextResponse.json({ error: "Suscripción no encontrada y no se pudo determinar el usuario" }, { status: 404 });
+      }
+
+      // Crear suscripción nueva
+      const now = new Date();
+      const periodEnd = new Date(now);
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+      const { data: created, error: createError } = await serviceSupabase
+        .from("subscriptions")
+        .insert({
+          id: referenceOrderId,
+          user_id: userId,
+          status: "active",
+          plan_type: "premium",
+          current_period_start: now.toISOString(),
+          current_period_end: periodEnd.toISOString(),
+          expires_at: null,
+          izipay_subscription_id: orderId,
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error(`[Izipay Webhook] Error creando suscripción:`, createError);
+        return NextResponse.json({ error: "Error creando suscripción" }, { status: 500 });
+      }
+
+      subscription = created;
     }
 
     console.log(`[Izipay Webhook] Suscripción ${subscription.id} encontrada, estado actual: ${subscription.status}`);
@@ -92,6 +132,19 @@ export async function POST(request: Request) {
           current_period_end: periodEnd.toISOString(),
           expires_at: null,
           izipay_subscription_id: orderId,
+        })
+        .eq("id", subscription.id),
+      serviceSupabase
+        .from("profiles")
+        .update({ is_lead: false })
+        .eq("id", subscription.user_id),
+    ]);
+
+    // Intentar guardar metadata por separado (ignorar error si columna no existe)
+    try {
+      await serviceSupabase
+        .from("subscriptions")
+        .update({
           metadata: {
             ...((subscription.metadata as Record<string, unknown>) || {}),
             izipay_status: "PAID",
@@ -102,12 +155,10 @@ export async function POST(request: Request) {
             izipay_card_last4: String(tx?.cardDetails?.pan || "").slice(-4),
           },
         })
-        .eq("id", subscription.id),
-      serviceSupabase
-        .from("profiles")
-        .update({ is_lead: false })
-        .eq("id", subscription.user_id),
-    ]);
+        .eq("id", subscription.id);
+    } catch {
+      // metadata column might not exist yet
+    }
 
       if (tx?.paymentMethodToken) {
         const { data: existingToken } = await supabase

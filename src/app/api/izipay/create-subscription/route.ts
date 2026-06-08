@@ -81,6 +81,7 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single();
 
+    // Crear suscripción SIN metadata primero (para que funcione aunque metadata no exista aún)
     const { data: order, error: orderError } = await supabase
       .from("subscriptions")
       .insert({
@@ -90,16 +91,16 @@ export async function POST(request: Request) {
         plan_type: "premium",
         current_period_start: new Date().toISOString(),
         current_period_end: null,
-        metadata: {
-          app_id: appId || null,
-          plan_name: plan.name,
-          created_via: "izipay_checkout",
-        },
       })
       .select()
       .single();
 
-    const orderId = order?.id || `sub_${Date.now()}_${user.id.slice(0, 8)}`;
+    if (orderError || !order) {
+      console.error("[Izipay Create Subscription] Error creating subscription:", orderError);
+      return NextResponse.json({ error: "Error al crear la suscripción. Intenta de nuevo." }, { status: 500 });
+    }
+
+    const orderId = order.id;
 
     const paymentResponse = await createPayment(
       {
@@ -125,7 +126,8 @@ export async function POST(request: Request) {
       }, { status: 502 });
     }
 
-    if (order) {
+    // Intentar guardar metadata (ignorar error si la columna aún no existe)
+    try {
       await supabase
         .from("subscriptions")
         .update({
@@ -137,6 +139,8 @@ export async function POST(request: Request) {
           },
         })
         .eq("id", order.id);
+    } catch {
+      // metadata column might not exist yet, ignore
     }
 
     return NextResponse.json({

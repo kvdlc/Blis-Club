@@ -39,20 +39,17 @@ export async function POST(request: Request) {
     periodEnd.setMonth(periodEnd.getMonth() + 1);
 
     // Activar como Premium y convertir a Cliente
+    const updateData: Record<string, unknown> = {
+      status: "active",
+      plan_type: "premium",
+      current_period_start: now.toISOString(),
+      current_period_end: periodEnd.toISOString(),
+      expires_at: null,
+    };
+
     const { data: updated, error: updateError } = await serviceSupabase
       .from("subscriptions")
-      .update({
-        status: "active",
-        plan_type: "premium",
-        current_period_start: now.toISOString(),
-        current_period_end: periodEnd.toISOString(),
-        expires_at: null,
-        metadata: {
-          ...((subscription as any).metadata || {}),
-          izipay_confirmed_at: now.toISOString(),
-          confirmed_via: "client",
-        },
-      })
+      .update(updateData)
       .eq("id", orderId)
       .select()
       .single();
@@ -60,6 +57,22 @@ export async function POST(request: Request) {
     if (updateError) {
       console.error("[Izipay Confirm] Error actualizando suscripción:", updateError);
       return NextResponse.json({ error: "Error al confirmar" }, { status: 500 });
+    }
+
+    // Intentar actualizar metadata por separado (ignorar error si columna no existe)
+    try {
+      await serviceSupabase
+        .from("subscriptions")
+        .update({
+          metadata: {
+            ...((subscription as any).metadata || {}),
+            izipay_confirmed_at: now.toISOString(),
+            confirmed_via: "client",
+          },
+        })
+        .eq("id", orderId);
+    } catch {
+      // metadata column might not exist yet
     }
 
     // Marcar como Cliente (pagó)
