@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 export async function POST(request: Request) {
   try {
@@ -16,9 +17,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    const { data: subscription } = await supabase
+    // Usar service_role para actualizar sin restricciones RLS
+    const serviceSupabase = createServiceClient();
+
+    const { data: subscription } = await serviceSupabase
       .from("subscriptions")
-      .select("id, user_id, plan_id, status")
+      .select("id, user_id, plan_id, status, plan_type")
       .eq("id", orderId)
       .single();
 
@@ -34,16 +38,17 @@ export async function POST(request: Request) {
     const periodEnd = new Date(now);
     periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-    const { data: updated, error: updateError } = await supabase
+    // Activar como Premium y convertir a Cliente
+    const { data: updated, error: updateError } = await serviceSupabase
       .from("subscriptions")
       .update({
         status: "active",
+        plan_type: "premium",
         current_period_start: now.toISOString(),
         current_period_end: periodEnd.toISOString(),
+        expires_at: null,
         metadata: {
-          ...((subscription as Record<string, unknown>).metadata
-            ? (subscription as Record<string, unknown>).metadata as Record<string, unknown>
-            : {}),
+          ...((subscription as any).metadata || {}),
           izipay_confirmed_at: now.toISOString(),
           confirmed_via: "client",
         },
@@ -56,6 +61,12 @@ export async function POST(request: Request) {
       console.error("[Izipay Confirm] Error actualizando suscripción:", updateError);
       return NextResponse.json({ error: "Error al confirmar" }, { status: 500 });
     }
+
+    // Marcar como Cliente (pagó)
+    await serviceSupabase
+      .from("profiles")
+      .update({ is_lead: false })
+      .eq("id", subscription.user_id);
 
     return NextResponse.json({ success: true, status: updated?.status });
   } catch (error) {

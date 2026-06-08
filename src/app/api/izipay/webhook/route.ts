@@ -81,32 +81,33 @@ export async function POST(request: Request) {
       periodEnd.setMonth(periodEnd.getMonth() + 1);
 
       // Activar suscripción Premium y mantener como cliente
-      await Promise.all([
-        supabase
-          .from("subscriptions")
-          .update({
-            status: "active",
-            plan_type: "premium",
-            current_period_start: now.toISOString(),
-            current_period_end: periodEnd.toISOString(),
-            expires_at: null,
-            izipay_subscription_id: orderId,
-            metadata: {
-              ...((subscription.metadata as Record<string, unknown>) || {}),
-              izipay_status: "PAID",
-              izipay_webhook_received_at: new Date().toISOString(),
-              izipay_transaction_uuid: tx?.uuid || "",
-              izipay_payment_method: tx?.paymentMethodType || "",
-              izipay_card_brand: tx?.cardDetails?.brand || "",
-              izipay_card_last4: String(tx?.cardDetails?.pan || "").slice(-4),
-            },
-          })
-          .eq("id", subscription.id),
-        supabase
-          .from("profiles")
-          .update({ is_lead: false })
-          .eq("id", subscription.user_id),
-      ]);
+    // Usar service_role para bypass RLS
+    await Promise.all([
+      serviceSupabase
+        .from("subscriptions")
+        .update({
+          status: "active",
+          plan_type: "premium",
+          current_period_start: now.toISOString(),
+          current_period_end: periodEnd.toISOString(),
+          expires_at: null,
+          izipay_subscription_id: orderId,
+          metadata: {
+            ...((subscription.metadata as Record<string, unknown>) || {}),
+            izipay_status: "PAID",
+            izipay_webhook_received_at: new Date().toISOString(),
+            izipay_transaction_uuid: tx?.uuid || "",
+            izipay_payment_method: tx?.paymentMethodType || "",
+            izipay_card_brand: tx?.cardDetails?.brand || "",
+            izipay_card_last4: String(tx?.cardDetails?.pan || "").slice(-4),
+          },
+        })
+        .eq("id", subscription.id),
+      serviceSupabase
+        .from("profiles")
+        .update({ is_lead: false })
+        .eq("id", subscription.user_id),
+    ]);
 
       if (tx?.paymentMethodToken) {
         const { data: existingToken } = await supabase
