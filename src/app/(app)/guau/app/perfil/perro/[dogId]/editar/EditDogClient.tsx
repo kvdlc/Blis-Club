@@ -116,9 +116,19 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     if (metabolicProfile?.activity_level) setActivity(metabolicProfile.activity_level);
     if (metabolicProfile?.allergies) setAllergies(metabolicProfile.allergies);
     if (metabolicProfile?.medical_conditions) setConditions(metabolicProfile.medical_conditions);
-    if (metabolicProfile?.diet_type) setDietType(metabolicProfile.diet_type as DietType);
+    if (metabolicProfile?.diet_type) {
+      const dt = metabolicProfile.diet_type as DietType;
+      setDietType(dt);
+      // Si dietType cambió a no-mixta y feedingPct es muy alto, corregir
+      if (dt !== "mixta" && feedingPct > 10) {
+        setFeedingPct(dt === "barf" ? BARF_PCT_BY_STAGE[lifeStage].default : CROQUETAS_PCT_BY_STAGE[lifeStage].default);
+      }
+    }
     if (metabolicProfile?.feeding_pct !== undefined && metabolicProfile?.feeding_pct !== null) {
-      setFeedingPct(metabolicProfile.feeding_pct);
+      // Solo aceptar si no es inconsistente con la dieta
+      if (dietType === "mixta" || metabolicProfile.feeding_pct <= 10) {
+        setFeedingPct(metabolicProfile.feeding_pct);
+      }
     }
   }, [metabolicProfile]);
 
