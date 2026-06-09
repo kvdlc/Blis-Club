@@ -56,15 +56,18 @@ const HIDE_REASONS = [
 ];
 
 function formatPieces(grams: number, unitWeight: number, displayUnit: string | null, unitType: string) {
-  if (unitType === 'g' || unitType === 'kg') return `${Math.round(grams)}g`;
-  if (!unitWeight || unitWeight <= 0) return `${Math.round(grams)}g`;
+  const gStr = `${Math.round(grams)}g`;
+  if (unitType === 'g' || unitType === 'kg' || !unitWeight || unitWeight <= 0) return gStr;
   const pieces = grams / unitWeight;
-  if (pieces < 0.25) return `${Math.round(grams)}g`;
-  if (Math.abs(pieces - 0.5) < 0.05) return `½ ${displayUnit || unitType}`;
-  if (Math.abs(pieces - 1) < 0.05) return `1 ${displayUnit || unitType}`;
-  if (pieces < 1) return `${Math.round(pieces * 2)}/2 ${displayUnit || unitType}`;
-  const rounded = Math.round(pieces * 10) / 10;
-  return `${rounded} ${displayUnit || unitType}`;
+  let pieceStr = "";
+  if (pieces < 0.25) pieceStr = "";
+  else if (Math.abs(pieces - 0.5) < 0.05) pieceStr = `½ ${displayUnit || unitType}`;
+  else if (Math.abs(pieces - 1) < 0.05) pieceStr = `1 ${displayUnit || unitType}`;
+  else if (pieces < 1) pieceStr = `${Math.round(pieces * 2)}/2 ${displayUnit || unitType}`;
+  else pieceStr = `${Math.round(pieces * 10) / 10} ${displayUnit || unitType}`;
+  if (pieceStr) return `${gStr} o ${pieceStr}`;
+  return gStr;
+}
 }
 
 export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts, dog, metabolicProfile, userId }: Props) {
@@ -129,29 +132,32 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
     loadFav();
   }, [supabase, userId, recipe.id]);
 
+  const loadSlots = useCallback(async () => {
+    if (!dog) return;
+    const { data } = await supabase.from("dog_meal_slots").select("*").eq("dog_id", dog.id).order("slot_index", { ascending: true });
+    const slots = (data as DogMealSlot[] | null) ?? [];
+    console.log("[Recipe] Loaded dog slots:", slots.length, "mealCount:", slots.length || 1);
+    setDogSlots(slots);
+  }, [supabase, dog?.id]);
+
+  const loadTodaySchedule = useCallback(async () => {
+    if (!dog) return;
+    const { data } = await supabase.from("meal_schedule").select("meal_slot_index, status").eq("dog_id", dog.id).eq("fecha", todayStr);
+    setTodaySchedule((data as { meal_slot_index: number; status: string }[] | null) ?? []);
+  }, [supabase, dog?.id, todayStr]);
+
   // Load dog slots on mount for accurate meal count
   useEffect(() => {
     if (!dog) return;
     loadSlots();
-  }, [dog]);
+    loadTodaySchedule();
+  }, [dog, loadSlots, loadTodaySchedule]);
 
   useEffect(() => {
     if (!dog || !cookModalOpen) return;
     loadSlots();
     loadTodaySchedule();
-  }, [cookModalOpen, dog]);
-
-  const loadSlots = async () => {
-    if (!dog) return;
-    const { data } = await supabase.from("dog_meal_slots").select("*").eq("dog_id", dog.id).order("slot_index", { ascending: true });
-    setDogSlots((data as DogMealSlot[] | null) ?? []);
-  };
-
-  const loadTodaySchedule = async () => {
-    if (!dog) return;
-    const { data } = await supabase.from("meal_schedule").select("meal_slot_index, status").eq("dog_id", dog.id).eq("fecha", todayStr);
-    setTodaySchedule((data as { meal_slot_index: number; status: string }[] | null) ?? []);
-  };
+  }, [cookModalOpen, dog, loadSlots, loadTodaySchedule]);
 
   const toggleFavorite = async () => {
     if (liked) {
