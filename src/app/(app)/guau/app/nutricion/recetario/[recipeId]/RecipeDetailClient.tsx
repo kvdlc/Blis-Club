@@ -59,15 +59,23 @@ const HIDE_REASONS = [
 function formatPieces(grams: number, unitWeight: number, displayUnit: string | null, unitType: string) {
   const gStr = `${Math.round(grams)}g`;
   if (unitType === 'g' || unitType === 'kg' || !unitWeight || unitWeight <= 0) return gStr;
+
+  const rawLabel = displayUnit || unitType;
+  const qtyMatch = rawLabel.match(/^(\d+(?:[.,]\d+)?)\s*/);
+  const unitQty = qtyMatch ? parseFloat(qtyMatch[1].replace(',', '.')) : 1;
+  const cleanLabel = qtyMatch ? rawLabel.slice(qtyMatch[0].length) : rawLabel;
+
   const pieces = grams / unitWeight;
+  const actualCount = pieces * unitQty;
+
   let pieceStr = "";
-  if (pieces < 0.25) pieceStr = "";
-  else if (Math.abs(pieces - 0.5) < 0.05) pieceStr = `≈½`;
-  else if (Math.abs(pieces - 1) < 0.05) pieceStr = `≈1`;
-  else if (pieces < 1) pieceStr = `≈${Math.round(pieces * 2)}/2`;
-  else pieceStr = `≈${Math.round(pieces * 10) / 10}`;
-  const unitLabel = displayUnit || unitType;
-  if (pieceStr) return `${gStr} (${pieceStr} ${unitLabel})`;
+  if (actualCount < 0.25) pieceStr = "";
+  else if (Math.abs(actualCount - 0.5) < 0.05) pieceStr = `½`;
+  else if (Math.abs(actualCount - 1) < 0.05) pieceStr = `1`;
+  else if (actualCount < 1) pieceStr = `${Math.round(actualCount * 2)}/2`;
+  else pieceStr = `${Math.round(actualCount * 10) / 10}`;
+
+  if (pieceStr) return `${gStr} (≈${pieceStr} ${cleanLabel})`;
   return gStr;
 }
 
