@@ -88,6 +88,18 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     return isNaN(v) ? dog.peso_kg : v;
   };
 
+  const [activity, setActivity] = useState(metabolicProfile?.activity_level ?? "moderado");
+  const [allergies, setAllergies] = useState<string[]>(metabolicProfile?.allergies ?? []);
+  const [conditions, setConditions] = useState<string[]>(metabolicProfile?.medical_conditions ?? []);
+  const [feedingPct, setFeedingPct] = useState(metabolicProfile?.feeding_pct ?? 2.5);
+  const [dietType, setDietType] = useState<DietType>((metabolicProfile?.diet_type as DietType) ?? "croquetas");
+  const [mixtaBarfProp, setMixtaBarfProp] = useState(50);
+  const [lifeStage, setLifeStage] = useState<LifeStage>(() => {
+    if (!dog) return "adulto";
+    const defaults = getFeedingDefaults({ raza: dog.raza, peso_kg: dog.peso_kg, edad_meses: dog.edad_meses, tamano_guardado: dog.tamano || null });
+    return defaults.life_stage;
+  });
+
   // Calculated ration
   let total = 0, kcalTotal = 0, barfGrams = 0, croqGrams = 0;
   const weight = getWeightNumber();
@@ -108,18 +120,6 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
 
   const pctRange = dietType === "barf" ? BARF_PCT_BY_STAGE[lifeStage] :
     dietType === "croquetas" ? CROQUETAS_PCT_BY_STAGE[lifeStage] : null;
-
-  const [activity, setActivity] = useState(metabolicProfile?.activity_level ?? "moderado");
-  const [allergies, setAllergies] = useState<string[]>(metabolicProfile?.allergies ?? []);
-  const [conditions, setConditions] = useState<string[]>(metabolicProfile?.medical_conditions ?? []);
-  const [feedingPct, setFeedingPct] = useState(metabolicProfile?.feeding_pct ?? 2.5);
-  const [dietType, setDietType] = useState<DietType>((metabolicProfile?.diet_type as DietType) ?? "croquetas");
-  const [mixtaBarfProp, setMixtaBarfProp] = useState(50);
-  const [lifeStage, setLifeStage] = useState<LifeStage>(() => {
-    if (!dog) return "adulto";
-    const defaults = getFeedingDefaults({ raza: dog.raza, peso_kg: dog.peso_kg, edad_meses: dog.edad_meses, tamano_guardado: dog.tamano || null });
-    return defaults.life_stage;
-  });
 
   const [saved, setSaved] = useState(false);
   const [saveIcon, setSaveIcon] = useState(false);
