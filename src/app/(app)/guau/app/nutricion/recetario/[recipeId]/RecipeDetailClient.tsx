@@ -8,7 +8,7 @@ import { ChefHat, ShoppingCart, ArrowLeft, Check, Heart, Clock, Flame, Star, Che
 import { ScheduleMealModal } from "./ScheduleMealModal";
 import VideoEmbed from "@/components/VideoEmbed";
 import { RecipeLightbox } from "@/components/RecipeLightbox";
-import { calcularRacionDiaria, getFeedingDefaults } from "@/lib/feeding-standards";
+import { calcularRacionDiaria, calcularRacionMixta, getFeedingDefaults } from "@/lib/feeding-standards";
 import type { DietType, ActivityLevel } from "@/lib/feeding-standards";
 
 interface Props {
@@ -91,10 +91,18 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   const weight = dog?.peso_kg ?? 0;
 
   // Usar la misma fórmula de ración que el editor y la calculadora
-  const ration = dog ? calcularRacionDiaria({
-    peso_kg: weight, feeding_pct: feedingPct, diet_type: dietType, activity_level: activityLevel,
-  }) : { total_grams: 0, total_kcal: 0 };
-  const totalGrams = ration.total_grams;
+  const ration = dog ? (dietType === "mixta"
+    ? calcularRacionMixta({
+        peso_kg: weight, feeding_pct: feedingPct, life_stage: "adulto",
+        proporcion_barf: 50, activity_level: activityLevel, ajuste_global: feedingPct / 100,
+      })
+    : calcularRacionDiaria({
+        peso_kg: weight, feeding_pct: feedingPct, diet_type: dietType, activity_level: activityLevel,
+      })
+  ) : { total_grams: 0, total_kcal: 0 };
+  const totalGrams = dietType === "mixta"
+    ? (ration as any).barf_grams + (ration as any).croquetas_grams
+    : (ration as any).total_grams;
   const mealCount = Math.max(dogSlots.length, 1);
   const gramsPerMeal = totalGrams / mealCount;
   const stars = DIFFICULTY_STARS[recipe.difficulty] ?? 1;
