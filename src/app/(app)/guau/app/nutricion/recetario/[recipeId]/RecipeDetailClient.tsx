@@ -19,6 +19,7 @@ interface Props {
   dog: Dog | null;
   metabolicProfile: DogMetabolicProfile | null;
   userId: string;
+  initialSlots?: DogMealSlot[];
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -61,15 +62,16 @@ function formatPieces(grams: number, unitWeight: number, displayUnit: string | n
   const pieces = grams / unitWeight;
   let pieceStr = "";
   if (pieces < 0.25) pieceStr = "";
-  else if (Math.abs(pieces - 0.5) < 0.05) pieceStr = `½ ${displayUnit || unitType}`;
-  else if (Math.abs(pieces - 1) < 0.05) pieceStr = `1 ${displayUnit || unitType}`;
-  else if (pieces < 1) pieceStr = `${Math.round(pieces * 2)}/2 ${displayUnit || unitType}`;
-  else pieceStr = `${Math.round(pieces * 10) / 10} ${displayUnit || unitType}`;
-  if (pieceStr) return `${gStr} o ${pieceStr}`;
+  else if (Math.abs(pieces - 0.5) < 0.05) pieceStr = `≈½`;
+  else if (Math.abs(pieces - 1) < 0.05) pieceStr = `≈1`;
+  else if (pieces < 1) pieceStr = `≈${Math.round(pieces * 2)}/2`;
+  else pieceStr = `≈${Math.round(pieces * 10) / 10}`;
+  const unitLabel = displayUnit || unitType;
+  if (pieceStr) return `${gStr} (${pieceStr} ${unitLabel})`;
   return gStr;
 }
 
-export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts, dog, metabolicProfile, userId }: Props) {
+export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts, dog, metabolicProfile, userId, initialSlots = [] }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const [addedToCart, setAddedToCart] = useState(false);
@@ -78,7 +80,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [liked, setLiked] = useState(false);
   const [cookModalOpen, setCookModalOpen] = useState(false);
-  const [dogSlots, setDogSlots] = useState<DogMealSlot[]>([]);
+  const [dogSlots, setDogSlots] = useState<DogMealSlot[]>(initialSlots);
   const [todaySchedule, setTodaySchedule] = useState<{ meal_slot_index: number; status: string }[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [savingCook, setSavingCook] = useState(false);

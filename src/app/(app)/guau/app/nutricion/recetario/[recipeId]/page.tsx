@@ -20,9 +20,14 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ r
   if (!recipe) notFound();
 
   let metabolicProfile: DogMetabolicProfile | null = null;
+  let dogSlots: any[] = [];
   if ((dog as Dog | null)?.id) {
-    const { data: mp } = await supabase.from("dog_metabolic_profiles").select("*").eq("dog_id", (dog as Dog).id).maybeSingle();
+    const [{ data: mp }, { data: slots }] = await Promise.all([
+      supabase.from("dog_metabolic_profiles").select("*").eq("dog_id", (dog as Dog).id).maybeSingle(),
+      supabase.from("dog_meal_slots").select("*").eq("dog_id", (dog as Dog).id).order("slot_index", { ascending: true }),
+    ]);
     metabolicProfile = mp as DogMetabolicProfile | null;
+    dogSlots = slots ?? [];
   }
 
   return (
@@ -34,6 +39,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ r
       dog={dog as Dog | null}
       metabolicProfile={metabolicProfile}
       userId={user.id}
+      initialSlots={dogSlots}
     />
   );
 }
