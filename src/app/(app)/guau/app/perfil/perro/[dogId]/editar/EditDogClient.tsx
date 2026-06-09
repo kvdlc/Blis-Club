@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Dog, DogMetabolicProfile, DogMealSlot, WeeklyChallenge, UserChallenge } from "@/types/database";
@@ -100,29 +100,29 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     return defaults.life_stage;
   });
 
-  // Calculated ration
-  let total = 0, kcalTotal = 0, barfGrams = 0, croqGrams = 0;
-  const weight = getWeightNumber();
-  if (dietType === "mixta") {
-    const ajusteGlobal = feedingPct / 100;
-    const result = calcularRacionMixta({
-      peso_kg: weight, life_stage: lifeStage,
-      proporcion_barf: mixtaBarfProp, activity_level: activity as ActivityLevel, ajuste_global: ajusteGlobal,
-    });
-    barfGrams = result.barf_grams; croqGrams = result.croquetas_grams;
-    total = barfGrams + croqGrams; kcalTotal = result.total_kcal;
-  } else {
-    const result = calcularRacionDiaria({ peso_kg: weight, feeding_pct: feedingPct, diet_type: dietType, activity_level: activity as ActivityLevel });
-    total = result.total_grams; kcalTotal = result.total_kcal;
-    if (dietType === "barf") barfGrams = total;
-    else croqGrams = total;
-  }
+  // Calculated ration (useMemo para evitar hydration mismatch)
+  const ration = useMemo(() => {
+    const w = getWeightNumber();
+    if (dietType === "mixta") {
+      return calcularRacionMixta({
+        peso_kg: w, life_stage: lifeStage,
+        proporcion_barf: mixtaBarfProp, activity_level: activity as ActivityLevel, ajuste_global: feedingPct / 100,
+      });
+    }
+    return calcularRacionDiaria({ peso_kg: w, feeding_pct: feedingPct, diet_type: dietType, activity_level: activity as ActivityLevel });
+  }, [dietType, feedingPct, mixtaBarfProp, activity, lifeStage, weightDisplay]);
+
+  const total = ration.total_grams ?? (dietType === "mixta" ? (ration.barf_grams + ration.croquetas_grams) : ration.total_grams);
+  const kcalTotal = 'total_kcal' in ration ? ration.total_kcal : 0;
+  const barfGrams = 'barf_grams' in ration ? ration.barf_grams : (dietType === "barf" ? total : 0);
+  const croqGrams = 'croquetas_grams' in ration ? ration.croquetas_grams : (dietType === "croquetas" ? total : 0);
 
   const pctRange = dietType === "barf" ? BARF_PCT_BY_STAGE[lifeStage] :
     dietType === "croquetas" ? CROQUETAS_PCT_BY_STAGE[lifeStage] : null;
 
   const [saved, setSaved] = useState(false);
   const [saveIcon, setSaveIcon] = useState(false);
+  const [savingFeeding, setSavingFeeding] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSrc, setEditorSrc] = useState("");
@@ -162,7 +162,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     }
   };
 
-  // Auto-save with debounce
+  // Auto-save: solo datos básicos (alimentación se guarda con botón manual)
   const autoSave = useCallback(async () => {
     setSaveIcon(true);
     const edadMeses = getAgeMonths(birthDate);
@@ -173,23 +173,9 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
       objetivo_principal: objective || null, foto_url: photo || null, breed_image_url: breedImage || null,
     }).eq("id", dog.id);
 
-    const { error: mpError } = await supabase.from("dog_metabolic_profiles").upsert({
-      dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
-      feeding_pct: feedingPct, diet_type: dietType,
-    }, { onConflict: "dog_id" });
-
-    // Si falla por diet_type, reintentar sin ella (columna puede no existir)
-    if (mpError) {
-      console.warn("[EditDog] diet_type save failed, retrying without:", mpError.message);
-      await supabase.from("dog_metabolic_profiles").upsert({
-        dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
-        feeding_pct: feedingPct,
-      }, { onConflict: "dog_id" });
-    }
-
     setSaved(true);
     setTimeout(() => { setSaved(false); setSaveIcon(false); }, 1500);
-  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, tamano, activity, allergies, conditions, feedingPct, dietType, dog.id, supabase]);
+  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, tamano, dog.id, supabase]);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -211,7 +197,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
       autoSave();
     }, 800);
     return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
-  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, activity, allergies, conditions, feedingPct, dietType]);
+  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, activity, allergies, conditions]);
 
   const filteredBreeds = breedSearch.trim()
     ? BREEDS.filter((b) => b.toLowerCase().includes(breedSearch.toLowerCase()))
@@ -490,6 +476,32 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
               className="w-full accent-zinc-400" />
           </div>
         )}
+
+        {/* Botón Guardar alimentación y salud */}
+        <button
+          onClick={async () => {
+            setSavingFeeding(true);
+            const { error } = await supabase.from("dog_metabolic_profiles").upsert({
+              dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
+              feeding_pct: feedingPct, diet_type: dietType,
+            }, { onConflict: "dog_id" });
+            if (error) {
+              // Retry without diet_type if column missing
+              const { error: e2 } = await supabase.from("dog_metabolic_profiles").upsert({
+                dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
+                feeding_pct: feedingPct,
+              }, { onConflict: "dog_id" });
+              if (e2) console.warn("[EditDog] Save failed:", e2.message);
+            }
+            setSaved(true);
+            setTimeout(() => setSaved(false), 1500);
+            setSavingFeeding(false);
+          }}
+          disabled={savingFeeding}
+          className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-2.5 text-sm font-bold transition-all active:scale-[0.98] disabled:opacity-60"
+        >
+          {savingFeeding ? "Guardando..." : "Guardar"}
+        </button>
       </div>
 
       {/* ═══ SALUD ═══ */}
