@@ -345,26 +345,26 @@ export function calcularRacionMixta(params: {
 /**
  * Devuelve slots de comida sugeridos según frecuencia y etapa.
  */
-export function sugerirMealSlots(lifeStage: LifeStage): { label: string; time: string }[] {
-  const freq = MEAL_FREQUENCY[lifeStage];
-  if (freq.recommended === 4) {
+export function sugerirMealSlots(lifeStage: LifeStage, customFreq?: number): { label: string; time: string }[] {
+  const freq = customFreq ?? MEAL_FREQUENCY[lifeStage].recommended;
+  if (freq >= 4) {
     return [
       { label: "Desayuno", time: "07:00" },
       { label: "Almuerzo", time: "12:00" },
       { label: "Merienda", time: "17:00" },
       { label: "Cena", time: "21:00" },
-    ];
+    ].slice(0, freq);
   }
-  if (freq.recommended === 3) {
+  if (freq >= 3) {
     return [
       { label: "Desayuno", time: "08:00" },
       { label: "Almuerzo", time: "13:00" },
       { label: "Cena", time: "19:00" },
-    ];
+    ].slice(0, freq);
   }
-  // 2 comidas (adulto)
+  // 2 comidas
   return [
     { label: "Mañana", time: "08:00" },
     { label: "Tarde/Noche", time: "19:00" },
-  ];
+  ].slice(0, freq);
 }

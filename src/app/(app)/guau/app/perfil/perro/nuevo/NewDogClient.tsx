@@ -424,8 +424,7 @@ export function NewDogClient({ userId }: Props) {
               {[1, 2, 3, 4].map((n) => (
                 <button key={n} onClick={() => {
                   setMealFreq(n);
-                  const stage = n >= 3 ? "cachorro" : "adulto";
-                  setMealSlots(sugerirMealSlots(stage as LifeStage).slice(0, n));
+                  setMealSlots(sugerirMealSlots(lifeStage, n));
                 }}
                   className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-all border-2 ${
                     mealFreq === n

@@ -43,7 +43,6 @@ export function ScheduleMealModal({ open, onClose, recipe, dog, totalGrams }: Pr
       .from("dog_meal_slots")
       .select("*")
       .eq("dog_id", dog.id)
-      .eq("active", true)
       .order("slot_index", { ascending: true });
     setSlots((data as DogMealSlot[] | null) ?? []);
   };

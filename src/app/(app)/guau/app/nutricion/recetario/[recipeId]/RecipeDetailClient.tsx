@@ -115,7 +115,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
 
   const loadSlots = async () => {
     if (!dog) return;
-    const { data } = await supabase.from("dog_meal_slots").select("*").eq("dog_id", dog.id).eq("active", true).order("slot_index", { ascending: true });
+    const { data } = await supabase.from("dog_meal_slots").select("*").eq("dog_id", dog.id).order("slot_index", { ascending: true });
     setDogSlots((data as DogMealSlot[] | null) ?? []);
   };
 
