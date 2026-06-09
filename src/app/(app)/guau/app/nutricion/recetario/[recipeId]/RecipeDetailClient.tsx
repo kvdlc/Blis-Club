@@ -68,7 +68,6 @@ function formatPieces(grams: number, unitWeight: number, displayUnit: string | n
   if (pieceStr) return `${gStr} o ${pieceStr}`;
   return gStr;
 }
-}
 
 export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts, dog, metabolicProfile, userId }: Props) {
   const router = useRouter();
