@@ -5,12 +5,18 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Dog, DogMetabolicProfile, DogMealSlot, WeeklyChallenge, UserChallenge } from "@/types/database";
 import { sugerirTamanoPorRaza, BREED_SIZE_LABELS } from "@/lib/breed-sizes";
-import { ArrowLeft, Camera, PawPrint, Check, Search, PenLine, ChevronDown, Loader2, Trash2, AlertTriangle, Globe } from "lucide-react";
+import { ArrowLeft, Camera, PawPrint, Check, Search, PenLine, ChevronDown, Loader2, Trash2, AlertTriangle, Globe, Info, Target, Flame } from "lucide-react";
 import { MealSlotsConfig } from "../../../MealSlotsConfig";
 import { DatePicker } from "@/components/DatePicker";
 import { uploadDogPhoto, uploadPhotoFromDataUrl } from "@/lib/storage";
 import { ImageEditor } from "@/components/ImageEditor";
 import { BreedImagePicker } from "@/components/BreedImagePicker";
+import {
+  getFeedingDefaults, ACTIVITY_LABELS as FS_ACTIVITY_LABELS,
+  calcularRacionDiaria, calcularRacionMixta,
+  BARF_PCT_BY_STAGE, CROQUETAS_PCT_BY_STAGE, MIXTA_AJUSTE_RANGE,
+} from "@/lib/feeding-standards";
+import type { ActivityLevel, DietType, LifeStage } from "@/lib/feeding-standards";
 
 interface Props {
   dog: Dog;
@@ -82,10 +88,38 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     return isNaN(v) ? dog.peso_kg : v;
   };
 
+  // Calculated ration
+  let total = 0, kcalTotal = 0, barfGrams = 0, croqGrams = 0;
+  const weight = getWeightNumber();
+  if (dietType === "mixta") {
+    const ajusteGlobal = feedingPct / 100;
+    const result = calcularRacionMixta({
+      peso_kg: weight, life_stage: lifeStage,
+      proporcion_barf: mixtaBarfProp, activity_level: activity as ActivityLevel, ajuste_global: ajusteGlobal,
+    });
+    barfGrams = result.barf_grams; croqGrams = result.croquetas_grams;
+    total = barfGrams + croqGrams; kcalTotal = result.total_kcal;
+  } else {
+    const result = calcularRacionDiaria({ peso_kg: weight, feeding_pct: feedingPct, diet_type: dietType, activity_level: activity as ActivityLevel });
+    total = result.total_grams; kcalTotal = result.total_kcal;
+    if (dietType === "barf") barfGrams = total;
+    else croqGrams = total;
+  }
+
+  const pctRange = dietType === "barf" ? BARF_PCT_BY_STAGE[lifeStage] :
+    dietType === "croquetas" ? CROQUETAS_PCT_BY_STAGE[lifeStage] : null;
+
   const [activity, setActivity] = useState(metabolicProfile?.activity_level ?? "moderado");
   const [allergies, setAllergies] = useState<string[]>(metabolicProfile?.allergies ?? []);
   const [conditions, setConditions] = useState<string[]>(metabolicProfile?.medical_conditions ?? []);
   const [feedingPct, setFeedingPct] = useState(metabolicProfile?.feeding_pct ?? 2.5);
+  const [dietType, setDietType] = useState<DietType>((metabolicProfile?.diet_type as DietType) ?? "croquetas");
+  const [mixtaBarfProp, setMixtaBarfProp] = useState(50);
+  const [lifeStage, setLifeStage] = useState<LifeStage>(() => {
+    if (!dog) return "adulto";
+    const defaults = getFeedingDefaults({ raza: dog.raza, peso_kg: dog.peso_kg, edad_meses: dog.edad_meses, tamano_guardado: dog.tamano || null });
+    return defaults.life_stage;
+  });
 
   const [saved, setSaved] = useState(false);
   const [saveIcon, setSaveIcon] = useState(false);
@@ -141,12 +175,12 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
 
     await supabase.from("dog_metabolic_profiles").upsert({
       dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
-      feeding_pct: feedingPct,
+      feeding_pct: feedingPct, diet_type: dietType,
     }, { onConflict: "dog_id" });
 
     setSaved(true);
     setTimeout(() => { setSaved(false); setSaveIcon(false); }, 1500);
-  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, tamano, activity, allergies, conditions, feedingPct, dog.id, supabase]);
+  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, tamano, activity, allergies, conditions, feedingPct, dietType, dog.id, supabase]);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -168,7 +202,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
       autoSave();
     }, 800);
     return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
-  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, activity, allergies, conditions, feedingPct]);
+  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, activity, allergies, conditions, feedingPct, dietType]);
 
   const filteredBreeds = breedSearch.trim()
     ? BREEDS.filter((b) => b.toLowerCase().includes(breedSearch.toLowerCase()))
@@ -342,17 +376,116 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
         </div>
       </div>
 
-      {/* ═══ PERFIL METABÓLICO ═══ */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Perfil Metabólico</h3>
+      {/* ═══ ALIMENTACIÓN ═══ */}
+      <div className="card-soft rounded-[1.5rem] p-5 space-y-4">
+        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Alimentación</h3>
 
+        {/* Etapa de vida */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-zinc-500">Etapa de vida</span>
+          <span className="text-xs font-bold text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-950/30">
+            {lifeStage === "cachorro" ? "Cachorro" : lifeStage === "adolescente" ? "Adolescente" : "Adulto"}
+            {tamano && ` · ${BREED_SIZE_LABELS[tamano] || tamano}`}
+          </span>
+        </div>
+
+        {/* Tipo de dieta */}
         <div>
-          <label className="text-xs text-zinc-500 block mb-1">Nivel de actividad</label>
+          <label className="text-[10px] text-zinc-400 block mb-1.5">Tipo de alimentación</label>
+          <div className="grid grid-cols-3 gap-2">
+            {([
+              { key: "croquetas" as DietType, label: "Croquetas", icon: "🦴" },
+              { key: "barf" as DietType, label: "Natural", icon: "🥩" },
+              { key: "mixta" as DietType, label: "Mixta", icon: "⚖️" },
+            ]).map((opt) => (
+              <button key={opt.key} onClick={() => {
+                setDietType(opt.key);
+                if (opt.key === "mixta") { setFeedingPct(100); }
+                else if (opt.key === "croquetas") { setFeedingPct(CROQUETAS_PCT_BY_STAGE[lifeStage].default); }
+                else { setFeedingPct(BARF_PCT_BY_STAGE[lifeStage].default); }
+              }}
+                className={`rounded-xl py-2 text-xs font-bold transition-all border-2 ${
+                  dietType === opt.key
+                    ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300"
+                    : "bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500"
+                }`}
+              >
+                <span className="text-base block">{opt.icon}</span>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Ración diaria */}
+        <div className="flex items-center justify-center py-2">
+          <div className="text-center">
+            <span className="text-2xl font-extrabold text-primary-600 dark:text-primary-400">{total}</span>
+            <span className="text-[10px] text-zinc-500 block">gramos/día</span>
+            <span className="text-[10px] text-zinc-400">{kcalTotal} kcal</span>
+          </div>
+        </div>
+
+        {/* Detalle mixta / croquetas */}
+        {dietType === "mixta" && (
+          <div className="text-center">
+            <p className="text-[10px] text-zinc-500">🦴 Croquetas: {croqGrams}g · 🥩 Natural: {barfGrams}g</p>
+          </div>
+        )}
+        {dietType === "croquetas" && (
+          <p className="text-[10px] text-zinc-400 text-center">≈ {Math.round((total / 110) * 10) / 10} tazas/día</p>
+        )}
+
+        {/* Actividad */}
+        <div>
+          <label className="text-[10px] text-zinc-400 block mb-1">Nivel de actividad</label>
           <select value={activity} onChange={(e) => setActivity(e.target.value as any)}
-            className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm">
-            {Object.entries(ACTIVITY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs">
+            {Object.entries(FS_ACTIVITY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
+
+        {/* Slider principal */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-zinc-500">
+              {dietType === "mixta" ? "Ajuste de cantidad" : "% del peso corporal"}
+            </span>
+            <span className="text-sm font-bold text-primary-700 dark:text-primary-300">
+              {dietType === "mixta" ? `${Math.round(feedingPct)}%` : `${feedingPct.toFixed(1)}%`}
+            </span>
+          </div>
+          <input type="range"
+            min={dietType === "mixta" ? MIXTA_AJUSTE_RANGE.min : (pctRange?.min ?? 1.5)}
+            max={dietType === "mixta" ? MIXTA_AJUSTE_RANGE.max : (pctRange?.max ?? 8)}
+            step={dietType === "mixta" ? 5 : 0.1}
+            value={feedingPct}
+            onChange={(e) => setFeedingPct(Number(e.target.value))}
+            className="w-full accent-primary-600" />
+          <p className="text-[10px] text-zinc-400">
+            {dietType === "mixta"
+              ? `${MIXTA_AJUSTE_RANGE.min}-${MIXTA_AJUSTE_RANGE.max}%`
+              : `Recomendado: ${pctRange?.min}-${pctRange?.max}%`}
+          </p>
+        </div>
+
+        {/* Slider proporción BARF (mixta) */}
+        {dietType === "mixta" && (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs font-bold">
+              <span className="text-primary-600 dark:text-primary-400">🦴 Croquetas {100 - mixtaBarfProp}%</span>
+              <span className="text-accent-600 dark:text-accent-400">{mixtaBarfProp}% Natural 🥩</span>
+            </div>
+            <input type="range" min={0} max={100} step={5} value={mixtaBarfProp}
+              onChange={(e) => setMixtaBarfProp(Number(e.target.value))}
+              className="w-full accent-zinc-400" />
+          </div>
+        )}
+      </div>
+
+      {/* ═══ SALUD ═══ */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Salud</h3>
 
         <div>
           <label className="text-xs text-zinc-500 block mb-1">Alergias</label>
@@ -371,15 +504,6 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
               <button key={c} onClick={() => setConditions(toggleArray(conditions, c))}
                 className={`text-[10px] rounded-full px-2.5 py-1 transition-colors ${conditions.includes(c) ? "bg-accent-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600"}`}>{c}</button>
             ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="text-xs text-zinc-500 block mb-1">% de alimentación corporal</label>
-          <div className="flex items-center gap-3">
-            <input type="range" min={1.5} max={3.5} step={0.1} value={feedingPct} onChange={(e) => setFeedingPct(Number(e.target.value))}
-              className="flex-1 accent-primary-600" />
-            <span className="text-sm font-mono font-bold w-10">{feedingPct}%</span>
           </div>
         </div>
       </div>
