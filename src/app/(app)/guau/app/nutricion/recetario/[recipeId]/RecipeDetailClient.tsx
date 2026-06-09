@@ -139,10 +139,13 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
       })
   ) : { total_grams: 0, total_kcal: 0 };
 
-  // Para mixta: usar solo los gramos naturales (BARF), no sumar croquetas
+  // Para mixta: recetas naturales (BARF) usan barf_grams, croquetas usan croquetas_grams
   const mixtaResult = dietType === "mixta" ? (ration as any) : null;
   const barfOnlyGrams = mixtaResult ? (mixtaResult.barf_grams || 0) : 0;
-  const totalGrams = mixtaResult ? barfOnlyGrams : ((ration as any).total_grams || 0);
+  const croqOnlyGrams = mixtaResult ? (mixtaResult.croquetas_grams || 0) : 0;
+  const totalGrams = mixtaResult
+    ? (recipe.category === "croquetas" ? croqOnlyGrams : barfOnlyGrams)
+    : ((ration as any).total_grams || 0);
   const activeSlots = dogSlots.filter(s => s.active);
   const mealCount = Math.max(activeSlots.length, 1);
   const gramsPerMeal = totalGrams / mealCount;
@@ -479,10 +482,10 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </div>
         )}
 
-        {/* Scale to dog with toggle — solo para recetas que NO son croquetas */}
-        {dog && recipe.category !== "croquetas" && (
+        {/* Scale to dog with toggle */}
+        {dog && (
           <div className="bg-secondary-50/80 dark:bg-secondary-950/30 rounded-2xl border border-secondary-200/60 dark:border-secondary-800/40 p-5">
-            {dietType === "croquetas" ? (
+            {dietType === "croquetas" && recipe.category !== "croquetas" ? (
               <div className="text-center py-2">
                 <p className="text-sm text-zinc-500 mb-2">
                   🦴 <strong>{dog.nombre}</strong> consume <strong>croquetas</strong>
@@ -517,7 +520,9 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
             </div>
             <p className="text-xs text-secondary-600 dark:text-secondary-400 mb-3">
               {dietType === "mixta" ? (
-                <>🥩 Porción natural {perMealMode ? "por comida" : "diaria"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong> (croquetas aparte)</>
+                recipe.category === "croquetas"
+                  ? <>🦴 Porción de croquetas {perMealMode ? "por comida" : "diaria"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong></>
+                  : <>🥩 Porción natural {perMealMode ? "por comida" : "diaria"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong> (croquetas aparte)</>
               ) : (
                 <>Porción {perMealMode ? "por comida" : "diaria total"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong></>
               )}
