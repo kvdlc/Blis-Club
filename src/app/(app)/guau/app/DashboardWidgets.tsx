@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Flame, UtensilsCrossed, GraduationCap, ShieldCheck, Pill, Clock, AlertTriangle, ArrowRight } from "lucide-react";
 
-/* Link SPA interno: usa el sistema de tabs sin navegación completa */
+/* Link SPA interno: usa router.replace para cambiar de tab sin navegación completa */
 function SPAButton({ tab, children, className }: { tab: string; children: React.ReactNode; className: string }) {
+  const router = useRouter();
   return (
     <button
-      onClick={() => { if ((window as any).__blisSetTab) (window as any).__blisSetTab(tab); }}
+      onClick={() => {
+        const url = tab === "inicio" ? "/guau/app" : `/guau/app?tab=${tab}`;
+        router.replace(url, { scroll: false });
+      }}
       className={className}
     >
       {children}

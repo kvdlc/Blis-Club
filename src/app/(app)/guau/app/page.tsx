@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 import { Dog, Walk, DogVaccine, DogMedication, DogMedicationLog, Lesson, UserProgress } from "@/types/database";
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import AppShell from "./AppShell";
@@ -123,12 +124,14 @@ export default async function DashboardPage({
   return (
     <>
       <OnboardingTutorial userId={user.id} hasSeenTutorial={profile?.has_seen_tutorial ?? false} />
-      <AppShell
-        userId={user.id}
-        dog={dog || null}
-        initialTab={initialTab as any}
-        dashboardData={dashboardData}
-      />
+      <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><p className="text-zinc-500">Cargando...</p></div>}>
+        <AppShell
+          userId={user.id}
+          dog={dog || null}
+          initialTab={initialTab as any}
+          dashboardData={dashboardData}
+        />
+      </Suspense>
     </>
   );
 }

@@ -52,16 +52,13 @@ export default function AppNav() {
     if (tab === activeTab) return;
     setActiveTab(tab);
 
-    // Si estamos en una ruta profunda (no en el dashboard), navegar completo
-    if (pathname !== "/guau/app") {
-      const url = tab === "inicio" ? "/guau/app" : `/guau/app?tab=${tab}`;
-      router.push(url);
-      return;
-    }
+    const url = tab === "inicio" ? "/guau/app" : `/guau/app?tab=${tab}`;
 
-    // En el dashboard: cambio instantáneo sin navegación
-    if ((window as any).__blisSetTab) {
-      (window as any).__blisSetTab(tab);
+    // Si estamos en una ruta profunda, push; en el dashboard, replace
+    if (pathname !== "/guau/app") {
+      router.push(url);
+    } else {
+      router.replace(url, { scroll: false });
     }
   };
 

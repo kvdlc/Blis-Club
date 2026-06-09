@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Dog, DogMetabolicProfile, DogMealSlot, NutritionRecipe, ToxicFood, MealSchedule, Walk, DogVaccine, Stage, Module, Lesson, UserProgress, Profile, WeeklyChallenge, UserChallenge, Subscription, Plan, UserBadge, Badge } from "@/types/database";
 import { NutritionHub } from "./nutricion/NutritionHub";
@@ -209,40 +210,26 @@ function DashboardContent({ data, dog, userId }: { data: any; dog: Dog | null; u
 /* ═══════════════════════════ AppShell ═══════════════════════ */
 interface AppShellProps { userId: string; dog: Dog | null; initialTab: TabKey; dashboardData?: any; }
 
+const validTabs: TabKey[] = ["inicio", "nutricion", "academia", "tracker", "perdido", "perfil"];
+
 export default function AppShell({ userId, dog, initialTab, dashboardData }: AppShellProps) {
-  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Una sola fuente de verdad: la URL
+  const urlTab = (searchParams.get("tab") as TabKey) || "inicio";
+  const activeTab: TabKey = validTabs.includes(urlTab) ? urlTab : "inicio";
+
   const [tabRefresh, setTabRefresh] = useState<Record<string, number>>({});
 
-  const validTabs = ["inicio", "nutricion", "academia", "tracker", "perdido", "perfil"];
-
-  // Forzar sincronización con la URL real al montar (maneja navegación cacheada por Next.js)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get("tab") as TabKey | null;
-    if (tab && validTabs.includes(tab) && tab !== activeTab) {
-      setActiveTab(tab);
-    }
-  }, []);
-
-  // Sincronizar con popstate (back/forward del navegador)
-  useEffect(() => {
-    const handlePopstate = () => {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab") as TabKey | null;
-      if (tab && validTabs.includes(tab)) setActiveTab(tab);
-      else setActiveTab("inicio");
-    };
-    window.addEventListener("popstate", handlePopstate);
-    return () => window.removeEventListener("popstate", handlePopstate);
-  }, []);
-
+  // goToTab: usar router.replace para que Next.js sincronice searchParams automáticamente
   const goToTab = useCallback((tab: TabKey) => {
-    setActiveTab(tab);
     setTabRefresh((prev) => ({ ...prev, [tab]: (prev[tab] || 0) + 1 }));
     const url = tab === "inicio" ? "/guau/app" : `/guau/app?tab=${tab}`;
-    window.history.replaceState(null, "", url);
-  }, []);
+    router.replace(url, { scroll: false });
+  }, [router]);
 
+  // Exponer globalmente para QuickTools y DashboardWidgets
   useEffect(() => {
     (window as any).__blisSetTab = goToTab;
     return () => { delete (window as any).__blisSetTab; };
@@ -255,7 +242,7 @@ export default function AppShell({ userId, dog, initialTab, dashboardData }: App
       <div style={{ display: activeTab === "nutricion" ? "block" : "none" }}><NutricionTab dog={dog} userId={userId} /></div>
       <div style={{ display: activeTab === "perfil" ? "block" : "none" }}><PerfilTab userId={userId} /></div>
       <div style={{ display: activeTab === "academia" ? "block" : "none" }}><AcademiaTab userId={userId} /></div>
-       <div style={{ display: activeTab === "tracker" ? "block" : "none" }}><TrackerTab key={`tracker-${tabRefresh["tracker"] || 0}`} dog={dog} userId={userId} /></div>
+      <div style={{ display: activeTab === "tracker" ? "block" : "none" }}><TrackerTab key={`tracker-${tabRefresh["tracker"] || 0}`} dog={dog} userId={userId} /></div>
       <div style={{ display: activeTab === "perdido" ? "block" : "none" }}><PerdidoTab dog={dog} /></div>
     </>
   );

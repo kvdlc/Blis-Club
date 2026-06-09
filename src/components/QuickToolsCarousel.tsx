@@ -121,9 +121,10 @@ export default function QuickToolsCarousel({ isLost = false }: Props) {
   const router = useRouter();
   const handleClick = (e: React.MouseEvent, tool: typeof TOOLS[0]) => {
     const spaTab = SPA_TABS[tool.key];
-    if (spaTab && (window as any).__blisSetTab) {
+    if (spaTab) {
       e.preventDefault();
-      (window as any).__blisSetTab(spaTab);
+      const url = spaTab === "inicio" ? "/guau/app" : `/guau/app?tab=${spaTab}`;
+      router.replace(url, { scroll: false });
     }
   };
 
