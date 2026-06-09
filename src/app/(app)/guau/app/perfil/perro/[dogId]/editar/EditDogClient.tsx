@@ -91,14 +91,22 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
   const [activity, setActivity] = useState(metabolicProfile?.activity_level ?? "moderado");
   const [allergies, setAllergies] = useState<string[]>(metabolicProfile?.allergies ?? []);
   const [conditions, setConditions] = useState<string[]>(metabolicProfile?.medical_conditions ?? []);
-  const [feedingPct, setFeedingPct] = useState(metabolicProfile?.feeding_pct ?? 2.5);
-  const [dietType, setDietType] = useState<DietType>((metabolicProfile?.diet_type as DietType) ?? "croquetas");
-  const [mixtaBarfProp, setMixtaBarfProp] = useState(50);
   const [lifeStage, setLifeStage] = useState<LifeStage>(() => {
     if (!dog) return "adulto";
     const defaults = getFeedingDefaults({ raza: dog.raza, peso_kg: dog.peso_kg, edad_meses: dog.edad_meses, tamano_guardado: dog.tamano || null });
     return defaults.life_stage;
   });
+  const [dietType, setDietType] = useState<DietType>((metabolicProfile?.diet_type as DietType) ?? "croquetas");
+  const correctedDiet = (metabolicProfile?.diet_type as DietType) ?? "croquetas";
+  const [feedingPct, setFeedingPct] = useState(() => {
+    const raw = metabolicProfile?.feeding_pct ?? 2.5;
+    // Si dietType no es mixta pero feedingPct es muy alto (>10), corregir
+    if (correctedDiet !== "mixta" && raw > 10) {
+      return correctedDiet === "barf" ? BARF_PCT_BY_STAGE[lifeStage].default : CROQUETAS_PCT_BY_STAGE[lifeStage].default;
+    }
+    return raw;
+  });
+  const [mixtaBarfProp, setMixtaBarfProp] = useState(50);
 
   // Calculated ration (useMemo para evitar hydration mismatch)
   const rationData = useMemo(() => {
