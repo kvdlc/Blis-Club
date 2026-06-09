@@ -3,8 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { determinarTamano } from "@/lib/breed-sizes";
-import { calcularRacionDiaria, getFeedingDefaults } from "@/lib/feeding-standards";
-import type { ActivityLevel, DietType } from "@/lib/feeding-standards";
+import { calcularRacionDiaria, calcularRacionMixta, getFeedingDefaults } from "@/lib/feeding-standards";
+import type { ActivityLevel, DietType, LifeStage } from "@/lib/feeding-standards";
 import type { Dog, DogMealSlot, MealSchedule, NutritionRecipe, DogMetabolicProfile } from "@/types/database";
 import {
   ChevronLeft, ChevronRight, Check, X, Sparkles, Clock, ChefHat, Circle,
@@ -44,15 +44,27 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
   const activityLevel: ActivityLevel = metabolicProfile?.activity_level ?? "moderado";
   const feedingPct = metabolicProfile?.feeding_pct ?? 2.5;
 
-  const racion = calcularRacionDiaria({
-    peso_kg: weightKg,
-    feeding_pct: feedingPct,
-    diet_type: dietType,
-    activity_level: activityLevel,
-  });
+  const mixtaResult = dietType === "mixta"
+    ? calcularRacionMixta({
+        peso_kg: weightKg,
+        life_stage: (getFeedingDefaults({ raza: dog.raza, peso_kg: weightKg, edad_meses: dog.edad_meses, tamano_guardado: dog.tamano })?.life_stage ?? "adulto") as LifeStage,
+        proporcion_barf: 50,
+        activity_level: activityLevel,
+        ajuste_global: feedingPct / 100,
+      })
+    : null;
 
-  const totalGramsTarget = racion.total_grams;
-  const kcalTarget = racion.total_kcal;
+  const diariaResult = mixtaResult
+    ? null
+    : calcularRacionDiaria({
+        peso_kg: weightKg,
+        feeding_pct: feedingPct,
+        diet_type: dietType,
+        activity_level: activityLevel,
+      });
+
+  const totalGramsTarget = mixtaResult ? mixtaResult.barf_grams + mixtaResult.croquetas_grams : (diariaResult?.total_grams ?? 0);
+  const kcalTarget = mixtaResult ? mixtaResult.total_kcal : (diariaResult?.total_kcal ?? 0);
 
   const toLocalDateStr = (d: Date) => {
     const y = d.getFullYear();

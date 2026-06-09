@@ -8,6 +8,8 @@ import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import AppShell from "./AppShell";
 import { getCachedDog, getCachedMetabolicProfile, getCachedWalks } from "@/lib/data-cache";
 import { getTodayLocal } from "@/lib/dates";
+import { calcularRacionDiaria, calcularRacionMixta, getFeedingDefaults } from "@/lib/feeding-standards";
+import type { DietType, ActivityLevel } from "@/lib/feeding-standards";
 
 async function getDashboardData(userId: string, dogId: string | null) {
   const supabase = await createClient();
@@ -102,10 +104,21 @@ export default async function DashboardPage({
   const yellowPct = Math.round(((walks || []).filter((w: Walk) => w.traffic_light === "yellow").length / totalWalks) * 100);
   const redPct = Math.round(((walks || []).filter((w: Walk) => w.traffic_light === "red").length / totalWalks) * 100);
 
-  const todayStr = getTodayLocal();
-  const gramsEaten = (mealSchedule as any[]).filter((s: any) => typeof s.fecha === "string" && s.fecha.startsWith(todayStr) && s.status === "fed").reduce((sum: number, s: any) => sum + (s.gramos ?? 0), 0);
-  const feedingPct = (metabolicProfile as any)?.feeding_pct ?? 2.5;
-  const gramsTarget = Math.round((dog?.peso_kg ?? 0) * 1000 * (feedingPct / 100));
+const todayStr = getTodayLocal();
+const gramsEaten = (mealSchedule as any[]).filter((s: any) => typeof s.fecha === "string" && s.fecha.startsWith(todayStr) && s.status === "fed").reduce((sum: number, s: any) => sum + (s.gramos ?? 0), 0);
+const feedingPct = (metabolicProfile as any)?.feeding_pct ?? 2.5;
+const dietType = ((metabolicProfile as any)?.diet_type as DietType) ?? "croquetas";
+const activityLevel = ((metabolicProfile as any)?.activity_level as ActivityLevel) ?? "moderado";
+const weight = dog?.peso_kg ?? 0;
+let gramsTarget: number;
+if (dietType === "mixta" && dog) {
+  const defaults = getFeedingDefaults({ raza: dog.raza, peso_kg: dog.peso_kg, edad_meses: dog.edad_meses, tamano_guardado: dog.tamano });
+  const lifeStage = defaults?.life_stage ?? "adulto";
+  const result = calcularRacionMixta({ peso_kg: weight, life_stage: lifeStage as any, proporcion_barf: 50, activity_level: activityLevel, ajuste_global: feedingPct / 100 });
+  gramsTarget = Math.round(result.barf_grams + result.croquetas_grams);
+} else {
+  gramsTarget = Math.round(weight * 1000 * (feedingPct / 100));
+}
 
   const breedImgRaw = breedImg ? breedImg.replace(/ /g, "%20") : null;
   const initialTab = (["inicio", "nutricion", "academia", "tracker", "perdido", "perfil"].includes(sp.tab || "") ? sp.tab : "inicio") as string;
