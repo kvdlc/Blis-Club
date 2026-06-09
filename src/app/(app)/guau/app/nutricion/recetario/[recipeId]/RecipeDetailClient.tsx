@@ -44,6 +44,26 @@ const TYPE_COLORS: Record<string, string> = {
   otro: "bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700",
 };
 
+const TYPE_ROW_COLORS: Record<string, string> = {
+  proteina: "border-l-danger-400 dark:border-l-danger-600 bg-danger-50/50 dark:bg-danger-950/20",
+  hueso: "border-l-warning-400 dark:border-l-warning-600 bg-warning-50/50 dark:bg-warning-950/20",
+  viscera: "border-l-accent-400 dark:border-l-accent-600 bg-accent-50/50 dark:bg-accent-950/20",
+  vegetal: "border-l-secondary-400 dark:border-l-secondary-600 bg-secondary-50/50 dark:bg-secondary-950/20",
+  suplemento: "border-l-primary-400 dark:border-l-primary-600 bg-primary-50/50 dark:bg-primary-950/20",
+  otro: "border-l-zinc-400 dark:border-l-zinc-600 bg-zinc-50/50 dark:bg-zinc-800/20",
+};
+
+const TYPE_TEXT: Record<string, string> = {
+  proteina: "text-danger-700 dark:text-danger-300",
+  hueso: "text-warning-700 dark:text-warning-300",
+  viscera: "text-accent-700 dark:text-accent-300",
+  vegetal: "text-secondary-700 dark:text-secondary-300",
+  suplemento: "text-primary-700 dark:text-primary-300",
+  otro: "text-zinc-700 dark:text-zinc-300",
+};
+
+const TYPE_ORDER = ["proteina", "hueso", "viscera", "vegetal", "suplemento", "otro"];
+
 const DIFFICULTY_STARS: Record<string, number> = {
   facil: 1, medio: 2, avanzado: 3,
 };
@@ -368,15 +388,47 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                 ))}
               </div>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {ingredients.map((ing) => (
-                  <div key={ing.id} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium ${TYPE_COLORS[ing.ingredient_type] ?? TYPE_COLORS.otro}`}>
-                    {TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}
-                    <span>{ing.ingredient_name}</span>
-                    <span className="opacity-60">({ing.quantity_per_serving_g}g)</span>
+              (() => {
+                const sorted = [...ingredients].sort((a, b) => {
+                  const ai = TYPE_ORDER.indexOf(a.ingredient_type) ?? 99;
+                  const bi = TYPE_ORDER.indexOf(b.ingredient_type) ?? 99;
+                  return ai - bi;
+                });
+                if (dog) {
+                  return (
+                    <div className="space-y-1">
+                      {sorted.map((ing) => {
+                        const baseGrams = (ing.quantity_per_serving_g / totalIngGrams) * totalGrams;
+                        const scaledGrams = perMealMode ? baseGrams / mealCount : baseGrams;
+                        const display = formatPieces(scaledGrams, ing.unit_weight_g, ing.display_unit, ing.unit_type);
+                        const rowColor = TYPE_ROW_COLORS[ing.ingredient_type] ?? TYPE_ROW_COLORS.otro;
+                        const textColor = TYPE_TEXT[ing.ingredient_type] ?? TYPE_TEXT.otro;
+                        return (
+                          <div key={ing.id} className={`flex items-center gap-2 px-3 py-2 rounded-lg border-l-3 ${rowColor}`}>
+                            <span className={textColor}>{TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}</span>
+                            <span className="flex-1 text-xs font-medium text-zinc-800 dark:text-zinc-200">{ing.ingredient_name}</span>
+                            <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200">{display}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+                return (
+                  <div className="space-y-1">
+                    {sorted.map((ing) => {
+                      const chipColor = TYPE_COLORS[ing.ingredient_type] ?? TYPE_COLORS.otro;
+                      return (
+                        <div key={ing.id} className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${chipColor}`}>
+                          {TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}
+                          <span className="text-xs font-medium flex-1">{ing.ingredient_name}</span>
+                          <span className="text-xs opacity-60 font-semibold">{ing.quantity_per_serving_g}g</span>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
+                );
+              })()
             )}
           </div>
         )}
@@ -424,15 +476,22 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                 <>Porción {perMealMode ? "por comida" : "diaria total"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong></>
               )}
             </p>
-            <div className="space-y-1.5">
-              {ingredients.map((ing) => {
+            <div className="space-y-1">
+              {[...ingredients].sort((a, b) => {
+                const ai = TYPE_ORDER.indexOf(a.ingredient_type) ?? 99;
+                const bi = TYPE_ORDER.indexOf(b.ingredient_type) ?? 99;
+                return ai - bi;
+              }).map((ing) => {
                 const baseGrams = (ing.quantity_per_serving_g / totalIngGrams) * totalGrams;
                 const scaledGrams = perMealMode ? baseGrams / mealCount : baseGrams;
                 const display = formatPieces(scaledGrams, ing.unit_weight_g, ing.display_unit, ing.unit_type);
+                const rowColor = TYPE_ROW_COLORS[ing.ingredient_type] ?? TYPE_ROW_COLORS.otro;
+                const textColor = TYPE_TEXT[ing.ingredient_type] ?? TYPE_TEXT.otro;
                 return (
-                  <div key={ing.id} className="flex justify-between text-xs text-secondary-700 dark:text-secondary-300">
-                    <span>{ing.ingredient_name}</span>
-                    <span className="font-semibold">{display}</span>
+                  <div key={ing.id} className={`flex items-center gap-2 px-3 py-2 rounded-lg border-l-3 ${rowColor}`}>
+                    <span className={textColor}>{TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}</span>
+                    <span className="flex-1 text-xs font-medium text-secondary-800 dark:text-secondary-200">{ing.ingredient_name}</span>
+                    <span className="text-xs font-bold text-secondary-700 dark:text-secondary-300">{display}</span>
                   </div>
                 );
               })}
