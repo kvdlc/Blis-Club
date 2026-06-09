@@ -146,14 +146,14 @@ function TrackerTab({ dog, userId, preloaded }: { dog: Dog | null; userId: strin
     fetchData();
   }, [dog?.id, userId, fetchData]);
 
-  // Escuchar cuando se completa un paseo para refrescar la racha
+  // Escuchar cuando se completa un paseo para refrescar datos
   useEffect(() => {
-    const handler = (e: CustomEvent) => {
-      setData((prev: any) => prev ? { ...prev, streakDays: e.detail?.streak ?? 0 } : prev);
+    const handler = () => {
+      fetchData();
     };
     window.addEventListener("walk-saved" as any, handler);
     return () => window.removeEventListener("walk-saved" as any, handler);
-  }, []);
+  }, [fetchData]);
 
   if (loading) return <TabSkeleton />;
   if (!data) return <p className="text-zinc-500 text-center py-8">Registra un perro primero.</p>;

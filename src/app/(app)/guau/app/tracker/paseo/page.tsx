@@ -138,6 +138,8 @@ export default function WalkPage() {
       }, { onConflict: "user_id,streak_type" });
     }
 
+    window.dispatchEvent(new CustomEvent("walk-saved", { detail: { streak: newStreak } }));
+
     setPhase("done");
     setSaving(false);
   };
