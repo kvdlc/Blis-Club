@@ -113,6 +113,10 @@ export async function POST(request: Request) {
       subscription = created;
     }
 
+    if (!subscription) {
+      return NextResponse.json({ error: "No se pudo encontrar ni crear la suscripción" }, { status: 500 });
+    }
+
     console.log(`[Izipay Webhook] Suscripción ${subscription.id} encontrada, estado actual: ${subscription.status}`);
 
     if (orderStatus === "PAID") {
