@@ -9,7 +9,7 @@ import { ScheduleMealModal } from "./ScheduleMealModal";
 import VideoEmbed from "@/components/VideoEmbed";
 import { RecipeLightbox } from "@/components/RecipeLightbox";
 import { calcularRacionDiaria, calcularRacionMixta, getFeedingDefaults } from "@/lib/feeding-standards";
-import type { DietType, ActivityLevel } from "@/lib/feeding-standards";
+import type { DietType, ActivityLevel, LifeStage } from "@/lib/feeding-standards";
 
 interface Props {
   recipe: NutritionRecipe;
