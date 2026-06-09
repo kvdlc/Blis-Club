@@ -8,6 +8,8 @@ import { ChefHat, ShoppingCart, ArrowLeft, Check, Heart, Clock, Flame, Star, Che
 import { ScheduleMealModal } from "./ScheduleMealModal";
 import VideoEmbed from "@/components/VideoEmbed";
 import { RecipeLightbox } from "@/components/RecipeLightbox";
+import { calcularRacionDiaria, getFeedingDefaults } from "@/lib/feeding-standards";
+import type { DietType, ActivityLevel } from "@/lib/feeding-standards";
 
 interface Props {
   recipe: NutritionRecipe;
@@ -84,9 +86,16 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   const [hidingRecipe, setHidingRecipe] = useState(false);
 
   const feedingPct = metabolicProfile?.feeding_pct ?? 2.5;
+  const dietType = (metabolicProfile?.diet_type as DietType) ?? "croquetas";
+  const activityLevel = (metabolicProfile?.activity_level as ActivityLevel) ?? "moderado";
   const weight = dog?.peso_kg ?? 0;
-  const totalGrams = weight * 1000 * (feedingPct / 100);
-  const mealCount = dogSlots.length || 1;
+
+  // Usar la misma fórmula de ración que el editor y la calculadora
+  const ration = dog ? calcularRacionDiaria({
+    peso_kg: weight, feeding_pct: feedingPct, diet_type: dietType, activity_level: activityLevel,
+  }) : { total_grams: 0, total_kcal: 0 };
+  const totalGrams = ration.total_grams;
+  const mealCount = Math.max(dogSlots.length, 1);
   const gramsPerMeal = totalGrams / mealCount;
   const stars = DIFFICULTY_STARS[recipe.difficulty] ?? 1;
 
@@ -106,6 +115,12 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
     };
     loadFav();
   }, [supabase, userId, recipe.id]);
+
+  // Load dog slots on mount for accurate meal count
+  useEffect(() => {
+    if (!dog) return;
+    loadSlots();
+  }, [dog]);
 
   useEffect(() => {
     if (!dog || !cookModalOpen) return;
