@@ -426,44 +426,78 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </div>
         )}
 
-        {/* Ingredients */}
+        {/* Ingredients with dog scaling */}
         {ingredients.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
             {recipe.category === "croquetas" ? (
-              <div className="flex flex-wrap gap-1.5">
-                {ingredients.map(ing => (
-                  <span key={ing.id} className="text-[10px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">{ing.ingredient_name}</span>
-                ))}
-              </div>
-            ) : (
-              (() => {
-                const sorted = [...ingredients].sort((a, b) => {
-                  const ai = TYPE_ORDER.indexOf(a.ingredient_type) ?? 99;
-                  const bi = TYPE_ORDER.indexOf(b.ingredient_type) ?? 99;
-                  return ai - bi;
-                });
-                if (dog) {
-                  return (
-                    <div className="space-y-1">
-                      {sorted.map((ing) => {
-                        const baseGrams = (ing.quantity_per_serving_g / totalIngGrams) * totalGrams;
-                        const scaledGrams = perMealMode ? baseGrams / mealCount : baseGrams;
-                        const display = formatPieces(scaledGrams, ing.unit_weight_g, ing.display_unit, ing.unit_type);
-                        const rowColor = TYPE_ROW_COLORS[ing.ingredient_type] ?? TYPE_ROW_COLORS.otro;
-                        const textColor = TYPE_TEXT[ing.ingredient_type] ?? TYPE_TEXT.otro;
-                        return (
-                          <div key={ing.id} className={`flex items-center gap-2 px-3 py-2 rounded-lg border-l-3 ${rowColor}`}>
-                            <span className={textColor}>{TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}</span>
-                            <span className="flex-1 text-xs font-medium text-zinc-800 dark:text-zinc-200">{ing.ingredient_name}</span>
-                            <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200">{display}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                }
-                return (
+              <>
+                <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {ingredients.map(ing => (
+                    <span key={ing.id} className="text-[10px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">{ing.ingredient_name}</span>
+                  ))}
+                </div>
+              </>
+            ) : dog ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+                    {perMealMode ? `Por comida (${mealCount} al día)` : `Cocinar para ${dog.nombre}`}
+                  </h3>
+                  <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 rounded-full p-0.5">
+                    <button
+                      onClick={() => setPerMealMode(false)}
+                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-all ${!perMealMode ? "bg-secondary-500 text-white" : "text-zinc-500"}`}
+                    >
+                      Todo el día
+                    </button>
+                    <button
+                      onClick={() => setPerMealMode(true)}
+                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-all ${perMealMode ? "bg-secondary-500 text-white" : "text-zinc-500"}`}
+                    >
+                      1 comida
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-500">
+                  {dietType === "mixta" ? (
+                    (recipe as any).category === "croquetas"
+                      ? <>🦴 Porción de croquetas {perMealMode ? "por comida" : "diaria"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong></>
+                      : <>🥩 Porción natural {perMealMode ? "por comida" : "diaria"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong> (croquetas aparte)</>
+                  ) : (
+                    <>Porción {perMealMode ? "por comida" : "diaria total"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong></>
+                  )}
+                </p>
+                <div className="space-y-1">
+                  {[...ingredients].sort((a, b) => {
+                    const ai = TYPE_ORDER.indexOf(a.ingredient_type) ?? 99;
+                    const bi = TYPE_ORDER.indexOf(b.ingredient_type) ?? 99;
+                    return ai - bi;
+                  }).map((ing) => {
+                    const baseGrams = (ing.quantity_per_serving_g / totalIngGrams) * totalGrams;
+                    const scaledGrams = perMealMode ? baseGrams / mealCount : baseGrams;
+                    const display = formatPieces(scaledGrams, ing.unit_weight_g, ing.display_unit, ing.unit_type);
+                    const rowColor = TYPE_ROW_COLORS[ing.ingredient_type] ?? TYPE_ROW_COLORS.otro;
+                    const textColor = TYPE_TEXT[ing.ingredient_type] ?? TYPE_TEXT.otro;
+                    return (
+                      <div key={ing.id} className={`flex items-center gap-2 px-3 py-2 rounded-lg border-l-3 ${rowColor}`}>
+                        <span className={textColor}>{TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}</span>
+                        <span className="flex-1 text-xs font-medium text-zinc-800 dark:text-zinc-200">{ing.ingredient_name}</span>
+                        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200">{display}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (() => {
+              const sorted = [...ingredients].sort((a, b) => {
+                const ai = TYPE_ORDER.indexOf(a.ingredient_type) ?? 99;
+                const bi = TYPE_ORDER.indexOf(b.ingredient_type) ?? 99;
+                return ai - bi;
+              });
+              return (
+                <>
+                  <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
                   <div className="space-y-1">
                     {sorted.map((ing) => {
                       const chipColor = TYPE_COLORS[ing.ingredient_type] ?? TYPE_COLORS.otro;
@@ -476,78 +510,24 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                       );
                     })}
                   </div>
-                );
-              })()
-            )}
+                </>
+              );
+            })()}
           </div>
         )}
 
-        {/* Scale to dog with toggle */}
-        {dog && (
-          <div className="bg-secondary-50/80 dark:bg-secondary-950/30 rounded-2xl border border-secondary-200/60 dark:border-secondary-800/40 p-5">
-            {dietType === "croquetas" && recipe.category !== "croquetas" ? (
-              <div className="text-center py-2">
-                <p className="text-sm text-zinc-500 mb-2">
-                  🦴 <strong>{dog.nombre}</strong> consume <strong>croquetas</strong>
-                </p>
-                <p className="text-xs text-zinc-400">
-                  Esta receta es para alimentación natural. Si quieres personalizar porciones, cambia el tipo de alimentación de tu perro a Natural o Mixta en su perfil.
-                </p>
-                <p className="text-xs text-zinc-400 mt-1">
-                  Porción genérica diaria: <strong>{Math.round(totalGrams)}g</strong>
-                </p>
-              </div>
-            ) : (
-              <>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-secondary-700 dark:text-secondary-300">
-                {perMealMode ? `Por comida (${mealCount} al día)` : `Cocinar para ${dog.nombre} (${dog.peso_kg}kg)`}
-              </h3>
-              <div className="flex items-center gap-2 bg-white dark:bg-zinc-800 rounded-full p-0.5 border border-secondary-200 dark:border-secondary-800">
-                <button
-                  onClick={() => setPerMealMode(false)}
-                  className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-all ${!perMealMode ? "bg-secondary-500 text-white" : "text-zinc-500"}`}
-                >
-                  Todo el día
-                </button>
-                <button
-                  onClick={() => setPerMealMode(true)}
-                  className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-all ${perMealMode ? "bg-secondary-500 text-white" : "text-zinc-500"}`}
-                >
-                  1 comida
-                </button>
-              </div>
-            </div>
-            <p className="text-xs text-secondary-600 dark:text-secondary-400 mb-3">
-              {dietType === "mixta" ? (
-                recipe.category === "croquetas"
-                  ? <>🦴 Porción de croquetas {perMealMode ? "por comida" : "diaria"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong></>
-                  : <>🥩 Porción natural {perMealMode ? "por comida" : "diaria"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong> (croquetas aparte)</>
-              ) : (
-                <>Porción {perMealMode ? "por comida" : "diaria total"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong></>
-              )}
+        {/* Croquetas diet notice */}
+        {dog && dietType === "croquetas" && recipe.category !== "croquetas" && (
+          <div className="bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-4 text-center">
+            <p className="text-sm text-zinc-500 mb-2">
+              🦴 <strong>{dog.nombre}</strong> consume <strong>croquetas</strong>
             </p>
-            <div className="space-y-1">
-              {[...ingredients].sort((a, b) => {
-                const ai = TYPE_ORDER.indexOf(a.ingredient_type) ?? 99;
-                const bi = TYPE_ORDER.indexOf(b.ingredient_type) ?? 99;
-                return ai - bi;
-              }).map((ing) => {
-                const baseGrams = (ing.quantity_per_serving_g / totalIngGrams) * totalGrams;
-                const scaledGrams = perMealMode ? baseGrams / mealCount : baseGrams;
-                const display = formatPieces(scaledGrams, ing.unit_weight_g, ing.display_unit, ing.unit_type);
-                const rowColor = TYPE_ROW_COLORS[ing.ingredient_type] ?? TYPE_ROW_COLORS.otro;
-                const textColor = TYPE_TEXT[ing.ingredient_type] ?? TYPE_TEXT.otro;
-                return (
-                  <div key={ing.id} className={`flex items-center gap-2 px-3 py-2 rounded-lg border-l-3 ${rowColor}`}>
-                    <span className={textColor}>{TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}</span>
-                    <span className="flex-1 text-xs font-medium text-secondary-800 dark:text-secondary-200">{ing.ingredient_name}</span>
-                    <span className="text-xs font-bold text-secondary-700 dark:text-secondary-300">{display}</span>
-                  </div>
-                );
-              })}
-            </div>
-            </>)}
+            <p className="text-xs text-zinc-400">
+              Esta receta es para alimentación natural. Si quieres personalizar porciones, cambia el tipo de alimentación de tu perro a Natural o Mixta en su perfil.
+            </p>
+            <p className="text-xs text-zinc-400 mt-1">
+              Porción genérica diaria: <strong>{Math.round(totalGrams)}g</strong>
+            </p>
           </div>
         )}
 
