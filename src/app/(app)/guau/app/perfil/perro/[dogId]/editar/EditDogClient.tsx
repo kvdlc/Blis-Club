@@ -111,6 +111,17 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
   });
   const [mixtaBarfProp, setMixtaBarfProp] = useState(50);
 
+  // Sincronizar estado con el prop cuando se refresca (router.refresh)
+  useEffect(() => {
+    if (metabolicProfile?.activity_level) setActivity(metabolicProfile.activity_level);
+    if (metabolicProfile?.allergies) setAllergies(metabolicProfile.allergies);
+    if (metabolicProfile?.medical_conditions) setConditions(metabolicProfile.medical_conditions);
+    if (metabolicProfile?.diet_type) setDietType(metabolicProfile.diet_type as DietType);
+    if (metabolicProfile?.feeding_pct !== undefined && metabolicProfile?.feeding_pct !== null) {
+      setFeedingPct(metabolicProfile.feeding_pct);
+    }
+  }, [metabolicProfile]);
+
   // Calculated ration (useMemo para evitar hydration mismatch)
   const rationData = useMemo(() => {
     const w = getWeightNumber();
