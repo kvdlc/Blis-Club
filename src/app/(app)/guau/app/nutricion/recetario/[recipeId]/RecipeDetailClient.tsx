@@ -468,7 +468,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                     <>Porción {perMealMode ? "por comida" : "diaria total"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong></>
                   )}
                 </p>
-                <div className="space-y-1">
+                <div className="grid grid-cols-2 gap-2">
                   {[...ingredients].sort((a, b) => {
                     const ai = TYPE_ORDER.indexOf(a.ingredient_type) ?? 99;
                     const bi = TYPE_ORDER.indexOf(b.ingredient_type) ?? 99;
@@ -477,13 +477,14 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                     const baseGrams = (ing.quantity_per_serving_g / totalIngGrams) * totalGrams;
                     const scaledGrams = perMealMode ? baseGrams / mealCount : baseGrams;
                     const display = formatPieces(scaledGrams, ing.unit_weight_g, ing.display_unit, ing.unit_type);
-                    const rowColor = TYPE_ROW_COLORS[ing.ingredient_type] ?? TYPE_ROW_COLORS.otro;
-                    const textColor = TYPE_TEXT[ing.ingredient_type] ?? TYPE_TEXT.otro;
+                    const chipColor = TYPE_COLORS[ing.ingredient_type] ?? TYPE_COLORS.otro;
                     return (
-                      <div key={ing.id} className={`flex items-center gap-2 px-3 py-2 rounded-lg border-l-3 ${rowColor}`}>
-                        <span className={textColor}>{TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}</span>
-                        <span className="flex-1 text-xs font-medium text-zinc-800 dark:text-zinc-200">{ing.ingredient_name}</span>
-                        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200">{display}</span>
+                      <div key={ing.id} className={`px-3 py-2.5 rounded-xl border ${chipColor}`}>
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          {TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}
+                          <span className="text-xs font-semibold leading-tight line-clamp-1">{ing.ingredient_name}</span>
+                        </div>
+                        <p className="text-sm font-bold leading-tight">{display}</p>
                       </div>
                     );
                   })}
