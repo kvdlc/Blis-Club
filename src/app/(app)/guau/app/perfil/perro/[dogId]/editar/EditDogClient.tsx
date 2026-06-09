@@ -173,10 +173,19 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
       objetivo_principal: objective || null, foto_url: photo || null, breed_image_url: breedImage || null,
     }).eq("id", dog.id);
 
-    await supabase.from("dog_metabolic_profiles").upsert({
+    const { error: mpError } = await supabase.from("dog_metabolic_profiles").upsert({
       dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
       feeding_pct: feedingPct, diet_type: dietType,
     }, { onConflict: "dog_id" });
+
+    // Si falla por diet_type, reintentar sin ella (columna puede no existir)
+    if (mpError) {
+      console.warn("[EditDog] diet_type save failed, retrying without:", mpError.message);
+      await supabase.from("dog_metabolic_profiles").upsert({
+        dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
+        feeding_pct: feedingPct,
+      }, { onConflict: "dog_id" });
+    }
 
     setSaved(true);
     setTimeout(() => { setSaved(false); setSaveIcon(false); }, 1500);

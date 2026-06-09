@@ -352,9 +352,23 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           </div>
         )}
 
-        {/* Scale to dog with toggle */}
+        {/* Scale to dog with toggle — solo para recetas que NO son croquetas */}
         {dog && recipe.category !== "croquetas" && (
           <div className="bg-secondary-50/80 dark:bg-secondary-950/30 rounded-2xl border border-secondary-200/60 dark:border-secondary-800/40 p-5">
+            {dietType === "croquetas" ? (
+              <div className="text-center py-2">
+                <p className="text-sm text-zinc-500 mb-2">
+                  🦴 <strong>{dog.nombre}</strong> consume <strong>croquetas</strong>
+                </p>
+                <p className="text-xs text-zinc-400">
+                  Esta receta es para alimentación natural. Si quieres personalizar porciones, cambia el tipo de alimentación de tu perro a Natural o Mixta en su perfil.
+                </p>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Porción genérica diaria: <strong>{Math.round(totalGrams)}g</strong>
+                </p>
+              </div>
+            ) : (
+              <>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-secondary-700 dark:text-secondary-300">
                 {perMealMode ? `Por comida (${mealCount} al día)` : `Cocinar para ${dog.nombre} (${dog.peso_kg}kg)`}
@@ -390,6 +404,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                 );
               })}
             </div>
+            </>)}
           </div>
         )}
 
