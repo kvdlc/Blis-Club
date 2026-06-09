@@ -137,8 +137,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
     if (!dog) return;
     const { data } = await supabase.from("dog_meal_slots").select("*").eq("dog_id", dog.id).order("slot_index", { ascending: true });
     const slots = (data as DogMealSlot[] | null) ?? [];
-    console.log("[Recipe] Loaded dog slots:", slots.length, "mealCount:", slots.length || 1);
-    setDogSlots(slots);
+    if (slots.length > 0) setDogSlots(slots); // solo actualizar si hay datos
   }, [supabase, dog?.id]);
 
   const loadTodaySchedule = useCallback(async () => {
