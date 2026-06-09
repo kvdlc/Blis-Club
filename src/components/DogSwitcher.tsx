@@ -105,7 +105,7 @@ export function DogSwitcher() {
             {allDogs.map((dog) => (
               <button
                 key={dog.id}
-                onClick={() => { setCurrentDogId(dog.id); setOpen(false); router.refresh(); }}
+                onClick={() => { setCurrentDogId(dog.id); setOpen(false); window.location.href = window.location.pathname + window.location.search; }}
                 className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 ${dog.id === currentDog.id ? "bg-primary-50 dark:bg-primary-950/30" : ""}`}
               >
                 <div className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 flex items-center justify-center overflow-hidden shrink-0">
