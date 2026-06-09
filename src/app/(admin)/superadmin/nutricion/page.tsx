@@ -14,6 +14,7 @@ interface Recipe {
   prep_time_min: number; difficulty: string; kcal_per_100g: number;
   is_detox: boolean; source_book: string; protein_type: string;
   breed_sizes: string[]; benefits: string[]; storage_instructions: string | null;
+  ingredients_text: string | null; nutrition_description: string | null;
 }
 interface Ingredient { id: string; recipe_id: string; ingredient_name: string; quantity_per_serving_g: number; ingredient_type: string; unit_type: string; unit_weight_g: number; display_unit: string | null; }
 interface Step { id: string; recipe_id: string; step_number: number; instruction: string; duration_min: number; image_url: string; }
@@ -159,7 +160,7 @@ export default function NutricionPage() {
 
   const handleEdit = (r: Recipe) => {
     setEditing(r);
-    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min ?? 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g ?? 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "", breed_sizes: (r as any).breed_sizes || [], benefits: (r as any).benefits || [], storage_instructions: (r as any).storage_instructions || "", ingredients_text: (r as any).ingredients_text || "", nutrition_description: (r as any).nutrition_description || "" });
+    setForm({ title: r.title, description: r.description || "", category: r.category, image_url: r.image_url || "", video_url: r.video_url || "", is_therapeutic: r.is_therapeutic, health_tags: r.health_tags || [], prep_time_min: r.prep_time_min ?? 0, difficulty: r.difficulty, kcal_per_100g: r.kcal_per_100g ?? 0, is_detox: r.is_detox, source_book: r.source_book || "", protein_type: r.protein_type || "", breed_sizes: r.breed_sizes || [], benefits: r.benefits || [], storage_instructions: r.storage_instructions || "", ingredients_text: r.ingredients_text || "", nutrition_description: r.nutrition_description || "" });
     setShowNew(false);
     loadSubEntities(r.id);
   };
@@ -516,14 +517,14 @@ export default function NutricionPage() {
                 <>
                   <div>
                     <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Ingredientes (uno por línea o separados por coma)</label>
-                    <textarea value={(form as any).ingredients_text || ""} onChange={e => setForm(f => ({...f, ingredients_text: e.target.value}))} rows={3}
+                    <textarea value={form.ingredients_text || ""} onChange={e => setForm(f => ({...f, ingredients_text: e.target.value}))} rows={3}
                       placeholder="Proteína de pollo, arroz, maíz, aceite de pescado..."
                       className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                     <p className="text-[10px] text-zinc-400 mt-0.5">Se guardarán como ingredientes individuales al guardar la receta</p>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Descripción nutricional (resumen en lenguaje natural)</label>
-                    <textarea value={(form as any).nutrition_description || ""} onChange={e => setForm(f => ({...f, nutrition_description: e.target.value}))} rows={2}
+                    <textarea value={form.nutrition_description || ""} onChange={e => setForm(f => ({...f, nutrition_description: e.target.value}))} rows={2}
                       placeholder="Croqueta con alto contenido proteico ideal para..."
                       className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   </div>
