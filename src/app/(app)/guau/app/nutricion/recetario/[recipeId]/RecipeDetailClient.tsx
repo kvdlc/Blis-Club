@@ -116,6 +116,8 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   const [perMealMode, setPerMealMode] = useState(false);
   const [hideModalOpen, setHideModalOpen] = useState(false);
   const [hidingRecipe, setHidingRecipe] = useState(false);
+  const [isDefaultKibble, setIsDefaultKibble] = useState(false);
+  const [savingKibble, setSavingKibble] = useState(false);
 
   const feedingPct = metabolicProfile?.feeding_pct ?? 2.5;
   const dietType = (metabolicProfile?.diet_type as DietType) ?? "croquetas";
@@ -154,7 +156,29 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   };
   const todayStr = toLocalDateStr();
 
-  // Load favorite status
+  // Load dog's default kibble
+  useEffect(() => {
+    if (!dog || recipe.category !== "croquetas") return;
+    const loadDefault = async () => {
+      const { data } = await supabase.from("dog_metabolic_profiles").select("kibble_recipe_id").eq("dog_id", dog.id).maybeSingle();
+      setIsDefaultKibble((data as any)?.kibble_recipe_id === recipe.id);
+    };
+    loadDefault();
+  }, [supabase, dog?.id, recipe.id, recipe.category]);
+
+  const toggleDefaultKibble = async () => {
+    if (!dog) return;
+    setSavingKibble(true);
+    if (isDefaultKibble) {
+      await supabase.from("dog_metabolic_profiles").update({ kibble_recipe_id: null }).eq("dog_id", dog.id);
+      setIsDefaultKibble(false);
+    } else {
+      await supabase.from("dog_metabolic_profiles").update({ kibble_recipe_id: recipe.id }).eq("dog_id", dog.id);
+      setIsDefaultKibble(true);
+    }
+    setSavingKibble(false);
+  };
+
   useEffect(() => {
     const loadFav = async () => {
       const { data } = await supabase.from("user_favorite_recipes").select("recipe_id").eq("user_id", userId).eq("recipe_id", recipe.id).maybeSingle();
@@ -350,6 +374,19 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                 )}
                 {(recipe as any).storage_instructions && (
                   <p className="text-[10px] text-zinc-400 italic"><span className="font-semibold not-italic">Almacenamiento:</span> {(recipe as any).storage_instructions}</p>
+                )}
+                {dog && (
+                  <button
+                    onClick={toggleDefaultKibble}
+                    disabled={savingKibble}
+                    className={`w-full rounded-xl py-2 text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      isDefaultKibble
+                        ? "bg-secondary-100 dark:bg-secondary-950/40 text-secondary-700 dark:text-secondary-300 border border-secondary-200 dark:border-secondary-800"
+                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                    }`}
+                  >
+                    {savingKibble ? "..." : isDefaultKibble ? <><Check className="w-3.5 h-3.5" /> Mi croqueta</> : "📌 Usar siempre como mi croqueta"}
+                  </button>
                 )}
               </div>
             )}

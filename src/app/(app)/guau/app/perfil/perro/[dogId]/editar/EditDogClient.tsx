@@ -25,6 +25,7 @@ interface Props {
   challenges: WeeklyChallenge[];
   userChallenges: UserChallenge[];
   userId: string;
+  croquetasRecipes: { id: string; title: string; image_url: string | null; protein_type: string | null; breed_sizes: string[] }[];
 }
 
 const ACTIVITY_LABELS: Record<string, string> = {
@@ -54,7 +55,7 @@ const BREEDS = [
   "Criollo / Mestizo"
 ].sort();
 
-export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Props) {
+export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croquetasRecipes }: Props) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -110,6 +111,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     return raw;
   });
   const [mixtaBarfProp, setMixtaBarfProp] = useState(50);
+  const [kibbleRecipeId, setKibbleRecipeId] = useState<string | null>(metabolicProfile?.kibble_recipe_id ?? null);
 
   // Sincronizar estado con el prop cuando se refresca (router.refresh)
   useEffect(() => {
@@ -203,7 +205,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     setSaveError("");
     const payload: Record<string, unknown> = {
       dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
-      feeding_pct: feedingPct, diet_type: dietType,
+      feeding_pct: feedingPct, diet_type: dietType, kibble_recipe_id: kibbleRecipeId,
     };
     console.log("[EditDog] Saving metabolic profile:", payload);
     const { error } = await supabase.from("dog_metabolic_profiles").upsert(payload, { onConflict: "dog_id" });
@@ -479,6 +481,28 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
             ))}
           </div>
         </div>
+
+        {/* Croquetas selector */}
+        {(dietType === "croquetas" || dietType === "mixta") && croquetasRecipes.length > 0 && (
+          <div>
+            <label className="text-[10px] text-zinc-400 block mb-1.5">
+              {dietType === "mixta" ? "Croqueta para dieta mixta" : "Tu croqueta"}
+            </label>
+            <select
+              value={kibbleRecipeId ?? ""}
+              onChange={(e) => setKibbleRecipeId(e.target.value || null)}
+              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs"
+            >
+              <option value="">Selecciona una croqueta...</option>
+              {croquetasRecipes.map((r) => (
+                <option key={r.id} value={r.id}>{r.title}{r.protein_type ? ` (${r.protein_type})` : ""}</option>
+              ))}
+            </select>
+            {kibbleRecipeId && (
+              <button onClick={() => setKibbleRecipeId(null)} className="text-[10px] text-zinc-400 hover:text-danger-500 mt-1">Quitar selección</button>
+            )}
+          </div>
+        )}
 
         {/* Ración diaria */}
         <div className="flex items-center justify-center py-2">
