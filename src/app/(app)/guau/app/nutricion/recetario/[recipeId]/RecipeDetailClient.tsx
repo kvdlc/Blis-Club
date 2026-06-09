@@ -103,9 +103,11 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
         peso_kg: weight, feeding_pct: feedingPct, diet_type: dietType, activity_level: activityLevel,
       })
   ) : { total_grams: 0, total_kcal: 0 };
-  const totalGrams = dietType === "mixta"
-    ? (ration as any).barf_grams + (ration as any).croquetas_grams
-    : (ration as any).total_grams;
+
+  // Para mixta: usar solo los gramos naturales (BARF), no sumar croquetas
+  const mixtaResult = dietType === "mixta" ? (ration as any) : null;
+  const barfOnlyGrams = mixtaResult ? (mixtaResult.barf_grams || 0) : 0;
+  const totalGrams = mixtaResult ? barfOnlyGrams : ((ration as any).total_grams || 0);
   const mealCount = Math.max(dogSlots.length, 1);
   const gramsPerMeal = totalGrams / mealCount;
   const stars = DIFFICULTY_STARS[recipe.difficulty] ?? 1;
@@ -400,7 +402,11 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
               </div>
             </div>
             <p className="text-xs text-secondary-600 dark:text-secondary-400 mb-3">
-              Porción {perMealMode ? "por comida" : "diaria total"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong> (al {feedingPct}%)
+              {dietType === "mixta" ? (
+                <>🥩 Porción natural {perMealMode ? "por comida" : "diaria"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong> (croquetas aparte)</>
+              ) : (
+                <>Porción {perMealMode ? "por comida" : "diaria total"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong></>
+              )}
             </p>
             <div className="space-y-1.5">
               {ingredients.map((ing) => {
