@@ -480,10 +480,12 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                     const rowColor = TYPE_ROW_COLORS[ing.ingredient_type] ?? TYPE_ROW_COLORS.otro;
                     const textColor = TYPE_TEXT[ing.ingredient_type] ?? TYPE_TEXT.otro;
                     return (
-                      <div key={ing.id} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-l-3 ${rowColor}`}>
-                        <span className={textColor}>{TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}</span>
-                        <span className="flex-1 text-xs font-medium text-zinc-800 dark:text-zinc-200">{ing.ingredient_name}</span>
-                        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200">{display}</span>
+                      <div key={ing.id} className={`flex items-start gap-2 px-3 py-1.5 rounded-lg border-l-3 ${rowColor}`}>
+                        <span className={`mt-0.5 ${textColor}`}>{TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200 line-clamp-1">{ing.ingredient_name}</p>
+                          <p className="text-xs font-bold text-zinc-700 dark:text-zinc-200">{display}</p>
+                        </div>
                       </div>
                     );
                   })}
