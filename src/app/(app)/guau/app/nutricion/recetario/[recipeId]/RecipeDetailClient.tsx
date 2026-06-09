@@ -90,10 +90,13 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   const activityLevel = (metabolicProfile?.activity_level as ActivityLevel) ?? "moderado";
   const weight = dog?.peso_kg ?? 0;
 
+  const defaults = dog ? getFeedingDefaults({ raza: dog.raza, peso_kg: dog.peso_kg, edad_meses: dog.edad_meses, tamano_guardado: dog.tamano }) : null;
+  const lifeStage = (defaults?.life_stage ?? "adulto") as LifeStage;
+
   // Usar la misma fórmula de ración que el editor y la calculadora
   const ration = dog ? (dietType === "mixta"
     ? calcularRacionMixta({
-        peso_kg: weight, life_stage: "adulto",
+        peso_kg: weight, life_stage: lifeStage,
         proporcion_barf: 50, activity_level: activityLevel, ajuste_global: feedingPct / 100,
       })
     : calcularRacionDiaria({
