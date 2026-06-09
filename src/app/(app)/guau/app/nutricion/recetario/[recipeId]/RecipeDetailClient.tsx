@@ -20,6 +20,7 @@ interface Props {
   metabolicProfile: DogMetabolicProfile | null;
   userId: string;
   initialSlots?: DogMealSlot[];
+  latestWeightKg?: number;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -99,7 +100,7 @@ function formatPieces(grams: number, unitWeight: number, displayUnit: string | n
   return gStr;
 }
 
-export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts, dog, metabolicProfile, userId, initialSlots = [] }: Props) {
+export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts, dog, metabolicProfile, userId, initialSlots = [], latestWeightKg }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const [addedToCart, setAddedToCart] = useState(false);
@@ -122,7 +123,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   const feedingPct = metabolicProfile?.feeding_pct ?? 2.5;
   const dietType = (metabolicProfile?.diet_type as DietType) ?? "croquetas";
   const activityLevel = (metabolicProfile?.activity_level as ActivityLevel) ?? "moderado";
-  const weight = dog?.peso_kg ?? 0;
+  const weight = latestWeightKg ?? (dog?.peso_kg ?? 0);
 
   const defaults = dog ? getFeedingDefaults({ raza: dog.raza, peso_kg: dog.peso_kg, edad_meses: dog.edad_meses, tamano_guardado: dog.tamano }) : null;
   const lifeStage = (defaults?.life_stage ?? "adulto") as LifeStage;

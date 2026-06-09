@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { NutritionRecipe, RecipeIngredient, Dog, DogMetabolicProfile, RecipeStep, RecipeNutritionFacts } from "@/types/database";
 import { RecipeDetailClient } from "./RecipeDetailClient";
 import { notFound } from "next/navigation";
+import { getCachedWeightLatest } from "@/lib/data-cache";
 
 export default async function RecipeDetailPage({ params }: { params: Promise<{ recipeId: string }> }) {
   const { recipeId } = await params;
@@ -21,13 +22,16 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ r
 
   let metabolicProfile: DogMetabolicProfile | null = null;
   let dogSlots: any[] = [];
+  let latestWeightKg: number | undefined;
   if ((dog as Dog | null)?.id) {
-    const [{ data: mp }, { data: slots }] = await Promise.all([
+    const [{ data: mp }, { data: slots }, weightData] = await Promise.all([
       supabase.from("dog_metabolic_profiles").select("*").eq("dog_id", (dog as Dog).id).maybeSingle(),
       supabase.from("dog_meal_slots").select("*").eq("dog_id", (dog as Dog).id).order("slot_index", { ascending: true }),
+      getCachedWeightLatest((dog as Dog).id),
     ]);
     metabolicProfile = mp as DogMetabolicProfile | null;
     dogSlots = slots ?? [];
+    latestWeightKg = weightData ?? undefined;
   }
 
   return (
@@ -40,6 +44,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ r
       metabolicProfile={metabolicProfile}
       userId={user.id}
       initialSlots={dogSlots}
+      latestWeightKg={latestWeightKg}
     />
   );
 }
