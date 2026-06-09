@@ -58,6 +58,9 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
   const router = useRouter();
   const supabase = createClient();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   const [photo, setPhoto] = useState(dog.foto_url ?? "");
   const [name, setName] = useState(dog.nombre);
   const [breed, setBreed] = useState(dog.raza);
@@ -134,6 +137,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
   const [saved, setSaved] = useState(false);
   const [saveIcon, setSaveIcon] = useState(false);
   const [savingFeeding, setSavingFeeding] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSrc, setEditorSrc] = useState("");
@@ -171,6 +175,31 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
       const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
       return (prevMonth.getDate() - b.getDate()) + now.getDate();
     }
+  };
+
+  const handleSaveFeeding = async () => {
+    setSavingFeeding(true);
+    setSaveError("");
+    const payload: Record<string, unknown> = {
+      dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
+      feeding_pct: feedingPct, diet_type: dietType,
+    };
+    const { error } = await supabase.from("dog_metabolic_profiles").upsert(payload, { onConflict: "dog_id" });
+    if (error) {
+      // Retry without diet_type
+      delete payload.diet_type;
+      const { error: e2 } = await supabase.from("dog_metabolic_profiles").upsert(payload, { onConflict: "dog_id" });
+      if (e2) {
+        console.warn("[EditDog] Save failed:", e2.message);
+        setSaveError(e2.message);
+        setSavingFeeding(false);
+        return;
+      }
+    }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+    setSavingFeeding(false);
+    router.refresh();
   };
 
   // Auto-save: solo datos básicos (alimentación se guarda con botón manual)
@@ -426,9 +455,15 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
         {/* Ración diaria */}
         <div className="flex items-center justify-center py-2">
           <div className="text-center">
-            <span className="text-2xl font-extrabold text-primary-600 dark:text-primary-400">{total}</span>
-            <span className="text-[10px] text-zinc-500 block">gramos/día</span>
-            <span className="text-[10px] text-zinc-400">{kcalTotal} kcal</span>
+            {mounted ? (
+              <>
+                <span className="text-2xl font-extrabold text-primary-600 dark:text-primary-400">{total}</span>
+                <span className="text-[10px] text-zinc-500 block">gramos/día</span>
+                <span className="text-[10px] text-zinc-400">{kcalTotal} kcal</span>
+              </>
+            ) : (
+              <span className="text-2xl font-extrabold text-primary-600 dark:text-primary-400">—</span>
+            )}
           </div>
         </div>
 
@@ -489,30 +524,22 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
         )}
 
         {/* Botón Guardar alimentación y salud */}
-        <button
-          onClick={async () => {
-            setSavingFeeding(true);
-            const { error } = await supabase.from("dog_metabolic_profiles").upsert({
-              dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
-              feeding_pct: feedingPct, diet_type: dietType,
-            }, { onConflict: "dog_id" });
-            if (error) {
-              // Retry without diet_type if column missing
-              const { error: e2 } = await supabase.from("dog_metabolic_profiles").upsert({
-                dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
-                feeding_pct: feedingPct,
-              }, { onConflict: "dog_id" });
-              if (e2) console.warn("[EditDog] Save failed:", e2.message);
-            }
-            setSaved(true);
-            setTimeout(() => setSaved(false), 1500);
-            setSavingFeeding(false);
-          }}
-          disabled={savingFeeding}
-          className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-2.5 text-sm font-bold transition-all active:scale-[0.98] disabled:opacity-60"
-        >
-          {savingFeeding ? "Guardando..." : "Guardar"}
-        </button>
+        {savingFeeding ? (
+          <div className="w-full rounded-xl bg-primary-600 text-white py-2.5 text-sm font-bold text-center">Guardando...</div>
+        ) : saveError ? (
+          <div className="space-y-2">
+            <div className="w-full rounded-xl bg-red-50 border border-red-200 text-red-700 py-2 px-3 text-xs text-center">{saveError}</div>
+            <button onClick={() => { setSaveError(""); handleSaveFeeding(); }}
+              className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-2.5 text-sm font-bold transition-all active:scale-[0.98]">
+              Reintentar
+            </button>
+          </div>
+        ) : (
+          <button onClick={handleSaveFeeding}
+            className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-2.5 text-sm font-bold transition-all active:scale-[0.98]">
+            Guardar
+          </button>
+        )}
       </div>
 
       {/* ═══ SALUD ═══ */}
