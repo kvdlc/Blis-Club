@@ -11,13 +11,15 @@ interface Props {
   recipe: NutritionRecipe;
   dog: Dog | null;
   totalGrams: number;
+  gramsPerMeal?: number;
+  perMealMode?: boolean;
 }
 
-export function ScheduleMealModal({ open, onClose, recipe, dog, totalGrams }: Props) {
+export function ScheduleMealModal({ open, onClose, recipe, dog, totalGrams, gramsPerMeal, perMealMode }: Props) {
   const supabase = createClient();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
-  const [grams, setGrams] = useState(totalGrams);
+  const [grams, setGrams] = useState(perMealMode && gramsPerMeal ? Math.round(gramsPerMeal) : totalGrams);
   const [slots, setSlots] = useState<DogMealSlot[]>([]);
   const [existingSchedule, setExistingSchedule] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);

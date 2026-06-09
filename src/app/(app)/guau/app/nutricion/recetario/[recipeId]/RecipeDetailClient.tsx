@@ -112,8 +112,10 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   const mixtaResult = dietType === "mixta" ? (ration as any) : null;
   const barfOnlyGrams = mixtaResult ? (mixtaResult.barf_grams || 0) : 0;
   const totalGrams = mixtaResult ? barfOnlyGrams : ((ration as any).total_grams || 0);
-  const mealCount = Math.max(dogSlots.length, 1);
+  const activeSlots = dogSlots.filter(s => s.active);
+  const mealCount = Math.max(activeSlots.length, 1);
   const gramsPerMeal = totalGrams / mealCount;
+  const displayGrams = perMealMode ? gramsPerMeal : totalGrams;
   const stars = DIFFICULTY_STARS[recipe.difficulty] ?? 1;
 
   const toLocalDateStr = (d = new Date()) => {
@@ -204,7 +206,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
     await supabase.from("nutrition_logs").insert({
       dog_id: dog.id,
       recipe_id: recipe.id,
-      gramos_servidos: Math.round(totalGrams),
+      gramos_servidos: Math.round(displayGrams),
       fecha: todayStr,
     });
 
@@ -214,7 +216,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
       fecha: todayStr,
       meal_slot_index: selectedSlot,
       status: "fed",
-      gramos: Math.round(totalGrams),
+      gramos: Math.round(displayGrams),
     }, { onConflict: "dog_id,fecha,meal_slot_index" });
 
     setSavingCook(false);
@@ -528,7 +530,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
       </div>
 
       {/* Schedule Modal */}
-      <ScheduleMealModal open={scheduleOpen} onClose={() => setScheduleOpen(false)} recipe={recipe} dog={dog} totalGrams={Math.round(totalGrams)} />
+      <ScheduleMealModal open={scheduleOpen} onClose={() => setScheduleOpen(false)} recipe={recipe} dog={dog} totalGrams={Math.round(totalGrams)} gramsPerMeal={Math.round(gramsPerMeal)} perMealMode={perMealMode} />
 
       {/* Cook Today Modal */}
       {cookModalOpen && (
@@ -547,11 +549,11 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
               </div>
               <div>
                 <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{recipe.title}</p>
-                <p className="text-xs text-zinc-500">{Math.round(totalGrams)}g · {Math.round(totalGrams * (recipe.kcal_per_100g ?? 0) / 100)} kcal</p>
+                <p className="text-xs text-zinc-500">{Math.round(displayGrams)}g · {Math.round(displayGrams * (recipe.kcal_per_100g ?? 0) / 100)} kcal</p>
               </div>
             </div>
 
-            {dogSlots.length === 0 ? (
+            {activeSlots.length === 0 ? (
               <div className="text-center py-6">
                 <p className="text-sm text-zinc-500 mb-2">No tienes horarios de comida configurados.</p>
                 <p className="text-xs text-zinc-400">Configúralos en el perfil de tu perro.</p>
@@ -559,7 +561,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
             ) : (
               <div className="space-y-2">
                 <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">¿En qué horario cocinaste?</label>
-                {dogSlots.map((slot) => {
+                {activeSlots.map((slot) => {
                   const existing = todaySchedule.find((s) => s.meal_slot_index === slot.slot_index);
                   const isSelected = selectedSlot === slot.slot_index;
                   return (
