@@ -468,7 +468,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                     <>Porción {perMealMode ? "por comida" : "diaria total"}: <strong>{Math.round(perMealMode ? gramsPerMeal : totalGrams)}g</strong></>
                   )}
                 </p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
                   {[...ingredients].sort((a, b) => {
                     const ai = TYPE_ORDER.indexOf(a.ingredient_type) ?? 99;
                     const bi = TYPE_ORDER.indexOf(b.ingredient_type) ?? 99;
