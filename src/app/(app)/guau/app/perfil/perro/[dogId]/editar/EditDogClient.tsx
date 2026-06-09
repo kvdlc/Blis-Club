@@ -101,7 +101,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
   });
 
   // Calculated ration (useMemo para evitar hydration mismatch)
-  const ration = useMemo(() => {
+  const rationData = useMemo(() => {
     const w = getWeightNumber();
     if (dietType === "mixta") {
       return calcularRacionMixta({
@@ -112,10 +112,13 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     return calcularRacionDiaria({ peso_kg: w, feeding_pct: feedingPct, diet_type: dietType, activity_level: activity as ActivityLevel });
   }, [dietType, feedingPct, mixtaBarfProp, activity, lifeStage, weightDisplay]);
 
-  const total = ration.total_grams ?? (dietType === "mixta" ? (ration.barf_grams + ration.croquetas_grams) : ration.total_grams);
-  const kcalTotal = 'total_kcal' in ration ? ration.total_kcal : 0;
-  const barfGrams = 'barf_grams' in ration ? ration.barf_grams : (dietType === "barf" ? total : 0);
-  const croqGrams = 'croquetas_grams' in ration ? ration.croquetas_grams : (dietType === "croquetas" ? total : 0);
+  const mixtaResult = dietType === "mixta" ? (rationData as ReturnType<typeof calcularRacionMixta>) : null;
+  const diariaResult = dietType !== "mixta" ? (rationData as ReturnType<typeof calcularRacionDiaria>) : null;
+
+  const total = mixtaResult ? mixtaResult.barf_grams + mixtaResult.croquetas_grams : (diariaResult?.total_grams ?? 0);
+  const kcalTotal = mixtaResult ? mixtaResult.total_kcal : (diariaResult?.total_kcal ?? 0);
+  const barfGrams = mixtaResult ? mixtaResult.barf_grams : (dietType === "barf" ? total : 0);
+  const croqGrams = mixtaResult ? mixtaResult.croquetas_grams : (dietType === "croquetas" ? total : 0);
 
   const pctRange = dietType === "barf" ? BARF_PCT_BY_STAGE[lifeStage] :
     dietType === "croquetas" ? CROQUETAS_PCT_BY_STAGE[lifeStage] : null;
