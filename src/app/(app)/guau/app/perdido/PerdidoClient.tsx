@@ -75,7 +75,7 @@ export function PerdidoClient({ dog: initialDog, latestWeightPhoto }: Props) {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <Link href="/guau/app" className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
+        <Link href="/guau/app?tab=perdido" className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </Link>
         <h1 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">Perro Perdido</h1>

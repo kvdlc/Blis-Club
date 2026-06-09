@@ -32,7 +32,7 @@ export default function IzipayCheckout({
   onSuccess,
   onError,
   onClose,
-  successRedirect = "/guau/app",
+  successRedirect = "/guau/app?tab=inicio",
   successCtaLabel = "Ir a la App",
 }: IzipayCheckoutProps) {
   const [formState, setFormState] = useState<FormState>('loading');

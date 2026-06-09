@@ -92,10 +92,10 @@ export default function CheckoutPage() {
               });
             } catch { /* webhook handles it */ }
           }
-          router.push("/guau/app?payment=success");
+          router.push("/guau/app?tab=inicio&payment=success");
         }}
         onError={(msg) => setError(msg)}
-        successRedirect="/guau/app"
+        successRedirect="/guau/app?tab=inicio"
         successCtaLabel="Ir a la App"
       />
     </div>

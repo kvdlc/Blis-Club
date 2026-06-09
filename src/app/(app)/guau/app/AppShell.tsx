@@ -213,12 +213,23 @@ export default function AppShell({ userId, dog, initialTab, dashboardData }: App
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [tabRefresh, setTabRefresh] = useState<Record<string, number>>({});
 
+  const validTabs = ["inicio", "nutricion", "academia", "tracker", "perdido", "perfil"];
+
+  // Forzar sincronización con la URL real al montar (maneja navegación cacheada por Next.js)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab") as TabKey | null;
+    if (tab && validTabs.includes(tab) && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, []);
+
   // Sincronizar con popstate (back/forward del navegador)
   useEffect(() => {
     const handlePopstate = () => {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get("tab") as TabKey | null;
-      if (tab && ["inicio", "nutricion", "academia", "tracker", "perdido", "perfil"].includes(tab)) setActiveTab(tab);
+      if (tab && validTabs.includes(tab)) setActiveTab(tab);
       else setActiveTab("inicio");
     };
     window.addEventListener("popstate", handlePopstate);

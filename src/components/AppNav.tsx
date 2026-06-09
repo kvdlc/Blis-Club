@@ -1,10 +1,19 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GraduationCap, UtensilsCrossed, Activity, User, Dog, Siren } from "lucide-react";
 
 type TabKey = "inicio" | "nutricion" | "academia" | "tracker" | "perdido" | "perfil";
+
+function inferTabFromPathname(pathname: string): TabKey | null {
+  if (pathname.startsWith("/guau/app/nutricion")) return "nutricion";
+  if (pathname.startsWith("/guau/app/perfil")) return "perfil";
+  if (pathname.startsWith("/guau/app/academia")) return "academia";
+  if (pathname.startsWith("/guau/app/tracker")) return "tracker";
+  if (pathname.startsWith("/guau/app/perdido")) return "perdido";
+  return null;
+}
 
 const desktopTabs: { key: TabKey; icon: any; label: string; center?: boolean }[] = [
   { key: "academia", icon: GraduationCap, label: "Academia" },
@@ -27,8 +36,17 @@ export default function AppNav() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+
+  // Derive tab from URL if on dashboard, else from pathname (sub-page context)
   const urlTab = (searchParams.get("tab") as TabKey) || "inicio";
-  const [activeTab, setActiveTab] = useState<TabKey>(urlTab);
+  const inferredTab = pathname === "/guau/app" ? urlTab : (inferTabFromPathname(pathname) || "inicio");
+
+  const [activeTab, setActiveTab] = useState<TabKey>(inferredTab);
+
+  // Keep activeTab in sync when navigating (e.g. browser back/forward)
+  useEffect(() => {
+    setActiveTab(inferredTab);
+  }, [inferredTab]);
 
   const goToTab = (tab: TabKey) => {
     if (tab === activeTab) return;
