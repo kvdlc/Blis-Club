@@ -19,17 +19,18 @@ export function ScheduleMealModal({ open, onClose, recipe, dog, totalGrams, gram
   const supabase = createClient();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
-  const isAllMeals = !perMealMode;
-  const defaultGrams = isAllMeals ? Math.round(gramsPerMeal ?? totalGrams) : Math.round(gramsPerMeal ?? totalGrams);
-  const [grams, setGrams] = useState(defaultGrams);
   const [slots, setSlots] = useState<DogMealSlot[]>([]);
   const [existingSchedule, setExistingSchedule] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const isAllMeals = !perMealMode;
   const activeSlots = slots.filter(s => s.active);
+  const computedPerMeal = activeSlots.length > 0 ? Math.round(totalGrams / activeSlots.length) : totalGrams;
+  const initialGrams = gramsPerMeal && gramsPerMeal > 0 ? gramsPerMeal : computedPerMeal;
+  const [grams, setGrams] = useState(initialGrams);
 
-  const toLocalDateStr = (d: Date) => {
+const toLocalDateStr = (d: Date) => {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
@@ -44,8 +45,10 @@ export function ScheduleMealModal({ open, onClose, recipe, dog, totalGrams, gram
   }, [open, dog, selectedDate]);
 
   useEffect(() => {
-    setGrams(isAllMeals ? Math.round(gramsPerMeal ?? totalGrams) : Math.round(gramsPerMeal ?? totalGrams));
-  }, [isAllMeals, gramsPerMeal, totalGrams]);
+    const ap = slots.filter(s => s.active);
+    const cp = ap.length > 0 ? Math.round(totalGrams / ap.length) : totalGrams;
+    setGrams(gramsPerMeal && gramsPerMeal > 0 ? gramsPerMeal : cp);
+  }, [gramsPerMeal, slots, totalGrams]);
 
   const loadSlots = async () => {
     if (!dog) return;
