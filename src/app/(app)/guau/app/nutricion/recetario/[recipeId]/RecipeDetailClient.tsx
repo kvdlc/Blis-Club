@@ -93,7 +93,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   // Usar la misma fórmula de ración que el editor y la calculadora
   const ration = dog ? (dietType === "mixta"
     ? calcularRacionMixta({
-        peso_kg: weight, feeding_pct: feedingPct, life_stage: "adulto",
+        peso_kg: weight, life_stage: "adulto",
         proporcion_barf: 50, activity_level: activityLevel, ajuste_global: feedingPct / 100,
       })
     : calcularRacionDiaria({
