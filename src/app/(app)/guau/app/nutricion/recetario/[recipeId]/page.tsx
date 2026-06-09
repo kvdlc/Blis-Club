@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import type { NutritionRecipe, RecipeIngredient, Dog, DogMetabolicProfile, RecipeStep, RecipeNutritionFacts } from "@/types/database";
 import { RecipeDetailClient } from "./RecipeDetailClient";
 import { notFound } from "next/navigation";
-import { getCachedWeightLatest } from "@/lib/data-cache";
+import { cookies } from "next/headers";
+import { getCachedDog, getCachedMetabolicProfile, getCachedMealSlots, getCachedWeightLatest } from "@/lib/data-cache";
 
 export default async function RecipeDetailPage({ params }: { params: Promise<{ recipeId: string }> }) {
   const { recipeId } = await params;
@@ -10,28 +11,48 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ r
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) notFound();
 
-  const [{ data: recipe }, { data: ingredients }, { data: steps }, { data: nutritionFacts }, { data: dog }] = await Promise.all([
+  const cookieStore = await cookies();
+  const savedDogId = cookieStore.get("blis_current_dog")?.value ?? null;
+
+  const [{ data: recipe }, { data: ingredients }, { data: steps }, { data: nutritionFacts }] = await Promise.all([
     supabase.from("nutrition_recipes").select("*").eq("id", recipeId).single(),
     supabase.from("recipe_ingredients").select("*").eq("recipe_id", recipeId),
     supabase.from("recipe_steps").select("*").eq("recipe_id", recipeId).order("step_number", { ascending: true }),
     supabase.from("recipe_nutrition_facts").select("*").eq("recipe_id", recipeId).maybeSingle(),
-    supabase.from("dogs").select("*").eq("owner_id", user.id).limit(1).single(),
   ]);
 
   if (!recipe) notFound();
 
+  let dog: Dog | null = null;
   let metabolicProfile: DogMetabolicProfile | null = null;
   let dogSlots: any[] = [];
   let latestWeightKg: number | undefined;
-  if ((dog as Dog | null)?.id) {
-    const [{ data: mp }, { data: slots }, weightData] = await Promise.all([
-      supabase.from("dog_metabolic_profiles").select("*").eq("dog_id", (dog as Dog).id).maybeSingle(),
-      supabase.from("dog_meal_slots").select("*").eq("dog_id", (dog as Dog).id).order("slot_index", { ascending: true }),
-      getCachedWeightLatest((dog as Dog).id),
+
+  const dogId = savedDogId;
+  if (dogId) {
+    const [dogRes, mpRes, slotsRes, weightData] = await Promise.all([
+      getCachedDog(dogId, user.id),
+      getCachedMetabolicProfile(dogId),
+      getCachedMealSlots(dogId),
+      getCachedWeightLatest(dogId),
     ]);
-    metabolicProfile = mp as DogMetabolicProfile | null;
-    dogSlots = slots ?? [];
+    dog = dogRes as Dog | null;
+    metabolicProfile = mpRes as DogMetabolicProfile | null;
+    dogSlots = slotsRes as any[];
     latestWeightKg = weightData ?? undefined;
+  } else {
+    const { data: fallbackDog } = await supabase.from("dogs").select("*").eq("owner_id", user.id).limit(1).single();
+    dog = fallbackDog as Dog | null;
+    if (dog?.id) {
+      const [mpRes, slotsRes, weightData] = await Promise.all([
+        getCachedMetabolicProfile(dog.id),
+        getCachedMealSlots(dog.id),
+        getCachedWeightLatest(dog.id),
+      ]);
+      metabolicProfile = mpRes as DogMetabolicProfile | null;
+      dogSlots = slotsRes as any[];
+      latestWeightKg = weightData ?? undefined;
+    }
   }
 
   return (

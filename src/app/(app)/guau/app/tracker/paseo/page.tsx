@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useCurrentDog } from "@/components/DogSwitcher";
 import { Droplets, BadgeCheck, Flag, PawPrint, PenLine } from "lucide-react";
 import { getTodayLocal, toLocalDateStr } from "@/lib/dates";
 
@@ -22,6 +23,7 @@ const TRIGGER_OPTIONS = [
 export default function WalkPage() {
   const router = useRouter();
   const supabase = createClient();
+  const { currentDog } = useCurrentDog();
 
   const [phase, setPhase] = useState<Phase>("active");
   const [seconds, setSeconds] = useState(0);
@@ -39,21 +41,13 @@ export default function WalkPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    // Cargar nombre del perro
-    const loadDog = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: dog } = await supabase.from("dogs").select("nombre").eq("owner_id", user.id).limit(1).single();
-        if (dog) setDogName((dog as { nombre: string }).nombre);
-      }
-    };
-    loadDog();
+    if (currentDog) setDogName(currentDog.nombre);
 
     intervalRef.current = setInterval(() => {
       setSeconds(Math.floor((Date.now() - startTime.current.getTime()) / 1000));
     }, 1000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, []);
+  }, [currentDog]);
 
   const handleEndWalk = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -99,13 +93,10 @@ export default function WalkPage() {
     const durationSec = Math.floor((endTime.getTime() - startTime.current.getTime()) / 1000);
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setSaving(false); return; }
-
-    const { data: dog } = await supabase.from("dogs").select("id").eq("owner_id", user.id).limit(1).single();
-    if (!dog) { setSaving(false); return; }
+    if (!user || !currentDog) { setSaving(false); return; }
 
     await supabase.from("walks").insert({
-      dog_id: (dog as { id: string }).id,
+      dog_id: currentDog.id,
       start_time: startTime.current.toISOString(),
       end_time: endTime.toISOString(),
       duration_sec: durationSec,
@@ -118,8 +109,8 @@ export default function WalkPage() {
 
     if (stool) {
       await supabase.from("digestive_logs").insert({
-        dog_id: (dog as { id: string }).id,
-        fecha: getTodayLocal(),
+        dog_id: currentDog.id,
+      fecha: getTodayLocal(),
         stool_type: stool,
       });
     }
