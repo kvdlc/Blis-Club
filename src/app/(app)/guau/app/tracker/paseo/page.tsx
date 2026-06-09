@@ -369,7 +369,7 @@ export default function WalkPage() {
             </span>
           )}
           <button
-            onClick={() => router.push("/guau/app/tracker")}
+            onClick={() => router.replace("/guau/app?tab=tracker", { scroll: false })}
             className="w-full max-w-xs bg-primary-600 hover:bg-primary-700 text-white rounded-2xl py-4 font-bold"
           >
             Ver progreso
