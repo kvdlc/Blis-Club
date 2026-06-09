@@ -228,24 +228,32 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
   };
 
   const handleCookConfirm = async () => {
-    if (!dog || selectedSlot === null) return;
+    if (!dog) return;
     setSavingCook(true);
+
+    const slotsToRegister = perMealMode
+      ? (selectedSlot !== null ? [selectedSlot] : [])
+      : activeSlots.map(s => s.slot_index);
+
+    if (slotsToRegister.length === 0) { setSavingCook(false); return; }
 
     await supabase.from("nutrition_logs").insert({
       dog_id: dog.id,
       recipe_id: recipe.id,
-      gramos_servidos: Math.round(displayGrams),
+      gramos_servidos: Math.round(perMealMode ? gramsPerMeal : totalGrams),
       fecha: todayStr,
     });
 
-    await supabase.from("meal_schedule").upsert({
-      dog_id: dog.id,
-      recipe_id: recipe.id,
-      fecha: todayStr,
-      meal_slot_index: selectedSlot,
-      status: "fed",
-      gramos: Math.round(displayGrams),
-    }, { onConflict: "dog_id,fecha,meal_slot_index" });
+    for (const slotIndex of slotsToRegister) {
+      await supabase.from("meal_schedule").upsert({
+        dog_id: dog.id,
+        recipe_id: recipe.id,
+        fecha: todayStr,
+        meal_slot_index: slotIndex,
+        status: "fed",
+        gramos: Math.round(gramsPerMeal),
+      }, { onConflict: "dog_id,fecha,meal_slot_index" });
+    }
 
     setSavingCook(false);
     setCookModalOpen(false);
@@ -622,10 +630,10 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
 
             {activeSlots.length === 0 ? (
               <div className="text-center py-6">
-                <p className="text-sm text-zinc-500 mb-2">No tienes horarios de comida configurados.</p>
+                <p className="text-sm text-zinc-500 mb-2">No tienes horarios de comida activos.</p>
                 <p className="text-xs text-zinc-400">Configúralos en el perfil de tu perro.</p>
               </div>
-            ) : (
+            ) : perMealMode ? (
               <div className="space-y-2">
                 <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">¿En qué horario cocinaste?</label>
                 {activeSlots.map((slot) => {
@@ -654,13 +662,34 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                   );
                 })}
               </div>
+            ) : (
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Se registrará en todas las comidas</label>
+                {activeSlots.map((slot) => {
+                  const existing = todaySchedule.find((s) => s.meal_slot_index === slot.slot_index);
+                  return (
+                    <div key={slot.slot_index} className="flex items-center gap-3 p-3.5 rounded-2xl border-2 border-secondary-200 dark:border-secondary-800 bg-secondary-50/60 dark:bg-secondary-950/20 text-left">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary-100 dark:bg-secondary-900 text-secondary-600 dark:text-secondary-400">
+                        <Check className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{slot.label}</p>
+                        <p className="text-xs text-zinc-400">{slot.time_of_day.slice(0, 5)} · {Math.round(gramsPerMeal)}g</p>
+                      </div>
+                      {existing && (
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary-100 text-secondary-700">{existing.status === 'fed' ? 'Completado' : 'Agendado'}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             )}
 
             <button
               onClick={handleCookConfirm}
-              disabled={selectedSlot === null || savingCook}
+              disabled={(perMealMode ? selectedSlot === null : activeSlots.length === 0) || savingCook}
               className={`w-full rounded-2xl py-3.5 font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                selectedSlot === null ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed" : "bg-gradient-to-r from-secondary-500 to-secondary-600 text-white shadow-lg shadow-secondary-500/20 active:scale-[0.97]"
+                (perMealMode ? selectedSlot === null : activeSlots.length === 0) ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed" : "bg-gradient-to-r from-secondary-500 to-secondary-600 text-white shadow-lg shadow-secondary-500/20 active:scale-[0.97]"
               }`}
             >
               {savingCook ? "Guardando..." : <><Check className="w-4 h-4" /> Confirmar y Registrar</>}
