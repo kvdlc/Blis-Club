@@ -79,7 +79,7 @@ export async function generateMetadata({ params }: { params: Promise<{ dogId: st
 
   const description = dog.is_lost
     ? `${dog.nombre} - ${dog.raza} · ${edadTexto} · ${dog.peso_kg}kg. ${dog.lost_location ? `Visto por última vez en ${dog.lost_location}.` : ""} Ayúdanos a encontrarlo.`
-    : `${dog.raza} · ${edadTexto} · ${dog.peso_kg}kg. Conocé su perfil completo en Blis Club.`;
+    : `${dog.raza} · ${edadTexto} · ${dog.peso_kg}kg. Conoce su perfil completo en Blis Club.`;
 
   return {
     title,

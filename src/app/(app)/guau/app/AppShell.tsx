@@ -49,7 +49,7 @@ function NutricionTab({ dog, userId, preloaded }: { dog: Dog | null; userId: str
   }, [dog?.id, data]);
 
   if (loading) return <TabSkeleton />;
-  if (!dog || !data) return <p className="text-zinc-500 text-center py-8">Registrá un perro primero.</p>;
+    if (!dog || !data) return <p className="text-zinc-500 text-center py-8">Registra un perro primero.</p>;
 
   return (
     <NutritionHub
@@ -156,14 +156,14 @@ function TrackerTab({ dog, userId, preloaded }: { dog: Dog | null; userId: strin
   }, []);
 
   if (loading) return <TabSkeleton />;
-  if (!data) return <p className="text-zinc-500 text-center py-8">Registrá un perro primero.</p>;
+  if (!data) return <p className="text-zinc-500 text-center py-8">Registra un perro primero.</p>;
 
   return <TrackerClient walks={data.walks} dog={dog} allDogs={data.allDogs} agilitySessions={data.agilitySessions} streakDays={data.streakDays} userId={userId} vaccines={data.vaccines} />;
 }
 
 /* ═══════════════════════════ Perdido ═══════════════════════ */
 function PerdidoTab({ dog, preloaded }: { dog: Dog | null; preloaded?: any }) {
-  if (!dog) return <p className="text-zinc-500 text-center py-8">Registrá un perro primero.</p>;
+  if (!dog) return <p className="text-zinc-500 text-center py-8">Registra un perro primero.</p>;
   return <PerdidoClient dog={dog} latestWeightPhoto={null} />;
 }
 
@@ -173,7 +173,7 @@ function DashboardContent({ data, dog, userId }: { data: any; dog: Dog | null; u
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
         <div className="w-24 h-24 rounded-full bg-primary-50 dark:bg-primary-950 flex items-center justify-center"><span className="text-4xl">🐾</span></div>
-        <div><h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">¡Bienvenido a Blis Club!</h2><p className="text-zinc-500 dark:text-zinc-400 mt-2 max-w-sm text-sm leading-relaxed">Registrá tu primer perro para empezar.</p></div>
+        <div><h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">¡Bienvenido a Blis Club!</h2><p className="text-zinc-500 dark:text-zinc-400 mt-2 max-w-sm text-sm leading-relaxed">Registra tu primer perro para empezar.</p></div>
         <AddDogForm userId={userId} />
       </div>
     );

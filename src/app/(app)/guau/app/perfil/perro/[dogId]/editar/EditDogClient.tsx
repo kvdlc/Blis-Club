@@ -195,18 +195,25 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
       dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
       feeding_pct: feedingPct, diet_type: dietType,
     };
+    console.log("[EditDog] Saving metabolic profile:", payload);
     const { error } = await supabase.from("dog_metabolic_profiles").upsert(payload, { onConflict: "dog_id" });
     if (error) {
+      console.warn("[EditDog] First attempt failed:", error.message);
       // Retry without diet_type
       delete payload.diet_type;
       const { error: e2 } = await supabase.from("dog_metabolic_profiles").upsert(payload, { onConflict: "dog_id" });
       if (e2) {
-        console.warn("[EditDog] Save failed:", e2.message);
+        console.error("[EditDog] Both attempts failed:", e2.message);
         setSaveError(e2.message);
         setSavingFeeding(false);
         return;
       }
+      console.log("[EditDog] Saved without diet_type");
     }
+    // Verify: read back to confirm
+    const { data: verify } = await supabase.from("dog_metabolic_profiles").select("diet_type, feeding_pct").eq("dog_id", dog.id).maybeSingle();
+    console.log("[EditDog] Verify after save:", verify);
+
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
     setSavingFeeding(false);
@@ -255,7 +262,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId }: Prop
     : BREEDS;
 
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-4 pb-24" suppressHydrationWarning>
       {/* Header */}
       <div className="flex items-center gap-3 pt-1">
         <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center">

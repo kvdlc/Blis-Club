@@ -389,8 +389,8 @@ export function NewDogClient({ userId }: Props) {
                 onClick={() => setInfoModal({
                   open: true, icon: "🍽️",
                   title: "Tipos de alimentación",
-                  example: "Elegí según tu estilo de vida y el de tu perro",
-                  body: "🦴  Croquetas\nAlimento seco y procesado. Muy práctico: solo servís y listo. No necesita refrigeración y dura meses. Es concentrado (poca agua), por eso tu perro come menos gramos. Ideal si tenés poco tiempo.\n\n🥩  Natural / BARF\nComida cruda biológicamente apropiada: carne, huesos carnosos, vísceras y vegetales. Tiene ~70% de agua, así que tu perro come más volumen. Ventajas: hidratación natural, nutrientes sin procesar, mejor digestión. Requiere más preparación.\n\n⚖️  Mixta\nCombinás croquetas + comida natural. Podés dar croquetas en la mañana y BARF en la noche, o mezclar en cada comida. Lo mejor de dos mundos: la practicidad de las croquetas con los beneficios de la comida natural."
+                  example: "Elige según tu estilo de vida y el de tu perro",
+                  body: "🦴  Croquetas\nAlimento seco y procesado. Muy práctico: solo sirves y listo. No necesita refrigeración y dura meses. Es concentrado (poca agua), por eso tu perro come menos gramos. Ideal si tienes poco tiempo.\n\n🥩  Natural / BARF\nComida cruda biológicamente apropiada: carne, huesos carnosos, vísceras y vegetales. Tiene ~70% de agua, así que tu perro come más volumen. Ventajas: hidratación natural, nutrientes sin procesar, mejor digestión. Requiere más preparación.\n\n⚖️  Mixta\nCombinas croquetas + comida natural. Puedes dar croquetas en la mañana y BARF en la noche, o mezclar en cada comida. Lo mejor de dos mundos: la practicidad de las croquetas con los beneficios de la comida natural."
                 })}
                 className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
               >
@@ -534,7 +534,7 @@ export function NewDogClient({ userId }: Props) {
                       ? "Ejemplo real: 960g estándar → 70% = 672g → 130% = 1.248g"
                       : "Peso del perro × porcentaje ÷ 100 = gramos diarios",
                     body: dietType === "mixta"
-                      ? "El sistema ya calculó la cantidad ideal de comida combinando croquetas y comida natural según el peso, edad y actividad de tu perro.\n\nEste ajuste te permite adaptar esa ración a la vida real:\n\n🏠  Si tu perro es casero y no hace mucho ejercicio, bajalo a 80-90% para evitar sobrepeso.\n🐕  Si es un perro normal con paseos diarios, deja el 100%.\n🏃  Si es muy activo, perro de trabajo o necesita ganar peso, subilo a 110-120%.\n\n📐  Ejemplo práctico:\nSi el sistema calculó 960g/día como ración estándar:\n· 80% = 768g (perro sedentario)\n· 100% = 960g (perro normal)\n· 120% = 1.152g (perro muy activo)"
+                      ? "El sistema ya calculó la cantidad ideal de comida combinando croquetas y comida natural según el peso, edad y actividad de tu perro.\n\nEste ajuste te permite adaptar esa ración a la vida real:\n\n🏠  Si tu perro es casero y no hace mucho ejercicio, bájalo a 80-90% para evitar sobrepeso.\n🐕  Si es un perro normal con paseos diarios, deja el 100%.\n🏃  Si es muy activo, perro de trabajo o necesita ganar peso, súbelo a 110-120%.\n\n📐  Ejemplo práctico:\nSi el sistema calculó 960g/día como ración estándar:\n· 80% = 768g (perro sedentario)\n· 100% = 960g (perro normal)\n· 120% = 1.152g (perro muy activo)"
                       : "Es la forma de calcular cuánta comida necesita tu perro por día.\n\n📐  Fórmula: Peso actual (kg) × 1000 × (porcentaje ÷ 100)\n\n🧮  Ejemplo: 20 kg × 1000 × 3% = 600 g/día\n\n💧  La comida natural (BARF) necesita un % más alto (~7%) porque tiene ~70% de agua.\n🦴  Las croquetas necesitan un % menor (~2.2%) porque son más concentradas (solo ~10% de agua)."
                   })}
                   className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
@@ -607,7 +607,7 @@ export function NewDogClient({ userId }: Props) {
                     open: true, icon: "🍖",
                     title: "¿Cómo se compone un plato BARF?",
                     example: "Proporciones ideales para un plato balanceado",
-                    body: "Un plato de comida natural balanceado se divide así:\n\n🔴  50% Carne magra\nMúsculo de res, pollo, pavo, cerdo o pescado. Es la base principal de proteína.\n\n🟠  20% Huesos carnosos blandos\nCuellos de pollo, alas, carcasas de pavo. NUNCA huesos cocidos (se astillan).\n\n🟣  10% Vísceras\n5% hígado (obligatorio) + 5% otras vísceras como riñón, bazo o corazón.\n\n🟢  20% Vegetales y frutas\nZanahoria, calabaza, espinaca, manzana (sin semillas), arándanos. Siempre triturados para que el perro los digiera.\n\n⚠️  Consultá con tu veterinario antes de cambiar la dieta de tu perro."
+                    body: "Un plato de comida natural balanceado se divide así:\n\n🔴  50% Carne magra\nMúsculo de res, pollo, pavo, cerdo o pescado. Es la base principal de proteína.\n\n🟠  20% Huesos carnosos blandos\nCuellos de pollo, alas, carcasas de pavo. NUNCA huesos cocidos (se astillan).\n\n🟣  10% Vísceras\n5% hígado (obligatorio) + 5% otras vísceras como riñón, bazo o corazón.\n\n🟢  20% Vegetales y frutas\nZanahoria, calabaza, espinaca, manzana (sin semillas), arándanos. Siempre triturados para que el perro los digiera.\n\n⚠️  Consulta con tu veterinario antes de cambiar la dieta de tu perro."
                   })}
                   className="w-4 h-4 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
                 >

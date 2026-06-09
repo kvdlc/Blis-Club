@@ -46,7 +46,7 @@ export function PanicButton({ dogName, onSubmit, loading }: Props) {
               Marcar como Perdido
             </p>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-              Generá un afiche y QR para encontrar a {dogName}
+              Genera un afiche y QR para encontrar a {dogName}
             </p>
           </div>
           <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-900/50 transition-colors">

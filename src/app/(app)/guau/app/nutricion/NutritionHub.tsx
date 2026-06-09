@@ -760,7 +760,7 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
 
           {filtered.length === 0 && (
             <p className="text-center text-sm text-zinc-400 py-6">
-              No se encontraron alimentos. Probá con otra palabra.
+              No se encontraron alimentos. Prueba con otra palabra.
             </p>
           )}
 
@@ -871,7 +871,7 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
       {!searched && (
         <div className="text-center py-8 space-y-2">
           <div className="text-4xl mb-3">🔍</div>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Escribí un alimento y tocá <b>Buscar</b></p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Escribe un alimento y toca <b>Buscar</b></p>
           <p className="text-xs text-zinc-400">Ej: chocolate, uvas, cebolla, pollo, zanahoria...</p>
         </div>
       )}
@@ -956,8 +956,8 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
             onClick={() => setInfoModal({
               open: true, icon: "🍽️",
               title: "Tipos de alimentación",
-              example: "Elegí según tu estilo de vida y el de tu perro",
-              body: "🦴  Croquetas\nAlimento seco y procesado. Muy práctico: solo servís y listo. Es concentrado (poca agua), por eso tu perro come menos gramos. Ideal si tenés poco tiempo.\n\n🥩  Natural / BARF\nComida cruda: carne, huesos carnosos, vísceras y vegetales. Tiene ~70% de agua, así que tu perro come más volumen. Ventajas: hidratación natural, nutrientes sin procesar, mejor digestión.\n\n⚖️  Mixta\nCombinás croquetas + comida natural. Lo mejor de dos mundos: la practicidad de las croquetas con los beneficios de la comida natural."
+              example: "Elige según tu estilo de vida y el de tu perro",
+              body: "🦴  Croquetas\nAlimento seco y procesado. Muy práctico: solo sirves y listo. Es concentrado (poca agua), por eso tu perro come menos gramos. Ideal si tienes poco tiempo.\n\n🥩  Natural / BARF\nComida cruda: carne, huesos carnosos, vísceras y vegetales. Tiene ~70% de agua, así que tu perro come más volumen. Ventajas: hidratación natural, nutrientes sin procesar, mejor digestión.\n\n⚖️  Mixta\nCombinas croquetas + comida natural. Lo mejor de dos mundos: la practicidad de las croquetas con los beneficios de la comida natural."
             })}
             className="w-3.5 h-3.5 rounded-full bg-accent-500/20 text-accent-600 flex items-center justify-center hover:bg-accent-500/30 transition-colors"
           >
