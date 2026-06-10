@@ -78,7 +78,7 @@ export default function AppSwitcher() {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Tus aplicaciones</h2>
+        <h2 className="text-2xl font-extrabold text-zinc-900">Tus aplicaciones</h2>
         <p className="text-sm text-zinc-500">Elige a cuál quieres entrar</p>
       </div>
 
@@ -92,13 +92,13 @@ export default function AppSwitcher() {
             <button
               key={app.app_slug}
               onClick={() => handleEnter(app.app_slug)}
-              className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all active:scale-[0.98] text-left"
+              className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-zinc-100 shadow-sm hover:shadow-md transition-all active:scale-[0.98] text-left"
             >
               <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center text-white shadow-lg shrink-0`}>
                 {app.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-base font-extrabold text-zinc-800 dark:text-zinc-200">{app.name}</p>
+                <p className="text-base font-extrabold text-zinc-800">{app.name}</p>
                 <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 ${statusColor}`}>
                   <StatusIcon className="w-3 h-3" />
                   {statusLabel}

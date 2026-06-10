@@ -45,7 +45,7 @@ export function ReferralTreeToolbar({
   const zoomPercent = Math.round(zoom * 100);
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm px-4 py-3 flex flex-wrap items-center gap-3">
+    <div className="bg-white border border-zinc-200 rounded-xl shadow-sm px-4 py-3 flex flex-wrap items-center gap-3">
       {/* Search */}
       <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md">
         <div className="relative flex-1">
@@ -56,7 +56,7 @@ export function ReferralTreeToolbar({
             onChange={(e) => onSearchChange(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && onSearch()}
             placeholder="Buscar afiliado..."
-            className="w-full pl-9 pr-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="w-full pl-9 pr-4 py-2 rounded-lg border border-zinc-200 bg-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           />
         </div>
         <button
@@ -68,9 +68,9 @@ export function ReferralTreeToolbar({
       </div>
 
       {/* Stats */}
-      <div className="hidden md:flex items-center gap-4 text-xs text-zinc-500 border-l border-zinc-200 dark:border-zinc-700 pl-4">
-        <span><strong className="text-zinc-800 dark:text-zinc-200">{totalMembers}</strong> miembros</span>
-        <span><strong className="text-zinc-800 dark:text-zinc-200">${(totalEarnings / 100).toFixed(2)}</strong> generado</span>
+      <div className="hidden md:flex items-center gap-4 text-xs text-zinc-500 border-l border-zinc-200 pl-4">
+        <span><strong className="text-zinc-800">{totalMembers}</strong> miembros</span>
+        <span><strong className="text-zinc-800">${(totalEarnings / 100).toFixed(2)}</strong> generado</span>
       </div>
 
       {/* Spacer */}
@@ -80,14 +80,12 @@ export function ReferralTreeToolbar({
       <div className="relative">
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-            showFilters ? "bg-primary-100 text-primary-700" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 hover:bg-zinc-200"
-          }`}
+          className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${ showFilters ? "bg-primary-100 text-primary-700" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200" }`}
         >
           <Filter className="w-4 h-4" /> Filtros {showFilters ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
         </button>
         {showFilters && (
-          <div className="absolute top-full right-0 mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-lg p-3 w-48 z-20">
+          <div className="absolute top-full right-0 mt-2 bg-white border border-zinc-200 rounded-xl shadow-lg p-3 w-48 z-20">
             <p className="text-xs font-semibold text-zinc-500 mb-2">Mostrar:</p>
             {[
               { key: "all", label: "Todos" },
@@ -98,9 +96,7 @@ export function ReferralTreeToolbar({
               <button
                 key={f.key}
                 onClick={() => { onFilterChange(f.key); setShowFilters(false); }}
-                className={`block w-full text-left text-sm px-2 py-1.5 rounded-lg transition-colors ${
-                  filter === f.key ? "bg-primary-50 text-primary-700 font-semibold" : "text-zinc-600 hover:bg-zinc-50"
-                }`}
+                className={`block w-full text-left text-sm px-2 py-1.5 rounded-lg transition-colors ${ filter === f.key ? "bg-primary-50 text-primary-700 font-semibold" : "text-zinc-600 hover:bg-zinc-50" }`}
               >
                 {f.label}
               </button>
@@ -110,33 +106,33 @@ export function ReferralTreeToolbar({
       </div>
 
       {/* Expand/Collapse */}
-      <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
-        <button onClick={onExpandAll} className="p-1.5 rounded hover:bg-white dark:hover:bg-zinc-700 transition-colors" title="Expandir todo">
+      <div className="flex items-center gap-1 bg-zinc-100 rounded-lg p-1">
+        <button onClick={onExpandAll} className="p-1.5 rounded hover:bg-white transition-colors" title="Expandir todo">
           <ChevronDown className="w-4 h-4 text-zinc-600" />
         </button>
-        <button onClick={onCollapseAll} className="p-1.5 rounded hover:bg-white dark:hover:bg-zinc-700 transition-colors" title="Colapsar todo">
+        <button onClick={onCollapseAll} className="p-1.5 rounded hover:bg-white transition-colors" title="Colapsar todo">
           <ChevronUp className="w-4 h-4 text-zinc-600" />
         </button>
       </div>
 
       {/* Zoom Controls */}
-      <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
-        <button onClick={onZoomOut} className="p-1.5 rounded hover:bg-white dark:hover:bg-zinc-700 transition-colors" title="Alejar">
+      <div className="flex items-center gap-1 bg-zinc-100 rounded-lg p-1">
+        <button onClick={onZoomOut} className="p-1.5 rounded hover:bg-white transition-colors" title="Alejar">
           <ZoomOut className="w-4 h-4 text-zinc-600" />
         </button>
         <span className="text-xs font-bold text-zinc-600 w-12 text-center">{zoomPercent}%</span>
-        <button onClick={onZoomIn} className="p-1.5 rounded hover:bg-white dark:hover:bg-zinc-700 transition-colors" title="Acercar">
+        <button onClick={onZoomIn} className="p-1.5 rounded hover:bg-white transition-colors" title="Acercar">
           <ZoomIn className="w-4 h-4 text-zinc-600" />
         </button>
       </div>
 
       {/* Reset */}
-      <button onClick={onReset} className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors" title="Centrar vista">
+      <button onClick={onReset} className="p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 transition-colors" title="Centrar vista">
         <Home className="w-4 h-4 text-zinc-600" />
       </button>
 
       {/* Export */}
-      <button onClick={onExport} className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors" title="Exportar imagen">
+      <button onClick={onExport} className="p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 transition-colors" title="Exportar imagen">
         <Download className="w-4 h-4 text-zinc-600" />
       </button>
 

@@ -40,11 +40,11 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
   return (
     <>
       <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white dark:bg-zinc-900 shadow-2xl z-50 overflow-y-auto border-l border-zinc-200 dark:border-zinc-700">
+      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 overflow-y-auto border-l border-zinc-200">
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-5 flex items-start justify-between">
+        <div className="sticky top-0 bg-white border-b border-zinc-200 p-5 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900 dark:to-accent-900 border-2 border-primary-200 dark:border-primary-800 flex items-center justify-center overflow-hidden">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-100 to-accent-100 border-2 border-primary-200 flex items-center justify-center overflow-hidden">
               {node.profile?.avatar_url ? (
                 <img src={node.profile.avatar_url} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -54,7 +54,7 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
               )}
             </div>
             <div>
-              <h3 className="font-bold text-zinc-900 dark:text-white">{node.profile?.display_name || "Usuario"}</h3>
+              <h3 className="font-bold text-zinc-900">{node.profile?.display_name || "Usuario"}</h3>
               <p className="text-xs text-zinc-500">{node.profile?.email}</p>
               <div className="flex items-center gap-2 mt-1">
                 {node.subscription?.status === "active" ? (
@@ -65,13 +65,13 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors">
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors">
             <X className="w-4 h-4 text-zinc-500" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-zinc-200 dark:border-zinc-700">
+        <div className="flex border-b border-zinc-200">
           {[
             { key: "overview" as const, label: "Resumen", icon: Users },
             { key: "actions" as const, label: "Acciones", icon: Edit3 },
@@ -79,11 +79,7 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors ${
-                activeTab === tab.key
-                  ? "text-primary-600 border-b-2 border-primary-600"
-                  : "text-zinc-500 hover:text-zinc-700"
-              }`}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors ${ activeTab === tab.key ? "text-primary-600 border-b-2 border-primary-600" : "text-zinc-500 hover:text-zinc-700" }`}
             >
               <tab.icon className="w-4 h-4" /> {tab.label}
             </button>
@@ -95,15 +91,15 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
           {activeTab === "overview" && (
             <>
               {/* Network Stats */}
-              <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4">
+              <div className="bg-zinc-50 rounded-xl p-4">
                 <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-semibold">Red de Afiliados</p>
                 <div className="grid grid-cols-2 gap-3 mt-3">
                   <div>
-                    <p className="text-2xl font-extrabold text-zinc-900 dark:text-white">{node.referral_count}</p>
+                    <p className="text-2xl font-extrabold text-zinc-900">{node.referral_count}</p>
                     <p className="text-xs text-zinc-500">referidos directos</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-extrabold text-zinc-900 dark:text-white">{totalNetwork}</p>
+                    <p className="text-2xl font-extrabold text-zinc-900">{totalNetwork}</p>
                     <p className="text-xs text-zinc-500">total en la red</p>
                   </div>
                 </div>
@@ -119,27 +115,27 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
               <div>
                 <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-semibold mb-3">Finanzas</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-warning-50 dark:bg-warning-950/20 rounded-xl p-3">
+                  <div className="bg-warning-50 rounded-xl p-3">
                     <p className="text-[10px] text-warning-600 uppercase tracking-wide">En Espera</p>
                     <p className="text-xl font-extrabold text-warning-700">{formatMoney(node.commissions.pending)}</p>
                   </div>
-                  <div className="bg-secondary-50 dark:bg-secondary-950/20 rounded-xl p-3">
+                  <div className="bg-secondary-50 rounded-xl p-3">
                     <p className="text-[10px] text-secondary-600 uppercase tracking-wide">Disponible</p>
                     <p className="text-xl font-extrabold text-secondary-700">{formatMoney(node.commissions.available)}</p>
                   </div>
-                  <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-3">
+                  <div className="bg-zinc-50 rounded-xl p-3">
                     <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Total Ganado</p>
-                    <p className="text-xl font-extrabold text-zinc-700 dark:text-zinc-300">{formatMoney(node.commissions.total)}</p>
+                    <p className="text-xl font-extrabold text-zinc-700">{formatMoney(node.commissions.total)}</p>
                   </div>
-                  <div className="bg-accent-50 dark:bg-accent-950/20 rounded-xl p-3">
+                  <div className="bg-accent-50 rounded-xl p-3">
                     <p className="text-[10px] text-accent-600 uppercase tracking-wide">Pagado</p>
                     <p className="text-xl font-extrabold text-accent-700">{formatMoney(node.commissions.paid_out)}</p>
                   </div>
                 </div>
-                <div className="mt-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-3 flex items-center justify-between">
+                <div className="mt-3 bg-zinc-50 rounded-xl p-3 flex items-center justify-between">
                   <div>
                     <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Comisiones Generadas</p>
-                    <p className="text-lg font-extrabold text-zinc-800 dark:text-zinc-200">{node.commissions.count}</p>
+                    <p className="text-lg font-extrabold text-zinc-800">{node.commissions.count}</p>
                   </div>
                   <DollarSign className="w-8 h-8 text-zinc-300" />
                 </div>
@@ -156,11 +152,7 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
                     key={status}
                     onClick={() => onChangeSubscription(node.id, status)}
                     disabled={node.subscription?.status === status}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
-                      node.subscription?.status === status
-                        ? "border-secondary-400 bg-secondary-50 text-secondary-700"
-                        : "border-zinc-200 dark:border-zinc-700 hover:border-primary-300 hover:bg-primary-50/50"
-                    }`}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${ node.subscription?.status === status ? "border-secondary-400 bg-secondary-50 text-secondary-700" : "border-zinc-200 hover:border-primary-300 hover:bg-primary-50/50" }`}
                   >
                     <CreditCard className="w-5 h-5" />
                     <div className="text-left flex-1">
@@ -175,7 +167,7 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
               <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-semibold pt-2">Acciones de Cuenta</p>
               <button
                 onClick={() => { setSuspendAction("suspend"); setShowSuspendConfirm(true); }}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-danger-200 dark:border-danger-900 hover:bg-danger-50 dark:hover:bg-danger-950/20 transition-all text-left"
+                className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-danger-200 hover:bg-danger-50 transition-all text-left"
               >
                 <Ban className="w-5 h-5 text-danger-500" />
                 <div>
@@ -185,7 +177,7 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
               </button>
               <button
                 onClick={() => { setSuspendAction("reactivate"); setShowSuspendConfirm(true); }}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-secondary-200 dark:border-secondary-900 hover:bg-secondary-50 dark:hover:bg-secondary-950/20 transition-all text-left"
+                className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-secondary-200 hover:bg-secondary-50 transition-all text-left"
               >
                 <Check className="w-5 h-5 text-secondary-600" />
                 <div>
@@ -197,7 +189,7 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
               <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-semibold pt-2">Comunicacion</p>
               <a
                 href={`mailto:${node.profile?.email}`}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-zinc-200 dark:border-zinc-700 hover:border-primary-300 hover:bg-primary-50/50 transition-all"
+                className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-zinc-200 hover:border-primary-300 hover:bg-primary-50/50 transition-all"
               >
                 <Mail className="w-5 h-5 text-primary-500" />
                 <div className="text-left">
@@ -214,11 +206,11 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
       {showSuspendConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowSuspendConfirm(false)} />
-          <div className="relative bg-white dark:bg-zinc-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+          <div className="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
             <div className="w-12 h-12 rounded-full bg-danger-100 flex items-center justify-center mx-auto mb-3">
               <AlertTriangle className="w-6 h-6 text-danger-600" />
             </div>
-            <h3 className="text-lg font-bold text-center text-zinc-900 dark:text-white">
+            <h3 className="text-lg font-bold text-center text-zinc-900">
               {suspendAction === "suspend" ? "Suspender cuenta" : "Reactivar cuenta"}
             </h3>
             <p className="text-sm text-zinc-500 text-center mt-2">
@@ -238,11 +230,7 @@ export function ReferralTreeDrawer({ node, onClose, onViewNetwork, onSuspend, on
                   onSuspend(node.id, suspendAction);
                   setShowSuspendConfirm(false);
                 }}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-colors ${
-                  suspendAction === "suspend"
-                    ? "bg-danger-600 hover:bg-danger-700"
-                    : "bg-secondary-600 hover:bg-secondary-700"
-                }`}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-colors ${ suspendAction === "suspend" ? "bg-danger-600 hover:bg-danger-700" : "bg-secondary-600 hover:bg-secondary-700" }`}
               >
                 Confirmar
               </button>

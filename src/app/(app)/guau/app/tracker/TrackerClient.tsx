@@ -89,17 +89,17 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
   };
 
   const getBg = (avg: number | null, isCurrent: boolean) => {
-    if (!isCurrent || avg === null) return "bg-zinc-50 dark:bg-zinc-800/30";
-    if (avg <= 1.3) return "bg-secondary-100 dark:bg-secondary-900/40";
-    if (avg <= 2.3) return "bg-warning-100 dark:bg-warning-900/40";
-    return "bg-danger-100 dark:bg-danger-900/40";
+    if (!isCurrent || avg === null) return "bg-zinc-50";
+    if (avg <= 1.3) return "bg-secondary-100";
+    if (avg <= 2.3) return "bg-warning-100";
+    return "bg-danger-100";
   };
   const getText = (avg: number | null, isCurrent: boolean) => {
-    if (!isCurrent) return "text-zinc-300 dark:text-zinc-600";
-    if (avg === null) return "text-zinc-400 dark:text-zinc-500";
-    if (avg <= 1.3) return "text-secondary-700 dark:text-secondary-300";
-    if (avg <= 2.3) return "text-warning-700 dark:text-warning-300";
-    return "text-danger-700 dark:text-danger-300";
+    if (!isCurrent) return "text-zinc-300";
+    if (avg === null) return "text-zinc-400";
+    if (avg <= 1.3) return "text-secondary-700";
+    if (avg <= 2.3) return "text-warning-700";
+    return "text-danger-700";
   };
   const getDot = (avg: number | null) => {
     if (avg === null) return "";
@@ -158,7 +158,7 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
       )}
 
       {!dog ? (
-        <p className="text-center text-zinc-500 dark:text-zinc-400 py-8">Registra un perro para empezar a trackear paseos.</p>
+        <p className="text-center text-zinc-500 py-8">Registra un perro para empezar a trackear paseos.</p>
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3">
@@ -168,14 +168,14 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
 
           {/* Today Summary — moved above Agilidad/Salud */}
           <div className="card-soft rounded-[1.5rem] p-5 space-y-3">
-            <div className="flex items-center gap-2"><CalendarDays className="w-4 h-4 text-primary-500" /><h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Hoy</h3></div>
+            <div className="flex items-center gap-2"><CalendarDays className="w-4 h-4 text-primary-500" /><h3 className="text-sm font-bold text-zinc-800">Hoy</h3></div>
             {todayStats ? (
               <>
                 <div className="grid grid-cols-2 gap-3 text-center">
-                  <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-xl p-3"><p className="text-lg font-bold text-primary-600">{todayStats.count}</p><p className="text-[10px] text-zinc-500 dark:text-zinc-400">Paseos</p></div>
-                  <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-xl p-3"><p className="text-lg font-bold text-zinc-700">{todayStats.mins}m</p><p className="text-[10px] text-zinc-500 dark:text-zinc-400">Minutos</p></div>
+                  <div className="bg-zinc-50 rounded-xl p-3"><p className="text-lg font-bold text-primary-600">{todayStats.count}</p><p className="text-[10px] text-zinc-500">Paseos</p></div>
+                  <div className="bg-zinc-50 rounded-xl p-3"><p className="text-lg font-bold text-zinc-700">{todayStats.mins}m</p><p className="text-[10px] text-zinc-500">Minutos</p></div>
                 </div>
-                <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+                <div className="flex items-center justify-between text-xs text-zinc-500">
                   <span className="flex items-center gap-1"><Droplets className="w-3 h-3 text-warning-500" />{todayStats.pipis}</span>
                   <span className="flex items-center gap-1"><BadgeCheck className="w-3 h-3 text-secondary-500" />{todayStats.popos}</span>
                   <span className={`font-semibold ${todayStats.avg <= 1.3 ? "text-secondary-600" : todayStats.avg <= 2.3 ? "text-warning-600" : "text-danger-600"}`}>{todayStats.avg <= 1.3 ? "Calma" : todayStats.avg <= 2.3 ? "Tensión" : "Estrés"}</span>
@@ -195,15 +195,15 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
 
           <div className="grid grid-cols-2 gap-3">
             <Link href="/guau/app/tracker/agilidad"
-              className="flex flex-col items-center gap-2 p-5 rounded-[1.5rem] border-2 border-zinc-100 dark:border-zinc-800 card-soft transition-all active:scale-[0.97] hover:border-accent-400 hover:bg-accent-50 dark:hover:bg-accent-950/30">
+              className="flex flex-col items-center gap-2 p-5 rounded-[1.5rem] border-2 border-zinc-100 card-soft transition-all active:scale-[0.97] hover:border-accent-400 hover:bg-accent-50">
               <img src="/icons/atleta bc.png" alt="Agilidad" className="w-20 h-20 object-contain drop-shadow-md" />
-              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Agilidad</span>
+              <span className="text-sm font-bold text-zinc-700">Agilidad</span>
               <span className="text-[10px] text-zinc-400">{agilitySessions.length} sesiones</span>
             </Link>
             <Link href="/guau/app/tracker/salud"
-              className="flex flex-col items-center gap-2 p-5 rounded-[1.5rem] border-2 border-zinc-100 dark:border-zinc-800 card-soft transition-all active:scale-[0.97] hover:border-accent-400 hover:bg-accent-50 dark:hover:bg-accent-950/30">
+              className="flex flex-col items-center gap-2 p-5 rounded-[1.5rem] border-2 border-zinc-100 card-soft transition-all active:scale-[0.97] hover:border-accent-400 hover:bg-accent-50">
               <img src="/icons/doctor bc.png" alt="Salud" className="w-20 h-20 object-contain drop-shadow-md" />
-              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Salud</span>
+              <span className="text-sm font-bold text-zinc-700">Salud</span>
               <span className="text-[10px] text-zinc-400">{vaccines.length} vacunas</span>
             </Link>
           </div>
@@ -211,17 +211,17 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
           {/* Calendar */}
           <div className="card-soft rounded-[1.5rem] p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{MONTHS[calMonth]} {calYear}</h3>
+              <h3 className="text-sm font-bold text-zinc-800">{MONTHS[calMonth]} {calYear}</h3>
               <div className="flex items-center gap-1">
-                <button onClick={() => navigateMonth(-1)} className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center"><ChevronLeft className="w-4 h-4" /></button>
-                <button onClick={() => navigateMonth(1)} className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center"><ChevronRight className="w-4 h-4" /></button>
+                <button onClick={() => navigateMonth(-1)} className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center"><ChevronLeft className="w-4 h-4" /></button>
+                <button onClick={() => navigateMonth(1)} className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center"><ChevronRight className="w-4 h-4" /></button>
               </div>
             </div>
             <div className="grid grid-cols-7 gap-1">{WEEKDAYS.map((d) => <div key={d} className="text-center text-[10px] font-semibold text-zinc-400 py-1">{d}</div>)}</div>
             <div className="grid grid-cols-7 gap-1">
               {calendarGrid.map((cell, i) => (
                 <button key={i} onClick={() => setSelectedDate(cell.date)}
-                  className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all ${getBg(cell.avg, cell.isCurrentMonth)} ${cell.isToday ? "ring-2 ring-primary-400 ring-offset-1 dark:ring-offset-zinc-900" : ""} ${cell.date === selectedDate ? "ring-2 ring-primary-600" : ""}`}>
+                  className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all ${getBg(cell.avg, cell.isCurrentMonth)} ${cell.isToday ? "ring-2 ring-primary-400 ring-offset-1" : ""} ${cell.date === selectedDate ? "ring-2 ring-primary-600" : ""}`}>
                   <span className={`text-xs font-semibold ${getText(cell.avg, cell.isCurrentMonth)}`}>{cell.day}</span>
                   {cell.isCurrentMonth && cell.count > 0 && <div className={`w-1.5 h-1.5 rounded-full mt-0.5 ${getDot(cell.avg)}`} />}
                 </button>
@@ -237,8 +237,8 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
           {/* Walk Cards */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Footprints className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 truncate">
+              <Footprints className="w-4 h-4 text-zinc-500" />
+              <h3 className="text-sm font-bold text-zinc-800 truncate">
                 Paseos del {new Date(selectedDate + "T00:00:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "short" })}
               </h3>
               {selectedWalks.length > 0 && <span className="text-xs text-zinc-400">({selectedWalks.length})</span>}
@@ -256,19 +256,19 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div className={`w-3.5 h-3.5 rounded-full ${dot}`} />
-                          <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{new Date(w.start_time).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}</span>
-                          <span className="text-sm text-zinc-600 dark:text-zinc-400">{durMin} min</span>
+                          <span className="text-sm font-semibold text-zinc-700">{new Date(w.start_time).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}</span>
+                          <span className="text-sm text-zinc-600">{durMin} min</span>
                         </div>
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${w.traffic_light === "green" ? "bg-secondary-100 text-secondary-700 dark:bg-secondary-900 dark:text-secondary-300" : w.traffic_light === "yellow" ? "bg-warning-100 text-warning-700 dark:bg-warning-900 dark:text-warning-300" : "bg-danger-100 text-danger-700 dark:bg-danger-900 dark:text-danger-300"}`}>{label}</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${w.traffic_light === "green" ? "bg-secondary-100 text-secondary-700" : w.traffic_light === "yellow" ? "bg-warning-100 text-warning-700" : "bg-danger-100 text-danger-700"}`}>{label}</span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-700 dark:text-zinc-300">
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-700">
                         {w.pipi_count > 0 && <span className="flex items-center gap-1"><Droplets className="w-3.5 h-3.5 text-warning-500" />{w.pipi_count} pipí</span>}
                         {w.popo_count > 0 && <span className="flex items-center gap-1"><BadgeCheck className="w-3.5 h-3.5 text-secondary-500" />{w.popo_count} popó</span>}
                         {w.stool_rating && <span className="flex items-center gap-1">💩 Heces: {w.stool_rating}/5</span>}
                       </div>
                       {w.trigger_tags && w.trigger_tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {w.trigger_tags.map((t, i) => (<span key={i} className="text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 rounded-full px-2 py-0.5 text-zinc-600 dark:text-zinc-300">{t}</span>))}
+                          {w.trigger_tags.map((t, i) => (<span key={i} className="text-[10px] font-medium bg-zinc-100 rounded-full px-2 py-0.5 text-zinc-600">{t}</span>))}
                         </div>
                       )}
                     </div>
@@ -281,7 +281,7 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
           {/* Reactivity chart */}
           {reactivityData.length > 1 && (
             <div className="card-soft rounded-[1.5rem] p-5">
-              <h3 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 mb-3 uppercase tracking-wide">Evolución Semanal</h3>
+              <h3 className="text-xs font-bold text-zinc-500 mb-3 uppercase tracking-wide">Evolución Semanal</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={reactivityData}>
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} /><YAxis tick={{ fontSize: 10 }} /><Tooltip />
@@ -344,7 +344,7 @@ function TrafficGauge({ greenPct, yellowPct, redPct }: { greenPct: number; yello
   return (
     <div className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center justify-center relative overflow-hidden">
       {/* Subtle gradient bg */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-zinc-50/60 dark:from-zinc-800/20 dark:via-transparent dark:to-zinc-900/30 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-zinc-50/60 pointer-events-none" />
 
       <div className="relative w-full max-w-[180px] mx-auto">
         <svg viewBox="0 0 200 108" className="w-full">
@@ -352,7 +352,7 @@ function TrafficGauge({ greenPct, yellowPct, redPct }: { greenPct: number; yello
           <path
             d="M 24 94 A 76 76 0 0 1 176 94"
             fill="none" stroke="currentColor" strokeWidth="14"
-            className="text-zinc-100 dark:text-zinc-800/50" strokeLinecap="round"
+            className="text-zinc-100" strokeLinecap="round"
           />
 
           {/* Colored segments */}
@@ -388,18 +388,10 @@ function TrafficGauge({ greenPct, yellowPct, redPct }: { greenPct: number; yello
 
         {/* Label overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-9 pointer-events-none">
-          <span className={`text-2xl font-extrabold tabular-nums tracking-tight ${
-            sel.key === "green" ? "text-secondary-600 dark:text-secondary-400" :
-            sel.key === "yellow" ? "text-warning-600 dark:text-warning-400" :
-            "text-danger-600 dark:text-danger-400"
-          }`}>
+          <span className={`text-2xl font-extrabold tabular-nums tracking-tight ${ sel.key === "green" ? "text-secondary-600" : sel.key === "yellow" ? "text-warning-600" : "text-danger-600" }`}>
             {sel.pct}%
           </span>
-          <span className={`text-[11px] font-bold mt-0.5 ${
-            sel.key === "green" ? "text-secondary-500" :
-            sel.key === "yellow" ? "text-warning-500" :
-            "text-danger-500"
-          }`}>
+          <span className={`text-[11px] font-bold mt-0.5 ${ sel.key === "green" ? "text-secondary-500" : sel.key === "yellow" ? "text-warning-500" : "text-danger-500" }`}>
             {sel.label}
           </span>
         </div>
@@ -411,11 +403,7 @@ function TrafficGauge({ greenPct, yellowPct, redPct }: { greenPct: number; yello
           <button
             key={seg.key}
             onClick={() => setSelected(seg.key)}
-            className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold transition-all ${
-              selected === seg.key
-                ? "bg-zinc-100 dark:bg-zinc-800 shadow-sm scale-105"
-                : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-            }`}
+            className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold transition-all ${ selected === seg.key ? "bg-zinc-100 shadow-sm scale-105" : "hover:bg-zinc-50" }`}
           >
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: seg.color }} />
             {seg.pct}%
@@ -431,39 +419,27 @@ function TrafficGauge({ greenPct, yellowPct, redPct }: { greenPct: number; yello
 /* ================================================================ */
 function StreakWidget({ streakDays }: { streakDays: number }) {
   const bgGradient = streakDays === 0
-    ? "from-zinc-50 to-zinc-100 dark:from-zinc-800/30 dark:to-zinc-900/30"
+    ? "from-zinc-50 to-zinc-100"
     : streakDays < 7
-    ? "from-warning-50/80 to-amber-50/70 dark:from-warning-950/30 dark:to-amber-950/30"
+    ? "from-warning-50/80 to-amber-50/70"
     : streakDays < 14
-    ? "from-warning-100/80 to-orange-100/70 dark:from-warning-950/40 dark:to-orange-950/40"
-    : "from-orange-100/80 to-amber-200/70 dark:from-orange-950/40 dark:to-amber-950/40";
+    ? "from-warning-100/80 to-orange-100/70"
+    : "from-orange-100/80 to-amber-200/70";
 
   return (
     <div className={`card-soft rounded-[1.5rem] p-4 flex flex-col items-center justify-between relative overflow-hidden bg-gradient-to-br ${bgGradient}`}>
       {/* Decorative rings */}
       {streakDays >= 7 && (
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-2 right-2 w-6 h-6 rounded-full border-2 border-warning-200/40 dark:border-warning-700/20" />
-          <div className="absolute bottom-2 left-2 w-4 h-4 rounded-full border border-warning-300/30 dark:border-warning-600/20" />
+          <div className="absolute top-2 right-2 w-6 h-6 rounded-full border-2 border-warning-200/40" />
+          <div className="absolute bottom-2 left-2 w-4 h-4 rounded-full border border-warning-300/30" />
         </div>
       )}
 
       {/* Flame icon with number inside */}
       <div className="relative mt-1">
-        <Flame strokeWidth={1.25} className={`w-[5.5rem] h-[5.5rem] drop-shadow-lg ${streakDays >= 3 ? "animate-pulse" : ""} ${
-          streakDays === 0
-            ? "text-zinc-300 dark:text-zinc-600"
-            : streakDays < 7
-            ? "text-warning-400"
-            : "text-warning-500"
-        }`} style={{ animationDuration: streakDays >= 14 ? "1.5s" : "2.5s" }} />
-        <span className={`absolute inset-x-0 top-[52%] flex justify-center text-xl font-extrabold tabular-nums ${
-          streakDays === 0
-            ? "text-zinc-300 dark:text-zinc-600"
-            : streakDays < 7
-            ? "text-warning-400"
-            : "text-warning-500"
-        }`}>
+        <Flame strokeWidth={1.25} className={`w-[5.5rem] h-[5.5rem] drop-shadow-lg ${streakDays >= 3 ? "animate-pulse" : ""} ${ streakDays === 0 ? "text-zinc-300" : streakDays < 7 ? "text-warning-400" : "text-warning-500" }`} style={{ animationDuration: streakDays >= 14 ? "1.5s" : "2.5s" }} />
+        <span className={`absolute inset-x-0 top-[52%] flex justify-center text-xl font-extrabold tabular-nums ${ streakDays === 0 ? "text-zinc-300" : streakDays < 7 ? "text-warning-400" : "text-warning-500" }`}>
           {streakDays}
         </span>
       </div>
@@ -471,7 +447,7 @@ function StreakWidget({ streakDays }: { streakDays: number }) {
       {/* Bottom area */}
       <div className="flex flex-col items-center">
         {/* Label */}
-        <span className="text-[11px] font-bold text-warning-600/80 dark:text-warning-400/80 mb-1">
+        <span className="text-[11px] font-bold text-warning-600/80 mb-1">
           Días de racha
         </span>
 
@@ -481,9 +457,7 @@ function StreakWidget({ streakDays }: { streakDays: number }) {
             {Array.from({ length: Math.min(streakDays, 12) }).map((_, i) => (
               <div
                 key={i}
-                className={`w-1 h-1 rounded-full ${
-                  i < 3 ? "bg-warning-300" : i < 7 ? "bg-warning-400" : i < 10 ? "bg-orange-400" : "bg-orange-500"
-                }`}
+                className={`w-1 h-1 rounded-full ${ i < 3 ? "bg-warning-300" : i < 7 ? "bg-warning-400" : i < 10 ? "bg-orange-400" : "bg-orange-500" }`}
                 style={{ opacity: 0.35 + (i / Math.min(streakDays, 12)) * 0.65 }}
               />
             ))}

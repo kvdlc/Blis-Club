@@ -262,9 +262,9 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
   if (!startTime) {
     // Not started yet, show start screen
     return (
-      <div className="card-soft rounded-[1.5rem] p-5 space-y-5 bg-white dark:bg-zinc-900 border-2 border-accent-200 dark:border-accent-800">
+      <div className="card-soft rounded-[1.5rem] p-5 space-y-5 bg-white border-2 border-accent-200">
         <div className="text-center space-y-3">
-          <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">Listo para entrenar</h3>
+          <h3 className="text-lg font-bold text-zinc-800">Listo para entrenar</h3>
           <p className="text-sm text-zinc-500">{config.sessionTypeName || "Entrenamiento"} · {config.difficulty} · {config.selectedObstacles.length} obstáculos</p>
         </div>
         <button
@@ -276,7 +276,7 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
         </button>
         <button
           onClick={onClose}
-          className="w-full py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm"
+          className="w-full py-3 rounded-xl bg-zinc-100 text-zinc-700 font-bold text-sm"
         >
           Volver a configuración
         </button>
@@ -285,11 +285,11 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-950 flex flex-col h-screen">
+    <div className="bg-white flex flex-col h-screen">
       {/* Timer zone - 30% */}
-      <div className="flex flex-col items-center justify-center py-4 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex flex-col items-center justify-center py-4 border-b border-zinc-100">
         <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Tiempo Total</p>
-        <p className="text-6xl font-black tabular-nums text-accent-600 dark:text-accent-400 leading-none">
+        <p className="text-6xl font-black tabular-nums text-accent-600 leading-none">
           {formatTime(elapsedTotal)}
         </p>
         {lapTimes.length > 0 && (
@@ -301,21 +301,17 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
       </div>
 
       {/* Controls - 15% */}
-      <div className="p-3 grid grid-cols-2 gap-2 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="p-3 grid grid-cols-2 gap-2 border-b border-zinc-100">
         <button
           onClick={toggleTimer}
-          className={`py-3.5 rounded-2xl font-bold text-sm transition-all active:scale-[0.97] flex items-center justify-center gap-2 ${
-            isRunning
-              ? "bg-warning-500 text-white shadow-lg shadow-warning-500/20"
-              : "bg-accent-600 text-white shadow-lg shadow-accent-600/20"
-          }`}
+          className={`py-3.5 rounded-2xl font-bold text-sm transition-all active:scale-[0.97] flex items-center justify-center gap-2 ${ isRunning ? "bg-warning-500 text-white shadow-lg shadow-warning-500/20" : "bg-accent-600 text-white shadow-lg shadow-accent-600/20" }`}
         >
           {isRunning ? <Square className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
           {isRunning ? "PAUSA" : "REANUDAR"}
         </button>
         <button
           onClick={markLap}
-          className="py-3.5 rounded-2xl font-bold text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 active:scale-[0.97] transition-all flex items-center justify-center gap-2"
+          className="py-3.5 rounded-2xl font-bold text-sm bg-zinc-100 text-zinc-700 active:scale-[0.97] transition-all flex items-center justify-center gap-2"
         >
           <RotateCcw className="w-5 h-5" />
           VUELTA
@@ -330,10 +326,10 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
       </div>
 
       {/* Config summary - collapsible */}
-      <div className="border-b border-zinc-100 dark:border-zinc-800">
+      <div className="border-b border-zinc-100">
         <button
           onClick={() => setShowConfig(!showConfig)}
-          className="w-full flex items-center justify-between px-3 py-2 text-xs text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+          className="w-full flex items-center justify-between px-3 py-2 text-xs text-zinc-500 hover:bg-zinc-50 transition-colors"
         >
           <span>📋 {config.sessionTypeName || "Sesión"} · {config.difficulty} · {config.selectedObstacles.length} obstáculos</span>
           <span className="flex items-center gap-1">
@@ -358,12 +354,12 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
       </div>
 
       {/* Foul zone - remaining space */}
-      <div className="flex-1 overflow-y-auto bg-red-50/60 dark:bg-red-950/20 p-3">
+      <div className="flex-1 overflow-y-auto bg-red-50/60 p-3">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-black text-red-700 dark:text-red-300 flex items-center gap-1">
+          <h3 className="text-sm font-black text-red-700 flex items-center gap-1">
             <span>🚫</span> FALTAS
           </h3>
-          <span className="text-xs font-bold text-red-600 dark:text-red-400">{fouls.length} total</span>
+          <span className="text-xs font-bold text-red-600">{fouls.length} total</span>
         </div>
 
         {config.selectedObstacles.length === 0 ? (
@@ -381,14 +377,10 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
                   onMouseLeave={handleLongPressEnd}
                   onTouchStart={() => handleLongPressStart(obs)}
                   onTouchEnd={handleLongPressEnd}
-                  className={`relative flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-center transition-all active:scale-[0.95] ${
-                    foulCount > 0
-                      ? "bg-red-100 dark:bg-red-900/40 border-red-300 dark:border-red-700"
-                      : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700"
-                  }`}
+                  className={`relative flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-center transition-all active:scale-[0.95] ${ foulCount > 0 ? "bg-red-100 border-red-300" : "bg-white border-zinc-200" }`}
                 >
                   <span className="text-2xl">{CATEGORY_CONFIG[obs.category]?.emoji || "🏁"}</span>
-                  <span className="text-[11px] font-bold leading-tight text-zinc-700 dark:text-zinc-300">{obs.name}</span>
+                  <span className="text-[11px] font-bold leading-tight text-zinc-700">{obs.name}</span>
                   {foulCount > 0 && (
                     <div className="flex items-center gap-1 mt-0.5">
                       <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
@@ -396,7 +388,7 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
                       </span>
                       <button
                         onClick={(e) => { e.stopPropagation(); removeLastFoulForObstacle(obs.id); }}
-                        className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-600 flex items-center justify-center text-[10px] active:scale-95"
+                        className="w-5 h-5 rounded-full bg-zinc-200 text-zinc-600 flex items-center justify-center text-[10px] active:scale-95"
                       >
                         −
                       </button>
@@ -412,8 +404,8 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
           <div className="mt-3 space-y-1">
             <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Registro de faltas</p>
             {fouls.map((f, idx) => (
-              <div key={f.id} className="flex items-center justify-between text-xs bg-white dark:bg-zinc-900 rounded-lg px-2 py-1">
-                <span className="text-zinc-600 dark:text-zinc-400">
+              <div key={f.id} className="flex items-center justify-between text-xs bg-white rounded-lg px-2 py-1">
+                <span className="text-zinc-600">
                   V{f.lap}: {config.selectedObstacles.find((o) => o.id === f.obstacle_id)?.name}
                 </span>
                 <span className="text-red-600 font-semibold">{getFoulTypeName(f.foul_type_id)}</span>
@@ -424,13 +416,13 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
       </div>
 
       {/* Photos */}
-      <div className="p-3 border-t border-zinc-100 dark:border-zinc-800">
+      <div className="p-3 border-t border-zinc-100">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-semibold text-zinc-500">Fotos ({photos.length}/3)</span>
         </div>
         <div className="flex gap-2">
           {photos.map((photo, idx) => (
-            <div key={idx} className="relative w-16 h-16 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
+            <div key={idx} className="relative w-16 h-16 rounded-xl overflow-hidden border border-zinc-200">
               <img src={photo} alt="" className="w-full h-full object-cover" />
               <button
                 onClick={() => removePhoto(idx)}
@@ -443,7 +435,7 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
           {photos.length < 3 && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-16 h-16 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              className="w-16 h-16 rounded-xl border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:bg-zinc-50 transition-colors"
             >
               <span className="text-lg">📷</span>
               <span className="text-[8px]">Añadir</span>
@@ -463,8 +455,8 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
       {/* Foul selector modal (long press) */}
       {showFoulSelector && (
         <div className="absolute inset-0 bg-black/50 z-50 flex items-end justify-center" onClick={() => setShowFoulSelector(null)}>
-          <div className="bg-white dark:bg-zinc-900 rounded-t-3xl p-5 w-full max-w-md space-y-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+          <div className="bg-white rounded-t-3xl p-5 w-full max-w-md space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-bold text-zinc-800">
               ¿Qué falta en {showFoulSelector.name}?
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -481,16 +473,16 @@ export function AgilityRun({ dog, userId, config, onFinish, onClose }: Props) {
                     }]);
                     setShowFoulSelector(null);
                   }}
-                  className="p-3 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 text-left active:scale-[0.97] transition-all hover:border-accent-300"
+                  className="p-3 rounded-xl border-2 border-zinc-100 text-left active:scale-[0.97] transition-all hover:border-accent-300"
                 >
-                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">{ft.name}</span>
+                  <span className="text-xs font-bold text-zinc-700">{ft.name}</span>
                   <p className="text-[10px] text-zinc-400">+{ft.default_time_penalty_seconds}s</p>
                 </button>
               ))}
             </div>
             <button
               onClick={() => setShowFoulSelector(null)}
-              className="w-full py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm"
+              className="w-full py-3 rounded-xl bg-zinc-100 text-zinc-700 font-bold text-sm"
             >
               Cancelar
             </button>

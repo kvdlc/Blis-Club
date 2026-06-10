@@ -88,21 +88,17 @@ export function SearchOverlay() {
     <>
       <button
         onClick={() => setOpen(!open)}
-        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 ${
-          open
-            ? "bg-primary-500 text-white shadow-md"
-            : "bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-100 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300"
-        }`}
+        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 ${ open ? "bg-primary-500 text-white shadow-md" : "bg-white/80 backdrop-blur-sm border border-zinc-100 text-zinc-600" }`}
       >
         <Search className="w-4 h-4" />
       </button>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-black/40 backdrop-blur-sm" onClick={() => setOpen(false)}>
-          <div ref={ref} className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-              <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center shrink-0">
-                <Search className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+          <div ref={ref} className="w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-zinc-200 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100">
+              <div className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center shrink-0">
+                <Search className="w-4 h-4 text-primary-600" />
               </div>
               <input
                 id="globalSearchInput"
@@ -110,10 +106,10 @@ export function SearchOverlay() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar recetas, lecciones..."
-                className="flex-1 bg-transparent text-sm focus:outline-none text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400"
+                className="flex-1 bg-transparent text-sm focus:outline-none text-zinc-800 placeholder:text-zinc-400"
               />
               {loading && <Loader2 className="w-4 h-4 text-primary-500 animate-spin" />}
-              <button onClick={() => setOpen(false)} className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+              <button onClick={() => setOpen(false)} className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center">
                 <X className="w-3.5 h-3.5 text-zinc-400" />
               </button>
             </div>
@@ -123,21 +119,21 @@ export function SearchOverlay() {
                 <p className="text-sm text-zinc-400 text-center py-6">Sin resultados para "{query}"</p>
               )}
               {displayItems.map((s, i) => (
-                <button key={i} onClick={() => navigate(s.href)} className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                <button key={i} onClick={() => navigate(s.href)} className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-zinc-50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0">
                     <s.icon className="w-4 h-4 text-zinc-500" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate">{s.label}</p>
+                    <p className="text-sm font-medium text-zinc-800 truncate">{s.label}</p>
                     <p className="text-xs text-zinc-400">{s.desc}</p>
                   </div>
                 </button>
               ))}
             </div>
 
-            <div className="px-5 py-2 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 text-[10px] text-zinc-400">
-              <span><kbd className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500">Esc</kbd> cerrar</span>
-              <span><kbd className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500">⌘K</kbd> atajo</span>
+            <div className="px-5 py-2 border-t border-zinc-100 flex items-center gap-3 text-[10px] text-zinc-400">
+              <span><kbd className="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500">Esc</kbd> cerrar</span>
+              <span><kbd className="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500">⌘K</kbd> atajo</span>
             </div>
           </div>
         </div>

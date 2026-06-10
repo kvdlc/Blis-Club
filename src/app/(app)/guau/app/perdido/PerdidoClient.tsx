@@ -119,42 +119,42 @@ export function PerdidoClient({ dog: initialDog, latestWeightPhoto }: Props) {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <button onClick={() => router.replace("/guau/app", { scroll: false })} className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
+        <button onClick={() => router.replace("/guau/app", { scroll: false })} className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-zinc-500 hover:text-zinc-700 transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </button>
-        <h1 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">Perro Perdido</h1>
+        <h1 className="text-lg font-bold text-zinc-800">Perro Perdido</h1>
       </div>
 
       {/* Emergency banner */}
       {isLost && (
-        <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-2xl p-4 flex items-start gap-3">
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
           <AlertTriangle className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="font-bold text-red-700 dark:text-red-400">
+            <p className="font-bold text-red-700">
               {dog.nombre} está reportado como perdido
             </p>
             {lostDog.lost_since && (
-              <p className="text-sm text-red-600 dark:text-red-500 mt-1">
+              <p className="text-sm text-red-600 mt-1">
                 Desde el {new Date(lostDog.lost_since).toLocaleDateString("es")}
               </p>
             )}
             <div className="flex flex-wrap gap-2 mt-3">
               <button
                 onClick={handleCopyLink}
-                className="flex items-center gap-1.5 text-sm font-semibold text-primary-600 dark:text-primary-400 bg-primary-100 dark:bg-primary-950/40 px-3 py-1.5 rounded-full hover:bg-primary-200 dark:hover:bg-primary-950/70 transition-colors"
+                className="flex items-center gap-1.5 text-sm font-semibold text-primary-600 bg-primary-100 px-3 py-1.5 rounded-full hover:bg-primary-200 transition-colors"
               >
                 {copied ? <><Check className="w-4 h-4" /> Copiado</> : <><Copy className="w-4 h-4" /> Copiar enlace</>}
               </button>
               <button
                 onClick={handleShare}
-                className="flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-950/40 px-3 py-1.5 rounded-full hover:bg-blue-200 dark:hover:bg-blue-950/70 transition-colors"
+                className="flex items-center gap-1.5 text-sm font-semibold text-blue-600 bg-blue-100 px-3 py-1.5 rounded-full hover:bg-blue-200 transition-colors"
               >
                 <Share2 className="w-4 h-4" /> Compartir
               </button>
               <button
                 onClick={handleMarkFound}
                 disabled={loading}
-                className="flex items-center gap-1.5 text-sm font-semibold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-950/40 px-3 py-1.5 rounded-full hover:bg-green-200 dark:hover:bg-green-950/70 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 text-sm font-semibold text-green-600 bg-green-100 px-3 py-1.5 rounded-full hover:bg-green-200 transition-colors disabled:opacity-50"
               >
                 <CheckCircle className="w-4 h-4" />
                 Marcar como encontrado

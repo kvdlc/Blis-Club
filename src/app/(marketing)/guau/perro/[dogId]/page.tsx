@@ -217,10 +217,10 @@ export default async function PublicDogProfile({ params }: { params: Promise<{ d
     return (
       <div className="min-h-screen bg-app-gradient flex items-center justify-center p-4">
         <div className="text-center space-y-4">
-          <div className="w-24 h-24 rounded-3xl bg-primary-50 dark:bg-primary-950 flex items-center justify-center mx-auto shadow-lg">
-            <PawPrint className="w-12 h-12 text-primary-300 dark:text-primary-700" />
+          <div className="w-24 h-24 rounded-3xl bg-primary-50 flex items-center justify-center mx-auto shadow-lg">
+            <PawPrint className="w-12 h-12 text-primary-300" />
           </div>
-          <h1 className="text-2xl font-bold text-zinc-600 dark:text-zinc-300">Perro no encontrado</h1>
+          <h1 className="text-2xl font-bold text-zinc-600">Perro no encontrado</h1>
           <p className="text-zinc-400 text-sm">El perfil que buscas no existe o fue eliminado.</p>
         </div>
       </div>

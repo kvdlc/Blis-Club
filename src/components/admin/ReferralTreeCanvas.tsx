@@ -373,7 +373,7 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
           <select
             value={selectedApp}
             onChange={(e) => onAppChange(e.target.value)}
-            className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           >
             <option value="">Todas las apps</option>
             {apps.map((app) => (
@@ -435,7 +435,7 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
                   key={line.id}
                   d={line.d}
                   stroke="currentColor"
-                  className="text-zinc-400 dark:text-zinc-400"
+                  className="text-zinc-400"
                   strokeWidth="3"
                   fill="none"
                   strokeLinecap="round"
@@ -465,7 +465,7 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
 
         {/* Mini Map */}
         <div
-          className="absolute bottom-4 right-4 w-36 h-28 bg-white/90 dark:bg-zinc-900/90 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-lg overflow-hidden"
+          className="absolute bottom-4 right-4 w-36 h-28 bg-white/90 rounded-lg border border-zinc-200 shadow-lg overflow-hidden"
           onClick={(e) => {
             if (!mapBounds || !containerRef.current) return;
             const rect = e.currentTarget.getBoundingClientRect();
@@ -516,7 +516,7 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
                         points={`${toMapX(parseFloat(x1))},${toMapY(parseFloat(y1))} ${toMapX(parseFloat(x2))},${toMapY(parseFloat(y2))} ${toMapX(parseFloat(x3))},${toMapY(parseFloat(y3))} ${toMapX(parseFloat(x4))},${toMapY(parseFloat(y4))}`}
                         fill="none"
                         stroke="currentColor"
-                        className="text-zinc-300 dark:text-zinc-600"
+                        className="text-zinc-300"
                         strokeWidth="0.5"
                       />
                     );
@@ -528,7 +528,7 @@ export function ReferralTreeCanvas({ trees, apps, selectedApp, onAppChange, onRe
                       cx={toMapX(pos.x)}
                       cy={toMapY(pos.y)}
                       r="2"
-                      className={selectedNode?.id === id ? "fill-primary-500" : "fill-zinc-400 dark:fill-zinc-500"}
+                      className={selectedNode?.id === id ? "fill-primary-500" : "fill-zinc-400"}
                     />
                   ))}
                   {/* Viewport rect */}

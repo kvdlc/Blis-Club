@@ -138,11 +138,11 @@ export function LessonDetail({
       <div className="flex items-center gap-3">
         <button
           onClick={() => router.push("/guau/app/academia")}
-          className="w-10 h-10 rounded-full bg-white dark:bg-zinc-900 shadow-sm border border-zinc-100 dark:border-zinc-800 flex items-center justify-center text-zinc-600 transition-transform active:scale-95"
+          className="w-10 h-10 rounded-full bg-white shadow-sm border border-zinc-100 flex items-center justify-center text-zinc-600 transition-transform active:scale-95"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Detalles</h1>
+        <h1 className="text-lg font-bold text-zinc-900">Detalles</h1>
       </div>
 
       {/* Hero Card */}
@@ -167,13 +167,13 @@ export function LessonDetail({
 
       {/* Title + Subtitle */}
       <div>
-        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{lesson.title}</h2>
+        <h2 className="text-xl font-bold text-zinc-900">{lesson.title}</h2>
         <div className="flex items-center gap-2 mt-1">
           <p className="text-sm text-zinc-500">
             Módulo {module.order} · Est. {typeConfig.duration} min · {typeConfig.label}
           </p>
           {isCompleted && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-secondary-100 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-300 px-2.5 py-0.5 text-[10px] font-bold">
+            <span className="inline-flex items-center gap-1 rounded-full bg-secondary-100 text-secondary-700 px-2.5 py-0.5 text-[10px] font-bold">
               <CheckCircle className="w-3 h-3" />
               Completada
             </span>
@@ -190,11 +190,7 @@ export function LessonDetail({
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition-all ${
-              activeTab === tab.key
-                ? "bg-primary-600 text-white shadow-md shadow-primary-600/20"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-            }`}
+            className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition-all ${ activeTab === tab.key ? "bg-primary-600 text-white shadow-md shadow-primary-600/20" : "bg-zinc-100 text-zinc-600" }`}
           >
             {tab.label}
           </button>
@@ -205,30 +201,30 @@ export function LessonDetail({
       {activeTab === "info" && (
         <div className="space-y-5">
           {/* Instructor Card */}
-          <div className="bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-sm border border-zinc-100 dark:border-zinc-800 p-4 flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-primary-100 dark:bg-primary-950 flex items-center justify-center border-2 border-primary-200 dark:border-primary-800">
-              <span className="text-primary-700 dark:text-primary-300 font-bold text-lg">B</span>
+          <div className="bg-white rounded-[1.25rem] shadow-sm border border-zinc-100 p-4 flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center border-2 border-primary-200">
+              <span className="text-primary-700 font-bold text-lg">B</span>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Equipo Blis Club</h3>
+              <h3 className="text-sm font-bold text-zinc-900">Equipo Blis Club</h3>
               <p className="text-xs text-zinc-500">Instructor certificado</p>
             </div>
-            <button className="text-xs font-semibold text-primary-600 bg-primary-50 dark:bg-primary-950/40 px-3 py-1.5 rounded-full transition-colors">
+            <button className="text-xs font-semibold text-primary-600 bg-primary-50 px-3 py-1.5 rounded-full transition-colors">
               Ver perfil
             </button>
           </div>
 
           {/* Metadata Chips */}
           <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 dark:bg-primary-950/40 text-primary-700 dark:text-primary-300 px-3 py-1.5 text-[11px] font-bold border border-primary-100 dark:border-primary-800/60">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 text-primary-700 px-3 py-1.5 text-[11px] font-bold border border-primary-100">
               <BookOpen className="w-3.5 h-3.5" />
               {typeConfig.label}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-50 dark:bg-secondary-950/40 text-secondary-700 dark:text-secondary-300 px-3 py-1.5 text-[11px] font-bold border border-secondary-100 dark:border-secondary-800/60">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-50 text-secondary-700 px-3 py-1.5 text-[11px] font-bold border border-secondary-100">
               <BarChart3 className="w-3.5 h-3.5" />
               Dificultad básica
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-50 dark:bg-warning-950/40 text-warning-700 dark:text-warning-300 px-3 py-1.5 text-[11px] font-bold border border-warning-100 dark:border-warning-800/60">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-50 text-warning-700 px-3 py-1.5 text-[11px] font-bold border border-warning-100">
               <Clock className="w-3.5 h-3.5" />
               ~{typeConfig.duration} min
             </span>
@@ -236,20 +232,20 @@ export function LessonDetail({
 
           {/* Material Section */}
           <div>
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-3">Material</h3>
+            <h3 className="text-sm font-bold text-zinc-900 mb-3">Material</h3>
             <div className="space-y-2.5">
               {materials.map((item, idx) => {
                 const MatIcon = getMaterialIcon(item.icon, idx);
                 return (
                   <div
                     key={idx}
-                    className="flex items-center gap-3 bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-sm border border-zinc-100 dark:border-zinc-800 p-3.5 transition-all active:scale-[0.98]"
+                    className="flex items-center gap-3 bg-white rounded-[1.25rem] shadow-sm border border-zinc-100 p-3.5 transition-all active:scale-[0.98]"
                   >
-                    <div className="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-950 flex items-center justify-center shrink-0">
+                    <div className="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
                       <MatIcon className="w-5 h-5 text-primary-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{item.title}</h4>
+                      <h4 className="text-sm font-semibold text-zinc-900 truncate">{item.title}</h4>
                       <p className="text-xs text-zinc-500 truncate mt-0.5">{item.description}</p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-zinc-300 shrink-0" />
@@ -265,12 +261,12 @@ export function LessonDetail({
       {activeTab === "progress" && (
         <div className="space-y-5">
           {/* Stage Progress Card */}
-          <div className="bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-sm border border-zinc-100 dark:border-zinc-800 p-4">
+          <div className="bg-white rounded-[1.25rem] shadow-sm border border-zinc-100 p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Progreso del stage</span>
-              <span className="text-xs font-bold text-primary-600 dark:text-primary-400">{stageProgressPct}%</span>
+              <span className="text-xs font-bold text-zinc-700">Progreso del stage</span>
+              <span className="text-xs font-bold text-primary-600">{stageProgressPct}%</span>
             </div>
-            <div className="bg-zinc-100 dark:bg-zinc-800 rounded-full h-2.5 overflow-hidden">
+            <div className="bg-zinc-100 rounded-full h-2.5 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
                 style={{ width: `${stageProgressPct}%`, backgroundColor: stage.color_hex }}
@@ -301,7 +297,7 @@ export function LessonDetail({
                       {unlocked ? mod.order : <Lock className="w-4 h-4" />}
                     </div>
                     <div className="flex-1">
-                      <h3 className={`text-sm font-bold ${unlocked ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-400"}`}>
+                      <h3 className={`text-sm font-bold ${unlocked ? "text-zinc-900" : "text-zinc-400"}`}>
                         {mod.title}
                       </h3>
                       {unlocked && (
@@ -325,21 +321,9 @@ export function LessonDetail({
                         <Link
                           key={les.id}
                           href={lesUnlocked ? `/guau/app/academia/${stageSlug}/lesson/${les.id}` : "#"}
-                          className={`flex items-center gap-3 rounded-xl p-3 transition-all ${
-                            isCurrent
-                              ? "bg-primary-50 dark:bg-primary-950/60 border border-primary-200 dark:border-primary-800/60"
-                              : lesUnlocked
-                                ? "bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-                                : "bg-zinc-50 dark:bg-zinc-900/50 opacity-50 border border-zinc-100 dark:border-zinc-800"
-                          }`}
+                          className={`flex items-center gap-3 rounded-xl p-3 transition-all ${ isCurrent ? "bg-primary-50 border border-primary-200" : lesUnlocked ? "bg-white border border-zinc-100 hover:bg-zinc-50" : "bg-zinc-50 opacity-50 border border-zinc-100" }`}
                         >
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                            isLesCompleted
-                              ? "bg-secondary-100 dark:bg-secondary-900 text-secondary-600"
-                              : lesUnlocked
-                                ? "bg-primary-100 dark:bg-primary-950 text-primary-600"
-                                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
-                          }`}>
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${ isLesCompleted ? "bg-secondary-100 text-secondary-600" : lesUnlocked ? "bg-primary-100 text-primary-600" : "bg-zinc-100 text-zinc-400" }`}>
                             {isLesCompleted ? (
                               <CheckCircle className="w-4 h-4" />
                             ) : lesUnlocked ? (
@@ -349,12 +333,12 @@ export function LessonDetail({
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-xs font-semibold truncate ${isCurrent ? "text-primary-700 dark:text-primary-300" : lesUnlocked ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-400"}`}>
+                            <p className={`text-xs font-semibold truncate ${isCurrent ? "text-primary-700" : lesUnlocked ? "text-zinc-900" : "text-zinc-400"}`}>
                               {les.title}
                             </p>
                           </div>
                           {isCurrent && (
-                            <span className="text-[10px] font-bold text-primary-600 bg-white dark:bg-zinc-900 px-2 py-0.5 rounded-full border border-primary-100 dark:border-primary-800">
+                            <span className="text-[10px] font-bold text-primary-600 bg-white px-2 py-0.5 rounded-full border border-primary-100">
                               Actual
                             </span>
                           )}
@@ -373,11 +357,7 @@ export function LessonDetail({
       <div className="fixed bottom-24 left-4 right-4 z-50 md:hidden space-y-2">
         <button
           onClick={handlePlay}
-          className={`w-full rounded-[1.25rem] text-white py-4 font-bold text-sm shadow-xl transition-transform active:scale-[0.97] flex items-center justify-center gap-2 ${
-            isCompleted
-              ? "bg-warning-500 hover:bg-warning-600 shadow-warning-500/30"
-              : "bg-secondary-600 hover:bg-secondary-700 shadow-secondary-600/30"
-          }`}
+          className={`w-full rounded-[1.25rem] text-white py-4 font-bold text-sm shadow-xl transition-transform active:scale-[0.97] flex items-center justify-center gap-2 ${ isCompleted ? "bg-warning-500 hover:bg-warning-600 shadow-warning-500/30" : "bg-secondary-600 hover:bg-secondary-700 shadow-secondary-600/30" }`}
         >
           <Play className="w-5 h-5 fill-current" />
           {buttonLabel}
@@ -397,11 +377,7 @@ export function LessonDetail({
       <div className="hidden md:block space-y-2">
         <button
           onClick={handlePlay}
-          className={`w-full rounded-[1.25rem] text-white py-4 font-bold text-sm shadow-lg transition-transform active:scale-[0.97] flex items-center justify-center gap-2 ${
-            isCompleted
-              ? "bg-warning-500 hover:bg-warning-600 shadow-warning-500/25"
-              : "bg-secondary-600 hover:bg-secondary-700 shadow-secondary-600/25"
-          }`}
+          className={`w-full rounded-[1.25rem] text-white py-4 font-bold text-sm shadow-lg transition-transform active:scale-[0.97] flex items-center justify-center gap-2 ${ isCompleted ? "bg-warning-500 hover:bg-warning-600 shadow-warning-500/25" : "bg-secondary-600 hover:bg-secondary-700 shadow-secondary-600/25" }`}
         >
           <Play className="w-5 h-5 fill-current" />
           {buttonLabel}

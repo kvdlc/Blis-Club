@@ -37,30 +37,30 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  proteina: "bg-danger-50 dark:bg-danger-950/30 text-danger-700 dark:text-danger-300 border-danger-200 dark:border-danger-900",
-  hueso: "bg-warning-50 dark:bg-warning-950/30 text-warning-700 dark:text-warning-300 border-warning-200 dark:border-warning-900",
-  viscera: "bg-accent-50 dark:bg-accent-950/30 text-accent-700 dark:text-accent-300 border-accent-200 dark:border-accent-900",
-  vegetal: "bg-secondary-50 dark:bg-secondary-950/30 text-secondary-700 dark:text-secondary-300 border-secondary-200 dark:border-secondary-900",
-  suplemento: "bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-300 border-primary-200 dark:border-primary-900",
-  otro: "bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700",
+  proteina: "bg-danger-50 text-danger-700 border-danger-200",
+  hueso: "bg-warning-50 text-warning-700 border-warning-200",
+  viscera: "bg-accent-50 text-accent-700 border-accent-200",
+  vegetal: "bg-secondary-50 text-secondary-700 border-secondary-200",
+  suplemento: "bg-primary-50 text-primary-700 border-primary-200",
+  otro: "bg-zinc-50 text-zinc-700 border-zinc-200",
 };
 
 const TYPE_ROW_COLORS: Record<string, string> = {
-  proteina: "border-l-danger-400 dark:border-l-danger-600 bg-danger-50/50 dark:bg-danger-950/20",
-  hueso: "border-l-warning-400 dark:border-l-warning-600 bg-warning-50/50 dark:bg-warning-950/20",
-  viscera: "border-l-accent-400 dark:border-l-accent-600 bg-accent-50/50 dark:bg-accent-950/20",
-  vegetal: "border-l-secondary-400 dark:border-l-secondary-600 bg-secondary-50/50 dark:bg-secondary-950/20",
-  suplemento: "border-l-primary-400 dark:border-l-primary-600 bg-primary-50/50 dark:bg-primary-950/20",
-  otro: "border-l-zinc-400 dark:border-l-zinc-600 bg-zinc-50/50 dark:bg-zinc-800/20",
+  proteina: "border-l-danger-400 bg-danger-50/50",
+  hueso: "border-l-warning-400 bg-warning-50/50",
+  viscera: "border-l-accent-400 bg-accent-50/50",
+  vegetal: "border-l-secondary-400 bg-secondary-50/50",
+  suplemento: "border-l-primary-400 bg-primary-50/50",
+  otro: "border-l-zinc-400 bg-zinc-50/50",
 };
 
 const TYPE_TEXT: Record<string, string> = {
-  proteina: "text-danger-700 dark:text-danger-300",
-  hueso: "text-warning-700 dark:text-warning-300",
-  viscera: "text-accent-700 dark:text-accent-300",
-  vegetal: "text-secondary-700 dark:text-secondary-300",
-  suplemento: "text-primary-700 dark:text-primary-300",
-  otro: "text-zinc-700 dark:text-zinc-300",
+  proteina: "text-danger-700",
+  hueso: "text-warning-700",
+  viscera: "text-accent-700",
+  vegetal: "text-secondary-700",
+  suplemento: "text-primary-700",
+  otro: "text-zinc-700",
 };
 
 const TYPE_ORDER = ["proteina", "hueso", "viscera", "vegetal", "suplemento", "otro"];
@@ -326,8 +326,8 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
       <div className="px-4 space-y-6">
         {/* White card overlapping the header */}
         <div className="relative -mt-10">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 shadow-lg rounded-[2rem] p-6 text-center">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{recipe.title}</h2>
+          <div className="bg-white border border-zinc-100 shadow-lg rounded-[2rem] p-6 text-center">
+            <h2 className="text-lg font-bold text-zinc-900">{recipe.title}</h2>
             <div className="flex items-center justify-center gap-5 mt-3">
               {(recipe.prep_time_min ?? 0) > 0 && (
                 <div className="flex items-center gap-1.5 text-xs text-zinc-500">
@@ -343,14 +343,14 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
               )}
               <div className="flex items-center gap-0.5">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <Star key={i} className={`w-3.5 h-3.5 ${i < stars ? "text-warning-400 fill-warning-400" : "text-zinc-200 dark:text-zinc-700"}`} />
+                  <Star key={i} className={`w-3.5 h-3.5 ${i < stars ? "text-warning-400 fill-warning-400" : "text-zinc-200"}`} />
                 ))}
               </div>
             </div>
             {recipe.breed_sizes && recipe.breed_sizes.length > 0 && (
               <div className="flex items-center justify-center gap-1.5 mt-3">
                 {recipe.breed_sizes.map(s => (
-                  <span key={s} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300">
+                  <span key={s} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary-100 text-primary-700">
                     {s === "miniatura" ? "Miniatura" : s === "pequena" ? "Pequeña" : s === "mediana" ? "Mediana" : s === "grande" ? "Grande" : s === "gigante" ? "Gigante" : s}
                   </span>
                 ))}
@@ -383,11 +383,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                   <button
                     onClick={toggleDefaultKibble}
                     disabled={savingKibble}
-                    className={`w-full rounded-xl py-2 text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                      isDefaultKibble
-                        ? "bg-secondary-100 dark:bg-secondary-950/40 text-secondary-700 dark:text-secondary-300 border border-secondary-200 dark:border-secondary-800"
-                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                    }`}
+                    className={`w-full rounded-xl py-2 text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${ isDefaultKibble ? "bg-secondary-100 text-secondary-700 border border-secondary-200" : "bg-zinc-100 text-zinc-600 border border-zinc-200 hover:bg-zinc-200" }`}
                   >
                     {savingKibble ? "..." : isDefaultKibble ? <><Check className="w-3.5 h-3.5" /> Mi croqueta</> : "📌 Usar siempre como mi croqueta"}
                   </button>
@@ -408,7 +404,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
             </button>
           </div>
           {recipe.category !== "croquetas" && (
-            <button onClick={handleAddToCart} className={`w-full rounded-2xl py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 ${addedToCart ? "bg-primary-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"} active:scale-[0.97]`}>
+            <button onClick={handleAddToCart} className={`w-full rounded-2xl py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 ${addedToCart ? "bg-primary-500 text-white" : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border border-zinc-200"} active:scale-[0.97]`}>
               {addedToCart ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
               {addedToCart ? "Añadido" : "Añadir a lista de compras"}
             </button>
@@ -420,7 +416,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Play className="w-4 h-4 text-accent-500" />
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Video explicativo</h3>
+              <h3 className="text-sm font-bold text-zinc-800">Video explicativo</h3>
             </div>
             <VideoEmbed url={recipe.video_url} />
           </div>
@@ -431,7 +427,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
           <div className="space-y-3">
             {recipe.category === "croquetas" ? (
               <>
-                <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
+                <h3 className="text-sm font-bold text-zinc-800">Ingredientes</h3>
                 <div className="flex flex-wrap gap-1.5">
                   {ingredients.map(ing => (
                     <span key={ing.id} className="text-[10px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">{ing.ingredient_name}</span>
@@ -441,10 +437,10 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
             ) : dog ? (
               <>
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+                  <h3 className="text-sm font-bold text-zinc-800">
                     {perMealMode ? `Por comida (${mealCount} al día)` : `Cocinar para ${dog.nombre}`}
                   </h3>
-                  <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 rounded-full p-0.5">
+                  <div className="flex items-center gap-2 bg-zinc-100 rounded-full p-0.5">
                     <button
                       onClick={() => setPerMealMode(false)}
                       className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-all ${!perMealMode ? "bg-secondary-500 text-white" : "text-zinc-500"}`}
@@ -483,8 +479,8 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                       <div key={ing.id} className={`flex items-start gap-2 px-3 py-1.5 rounded-lg border-l-3 ${rowColor}`}>
                         <span className={`mt-0.5 ${textColor}`}>{TYPE_ICONS[ing.ingredient_type] ?? TYPE_ICONS.otro}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200 line-clamp-1">{ing.ingredient_name}</p>
-                          <p className="text-xs font-bold text-zinc-700 dark:text-zinc-200">{display}</p>
+                          <p className="text-xs font-medium text-zinc-800 line-clamp-1">{ing.ingredient_name}</p>
+                          <p className="text-xs font-bold text-zinc-700">{display}</p>
                         </div>
                       </div>
                     );
@@ -499,7 +495,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
               });
               return (
                 <>
-                  <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ingredientes</h3>
+                  <h3 className="text-sm font-bold text-zinc-800">Ingredientes</h3>
                   <div className="space-y-1">
                     {sorted.map((ing) => {
                       const chipColor = TYPE_COLORS[ing.ingredient_type] ?? TYPE_COLORS.otro;
@@ -520,7 +516,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
 
         {/* Croquetas diet notice */}
         {dog && dietType === "croquetas" && recipe.category !== "croquetas" && (
-          <div className="bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-4 text-center">
+          <div className="bg-zinc-50 rounded-2xl p-4 text-center">
             <p className="text-sm text-zinc-500 mb-2">
               🦴 <strong>{dog.nombre}</strong> consume <strong>croquetas</strong>
             </p>
@@ -536,15 +532,15 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
         {/* Preparation Steps (hidden for croquetas) */}
         {recipe.category !== "croquetas" && steps.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Preparación</h3>
+            <h3 className="text-sm font-bold text-zinc-800">Preparación</h3>
             <div className="space-y-3">
               {steps.map((step) => (
                 <div key={step.id} className="flex gap-3">
-                  <div className="shrink-0 w-7 h-7 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 flex items-center justify-center text-xs font-bold">
+                  <div className="shrink-0 w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold">
                     {step.step_number}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">{step.instruction}</p>
+                    <p className="text-sm text-zinc-700 leading-relaxed">{step.instruction}</p>
                     {step.duration_min && (
                       <span className="text-[10px] text-zinc-400 mt-1 flex items-center gap-1">
                         <Clock className="w-3 h-3" /> {step.duration_min} min
@@ -561,7 +557,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
         {nutritionFacts && (
           <div className="card-soft rounded-[1.5rem] overflow-hidden">
             <button onClick={() => setNutritionOpen(!nutritionOpen)} className="w-full flex items-center justify-between p-5 text-left">
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Valor nutricional <span className="text-zinc-400 font-normal">(por 100g)</span></h3>
+              <h3 className="text-sm font-bold text-zinc-800">Valor nutricional <span className="text-zinc-400 font-normal">(por 100g)</span></h3>
               {nutritionOpen ? <ChevronUp className="w-4 h-4 text-zinc-400" /> : <ChevronDown className="w-4 h-4 text-zinc-400" />}
             </button>
             {nutritionOpen && (
@@ -574,16 +570,16 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                   ].map((m) => m.value && (
                     <div key={m.label}>
                       <div className="flex justify-between text-xs mb-1">
-                        <span className="text-zinc-600 dark:text-zinc-400">{m.label}</span>
-                        <span className="font-semibold text-zinc-800 dark:text-zinc-200">{m.value}g</span>
+                        <span className="text-zinc-600">{m.label}</span>
+                        <span className="font-semibold text-zinc-800">{m.value}g</span>
                       </div>
-                      <div className="h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                      <div className="h-2 rounded-full bg-zinc-100 overflow-hidden">
                         <div className={`h-full rounded-full ${m.color}`} style={{ width: `${Math.min((m.value / m.max) * 100, 100)}%` }} />
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-100">
                   {[
                     { label: "Calcio", value: nutritionFacts.calcium_mg, unit: "mg" },
                     { label: "Fósforo", value: nutritionFacts.phosphorus_mg, unit: "mg" },
@@ -596,7 +592,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                   ].map((m) => m.value && (
                     <div key={m.label} className="flex justify-between text-xs py-1.5">
                       <span className="text-zinc-500">{m.label}</span>
-                      <span className="font-medium text-zinc-700 dark:text-zinc-300">{m.value}{m.unit}</span>
+                      <span className="font-medium text-zinc-700">{m.value}{m.unit}</span>
                     </div>
                   ))}
                 </div>
@@ -608,7 +604,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
         {/* Nutrition description (croquetas) */}
         {recipe.category === "croquetas" && (recipe as any).nutrition_description && (
           <div className="card-soft rounded-[1.5rem] p-5">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-2">Descripción nutricional</h3>
+            <h3 className="text-sm font-bold text-zinc-800 mb-2">Descripción nutricional</h3>
             <p className="text-xs text-zinc-500 leading-relaxed">{(recipe as any).nutrition_description}</p>
           </div>
         )}
@@ -616,12 +612,12 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
         {/* Benefits (croquetas) */}
         {recipe.category === "croquetas" && (recipe as any).benefits?.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Beneficios</h3>
+            <h3 className="text-sm font-bold text-zinc-800">Beneficios</h3>
             <div className="space-y-2">
               {(recipe as any).benefits.map((b: string, i: number) => (
                 <div key={i} className="flex items-start gap-2">
                   <span className="text-accent-500 mt-0.5">✓</span>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{b}</p>
+                  <p className="text-xs text-zinc-600 leading-relaxed">{b}</p>
                 </div>
               ))}
             </div>
@@ -635,20 +631,20 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
       {/* Cook Today Modal */}
       {cookModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4" onClick={() => setCookModalOpen(false)}>
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-5 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-5 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Cocinar Hoy</h3>
-              <button onClick={() => setCookModalOpen(false)} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+              <h3 className="text-lg font-bold text-zinc-900">Cocinar Hoy</h3>
+              <button onClick={() => setCookModalOpen(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-primary-50 dark:bg-primary-950/30">
-              <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-primary-50">
+              <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
                 <span className="text-lg">🍽️</span>
               </div>
               <div>
-                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{recipe.title}</p>
+                <p className="text-sm font-bold text-zinc-800">{recipe.title}</p>
                 <p className="text-xs text-zinc-500">{Math.round(displayGrams)}g · {Math.round(displayGrams * (recipe.kcal_per_100g ?? 0) / 100)} kcal</p>
               </div>
             </div>
@@ -668,15 +664,13 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                     <button
                       key={slot.slot_index}
                       onClick={() => setSelectedSlot(slot.slot_index)}
-                      className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all text-left ${
-                        isSelected ? "border-primary-400 bg-primary-50 dark:bg-primary-950/30" : existing ? "border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50" : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-primary-200"
-                      }`}
+                      className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all text-left ${ isSelected ? "border-primary-400 bg-primary-50" : existing ? "border-zinc-100 bg-zinc-50" : "border-zinc-100 bg-white hover:border-primary-200" }`}
                     >
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isSelected ? "bg-primary-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"}`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isSelected ? "bg-primary-500 text-white" : "bg-zinc-100 text-zinc-500"}`}>
                         <Clock className="w-4 h-4" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{slot.label}</p>
+                        <p className="text-sm font-semibold text-zinc-800">{slot.label}</p>
                         <p className="text-xs text-zinc-400">{slot.time_of_day.slice(0, 5)}</p>
                       </div>
                       {existing && (
@@ -693,12 +687,12 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                 {activeSlots.map((slot) => {
                   const existing = todaySchedule.find((s) => s.meal_slot_index === slot.slot_index);
                   return (
-                    <div key={slot.slot_index} className="flex items-center gap-3 p-3.5 rounded-2xl border-2 border-secondary-200 dark:border-secondary-800 bg-secondary-50/60 dark:bg-secondary-950/20 text-left">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary-100 dark:bg-secondary-900 text-secondary-600 dark:text-secondary-400">
+                    <div key={slot.slot_index} className="flex items-center gap-3 p-3.5 rounded-2xl border-2 border-secondary-200 bg-secondary-50/60 text-left">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary-100 text-secondary-600">
                         <Check className="w-4 h-4" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{slot.label}</p>
+                        <p className="text-sm font-semibold text-zinc-800">{slot.label}</p>
                         <p className="text-xs text-zinc-400">{slot.time_of_day.slice(0, 5)} · {Math.round(gramsPerMeal)}g</p>
                       </div>
                       {existing && (
@@ -713,9 +707,7 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
             <button
               onClick={handleCookConfirm}
               disabled={(perMealMode ? selectedSlot === null : activeSlots.length === 0) || savingCook}
-              className={`w-full rounded-2xl py-3.5 font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                (perMealMode ? selectedSlot === null : activeSlots.length === 0) ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed" : "bg-gradient-to-r from-secondary-500 to-secondary-600 text-white shadow-lg shadow-secondary-500/20 active:scale-[0.97]"
-              }`}
+              className={`w-full rounded-2xl py-3.5 font-bold text-sm transition-all flex items-center justify-center gap-2 ${ (perMealMode ? selectedSlot === null : activeSlots.length === 0) ? "bg-zinc-200 text-zinc-400 cursor-not-allowed" : "bg-gradient-to-r from-secondary-500 to-secondary-600 text-white shadow-lg shadow-secondary-500/20 active:scale-[0.97]" }`}
             >
               {savingCook ? "Guardando..." : <><Check className="w-4 h-4" /> Confirmar y Registrar</>}
             </button>
@@ -726,10 +718,10 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
       {/* Hide Recipe Modal */}
       {hideModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4" onClick={() => setHideModalOpen(false)}>
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">¿Por qué ocultas esta receta?</h3>
-              <button onClick={() => setHideModalOpen(false)} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+              <h3 className="text-lg font-bold text-zinc-900">¿Por qué ocultas esta receta?</h3>
+              <button onClick={() => setHideModalOpen(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -740,10 +732,10 @@ export function RecipeDetailClient({ recipe, ingredients, steps, nutritionFacts,
                   key={r.label}
                   onClick={() => handleHide(r.label)}
                   disabled={hidingRecipe}
-                  className="w-full flex items-center gap-3 p-3.5 rounded-2xl border-2 border-zinc-100 dark:border-zinc-800 hover:border-primary-200 dark:hover:border-zinc-700 bg-white dark:bg-zinc-900 transition-all text-left"
+                  className="w-full flex items-center gap-3 p-3.5 rounded-2xl border-2 border-zinc-100 hover:border-primary-200 bg-white transition-all text-left"
                 >
                   <span className="text-xl">{r.emoji}</span>
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{r.label}</span>
+                  <span className="text-sm font-medium text-zinc-700">{r.label}</span>
                 </button>
               ))}
             </div>

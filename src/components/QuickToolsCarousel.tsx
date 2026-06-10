@@ -22,8 +22,8 @@ const TOOLS = [
     iconType: "svg" as const,
     iconSvg: Play,
     bg: "bg-gradient-to-br from-primary-400 to-primary-600",
-    textColor: "text-primary-700 dark:text-primary-300",
-    ringColor: "ring-primary-200 dark:ring-primary-800",
+    textColor: "text-primary-700",
+    ringColor: "ring-primary-200",
   },
   {
     key: "perdido",
@@ -32,8 +32,8 @@ const TOOLS = [
     iconType: "png" as const,
     iconSrc: "/icons/sirena.png",
     bg: "bg-gradient-to-br from-red-400 to-red-600",
-    textColor: "text-red-700 dark:text-red-300",
-    ringColor: "ring-red-200 dark:ring-red-800",
+    textColor: "text-red-700",
+    ringColor: "ring-red-200",
   },
   {
     key: "comida",
@@ -42,8 +42,8 @@ const TOOLS = [
     iconType: "png" as const,
     iconSrc: "/icons/comida.png",
     bg: "bg-gradient-to-br from-orange-400 to-orange-600",
-    textColor: "text-orange-700 dark:text-orange-300",
-    ringColor: "ring-orange-200 dark:ring-orange-800",
+    textColor: "text-orange-700",
+    ringColor: "ring-orange-200",
   },
   {
     key: "vacunas",
@@ -52,8 +52,8 @@ const TOOLS = [
     iconType: "png" as const,
     iconSrc: "/icons/vacunas.png",
     bg: "bg-gradient-to-br from-primary-300 to-primary-500",
-    textColor: "text-primary-700 dark:text-primary-300",
-    ringColor: "ring-primary-200 dark:ring-primary-800",
+    textColor: "text-primary-700",
+    ringColor: "ring-primary-200",
   },
   {
     key: "peso",
@@ -62,8 +62,8 @@ const TOOLS = [
     iconType: "png" as const,
     iconSrc: "/icons/peso.png",
     bg: "bg-gradient-to-br from-accent-300 to-accent-500",
-    textColor: "text-accent-700 dark:text-accent-300",
-    ringColor: "ring-accent-200 dark:ring-accent-800",
+    textColor: "text-accent-700",
+    ringColor: "ring-accent-200",
   },
   {
     key: "visitas",
@@ -72,8 +72,8 @@ const TOOLS = [
     iconType: "png" as const,
     iconSrc: "/icons/visitas.png",
     bg: "bg-gradient-to-br from-secondary-300 to-secondary-500",
-    textColor: "text-secondary-700 dark:text-secondary-300",
-    ringColor: "ring-secondary-200 dark:ring-secondary-800",
+    textColor: "text-secondary-700",
+    ringColor: "ring-secondary-200",
   },
   {
     key: "medicamentos",
@@ -82,8 +82,8 @@ const TOOLS = [
     iconType: "png" as const,
     iconSrc: "/icons/medicamento.png",
     bg: "bg-gradient-to-br from-warning-300 to-warning-500",
-    textColor: "text-warning-700 dark:text-warning-300",
-    ringColor: "ring-warning-200 dark:ring-warning-800",
+    textColor: "text-warning-700",
+    ringColor: "ring-warning-200",
   },
   {
     key: "veterinarios",
@@ -92,8 +92,8 @@ const TOOLS = [
     iconType: "png" as const,
     iconSrc: "/icons/veterinarios.png",
     bg: "bg-gradient-to-br from-danger-300 to-danger-500",
-    textColor: "text-danger-700 dark:text-danger-300",
-    ringColor: "ring-danger-200 dark:ring-danger-800",
+    textColor: "text-danger-700",
+    ringColor: "ring-danger-200",
   },
   {
     key: "escaner",
@@ -102,8 +102,8 @@ const TOOLS = [
     iconType: "png" as const,
     iconSrc: "/icons/scanbar.png",
     bg: "bg-gradient-to-br from-secondary-300 to-secondary-500",
-    textColor: "text-secondary-700 dark:text-secondary-300",
-    ringColor: "ring-secondary-200 dark:ring-secondary-800",
+    textColor: "text-secondary-700",
+    ringColor: "ring-secondary-200",
   },
   {
     key: "agregar",
@@ -112,8 +112,8 @@ const TOOLS = [
     iconType: "png" as const,
     iconSrc: "/icons/agregar perro.png",
     bg: "bg-gradient-to-br from-primary-300 to-primary-500",
-    textColor: "text-primary-700 dark:text-primary-300",
-    ringColor: "ring-primary-200 dark:ring-primary-800",
+    textColor: "text-primary-700",
+    ringColor: "ring-primary-200",
   },
 ];
 
@@ -138,7 +138,7 @@ export default function QuickToolsCarousel({ isLost = false }: Props) {
             ? "bg-gradient-to-br from-red-500 to-red-700 shadow-red-500/30"
             : tool.bg;
           const activeRing = isLostItem
-            ? "ring-red-300 dark:ring-red-700"
+            ? "ring-red-300"
             : tool.ringColor;
 
           return (
@@ -149,7 +149,7 @@ export default function QuickToolsCarousel({ isLost = false }: Props) {
               className={`flex flex-col items-center gap-2 min-w-[72px] snap-start transition-transform active:scale-95`}
             >
               <div
-                className={`w-16 h-16 rounded-full ${activeBg} flex items-center justify-center shadow-md ${isLostItem ? "shadow-lg" : ""} ring-2 ${activeRing} ring-offset-2 dark:ring-offset-zinc-950 relative`}
+                className={`w-16 h-16 rounded-full ${activeBg} flex items-center justify-center shadow-md ${isLostItem ? "shadow-lg" : ""} ring-2 ${activeRing} ring-offset-2 relative`}
               >
                 {tool.iconType === "svg" && tool.iconSvg ? (
                   <tool.iconSvg className="w-7 h-7 text-white fill-white" />
@@ -161,13 +161,13 @@ export default function QuickToolsCarousel({ isLost = false }: Props) {
                   />
                 )}
                 {isLostItem && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white dark:bg-zinc-950 border-2 border-red-500 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white border-2 border-red-500 flex items-center justify-center">
                     <span className="w-2 h-2 rounded-full bg-red-500" />
                   </span>
                 )}
               </div>
               <span
-                className={`text-[11px] font-bold text-center leading-tight ${isLostItem ? "text-red-600 dark:text-red-400" : "text-zinc-700 dark:text-zinc-300"} max-w-[72px]`}
+                className={`text-[11px] font-bold text-center leading-tight ${isLostItem ? "text-red-600" : "text-zinc-700"} max-w-[72px]`}
               >
                 {tool.label}
               </span>
@@ -184,7 +184,7 @@ export default function QuickToolsCarousel({ isLost = false }: Props) {
             ? "bg-gradient-to-br from-red-500 to-red-700 shadow-red-500/30"
             : tool.bg;
           const activeRing = isLostItem
-            ? "ring-red-300 dark:ring-red-700"
+            ? "ring-red-300"
             : tool.ringColor;
 
           return (
@@ -195,7 +195,7 @@ export default function QuickToolsCarousel({ isLost = false }: Props) {
               className={`flex flex-col items-center gap-2 transition-transform active:scale-95`}
             >
               <div
-                className={`w-16 h-16 rounded-full ${activeBg} flex items-center justify-center shadow-md ${isLostItem ? "shadow-lg" : ""} ring-2 ${activeRing} ring-offset-2 dark:ring-offset-zinc-950 relative`}
+                className={`w-16 h-16 rounded-full ${activeBg} flex items-center justify-center shadow-md ${isLostItem ? "shadow-lg" : ""} ring-2 ${activeRing} ring-offset-2 relative`}
               >
                 {tool.iconType === "svg" && tool.iconSvg ? (
                   <tool.iconSvg className="w-7 h-7 text-white fill-white" />
@@ -207,13 +207,13 @@ export default function QuickToolsCarousel({ isLost = false }: Props) {
                   />
                 )}
                 {isLostItem && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white dark:bg-zinc-950 border-2 border-red-500 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white border-2 border-red-500 flex items-center justify-center">
                     <span className="w-2 h-2 rounded-full bg-red-500" />
                   </span>
                 )}
               </div>
               <span
-                className={`text-[11px] font-bold text-center leading-tight ${isLostItem ? "text-red-600 dark:text-red-400" : "text-zinc-700 dark:text-zinc-300"} max-w-[80px]`}
+                className={`text-[11px] font-bold text-center leading-tight ${isLostItem ? "text-red-600" : "text-zinc-700"} max-w-[80px]`}
               >
                 {tool.label}
               </span>

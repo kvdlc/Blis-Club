@@ -378,8 +378,8 @@ export default function AcademiaPage() {
         {/* HEADER */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Academia</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            <h1 className="text-2xl font-extrabold text-zinc-900">Academia</h1>
+            <p className="text-sm text-zinc-500 mt-1">
               Gestiona etapas, módulos y lecciones
             </p>
           </div>
@@ -395,7 +395,7 @@ export default function AcademiaPage() {
         {stageForm && (
           <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">
+              <h2 className="text-base font-bold text-zinc-800">
                 {editingStage ? "Editar Etapa" : "Nueva Etapa"}
               </h2>
               <button
@@ -407,40 +407,40 @@ export default function AcademiaPage() {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">
                   Título
                 </label>
                 <input
                   value={stageForm.title}
                   onChange={(e) => setStageForm({ ...stageForm, title: e.target.value })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">
                   Orden
                 </label>
                 <input
                   type="number"
                   value={stageForm.order}
                   onChange={(e) => setStageForm({ ...stageForm, order: parseInt(e.target.value) || 0 })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">
+              <label className="block text-sm font-semibold text-zinc-600 mb-1.5">
                 Descripción
               </label>
               <textarea
                 value={stageForm.description}
                 onChange={(e) => setStageForm({ ...stageForm, description: e.target.value })}
                 rows={2}
-                className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">
+              <label className="block text-sm font-semibold text-zinc-600 mb-1.5">
                 Color
               </label>
               <div className="flex gap-2">
@@ -448,9 +448,7 @@ export default function AcademiaPage() {
                   <button
                     key={c}
                     onClick={() => setStageForm({ ...stageForm, color_hex: c })}
-                    className={`w-9 h-9 rounded-xl transition-all ${
-                      stageForm.color_hex === c ? "ring-2 ring-offset-2 ring-primary-500 scale-110" : ""
-                    }`}
+                    className={`w-9 h-9 rounded-xl transition-all ${ stageForm.color_hex === c ? "ring-2 ring-offset-2 ring-primary-500 scale-110" : "" }`}
                     style={{ backgroundColor: c }}
                   />
                 ))}
@@ -465,7 +463,7 @@ export default function AcademiaPage() {
               </button>
               <button
                 onClick={() => { setStageForm(null); setEditingStage(null); }}
-                className="flex items-center gap-2 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
+                className="flex items-center gap-2 border border-zinc-200 text-zinc-600 rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-zinc-50 transition-all"
               >
                 Cancelar
               </button>
@@ -505,20 +503,20 @@ export default function AcademiaPage() {
                       <GraduationCap className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">{stage.title}</p>
+                      <p className="text-base font-bold text-zinc-800">{stage.title}</p>
                       <p className="text-sm text-zinc-500 truncate">{stage.description || "Sin descripción"}</p>
                     </div>
                     <span className="text-xs text-zinc-400 font-mono shrink-0">#{stage.order}</span>
                     <div className="flex gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => handleEditStage(stage)}
-                        className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors"
+                        className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteStage(stage.id)}
-                        className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-950 transition-colors"
+                        className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -527,7 +525,7 @@ export default function AcademiaPage() {
 
                   {/* EXPANDED: MODULES */}
                   {isExpanded && (
-                    <div className="ml-8 mt-2 space-y-2 border-l-2 border-zinc-200 dark:border-zinc-700 pl-4">
+                    <div className="ml-8 mt-2 space-y-2 border-l-2 border-zinc-200 pl-4">
                       {stageModules.length === 0 && !moduleForm && (
                         <p className="text-sm text-zinc-400 py-2">No hay módulos en esta etapa.</p>
                       )}
@@ -547,24 +545,24 @@ export default function AcademiaPage() {
                               <button className="text-zinc-400" onClick={(e) => { e.stopPropagation(); toggleModuleExpand(mod.id); }}>
                                 {isModExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                               </button>
-                              <div className="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-950 flex items-center justify-center text-primary-600 shrink-0">
+                              <div className="w-9 h-9 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 shrink-0">
                                 <ModIcon className="w-4 h-4" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{mod.title}</p>
+                                <p className="text-sm font-bold text-zinc-800">{mod.title}</p>
                                 <p className="text-xs text-zinc-500 truncate">{mod.description || "Sin descripción"}</p>
                               </div>
                               <span className="text-xs text-zinc-400 font-mono shrink-0">#{mod.order}</span>
                               <div className="flex gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                                 <button
                                   onClick={() => handleEditModule(mod)}
-                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors"
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
                                 >
                                   <Edit className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteModule(mod.id)}
-                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-950 transition-colors"
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 transition-colors"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -573,7 +571,7 @@ export default function AcademiaPage() {
 
                             {/* EXPANDED: LESSONS */}
                             {isModExpanded && (
-                              <div className="ml-6 mt-2 space-y-2 border-l-2 border-zinc-200 dark:border-zinc-700 pl-4">
+                              <div className="ml-6 mt-2 space-y-2 border-l-2 border-zinc-200 pl-4">
                                 {modLessons.length === 0 && (
                                   <p className="text-sm text-zinc-400 py-2">No hay lecciones en este módulo.</p>
                                 )}
@@ -583,24 +581,24 @@ export default function AcademiaPage() {
                                     key={lesson.id}
                                     className="card-soft rounded-[1.25rem] p-3 flex items-center gap-3"
                                   >
-                                    <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 shrink-0">
+                                    <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500 shrink-0">
                                       {createElement(getLessonTypeIcon(lesson.type), { className: "w-4 h-4" })}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{lesson.title}</p>
+                                      <p className="text-sm font-semibold text-zinc-800">{lesson.title}</p>
                                       <p className="text-xs text-zinc-500">{getLessonTypeLabel(lesson.type)}</p>
                                     </div>
                                     <span className="text-xs text-zinc-400 font-mono shrink-0">#{lesson.order}</span>
                                     <div className="flex gap-1 shrink-0">
                                       <button
                                         onClick={() => handleEditLesson(lesson)}
-                                        className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors"
+                                        className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
                                       >
                                         <Edit className="w-3.5 h-3.5" />
                                       </button>
                                       <button
                                         onClick={() => handleDeleteLesson(lesson.id, lesson.module_id)}
-                                        className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-950 transition-colors"
+                                        className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 transition-colors"
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
                                       </button>
@@ -623,9 +621,9 @@ export default function AcademiaPage() {
 
                       {/* MODULE FORM */}
                       {moduleForm && moduleForm.stageId === stage.id && (
-                        <div className="card-soft rounded-[1.25rem] p-4 space-y-3 border border-primary-200 dark:border-primary-800">
+                        <div className="card-soft rounded-[1.25rem] p-4 space-y-3 border border-primary-200">
                           <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+                            <h3 className="text-sm font-bold text-zinc-800">
                               {moduleForm.editingId ? "Editar Módulo" : "Nuevo Módulo"}
                             </h3>
                             <button onClick={() => setModuleForm(null)} className="text-zinc-400 hover:text-zinc-600">
@@ -634,38 +632,38 @@ export default function AcademiaPage() {
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">Título</label>
+                              <label className="block text-xs font-semibold text-zinc-600 mb-1">Título</label>
                               <input
                                 value={moduleForm.title}
                                 onChange={(e) => setModuleForm({ ...moduleForm, title: e.target.value })}
-                                className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                                className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                               />
                             </div>
                             <div>
-                              <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">Orden</label>
+                              <label className="block text-xs font-semibold text-zinc-600 mb-1">Orden</label>
                               <input
                                 type="number"
                                 value={moduleForm.order}
                                 onChange={(e) => setModuleForm({ ...moduleForm, order: parseInt(e.target.value) || 0 })}
-                                className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                                className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                               />
                             </div>
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">Descripción</label>
+                            <label className="block text-xs font-semibold text-zinc-600 mb-1">Descripción</label>
                             <textarea
                               value={moduleForm.description}
                               onChange={(e) => setModuleForm({ ...moduleForm, description: e.target.value })}
                               rows={1}
-                              className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">Icono</label>
+                            <label className="block text-xs font-semibold text-zinc-600 mb-1">Icono</label>
                             <select
                               value={moduleForm.icon_name}
                               onChange={(e) => setModuleForm({ ...moduleForm, icon_name: e.target.value })}
-                              className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                             >
                               <option value="BookOpen">BookOpen</option>
                               <option value="BookMarked">BookMarked</option>
@@ -686,7 +684,7 @@ export default function AcademiaPage() {
                             </button>
                             <button
                               onClick={() => setModuleForm(null)}
-                              className="flex items-center gap-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 rounded-xl px-4 py-2 text-xs font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
+                              className="flex items-center gap-1 border border-zinc-200 text-zinc-600 rounded-xl px-4 py-2 text-xs font-bold hover:bg-zinc-50 transition-all"
                             >
                               Cancelar
                             </button>
@@ -715,11 +713,11 @@ export default function AcademiaPage() {
         {lessonForm && (
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40" onClick={() => setLessonForm(null)}>
             <div
-              className="bg-white dark:bg-zinc-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-t-[1.25rem] sm:rounded-[1.25rem] p-6 space-y-4 shadow-xl"
+              className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-t-[1.25rem] sm:rounded-[1.25rem] p-6 space-y-4 shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">
+                <h2 className="text-base font-bold text-zinc-800">
                   {lessonForm.editingId ? "Editar Lección" : "Nueva Lección"}
                 </h2>
                 <button onClick={() => setLessonForm(null)} className="text-zinc-400 hover:text-zinc-600">
@@ -729,26 +727,26 @@ export default function AcademiaPage() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Título</label>
+                  <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Título</label>
                   <input
                     value={lessonForm.title}
                     onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
-                    className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Orden</label>
+                  <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Orden</label>
                   <input
                     type="number"
                     value={lessonForm.order}
                     onChange={(e) => setLessonForm({ ...lessonForm, order: parseInt(e.target.value) || 0 })}
-                    className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Tipo de Lección</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Tipo de Lección</label>
                 <div className="flex flex-wrap gap-2">
                   {LESSON_TYPES.map((lt) => {
                     const LIcon = lt.icon;
@@ -756,11 +754,7 @@ export default function AcademiaPage() {
                       <button
                         key={lt.value}
                         onClick={() => handleLessonTypeChange(lt.value)}
-                        className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
-                          lessonForm.type === lt.value
-                            ? "bg-primary-600 text-white"
-                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                        }`}
+                        className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${ lessonForm.type === lt.value ? "bg-primary-600 text-white" : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200" }`}
                       >
                         <LIcon className="w-3.5 h-3.5" />
                         {lt.label}
@@ -793,7 +787,7 @@ export default function AcademiaPage() {
                 </button>
                 <button
                   onClick={() => setLessonForm(null)}
-                  className="flex items-center gap-2 border border-zinc-200 dark:border-zinc-700 text-zinc-600 rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
+                  className="flex items-center gap-2 border border-zinc-200 text-zinc-600 rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-zinc-50 transition-all"
                 >
                   Cancelar
                 </button>

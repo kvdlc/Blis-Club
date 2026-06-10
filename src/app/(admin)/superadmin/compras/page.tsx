@@ -111,8 +111,8 @@ export default function PurchasesPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Historial de Compras</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Todas las transacciones de suscripción</p>
+            <h1 className="text-2xl font-extrabold text-zinc-900">Historial de Compras</h1>
+            <p className="text-sm text-zinc-500 mt-1">Todas las transacciones de suscripción</p>
           </div>
           <div className="flex items-center gap-2 text-sm text-zinc-500">
             <CreditCard className="w-4 h-4" />
@@ -127,7 +127,7 @@ export default function PurchasesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar por email, nombre o ID de transacción..."
-              className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
           </div>
           <div className="relative">
@@ -135,7 +135,7 @@ export default function PurchasesPage() {
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-8 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 appearance-none cursor-pointer"
+              className="rounded-xl border border-zinc-200 bg-white pl-10 pr-8 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 appearance-none cursor-pointer"
             >
               <option value="">Todos los estados</option>
               <option value="succeeded">Exitoso</option>
@@ -154,19 +154,19 @@ export default function PurchasesPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">ID / Fecha</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Cliente</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Plan</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Monto</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Método</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Estado</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Transacción Izipay</th>
+                    <tr className="border-b border-zinc-100">
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">ID / Fecha</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Cliente</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Plan</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Monto</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Método</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Estado</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Transacción Izipay</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.map((p) => (
-                      <tr key={p.id} className="border-b border-zinc-50 dark:border-zinc-900 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30">
+                      <tr key={p.id} className="border-b border-zinc-50 hover:bg-zinc-50/50">
                         <td className="px-4 py-3">
                           <div className="font-mono text-xs text-zinc-500">{p.id.slice(0, 8)}...</div>
                           <div className="text-xs text-zinc-400 mt-0.5">{formatDate(p.created_at)}</div>
@@ -174,7 +174,7 @@ export default function PurchasesPage() {
                         <td className="px-4 py-3">
                           {p.profiles ? (
                             <div>
-                              <div className="font-semibold text-zinc-800 dark:text-zinc-200">{p.profiles.display_name || "—"}</div>
+                              <div className="font-semibold text-zinc-800">{p.profiles.display_name || "—"}</div>
                               <div className="text-xs text-zinc-500">{p.profiles.email}</div>
                             </div>
                           ) : (
@@ -182,12 +182,12 @@ export default function PurchasesPage() {
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                          <span className="text-sm font-medium text-zinc-700">
                             {p.plans?.name || "Producto único"}
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          <span className="font-semibold text-zinc-800">
                             {formatPrice(p.amount_cents, p.currency)}
                           </span>
                         </td>
@@ -218,17 +218,17 @@ export default function PurchasesPage() {
                   <button
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="p-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 rounded-xl border border-zinc-200 text-zinc-500 hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  <span className="text-sm font-medium text-zinc-600">
                     Página {page} de {totalPages}
                   </span>
                   <button
                     onClick={() => setPage(Math.min(totalPages, page + 1))}
                     disabled={page === totalPages}
-                    className="p-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 rounded-xl border border-zinc-200 text-zinc-500 hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>

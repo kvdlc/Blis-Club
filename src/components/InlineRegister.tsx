@@ -99,12 +99,12 @@ export default function InlineRegister({
 
   if (sent) {
     return (
-      <div className={`bg-secondary-50 dark:bg-secondary-950/40 border border-secondary-100 dark:border-secondary-800/60 rounded-2xl p-6 text-center space-y-3 ${className}`}>
-        <div className="w-12 h-12 mx-auto rounded-full bg-secondary-100 dark:bg-secondary-900 flex items-center justify-center">
+      <div className={`bg-secondary-50 border border-secondary-100 rounded-2xl p-6 text-center space-y-3 ${className}`}>
+        <div className="w-12 h-12 mx-auto rounded-full bg-secondary-100 flex items-center justify-center">
           <CheckCircle className="w-6 h-6 text-secondary-600" />
         </div>
-        <h3 className="text-base font-bold text-secondary-700 dark:text-secondary-300">¡Revisa tu correo!</h3>
-        <p className="text-sm text-secondary-600 dark:text-secondary-400">
+        <h3 className="text-base font-bold text-secondary-700">¡Revisa tu correo!</h3>
+        <p className="text-sm text-secondary-600">
           Te enviamos un enlace a <span className="font-semibold">{email}</span> para confirmar tu cuenta.
         </p>
       </div>
@@ -120,7 +120,7 @@ export default function InlineRegister({
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           placeholder="Nombre"
-          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          className="w-full rounded-xl border border-zinc-200 bg-white pl-10 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           style={{ backgroundImage: "none" }}
         />
         <input
@@ -129,7 +129,7 @@ export default function InlineRegister({
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           placeholder="Apellido"
-          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          className="w-full rounded-xl border border-zinc-200 bg-white pl-10 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           style={{ backgroundImage: "none" }}
         />
       </div>
@@ -141,7 +141,7 @@ export default function InlineRegister({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
         />
       </div>
       <div className="relative">
@@ -153,7 +153,7 @@ export default function InlineRegister({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Contraseña (mín. 6 caracteres)"
-          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
         />
       </div>
       <button
@@ -165,7 +165,7 @@ export default function InlineRegister({
         {loading ? "Creando cuenta..." : buttonText}
       </button>
       {error && (
-        <p className="text-xs text-danger-600 bg-danger-50 dark:bg-danger-950/40 rounded-xl p-2.5">{error}</p>
+        <p className="text-xs text-danger-600 bg-danger-50 rounded-xl p-2.5">{error}</p>
       )}
     </form>
   );

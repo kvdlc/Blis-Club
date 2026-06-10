@@ -116,36 +116,36 @@ const toLocalDateStr = (d: Date) => {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4" onClick={onClose}>
       <div
-        className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-5 shadow-2xl max-h-[85vh] overflow-y-auto"
+        className="bg-white w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-5 shadow-2xl max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Agendar Comida</h3>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+          <h3 className="text-lg font-bold text-zinc-900">Agendar Comida</h3>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="flex items-center gap-3 p-3 rounded-2xl bg-primary-50 dark:bg-primary-950/30">
-          <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+        <div className="flex items-center gap-3 p-3 rounded-2xl bg-primary-50">
+          <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
             <span className="text-lg">🍽️</span>
           </div>
           <div>
-            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{recipe.title}</p>
+            <p className="text-sm font-bold text-zinc-800">{recipe.title}</p>
             <p className="text-xs text-zinc-500">{Math.round(recipe.kcal_per_100g ?? 0)} kcal/100g</p>
           </div>
         </div>
 
         <div className="space-y-2">
           <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Fecha</label>
-          <div className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 rounded-2xl p-2">
+          <div className="flex items-center justify-between bg-zinc-50 rounded-2xl p-2">
             <button
               onClick={() => {
                 const d = new Date(selectedDate);
                 d.setDate(d.getDate() - 1);
                 setSelectedDate(d);
               }}
-              className="w-8 h-8 rounded-xl bg-white dark:bg-zinc-700 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors"
+              className="w-8 h-8 rounded-xl bg-white flex items-center justify-center hover:bg-zinc-100 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -157,13 +157,7 @@ const toLocalDateStr = (d: Date) => {
                   <button
                     key={d.toISOString()}
                     onClick={() => setSelectedDate(d)}
-                    className={`flex flex-col items-center px-2 py-1.5 rounded-xl transition-all min-w-[2.2rem] ${
-                      isSelected
-                        ? "bg-primary-500 text-white shadow-md"
-                        : isToday
-                        ? "bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300"
-                        : "hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
-                    }`}
+                    className={`flex flex-col items-center px-2 py-1.5 rounded-xl transition-all min-w-[2.2rem] ${ isSelected ? "bg-primary-500 text-white shadow-md" : isToday ? "bg-primary-100 text-primary-700" : "hover:bg-zinc-100 text-zinc-600" }`}
                   >
                     <span className="text-[9px] font-medium">{d.toLocaleDateString("es", { weekday: "narrow" }).toUpperCase()}</span>
                     <span className="text-sm font-bold">{d.getDate()}</span>
@@ -177,7 +171,7 @@ const toLocalDateStr = (d: Date) => {
                 d.setDate(d.getDate() + 1);
                 setSelectedDate(d);
               }}
-              className="w-8 h-8 rounded-xl bg-white dark:bg-zinc-700 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors"
+              className="w-8 h-8 rounded-xl bg-white flex items-center justify-center hover:bg-zinc-100 transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -195,15 +189,15 @@ const toLocalDateStr = (d: Date) => {
                   {activeSlots.map((slot) => {
                     const isTaken = existingSchedule.has(String(slot.slot_index));
                     return (
-                      <div key={slot.slot_index} className="flex items-center gap-3 p-3.5 rounded-2xl border-2 border-secondary-200 dark:border-secondary-800 bg-secondary-50/60 dark:bg-secondary-950/20 text-left">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary-100 dark:bg-secondary-900 text-secondary-600 dark:text-secondary-400">
+                      <div key={slot.slot_index} className="flex items-center gap-3 p-3.5 rounded-2xl border-2 border-secondary-200 bg-secondary-50/60 text-left">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary-100 text-secondary-600">
                           <Check className="w-4 h-4" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{slot.label}</p>
+                          <p className="text-sm font-semibold text-zinc-800">{slot.label}</p>
                           <p className="text-xs text-zinc-400">{slot.time_of_day.slice(0, 5)} · {grams}g</p>
                         </div>
-                        {isTaken && <span className="text-[10px] text-zinc-400 font-medium bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">Ocupado</span>}
+                        {isTaken && <span className="text-[10px] text-zinc-400 font-medium bg-zinc-100 px-2 py-0.5 rounded-full">Ocupado</span>}
                       </div>
                     );
                   })}
@@ -225,22 +219,16 @@ const toLocalDateStr = (d: Date) => {
                       key={slot.slot_index}
                       onClick={() => !isTaken && setSelectedSlot(slot.slot_index)}
                       disabled={isTaken}
-                      className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all text-left ${
-                        isSelected
-                          ? "border-primary-400 bg-primary-50 dark:bg-primary-950/30"
-                          : isTaken
-                          ? "border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 opacity-50 cursor-not-allowed"
-                          : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-primary-200 dark:hover:border-primary-800"
-                      }`}
+                      className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all text-left ${ isSelected ? "border-primary-400 bg-primary-50" : isTaken ? "border-zinc-100 bg-zinc-50 opacity-50 cursor-not-allowed" : "border-zinc-100 bg-white hover:border-primary-200" }`}
                     >
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isSelected ? "bg-primary-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"}`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isSelected ? "bg-primary-500 text-white" : "bg-zinc-100 text-zinc-500"}`}>
                         <Clock className="w-4 h-4" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{slot.label}</p>
+                        <p className="text-sm font-semibold text-zinc-800">{slot.label}</p>
                         <p className="text-xs text-zinc-400">{slot.time_of_day.slice(0, 5)}</p>
                       </div>
-                      {isTaken && <span className="text-[10px] text-zinc-400 font-medium bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">Ocupado</span>}
+                      {isTaken && <span className="text-[10px] text-zinc-400 font-medium bg-zinc-100 px-2 py-0.5 rounded-full">Ocupado</span>}
                       {isSelected && <Check className="w-5 h-5 text-primary-500" />}
                     </button>
                   );
@@ -255,16 +243,16 @@ const toLocalDateStr = (d: Date) => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setGrams(Math.max(50, grams - 25))}
-              className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors font-bold text-zinc-600"
+              className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors font-bold text-zinc-600"
             >
               -
             </button>
             <div className="flex-1 text-center">
-              <span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{grams}g</span>
+              <span className="text-xl font-bold text-zinc-900">{grams}g</span>
             </div>
             <button
               onClick={() => setGrams(grams + 25)}
-              className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors font-bold text-zinc-600"
+              className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors font-bold text-zinc-600"
             >
               +
             </button>
@@ -274,13 +262,7 @@ const toLocalDateStr = (d: Date) => {
         <button
           onClick={handleSave}
           disabled={!canSave || saving || saved}
-          className={`w-full rounded-2xl py-3.5 font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-            saved
-              ? "bg-secondary-500 text-white"
-              : !canSave
-              ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/20 active:scale-[0.97]"
-          }`}
+          className={`w-full rounded-2xl py-3.5 font-bold text-sm transition-all flex items-center justify-center gap-2 ${ saved ? "bg-secondary-500 text-white" : !canSave ? "bg-zinc-200 text-zinc-400 cursor-not-allowed" : "bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/20 active:scale-[0.97]" }`}
         >
           {saved ? <><Check className="w-4 h-4" /> Guardado</> : saving ? "Guardando..." : isAllMeals ? `Agendar ${activeSlots.length} comidas` : "Guardar en Agenda"}
         </button>

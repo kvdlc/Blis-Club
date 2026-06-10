@@ -176,14 +176,14 @@ export default function WalkPage() {
       {phase === "active" && (
         <>
           <div className="flex-1 flex flex-col items-center justify-center space-y-8">
-            <p className="text-6xl font-bold tabular-nums text-primary-600 dark:text-primary-400">
+            <p className="text-6xl font-bold tabular-nums text-primary-600">
               {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
             </p>
 
             <div className="flex gap-6">
               <button
                 onClick={() => setPipiCount((c) => c + 1)}
-                className="flex flex-col items-center gap-2 bg-warning-50 dark:bg-warning-950 border-2 border-warning-300 dark:border-warning-700 rounded-2xl p-6 active:scale-95 transition-transform min-w-[100px]"
+                className="flex flex-col items-center gap-2 bg-warning-50 border-2 border-warning-300 rounded-2xl p-6 active:scale-95 transition-transform min-w-[100px]"
               >
                 <Droplets className="w-8 h-8 text-warning-500" />
                 <span className="text-xs font-semibold text-warning-600">Pipí</span>
@@ -193,7 +193,7 @@ export default function WalkPage() {
               </button>
               <button
                 onClick={() => setPopoCount((c) => c + 1)}
-                className="flex flex-col items-center gap-2 bg-secondary-50 dark:bg-secondary-950 border-2 border-secondary-300 dark:border-secondary-700 rounded-2xl p-6 active:scale-95 transition-transform min-w-[100px]"
+                className="flex flex-col items-center gap-2 bg-secondary-50 border-2 border-secondary-300 rounded-2xl p-6 active:scale-95 transition-transform min-w-[100px]"
               >
                 <BadgeCheck className="w-8 h-8 text-secondary-500" />
                 <span className="text-xs font-semibold text-secondary-600">Popó</span>
@@ -217,7 +217,7 @@ export default function WalkPage() {
       {/* ═══ PHASE: EVALUATE ═══ */}
       {phase === "evaluate" && (
         <div className="flex-1 flex flex-col items-center justify-center space-y-6">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">¿Cómo estuvo el paseo?</h2>
+          <h2 className="text-xl font-bold text-zinc-900">¿Cómo estuvo el paseo?</h2>
           <div className="flex gap-4">
             {[
               { color: "bg-secondary-500", label: "Calma", value: "green", ring: "ring-secondary-300" },
@@ -227,7 +227,7 @@ export default function WalkPage() {
               <button
                 key={opt.value}
                 onClick={() => handleTrafficSelect(opt.value)}
-                className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 hover:scale-105 active:scale-95 transition-all"
+                className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-white border-2 border-zinc-200 hover:scale-105 active:scale-95 transition-all"
               >
                 <div className={`w-16 h-16 rounded-full ${opt.color} shadow-lg`} />
                 <span className="text-sm font-semibold">{opt.label}</span>
@@ -240,7 +240,7 @@ export default function WalkPage() {
       {/* ═══ PHASE: TRIGGERS (rediseñado con tarjetas + emojis) ═══ */}
       {phase === "triggers" && (
         <div className="flex-1 flex flex-col space-y-6 overflow-auto">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 text-center">
+          <h2 className="text-xl font-bold text-zinc-900 text-center">
             ¿Qué causó la reacción?
           </h2>
           <div className="grid grid-cols-3 gap-3 px-2">
@@ -250,14 +250,10 @@ export default function WalkPage() {
                 <button
                   key={opt.tag}
                   onClick={() => toggleTrigger(opt.tag)}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${
-                    selected
-                      ? "border-primary-400 bg-primary-50 dark:bg-primary-950/50 shadow-sm"
-                      : "border-zinc-100 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40"
-                  }`}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${ selected ? "border-primary-400 bg-primary-50 shadow-sm" : "border-zinc-100 bg-white/60" }`}
                 >
                   <span className="text-3xl">{opt.emoji}</span>
-                  <span className={`text-[10px] font-semibold leading-tight text-center ${selected ? "text-primary-700 dark:text-primary-300" : "text-zinc-600 dark:text-zinc-400"}`}>
+                  <span className={`text-[10px] font-semibold leading-tight text-center ${selected ? "text-primary-700" : "text-zinc-600"}`}>
                     {opt.tag}
                   </span>
                 </button>
@@ -265,14 +261,10 @@ export default function WalkPage() {
             })}
             <button
               onClick={() => setShowCustomTrigger(!showCustomTrigger)}
-              className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${
-                showCustomTrigger
-                  ? "border-primary-400 bg-primary-50 dark:bg-primary-950/50 shadow-sm"
-                  : "border-dashed border-zinc-300 dark:border-zinc-700 bg-white/40 dark:bg-zinc-900/20"
-              }`}
+              className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${ showCustomTrigger ? "border-primary-400 bg-primary-50 shadow-sm" : "border-dashed border-zinc-300 bg-white/40" }`}
             >
               <span className="text-3xl">✏️</span>
-              <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 leading-tight text-center">Otro</span>
+              <span className="text-[10px] font-semibold text-zinc-500 leading-tight text-center">Otro</span>
             </button>
           </div>
 
@@ -284,7 +276,7 @@ export default function WalkPage() {
                 onChange={(e) => setCustomTrigger(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addCustomTrigger()}
                 placeholder="Describe qué más causó la reacción..."
-                className="flex-1 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                className="flex-1 rounded-xl bg-white border border-zinc-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 autoFocus
               />
               <button
@@ -299,7 +291,7 @@ export default function WalkPage() {
           {triggers.filter((t) => !TRIGGER_OPTIONS.some((o) => o.tag === t)).length > 0 && (
             <div className="flex flex-wrap gap-2 justify-center">
               {triggers.filter((t) => !TRIGGER_OPTIONS.some((o) => o.tag === t)).map((t) => (
-                <span key={t} className="flex items-center gap-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-xs px-3 py-1.5 rounded-full">
+                <span key={t} className="flex items-center gap-1 bg-primary-100 text-primary-700 text-xs px-3 py-1.5 rounded-full">
                   {t}
                   <button onClick={() => setTriggers((prev) => prev.filter((x) => x !== t))} className="ml-1 text-primary-400 hover:text-danger-500">×</button>
                 </span>
@@ -319,7 +311,7 @@ export default function WalkPage() {
       {/* ═══ PHASE: DIGESTIVE ═══ */}
       {phase === "digestive" && (
         <div className="flex-1 flex flex-col items-center justify-center space-y-6">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 text-center">
+          <h2 className="text-xl font-bold text-zinc-900 text-center">
             ¿Cómo estaban las heces?
           </h2>
           <div className="flex gap-2">
@@ -333,14 +325,10 @@ export default function WalkPage() {
               <button
                 key={s.n}
                 onClick={() => handleStoolSelect(s.n)}
-                className={`flex flex-col items-center gap-1 p-3 rounded-2xl transition-all ${
-                  stoolRating === s.n
-                    ? "bg-primary-100 dark:bg-primary-950 border-2 border-primary-500"
-                    : "bg-zinc-50 dark:bg-zinc-900 border-2 border-transparent"
-                }`}
+                className={`flex flex-col items-center gap-1 p-3 rounded-2xl transition-all ${ stoolRating === s.n ? "bg-primary-100 border-2 border-primary-500" : "bg-zinc-50 border-2 border-transparent" }`}
               >
                 <span className="text-2xl">{s.e}</span>
-                <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{s.l}</span>
+                <span className="text-[10px] text-zinc-500">{s.l}</span>
               </button>
             ))}
           </div>
@@ -350,21 +338,17 @@ export default function WalkPage() {
       {/* ═══ PHASE: DONE ═══ */}
       {phase === "done" && (
         <div className="flex-1 flex flex-col items-center justify-center space-y-6 text-center">
-          <div className="w-20 h-20 rounded-full bg-secondary-100 dark:bg-secondary-950 flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full bg-secondary-100 flex items-center justify-center">
             <Flag className="w-10 h-10 text-secondary-500" />
           </div>
-          <h2 className="text-xl font-bold text-secondary-600 dark:text-secondary-400">
+          <h2 className="text-xl font-bold text-secondary-600">
             ¡Paseo guardado!
           </h2>
-          <p className="text-zinc-500 dark:text-zinc-400">
+          <p className="text-zinc-500">
             {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")} · {pipiCount} pipí · {popoCount} popó
           </p>
           {trafficLight && (
-            <span className={`px-4 py-1 rounded-full text-sm font-semibold ${
-              trafficLight === "green" ? "bg-secondary-100 text-secondary-700" :
-              trafficLight === "yellow" ? "bg-warning-100 text-warning-700" :
-              "bg-danger-100 text-danger-700"
-            }`}>
+            <span className={`px-4 py-1 rounded-full text-sm font-semibold ${ trafficLight === "green" ? "bg-secondary-100 text-secondary-700" : trafficLight === "yellow" ? "bg-warning-100 text-warning-700" : "bg-danger-100 text-danger-700" }`}>
               {trafficLight === "green" ? "Paseo en calma" : trafficLight === "yellow" ? "Paseo tenso" : "Paseo estresante"}
             </span>
           )}

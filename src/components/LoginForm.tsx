@@ -97,14 +97,14 @@ export function LoginForm() {
 
   if (sent) {
     return (
-      <div className="bg-secondary-50 dark:bg-secondary-950/40 border border-secondary-100 dark:border-secondary-800/60 rounded-[1.5rem] p-8 text-center space-y-3 shadow-sm">
-        <div className="w-14 h-14 mx-auto rounded-full bg-secondary-100 dark:bg-secondary-900 flex items-center justify-center">
+      <div className="bg-secondary-50 border border-secondary-100 rounded-[1.5rem] p-8 text-center space-y-3 shadow-sm">
+        <div className="w-14 h-14 mx-auto rounded-full bg-secondary-100 flex items-center justify-center">
           <CheckCircle className="w-7 h-7 text-secondary-600" />
         </div>
-        <h2 className="text-lg font-bold text-secondary-700 dark:text-secondary-300">
+        <h2 className="text-lg font-bold text-secondary-700">
           {mode === "register" ? "¡Registro exitoso!" : "¡Magic Link enviado!"}
         </h2>
-        <p className="text-sm text-secondary-600 dark:text-secondary-400">
+        <p className="text-sm text-secondary-600">
           {mode === "register"
             ? `Revisa ${email}. Te enviamos un enlace para confirmar tu cuenta.`
             : `Revisa ${email}. Te enviamos un enlace mágico para acceder.`}
@@ -115,7 +115,7 @@ export function LoginForm() {
 
   return (
     <div className="space-y-4">
-      <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-1">
+      <div className="flex bg-zinc-100 rounded-full p-1">
         {[
           { key: "password" as const, label: "Ingresar", icon: KeyRound },
           { key: "register" as const, label: "Registrarse", icon: UserPlus },
@@ -124,9 +124,7 @@ export function LoginForm() {
           <button
             key={m.key}
             onClick={() => { setMode(m.key); setError(""); }}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-xs font-semibold transition-all ${
-              mode === m.key ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm" : "text-zinc-500"
-            }`}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-xs font-semibold transition-all ${ mode === m.key ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500" }`}
           >
             <m.icon className="w-3.5 h-3.5" />
             {m.label}
@@ -138,45 +136,45 @@ export function LoginForm() {
         {mode === "register" && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="firstName" className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Nombre</label>
+              <label htmlFor="firstName" className="block text-sm font-semibold text-zinc-700 mb-2">Nombre</label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                 <input id="firstName" type="text" required value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Nombre"
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
             </div>
             <div>
-              <label htmlFor="lastName" className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Apellido</label>
+              <label htmlFor="lastName" className="block text-sm font-semibold text-zinc-700 mb-2">Apellido</label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                 <input id="lastName" type="text" required value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Apellido"
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
             </div>
           </div>
         )}
         <div>
-          <label htmlFor="email" className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Correo electrónico</label>
+          <label htmlFor="email" className="block text-sm font-semibold text-zinc-700 mb-2">Correo electrónico</label>
           <div className="relative">
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <input id="email" type="text" inputMode="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tutor@blis.club"
-              className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+              className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
           </div>
         </div>
 
         {(mode === "password" || mode === "register") && (
           <div>
-            <label htmlFor="password" className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Contraseña</label>
+            <label htmlFor="password" className="block text-sm font-semibold text-zinc-700 mb-2">Contraseña</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
-                className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
             </div>
           </div>
         )}
 
         {error && (
-          <p className="text-sm text-danger-600 dark:text-danger-400 bg-danger-50 dark:bg-danger-950/40 rounded-xl p-3">{error}</p>
+          <p className="text-sm text-danger-600 bg-danger-50 rounded-xl p-3">{error}</p>
         )}
 
         <button type="submit" disabled={loading}

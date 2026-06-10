@@ -74,11 +74,11 @@ interface Props {
 
 /* ─── Constants ─── */
 const PAYMENT_STATUS: Record<string, { label: string; color: string; icon: any; filter: string }> = {
-  succeeded: { label: "Completado", color: "text-secondary-600 bg-secondary-50 dark:bg-secondary-950/30", icon: Check, filter: "completados" },
-  failed: { label: "Fallido", color: "text-danger-600 bg-danger-50 dark:bg-danger-950/30", icon: AlertTriangle, filter: "fallidos" },
-  refunded: { label: "Reembolsado", color: "text-warning-600 bg-warning-50 dark:bg-warning-950/30", icon: DollarSign, filter: "reembolsados" },
-  pending: { label: "Pendiente", color: "text-primary-600 bg-primary-50 dark:bg-primary-950/30", icon: Clock, filter: "pendientes" },
-  disputed: { label: "En disputa", color: "text-danger-600 bg-danger-50 dark:bg-danger-950/30", icon: AlertTriangle, filter: "disputas" },
+  succeeded: { label: "Completado", color: "text-secondary-600 bg-secondary-50", icon: Check, filter: "completados" },
+  failed: { label: "Fallido", color: "text-danger-600 bg-danger-50", icon: AlertTriangle, filter: "fallidos" },
+  refunded: { label: "Reembolsado", color: "text-warning-600 bg-warning-50", icon: DollarSign, filter: "reembolsados" },
+  pending: { label: "Pendiente", color: "text-primary-600 bg-primary-50", icon: Clock, filter: "pendientes" },
+  disputed: { label: "En disputa", color: "text-danger-600 bg-danger-50", icon: AlertTriangle, filter: "disputas" },
 };
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
   card: "Tarjeta", yape: "Yape", plin: "Plin", transfer: "Transferencia", paypal: "PayPal",
@@ -168,14 +168,14 @@ export default function BilleteraClient({
     <div className="space-y-5 pb-8">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={() => router.back()} className="w-9 h-9 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center">
+        <button onClick={() => router.back()} className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Billetera</h1>
+        <h1 className="text-lg font-bold text-zinc-900">Billetera</h1>
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-1 overflow-x-auto">
+      <div className="flex bg-zinc-100 rounded-full p-1 overflow-x-auto">
         {[
           { key: "billetera" as const, label: "Billetera", icon: Wallet },
           { key: "comisiones" as const, label: "Comisiones", icon: DollarSign },
@@ -185,9 +185,7 @@ export default function BilleteraClient({
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
-              tab === t.key ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm" : "text-zinc-500"
-            }`}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${ tab === t.key ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500" }`}
           >
             <t.icon className="w-3.5 h-3.5" />
             {t.label}
@@ -199,12 +197,12 @@ export default function BilleteraClient({
       {tab === "billetera" && (
         <div className="space-y-4 animate-fade-in">
           {/* Credit info banner */}
-          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-950/40 dark:to-accent-950/40 border border-primary-100 dark:border-primary-800/30">
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-primary-50 to-accent-50 border border-primary-100">
             <div className="flex items-center gap-2 mb-1">
               <Zap className="w-4 h-4 text-primary-500" />
-              <span className="text-[10px] font-bold uppercase text-primary-600 dark:text-primary-400">Crédito disponible</span>
+              <span className="text-[10px] font-bold uppercase text-primary-600">Crédito disponible</span>
             </div>
-            <p className="text-3xl font-extrabold text-zinc-900 dark:text-white">
+            <p className="text-3xl font-extrabold text-zinc-900">
               ${(availableCents / 100).toFixed(2)} <span className="text-sm font-normal text-zinc-400">USD</span>
             </p>
             <p className="text-xs text-zinc-500 mt-1">
@@ -214,11 +212,11 @@ export default function BilleteraClient({
 
           {/* Comisiones por nivel */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="card-soft rounded-xl p-3 text-center border border-primary-100 dark:border-primary-800/40">
+            <div className="card-soft rounded-xl p-3 text-center border border-primary-100">
               <p className="text-[10px] text-zinc-400 mb-0.5">Nivel 1 ($2.00)</p>
               <p className="text-sm font-extrabold text-primary-600">${(summary.level1Cents / 100).toFixed(2)}</p>
             </div>
-            <div className="card-soft rounded-xl p-3 text-center border border-accent-100 dark:border-accent-800/40">
+            <div className="card-soft rounded-xl p-3 text-center border border-accent-100">
               <p className="text-[10px] text-zinc-400 mb-0.5">Nivel 2 ($1.00)</p>
               <p className="text-sm font-extrabold text-accent-600">${(summary.level2Cents / 100).toFixed(2)}</p>
             </div>
@@ -231,7 +229,7 @@ export default function BilleteraClient({
           {/* Stats */}
           <div className="grid grid-cols-3 gap-2">
             <div className="card-soft rounded-xl p-3 text-center">
-              <p className="text-lg font-extrabold text-zinc-900 dark:text-white">{referralCount}</p>
+              <p className="text-lg font-extrabold text-zinc-900">{referralCount}</p>
               <p className="text-[10px] text-zinc-500">Referidos</p>
             </div>
             <div className="card-soft rounded-xl p-3 text-center">
@@ -253,18 +251,18 @@ export default function BilleteraClient({
               onOpenBillingProfile={() => setShowBillingModal(true)}
             />
           ) : (
-            <div className="card-soft rounded-[1.25rem] p-4 flex items-center gap-3 bg-warning-50/50 dark:bg-warning-950/20 border border-warning-200 dark:border-warning-800">
+            <div className="card-soft rounded-[1.25rem] p-4 flex items-center gap-3 bg-warning-50/50 border border-warning-200">
               <AlertTriangle className="w-5 h-5 text-warning-500 shrink-0" />
-              <p className="text-xs text-warning-700 dark:text-warning-300">
+              <p className="text-xs text-warning-700">
                 Necesitas una suscripción activa para poder retirar tu crédito.
               </p>
             </div>
           )}
 
           {withdrawMessage && (
-            <div className="card-soft rounded-[1.25rem] p-4 flex items-center gap-3 bg-secondary-50/50 dark:bg-secondary-950/20 border border-secondary-200 dark:border-secondary-800">
+            <div className="card-soft rounded-[1.25rem] p-4 flex items-center gap-3 bg-secondary-50/50 border border-secondary-200">
               <Check className="w-5 h-5 text-secondary-500 shrink-0" />
-              <p className="text-xs text-secondary-700 dark:text-secondary-300">{withdrawMessage}</p>
+              <p className="text-xs text-secondary-700">{withdrawMessage}</p>
             </div>
           )}
 
@@ -272,11 +270,11 @@ export default function BilleteraClient({
           {payments && payments.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+                <h3 className="text-sm font-bold text-zinc-800 flex items-center gap-2">
                   <Receipt className="w-4 h-4 text-primary-500" />Historial de cobros ({filteredPayments.length})
                 </h3>
                 <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)}
-                  className="text-[10px] font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-2 py-1">
+                  className="text-[10px] font-bold bg-zinc-50 border border-zinc-200 rounded-lg px-2 py-1">
                   <option value="all">Todos ({paymentStats.all})</option>
                   <option value="completados">Completados ({paymentStats.completados})</option>
                   <option value="fallidos">Fallidos ({paymentStats.fallidos})</option>
@@ -295,7 +293,7 @@ export default function BilleteraClient({
                         <div className="flex items-center gap-2.5">
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${status.color}`}><Icon className="w-4 h-4" /></div>
                           <div>
-                            <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{p.plan?.name || p.description || "Suscripción"}</p>
+                            <p className="text-xs font-bold text-zinc-800">{p.plan?.name || p.description || "Suscripción"}</p>
                             <p className="text-[10px] text-zinc-400">
                               {new Date(p.created_at).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}
                               {" · "}{PAYMENT_METHOD_LABELS[p.payment_method] || p.payment_method}
@@ -303,7 +301,7 @@ export default function BilleteraClient({
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`text-sm font-extrabold ${p.status === "refunded" || p.status === "failed" ? "text-zinc-400 line-through" : "text-zinc-900 dark:text-white"}`}>
+                          <p className={`text-sm font-extrabold ${p.status === "refunded" || p.status === "failed" ? "text-zinc-400 line-through" : "text-zinc-900"}`}>
                             ${(p.amount_cents / 100).toFixed(2)} {p.currency}
                           </p>
                           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${status.color}`}>{status.label}</span>
@@ -319,7 +317,7 @@ export default function BilleteraClient({
           {/* Withdrawals History */}
           {withdrawals.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2"><Clock className="w-4 h-4 text-zinc-500" />Historial de retiros</h3>
+              <h3 className="text-sm font-bold text-zinc-800 flex items-center gap-2"><Clock className="w-4 h-4 text-zinc-500" />Historial de retiros</h3>
               <div className="space-y-2">
                 {withdrawals.map((w) => {
                   const s = WITHDRAWAL_STATUS[w.status] || WITHDRAWAL_STATUS.pending;
@@ -327,7 +325,7 @@ export default function BilleteraClient({
                     <div key={w.id} className="card-soft rounded-xl p-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">${(w.amount_usd / 100).toFixed(2)} USD</p>
+                          <p className="text-xs font-bold text-zinc-700">${(w.amount_usd / 100).toFixed(2)} USD</p>
                           <p className="text-[10px] text-zinc-400 capitalize">{w.withdrawal_method || w.method}</p>
                         </div>
                         <div className="text-right">
@@ -338,7 +336,7 @@ export default function BilleteraClient({
                         </div>
                       </div>
                       {w.fee_cents !== undefined && w.fee_cents > 0 && (
-                        <div className="flex justify-between text-[10px] text-zinc-400 mt-1 pt-1 border-t border-zinc-100 dark:border-zinc-800">
+                        <div className="flex justify-between text-[10px] text-zinc-400 mt-1 pt-1 border-t border-zinc-100">
                           <span>Fee: ${(w.fee_cents / 100).toFixed(2)}</span>
                           <span>Neto: ${((w.net_amount_cents || w.amount_usd) / 100).toFixed(2)}</span>
                         </div>
@@ -351,14 +349,14 @@ export default function BilleteraClient({
           )}
 
           {/* Magic Link */}
-          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-accent-50 to-primary-50 dark:from-accent-900/20 dark:to-primary-900/20 border border-accent-100 dark:border-accent-800/30">
-            <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-2">Tu enlace mágico</h4>
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-accent-50 to-primary-50 border border-accent-100">
+            <h4 className="text-sm font-bold text-zinc-800 mb-2">Tu enlace mágico</h4>
             <p className="text-[11px] text-zinc-500 mb-3">
               Comparte este enlace. Cuando alguien entre y se registre, se vincula automáticamente a ti.
             </p>
             <button onClick={handleShareLink}
-              className="w-full flex items-center justify-between rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 mb-2">
-              <span className="text-[11px] font-mono text-zinc-600 dark:text-zinc-400 truncate pr-2">blis.club/guau/webg?ref={referralCode}</span>
+              className="w-full flex items-center justify-between rounded-xl bg-white border border-zinc-200 px-3 py-2.5 transition-colors hover:bg-zinc-50 mb-2">
+              <span className="text-[11px] font-mono text-zinc-600 truncate pr-2">blis.club/guau/webg?ref={referralCode}</span>
               <span className="text-xs font-semibold text-primary-600 flex items-center gap-1 shrink-0">
                 {copied ? <><Check className="w-3 h-3" /> Copiado</> : <><Share2 className="w-3 h-3" /> Copiar</>}
               </span>
@@ -373,12 +371,12 @@ export default function BilleteraClient({
       {/* ══════ TAB: COMISIONES ══════ */}
       {tab === "comisiones" && (
         <div className="space-y-4 animate-fade-in">
-          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-950/40 dark:to-accent-950/40 border border-primary-100 dark:border-primary-800/30">
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-primary-50 to-accent-50 border border-primary-100">
             <div className="flex items-center gap-2 mb-1">
               <DollarSign className="w-4 h-4 text-primary-500" />
-              <span className="text-[10px] font-bold uppercase text-primary-600 dark:text-primary-400">Tus comisiones</span>
+              <span className="text-[10px] font-bold uppercase text-primary-600">Tus comisiones</span>
             </div>
-            <p className="text-2xl font-extrabold text-zinc-900 dark:text-white">
+            <p className="text-2xl font-extrabold text-zinc-900">
               {commissions.length} <span className="text-sm font-normal text-zinc-400">totales</span>
             </p>
             <p className="text-xs text-zinc-500 mt-1">
@@ -396,17 +394,11 @@ export default function BilleteraClient({
               <div key={c.id} className="card-soft rounded-xl p-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      c.status === "available"
-                        ? "bg-secondary-100 text-secondary-600"
-                        : c.status === "pending"
-                        ? "bg-warning-100 text-warning-600"
-                        : "bg-danger-100 text-danger-600"
-                    }`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${ c.status === "available" ? "bg-secondary-100 text-secondary-600" : c.status === "pending" ? "bg-warning-100 text-warning-600" : "bg-danger-100 text-danger-600" }`}>
                       {c.status === "available" ? <Unlock className="w-4 h-4" /> : c.status === "pending" ? <Lock className="w-4 h-4" /> : <RotateCcw className="w-4 h-4" />}
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                      <p className="text-xs font-bold text-zinc-800">
                         {c.referred_name || "Usuario"}
                       </p>
                       <p className="text-[10px] text-zinc-400">
@@ -415,23 +407,17 @@ export default function BilleteraClient({
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${
-                      c.status === "available"
-                        ? "bg-secondary-100 text-secondary-700"
-                        : c.status === "pending"
-                        ? "bg-warning-100 text-warning-700"
-                        : "bg-danger-100 text-danger-700"
-                    }`}>
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${ c.status === "available" ? "bg-secondary-100 text-secondary-700" : c.status === "pending" ? "bg-warning-100 text-warning-700" : "bg-danger-100 text-danger-700" }`}>
                       {c.status === "available" ? "Disponible" : c.status === "pending" ? "En espera" : "Reversada"}
                     </span>
                   </div>
                 </div>
                 {c.status === "pending" && c.days_remaining > 0 && (
-                  <div className="mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                  <div className="mt-2 pt-2 border-t border-zinc-100">
                     <p className="text-[10px] text-zinc-400">
                       Disponible en {c.days_remaining} día{c.days_remaining !== 1 ? "s" : ""}
                     </p>
-                    <div className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full mt-1 overflow-hidden">
+                    <div className="w-full h-1.5 bg-zinc-100 rounded-full mt-1 overflow-hidden">
                       <div
                         className="h-full bg-warning-400 rounded-full transition-all"
                         style={{ width: `${Math.max(0, 100 - (c.days_remaining / 14) * 100)}%` }}
@@ -451,10 +437,10 @@ export default function BilleteraClient({
       {/* ══════ TAB: MOVIMIENTOS ══════ */}
       {tab === "movimientos" && (
         <div className="space-y-4 animate-fade-in">
-          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-accent-50 to-primary-50 dark:from-accent-950/40 dark:to-primary-950/40 border border-accent-100 dark:border-accent-800/30">
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-br from-accent-50 to-primary-50 border border-accent-100">
             <div className="flex items-center gap-2 mb-1">
               <History className="w-4 h-4 text-accent-500" />
-              <span className="text-[10px] font-bold uppercase text-accent-600 dark:text-accent-400">Movimientos</span>
+              <span className="text-[10px] font-bold uppercase text-accent-600">Movimientos</span>
             </div>
             <p className="text-xs text-zinc-500">
               Historial completo de comisiones y retiros.
@@ -471,26 +457,18 @@ export default function BilleteraClient({
               <div key={t.id} className="card-soft rounded-xl p-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      t.amount_cents > 0
-                        ? "bg-secondary-100 text-secondary-600"
-                        : t.amount_cents < 0
-                        ? "bg-danger-100 text-danger-600"
-                        : "bg-zinc-100 text-zinc-500"
-                    }`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${ t.amount_cents > 0 ? "bg-secondary-100 text-secondary-600" : t.amount_cents < 0 ? "bg-danger-100 text-danger-600" : "bg-zinc-100 text-zinc-500" }`}>
                       {t.amount_cents > 0 ? <TrendingUp className="w-4 h-4" /> : t.amount_cents < 0 ? <TrendingDown className="w-4 h-4" /> : <Minus className="w-4 h-4" />}
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{t.type_label || t.type}</p>
+                      <p className="text-xs font-bold text-zinc-800">{t.type_label || t.type}</p>
                       <p className="text-[10px] text-zinc-400">
                         {new Date(t.created_at).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`text-sm font-extrabold ${
-                      t.amount_cents > 0 ? "text-secondary-600" : t.amount_cents < 0 ? "text-danger-600" : "text-zinc-400"
-                    }`}>
+                    <p className={`text-sm font-extrabold ${ t.amount_cents > 0 ? "text-secondary-600" : t.amount_cents < 0 ? "text-danger-600" : "text-zinc-400" }`}>
                       {t.amount_cents > 0 ? "+" : ""}{(t.amount_cents / 100).toFixed(2)}
                     </p>
                     <p className="text-[10px] text-zinc-400">
@@ -499,7 +477,7 @@ export default function BilleteraClient({
                   </div>
                 </div>
                 {t.description && t.description !== t.type && (
-                  <p className="text-[10px] text-zinc-400 mt-1.5 pt-1.5 border-t border-zinc-100 dark:border-zinc-800">{t.description}</p>
+                  <p className="text-[10px] text-zinc-400 mt-1.5 pt-1.5 border-t border-zinc-100">{t.description}</p>
                 )}
               </div>
             ))}

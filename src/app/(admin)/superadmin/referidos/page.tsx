@@ -283,8 +283,8 @@ export default function ReferidosPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Sistema de Referidos</h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona comisiones, billeteras y solicitudes de retiro</p>
+          <h1 className="text-2xl font-extrabold text-zinc-900">Sistema de Referidos</h1>
+          <p className="text-sm text-zinc-500 mt-1">Gestiona comisiones, billeteras y solicitudes de retiro</p>
         </div>
 
         {/* Summary Cards */}
@@ -336,7 +336,7 @@ export default function ReferidosPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-1 overflow-x-auto">
+        <div className="flex gap-2 border-b border-zinc-200 pb-1 overflow-x-auto">
           {([
             { key: "tree" as const, label: "Red", onClick: () => { if (trees.length === 0) loadTree(); } },
             { key: "overview" as const, label: "Resumen" },
@@ -351,11 +351,7 @@ export default function ReferidosPage() {
                 setActiveTab(tab.key);
                 if ((tab as any).onClick) (tab as any).onClick();
               }}
-              className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors whitespace-nowrap ${
-                activeTab === tab.key
-                  ? "bg-white dark:bg-zinc-800 text-primary-600 border-b-2 border-primary-600"
-                  : "text-zinc-500 hover:text-zinc-700"
-              }`}
+              className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors whitespace-nowrap ${ activeTab === tab.key ? "bg-white text-primary-600 border-b-2 border-primary-600" : "text-zinc-500 hover:text-zinc-700" }`}
             >
               {tab.label}
             </button>
@@ -366,15 +362,15 @@ export default function ReferidosPage() {
         {activeTab === "overview" && (
           <div className="space-y-6">
             <div className="card-soft rounded-[1.25rem] overflow-hidden">
-              <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 px-4 pt-4">Top Afiliados</h2>
+              <h2 className="text-lg font-bold text-zinc-800 px-4 pt-4">Top Afiliados</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Usuario</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Ganado Total</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Disponible</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Comisiones</th>
+                    <tr className="border-b border-zinc-100">
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Usuario</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Ganado Total</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Disponible</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Comisiones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -382,10 +378,10 @@ export default function ReferidosPage() {
                       .filter((w) => (w.total_cash_usd || 0) > 0)
                       .sort((a, b) => (b.available_cash_usd || 0) - (a.available_cash_usd || 0))
                       .map((w) => (
-                        <tr key={w.user_id} className="border-b border-zinc-50 dark:border-zinc-900 hover:bg-zinc-50/50">
+                        <tr key={w.user_id} className="border-b border-zinc-50 hover:bg-zinc-50/50">
                           <td className="px-4 py-3">
                             <div>
-                              <p className="font-semibold text-zinc-800 dark:text-zinc-200">{w.profile?.display_name || w.profile?.email}</p>
+                              <p className="font-semibold text-zinc-800">{w.profile?.display_name || w.profile?.email}</p>
                               <p className="text-xs text-zinc-400">{w.profile?.email}</p>
                             </div>
                           </td>
@@ -412,8 +408,8 @@ export default function ReferidosPage() {
         {activeTab === "pending" && (
           <div className="space-y-4">
             {selectedCommissions.size > 0 && (
-              <div className="flex items-center justify-between bg-primary-50 dark:bg-primary-950/30 rounded-xl px-4 py-3">
-                <span className="text-sm font-semibold text-primary-700 dark:text-primary-300">
+              <div className="flex items-center justify-between bg-primary-50 rounded-xl px-4 py-3">
+                <span className="text-sm font-semibold text-primary-700">
                   {selectedCommissions.size} comision(es) seleccionada(s)
                 </span>
                 <button
@@ -429,13 +425,13 @@ export default function ReferidosPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-100 dark:border-zinc-800">
+                    <tr className="border-b border-zinc-100">
                       <th className="px-4 py-3 w-10"><input type="checkbox" className="rounded border-zinc-300" /></th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Quién recibe</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Referido</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Nivel</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Monto</th>
-                      <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Disponible en</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Quién recibe</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Referido</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Nivel</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Monto</th>
+                      <th className="text-left px-4 py-3 font-semibold text-zinc-600">Disponible en</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -444,7 +440,7 @@ export default function ReferidosPage() {
                         ? Math.max(0, Math.ceil((new Date(c.available_after).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
                         : 0;
                       return (
-                        <tr key={c.id} className="border-b border-zinc-50 dark:border-zinc-900 hover:bg-zinc-50/50">
+                        <tr key={c.id} className="border-b border-zinc-50 hover:bg-zinc-50/50">
                           <td className="px-4 py-3">
                             <input
                               type="checkbox"
@@ -454,18 +450,14 @@ export default function ReferidosPage() {
                             />
                           </td>
                           <td className="px-4 py-3">
-                            <p className="font-semibold text-zinc-800 dark:text-zinc-200">{c.referrer?.display_name || c.referrer?.email}</p>
+                            <p className="font-semibold text-zinc-800">{c.referrer?.display_name || c.referrer?.email}</p>
                             <p className="text-xs text-zinc-400">{c.referrer?.email}</p>
                           </td>
                           <td className="px-4 py-3">
-                            <p className="text-zinc-600 dark:text-zinc-400">{c.referral?.referred?.display_name || c.referral?.referred?.email}</p>
+                            <p className="text-zinc-600">{c.referral?.referred?.display_name || c.referral?.referred?.email}</p>
                           </td>
                           <td className="px-4 py-3">
-                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                              c.level === 1 ? "bg-primary-100 text-primary-700" :
-                              c.level === 2 ? "bg-accent-100 text-accent-700" :
-                              "bg-warning-100 text-warning-700"
-                            }`}>
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ c.level === 1 ? "bg-primary-100 text-primary-700" : c.level === 2 ? "bg-accent-100 text-accent-700" : "bg-warning-100 text-warning-700" }`}>
                               Nivel {c.level}
                             </span>
                           </td>
@@ -492,30 +484,26 @@ export default function ReferidosPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Quién recibe</th>
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Referido</th>
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Nivel</th>
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Monto</th>
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Disponible desde</th>
+                  <tr className="border-b border-zinc-100">
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600">Quién recibe</th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600">Referido</th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600">Nivel</th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600">Monto</th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600">Disponible desde</th>
                   </tr>
                 </thead>
                 <tbody>
                   {availableCommissions.map((c) => (
-                    <tr key={c.id} className="border-b border-zinc-50 dark:border-zinc-900 hover:bg-zinc-50/50">
+                    <tr key={c.id} className="border-b border-zinc-50 hover:bg-zinc-50/50">
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">{c.referrer?.display_name || c.referrer?.email}</p>
+                        <p className="font-semibold text-zinc-800">{c.referrer?.display_name || c.referrer?.email}</p>
                         <p className="text-xs text-zinc-400">{c.referrer?.email}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-zinc-600 dark:text-zinc-400">{c.referral?.referred?.display_name || c.referral?.referred?.email}</p>
+                        <p className="text-zinc-600">{c.referral?.referred?.display_name || c.referral?.referred?.email}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          c.level === 1 ? "bg-primary-100 text-primary-700" :
-                          c.level === 2 ? "bg-accent-100 text-accent-700" :
-                          "bg-warning-100 text-warning-700"
-                        }`}>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ c.level === 1 ? "bg-primary-100 text-primary-700" : c.level === 2 ? "bg-accent-100 text-accent-700" : "bg-warning-100 text-warning-700" }`}>
                           Nivel {c.level}
                         </span>
                       </td>
@@ -538,12 +526,12 @@ export default function ReferidosPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Usuario</th>
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Ganado Total</th>
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Disponible</th>
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Referidos Directos</th>
-                    <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">Comisiones</th>
+                  <tr className="border-b border-zinc-100">
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600">Usuario</th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600">Ganado Total</th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600">Disponible</th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600">Referidos Directos</th>
+                    <th className="text-left px-4 py-3 font-semibold text-zinc-600">Comisiones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -553,10 +541,10 @@ export default function ReferidosPage() {
                       const userCommissions = commissions.filter((c) => c.user_id === w.user_id);
                       const directReferrals = commissions.filter((c) => c.user_id === w.user_id && c.level === 1).length;
                       return (
-                        <tr key={w.user_id} className="border-b border-zinc-50 dark:border-zinc-900 hover:bg-zinc-50/50">
+                        <tr key={w.user_id} className="border-b border-zinc-50 hover:bg-zinc-50/50">
                           <td className="px-4 py-3">
                             <div>
-                              <p className="font-semibold text-zinc-800 dark:text-zinc-200">{w.profile?.display_name || w.profile?.email}</p>
+                              <p className="font-semibold text-zinc-800">{w.profile?.display_name || w.profile?.email}</p>
                               <p className="text-xs text-zinc-400">{w.profile?.email}</p>
                             </div>
                           </td>
@@ -583,11 +571,7 @@ export default function ReferidosPage() {
                 <button
                   key={f}
                   onClick={() => setWithdrawalFilter(f)}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
-                    withdrawalFilter === f
-                      ? "bg-primary-600 text-white"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 hover:bg-zinc-200"
-                  }`}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${ withdrawalFilter === f ? "bg-primary-600 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200" }`}
                 >
                   {f === "all" ? "Todos" : f.charAt(0).toUpperCase() + f.slice(1)}
                 </button>
@@ -603,11 +587,11 @@ export default function ReferidosPage() {
                   <div className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-950 flex items-center justify-center text-accent-600">
+                        <div className="w-10 h-10 rounded-full bg-accent-100 flex items-center justify-center text-accent-600">
                           <DollarSign className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="font-semibold text-zinc-800 dark:text-zinc-200 text-sm">{w.profiles?.display_name || w.profiles?.email || w.user_id}</p>
+                          <p className="font-semibold text-zinc-800 text-sm">{w.profiles?.display_name || w.profiles?.email || w.user_id}</p>
                           <p className="text-xs text-zinc-400">{w.profiles?.email}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${STATUS_COLORS[w.status] || "bg-zinc-100 text-zinc-600"}`}>
@@ -618,7 +602,7 @@ export default function ReferidosPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-extrabold text-zinc-900 dark:text-white">{formatMoney(w.amount_usd)}</p>
+                        <p className="text-lg font-extrabold text-zinc-900">{formatMoney(w.amount_usd)}</p>
                         <p className="text-[10px] text-zinc-400">{w.withdrawal_method || w.method}</p>
                         {w.fee_cents !== undefined && w.fee_cents > 0 && (
                           <p className="text-[10px] text-zinc-400">Fee: ${(w.fee_cents / 100).toFixed(2)}</p>
@@ -636,7 +620,7 @@ export default function ReferidosPage() {
                     </button>
 
                     {expandedWithdrawal === w.id && w.billing && (
-                      <div className="mt-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1 text-xs">
+                      <div className="mt-3 p-3 rounded-xl bg-zinc-50 space-y-1 text-xs">
                         <p><span className="text-zinc-400">Nombre:</span> <span className="font-semibold">{w.billing.full_name}</span></p>
                         <p><span className="text-zinc-400">País:</span> {w.billing.country_code}</p>
                         <p><span className="text-zinc-400">Documento:</span> {w.billing.document_type?.toUpperCase()} {w.billing.document_number}</p>
@@ -654,8 +638,8 @@ export default function ReferidosPage() {
 
                     {/* TX ID for completed */}
                     {w.status === "completed" && w.payment_reference && (
-                      <div className="mt-3 p-3 rounded-xl bg-secondary-50 dark:bg-secondary-950/30">
-                        <p className="text-xs font-semibold text-secondary-700 dark:text-secondary-300">
+                      <div className="mt-3 p-3 rounded-xl bg-secondary-50">
+                        <p className="text-xs font-semibold text-secondary-700">
                           Referencia / TX ID: <span className="font-mono">{w.payment_reference}</span>
                         </p>
                       </div>
@@ -663,15 +647,15 @@ export default function ReferidosPage() {
 
                     {/* Failure/Rejection reason */}
                     {(w.status === "failed" && w.failure_reason) && (
-                      <div className="mt-3 p-3 rounded-xl bg-danger-50 dark:bg-danger-950/30">
-                        <p className="text-xs text-danger-700 dark:text-danger-300">
+                      <div className="mt-3 p-3 rounded-xl bg-danger-50">
+                        <p className="text-xs text-danger-700">
                           <span className="font-semibold">Fallo:</span> {w.failure_reason}
                         </p>
                       </div>
                     )}
                     {(w.status === "rejected" && w.rejection_reason) && (
-                      <div className="mt-3 p-3 rounded-xl bg-danger-50 dark:bg-danger-950/30">
-                        <p className="text-xs text-danger-700 dark:text-danger-300">
+                      <div className="mt-3 p-3 rounded-xl bg-danger-50">
+                        <p className="text-xs text-danger-700">
                           <span className="font-semibold">Rechazo:</span> {w.rejection_reason}
                         </p>
                       </div>
@@ -693,7 +677,7 @@ export default function ReferidosPage() {
                             placeholder="Motivo de rechazo..."
                             value={rejectionReason[w.id] || ""}
                             onChange={(e) => setRejectionReason((p) => ({ ...p, [w.id]: e.target.value }))}
-                            className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-danger-500/20"
+                            className="flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-danger-500/20"
                           />
                           <button
                             onClick={() => handleReject(w.id)}
@@ -714,7 +698,7 @@ export default function ReferidosPage() {
                             placeholder="TX ID / Referencia de pago..."
                             value={paymentReference[w.id] || ""}
                             onChange={(e) => setPaymentReference((p) => ({ ...p, [w.id]: e.target.value }))}
-                            className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-secondary-500/20"
+                            className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-secondary-500/20"
                           />
                           <button
                             onClick={() => handleComplete(w.id)}
@@ -730,7 +714,7 @@ export default function ReferidosPage() {
                             placeholder="Motivo del fallo..."
                             value={failureReason[w.id] || ""}
                             onChange={(e) => setFailureReason((p) => ({ ...p, [w.id]: e.target.value }))}
-                            className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-danger-500/20"
+                            className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-danger-500/20"
                           />
                           <button
                             onClick={() => handleFail(w.id)}

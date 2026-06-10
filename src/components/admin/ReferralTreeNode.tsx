@@ -50,12 +50,10 @@ export function ReferralTreeNode({ node, depth, expandedNodes, onToggle, onSelec
           e.stopPropagation();
           onSelect(node);
         }}
-        className={`relative cursor-pointer group transition-all duration-200 select-none ${
-          isSelected ? "scale-110 z-20" : "hover:scale-105 z-10"
-        } ${isHighlighted ? "animate-pulse" : ""}`}
+        className={`relative cursor-pointer group transition-all duration-200 select-none ${ isSelected ? "scale-110 z-20" : "hover:scale-105 z-10" } ${isHighlighted ? "animate-pulse" : ""}`}
       >
         <div
-          className={`w-[${CARD_WIDTH}px] bg-white dark:bg-zinc-800 rounded-2xl border-2 ${colors.border} shadow-md hover:shadow-xl transition-all p-4 text-center relative`}
+          className={`w-[${CARD_WIDTH}px] bg-white rounded-2xl border-2 ${colors.border} shadow-md hover:shadow-xl transition-all p-4 text-center relative`}
           style={{ width: CARD_WIDTH }}
         >
           {/* Selected ring */}
@@ -78,7 +76,7 @@ export function ReferralTreeNode({ node, depth, expandedNodes, onToggle, onSelec
           </div>
 
           {/* Name */}
-          <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200 truncate px-1 leading-tight">
+          <p className="text-sm font-bold text-zinc-800 truncate px-1 leading-tight">
             {node.profile?.display_name || "Usuario"}
           </p>
           <p className="text-[10px] text-zinc-400 truncate px-1 mt-0.5">{node.profile?.email}</p>
@@ -120,7 +118,7 @@ export function ReferralTreeNode({ node, depth, expandedNodes, onToggle, onSelec
             e.stopPropagation();
             onToggle(node.id);
           }}
-          className="mt-2 mb-2 w-7 h-7 rounded-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors z-10"
+          className="mt-2 mb-2 w-7 h-7 rounded-full bg-white border border-zinc-200 shadow-sm flex items-center justify-center hover:bg-zinc-50 transition-colors z-10"
         >
           {isExpanded ? (
             <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />

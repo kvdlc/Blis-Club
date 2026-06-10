@@ -140,13 +140,13 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
     <div className="space-y-5 pb-24">
       {/* Header */}
       <div className="flex items-center gap-3 pt-1">
-        <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center">
+        <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex items-center gap-2">
           <Globe className="w-5 h-5 text-primary-500" />
           <div>
-            <h2 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Perfil Público</h2>
+            <h2 className="text-sm font-bold text-zinc-800">Perfil Público</h2>
             <p className="text-[10px] text-zinc-400">{dogName}</p>
           </div>
         </div>
@@ -178,7 +178,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
 
       {/* ═══ BIO ═══ */}
       <div className="card-elevated rounded-2xl p-5 space-y-3">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+        <h3 className="text-sm font-bold text-zinc-800 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary-500" /> Biografía
         </h3>
         <textarea
@@ -187,52 +187,48 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
           placeholder={`Cuéntale al mundo sobre ${dogName}...`}
           maxLength={200}
           rows={3}
-          className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 resize-none focus:outline-none focus:border-primary-400 transition-colors"
+          className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-3 text-sm text-zinc-700 placeholder:text-zinc-400 resize-none focus:outline-none focus:border-primary-400 transition-colors"
         />
         <p className="text-[10px] text-zinc-400 text-right">{bio.length}/200</p>
       </div>
 
       {/* ═══ CITY ═══ */}
       <div className="card-elevated rounded-2xl p-5 space-y-3">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ciudad</h3>
+        <h3 className="text-sm font-bold text-zinc-800">Ciudad</h3>
         <input
           type="text"
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="Ej: Ciudad de México, CDMX"
-          className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 focus:outline-none focus:border-primary-400 transition-colors"
+          className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-3 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:border-primary-400 transition-colors"
         />
       </div>
 
       {/* ═══ SECTIONS TOGGLES ═══ */}
       <div className="card-elevated rounded-2xl p-5 space-y-3">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Secciones visibles</h3>
+        <h3 className="text-sm font-bold text-zinc-800">Secciones visibles</h3>
         <p className="text-[10px] text-zinc-400 -mt-2">Activa o desactiva lo que quieres mostrar en el perfil público</p>
         <div className="space-y-1">
           {SECTIONS.map((s) => (
             <label
               key={s.key}
-              className="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer transition-colors"
+              className="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-950/30 flex items-center justify-center text-primary-600">
+                <div className="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600">
                   {s.icon}
                 </div>
-                <span className="text-sm text-zinc-700 dark:text-zinc-300">{s.label}</span>
+                <span className="text-sm text-zinc-700">{s.label}</span>
               </div>
               <button
                 type="button"
                 role="switch"
                 aria-checked={sectionsVisible[s.key]}
                 onClick={() => toggleSection(s.key)}
-                className={`relative w-11 h-6 rounded-full transition-colors ${
-                  sectionsVisible[s.key] ? "bg-primary-500" : "bg-zinc-300 dark:bg-zinc-600"
-                }`}
+                className={`relative w-11 h-6 rounded-full transition-colors ${ sectionsVisible[s.key] ? "bg-primary-500" : "bg-zinc-300" }`}
               >
                 <span
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                    sectionsVisible[s.key] ? "translate-x-5" : "translate-x-0"
-                  }`}
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${ sectionsVisible[s.key] ? "translate-x-5" : "translate-x-0" }`}
                 />
               </button>
             </label>
@@ -243,7 +239,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
       {/* ═══ GALLERY ═══ */}
       {sectionsVisible.gallery && (
         <div className="card-elevated rounded-2xl p-5 space-y-3">
-          <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-zinc-800 flex items-center gap-2">
             <Camera className="w-4 h-4 text-primary-500" /> Galería de fotos
           </h3>
           <p className="text-[10px] text-zinc-400 -mt-2">
@@ -272,7 +268,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
               </div>
             ))}
             {galleryPhotos.length < MAX_GALLERY && (
-              <label className="aspect-square rounded-xl border-2 border-dashed border-zinc-300 dark:border-zinc-600 flex flex-col items-center justify-center cursor-pointer hover:border-primary-400 transition-colors gap-1">
+              <label className="aspect-square rounded-xl border-2 border-dashed border-zinc-300 flex flex-col items-center justify-center cursor-pointer hover:border-primary-400 transition-colors gap-1">
                 {uploading ? (
                   <Loader2 className="w-5 h-5 text-zinc-400 animate-spin" />
                 ) : (
@@ -291,15 +287,15 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
       {/* ═══ BUSCA NOVI@ ═══ */}
       {sectionsVisible.breeding && (
         <div className="card-elevated rounded-2xl p-5 space-y-4">
-          <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-zinc-800 flex items-center gap-2">
             <Heart className="w-4 h-4 text-pink-500" /> Busca Novi@
           </h3>
 
-          <label className="flex items-center justify-between p-3 rounded-xl bg-pink-50 dark:bg-pink-950/20 cursor-pointer">
+          <label className="flex items-center justify-between p-3 rounded-xl bg-pink-50 cursor-pointer">
             <div className="flex items-center gap-3">
               <span className="text-2xl">💘</span>
               <div>
-                <p className="text-sm font-bold text-pink-700 dark:text-pink-300">Activar sección</p>
+                <p className="text-sm font-bold text-pink-700">Activar sección</p>
                 <p className="text-[10px] text-pink-500/80">Se mostrará justo después de la biografía</p>
               </div>
             </div>
@@ -308,14 +304,10 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
               role="switch"
               aria-checked={breedingActive}
               onClick={() => setBreedingActive(!breedingActive)}
-              className={`relative w-11 h-6 rounded-full transition-colors ${
-                breedingActive ? "bg-pink-500" : "bg-zinc-300 dark:bg-zinc-600"
-              }`}
+              className={`relative w-11 h-6 rounded-full transition-colors ${ breedingActive ? "bg-pink-500" : "bg-zinc-300" }`}
             >
               <span
-                className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                  breedingActive ? "translate-x-5" : "translate-x-0"
-                }`}
+                className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${ breedingActive ? "translate-x-5" : "translate-x-0" }`}
               />
             </button>
           </label>
@@ -330,11 +322,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
                   <button
                     type="button"
                     onClick={() => setBreedingInquiryOnly(false)}
-                    className={`w-full rounded-xl border-2 py-2.5 text-xs font-bold transition-all ${
-                      !breedingInquiryOnly
-                        ? "border-pink-400 bg-pink-50 text-pink-700"
-                        : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-500"
-                    }`}
+                    className={`w-full rounded-xl border-2 py-2.5 text-xs font-bold transition-all ${ !breedingInquiryOnly ? "border-pink-400 bg-pink-50 text-pink-700" : "border-zinc-200 bg-white text-zinc-500" }`}
                   >
                     💰 Con precio
                   </button>
@@ -346,11 +334,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
                   <button
                     type="button"
                     onClick={() => setBreedingInquiryOnly(true)}
-                    className={`w-full rounded-xl border-2 py-2.5 text-xs font-bold transition-all ${
-                      breedingInquiryOnly
-                        ? "border-pink-400 bg-pink-50 text-pink-700"
-                        : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-500"
-                    }`}
+                    className={`w-full rounded-xl border-2 py-2.5 text-xs font-bold transition-all ${ breedingInquiryOnly ? "border-pink-400 bg-pink-50 text-pink-700" : "border-zinc-200 bg-white text-zinc-500" }`}
                   >
                     💬 Consulta al interno
                   </button>
@@ -362,7 +346,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
                   <select
                     value={breedingCurrency}
                     onChange={(e) => setBreedingCurrency(e.target.value)}
-                    className="rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 focus:outline-none focus:border-pink-400"
+                    className="rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2.5 text-sm text-zinc-700 focus:outline-none focus:border-pink-400"
                   >
                     {CURRENCIES.map((c) => (
                       <option key={c} value={c}>{c}</option>
@@ -373,7 +357,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
                     value={breedingAmount}
                     onChange={(e) => setBreedingAmount(e.target.value)}
                     placeholder="Monto"
-                    className="flex-1 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-4 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 focus:outline-none focus:border-pink-400 transition-colors"
+                    className="flex-1 rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-2.5 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:border-pink-400 transition-colors"
                   />
                 </div>
               )}
@@ -384,7 +368,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
                 placeholder="Describe qué buscas, características, condiciones..."
                 maxLength={200}
                 rows={3}
-                className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 resize-none focus:outline-none focus:border-pink-400 transition-colors"
+                className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-3 text-sm text-zinc-700 placeholder:text-zinc-400 resize-none focus:outline-none focus:border-pink-400 transition-colors"
               />
               <p className="text-[10px] text-zinc-400 text-right">{breedingDescription.length}/200</p>
             </div>
@@ -395,7 +379,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
       {/* ═══ CONTACT ═══ */}
       {sectionsVisible.contact && (
         <div className="card-elevated rounded-2xl p-5 space-y-3">
-          <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-zinc-800 flex items-center gap-2">
             <Phone className="w-4 h-4 text-green-500" /> Datos de contacto públicos
           </h3>
           <p className="text-[10px] text-zinc-400 -mt-2">Esta información será visible para cualquiera que vea el perfil público</p>
@@ -408,7 +392,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
                 value={contactPhone}
                 onChange={(e) => setContactPhone(e.target.value)}
                 placeholder="+52 1 55 1234 5678"
-                className="flex-1 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 focus:outline-none focus:border-primary-400 transition-colors"
+                className="flex-1 rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-3 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:border-primary-400 transition-colors"
               />
               {ownerWhatsapp && !contactPhone && (
                 <button
@@ -429,7 +413,7 @@ export function PublicProfileConfigClient({ dogId, dogName, userId, initialConfi
               value={contactEmail}
               onChange={(e) => setContactEmail(e.target.value)}
               placeholder="dueño@email.com"
-              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 focus:outline-none focus:border-primary-400 transition-colors"
+              className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-3 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:border-primary-400 transition-colors"
             />
           </div>
         </div>

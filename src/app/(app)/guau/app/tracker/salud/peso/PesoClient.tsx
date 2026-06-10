@@ -89,20 +89,20 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
   return (
     <div className="space-y-4 pb-8">
       <div className="flex items-center gap-3 pt-1">
-        <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center">
+        <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-accent-100 dark:bg-accent-900 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-accent-100 flex items-center justify-center">
             <Weight className="w-4 h-4 text-accent-500" />
           </div>
-          <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Peso de {dog.nombre}</h1>
+          <h1 className="text-lg font-bold text-zinc-900">Peso de {dog.nombre}</h1>
         </div>
       </div>
 
-      <div className="card-soft rounded-[1.25rem] p-4 flex items-center justify-between bg-gradient-to-r from-accent-50 to-primary-50 dark:from-accent-950/30 dark:to-primary-950/20">
-        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">⚖️ Peso actual</span>
-        <span className="text-xl font-extrabold text-accent-600 dark:text-accent-400">{dog.peso_kg} kg</span>
+      <div className="card-soft rounded-[1.25rem] p-4 flex items-center justify-between bg-gradient-to-r from-accent-50 to-primary-50">
+        <span className="text-sm font-semibold text-zinc-700">⚖️ Peso actual</span>
+        <span className="text-xl font-extrabold text-accent-600">{dog.peso_kg} kg</span>
       </div>
 
       <div className="space-y-2">
@@ -115,12 +115,12 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
                   <div className="space-y-2">
                     <div className="flex gap-2">
                       <DatePicker value={editForm.fecha} onChange={(d) => setEditForm((f) => ({ ...f, fecha: d }))} />
-                      <input type="number" step="0.1" value={editForm.peso_kg} onChange={(e) => setEditForm((f) => ({ ...f, peso_kg: e.target.value }))} className="w-24 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 text-xs" />
+                      <input type="number" step="0.1" value={editForm.peso_kg} onChange={(e) => setEditForm((f) => ({ ...f, peso_kg: e.target.value }))} className="w-24 rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-1.5 text-xs" />
                     </div>
-                    <input value={editForm.notas} onChange={(e) => setEditForm((f) => ({ ...f, notas: e.target.value }))} placeholder="Notas" className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 text-xs" />
+                    <input value={editForm.notas} onChange={(e) => setEditForm((f) => ({ ...f, notas: e.target.value }))} placeholder="Notas" className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-1.5 text-xs" />
                     <div className="flex gap-2">
                       <button onClick={() => saveEdit(w.id)} className="flex-1 bg-accent-600 text-white rounded-lg py-1.5 text-xs font-bold flex items-center justify-center gap-1"><Save className="w-3 h-3" /> Guardar</button>
-                      <button onClick={() => setEditing(null)} className="flex-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg py-1.5 text-xs font-semibold flex items-center justify-center gap-1"><X className="w-3 h-3" /> Cancelar</button>
+                      <button onClick={() => setEditing(null)} className="flex-1 bg-zinc-100 rounded-lg py-1.5 text-xs font-semibold flex items-center justify-center gap-1"><X className="w-3 h-3" /> Cancelar</button>
                     </div>
                   </div>
                 ) : (
@@ -131,8 +131,8 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs text-zinc-500 dark:text-zinc-400">{new Date(w.fecha + "T00:00:00").toLocaleDateString("es")}</span>
-                          <span className="text-sm font-extrabold text-zinc-700 dark:text-zinc-300">{w.peso_kg} kg</span>
+                          <span className="text-xs text-zinc-500">{new Date(w.fecha + "T00:00:00").toLocaleDateString("es")}</span>
+                          <span className="text-sm font-extrabold text-zinc-700">{w.peso_kg} kg</span>
                         </div>
                         {trend && (
                           <div className={`flex items-center gap-0.5 text-[10px] mt-0.5 ${trend.up ? "text-danger-500" : "text-secondary-500"}`}>
@@ -143,10 +143,10 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
                         {w.notas && <p className="text-[10px] text-zinc-400 truncate mt-0.5">{w.notas}</p>}
                       </div>
                       <div className="flex items-center gap-0.5 shrink-0">
-                        <button onClick={() => startEdit(w)} className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors">
-                          <Pencil className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                        <button onClick={() => startEdit(w)} className="w-6 h-6 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors">
+                          <Pencil className="w-3 h-3 text-zinc-500" />
                         </button>
-                        <button onClick={() => deleteWeight(w.id)} className="w-6 h-6 rounded-full bg-danger-100 dark:bg-danger-900 flex items-center justify-center hover:bg-danger-200 transition-colors">
+                        <button onClick={() => deleteWeight(w.id)} className="w-6 h-6 rounded-full bg-danger-100 flex items-center justify-center hover:bg-danger-200 transition-colors">
                           <Trash2 className="w-3 h-3 text-danger-500" />
                         </button>
                       </div>
@@ -161,25 +161,25 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
         )}
       </div>
 
-      <form onSubmit={addWeight} className="card-soft rounded-[1.25rem] p-5 space-y-3 bg-gradient-to-br from-accent-50/50 to-primary-50/50 dark:from-accent-950/30 dark:to-primary-950/20 border-2 border-dashed border-accent-200 dark:border-accent-800">
+      <form onSubmit={addWeight} className="card-soft rounded-[1.25rem] p-5 space-y-3 bg-gradient-to-br from-accent-50/50 to-primary-50/50 border-2 border-dashed border-accent-200">
         <div className="flex items-center gap-2">
           <Weight className="w-4 h-4 text-accent-500" />
-          <span className="text-xs font-bold text-accent-700 dark:text-accent-300">Nuevo Registro</span>
+          <span className="text-xs font-bold text-accent-700">Nuevo Registro</span>
         </div>
 
         <div className="flex gap-2">
           <div className="flex-1">
-            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">📅 Fecha</span></div>
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">📅 Fecha</span></div>
             <DatePicker value={formDate} onChange={setFormDate} />
           </div>
           <div className="w-28">
-            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">⚖️ Peso</span></div>
-            <input name="peso_kg" type="number" step="0.1" placeholder={`${dog.peso_kg}`} required className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm font-bold text-accent-600" />
+            <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">⚖️ Peso</span></div>
+            <input name="peso_kg" type="number" step="0.1" placeholder={`${dog.peso_kg}`} required className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm font-bold text-accent-600" />
           </div>
         </div>
 
         <div>
-          <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">📸 Foto de progreso</span></div>
+          <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">📸 Foto de progreso</span></div>
           <div className="flex gap-2">
             {photoUrl ? (
               <div className="relative w-full">
@@ -192,12 +192,12 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="w-full flex flex-col items-center justify-center gap-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-600 py-6 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                className="w-full flex flex-col items-center justify-center gap-2 rounded-xl bg-zinc-50 border-2 border-dashed border-zinc-300 py-6 hover:bg-zinc-100 transition-colors"
               >
-                <div className="w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-accent-100 flex items-center justify-center">
                   <Camera className="w-5 h-5 text-accent-500" />
                 </div>
-                <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">Tocar para tomar o elegir foto</span>
+                <span className="text-[11px] font-semibold text-zinc-500">Tocar para tomar o elegir foto</span>
               </button>
             )}
           </div>
@@ -212,8 +212,8 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
         </div>
 
         <div>
-          <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500 dark:text-zinc-400">🗒️ Notas</span></div>
-          <input name="notas" placeholder="Ej: Después del desayuno" className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs" />
+          <div className="flex items-center gap-1 mb-1"><span className="text-xs text-zinc-500">🗒️ Notas</span></div>
+          <input name="notas" placeholder="Ej: Después del desayuno" className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-xs" />
         </div>
 
         <button type="submit" disabled={uploading} className="w-full bg-accent-600 text-white rounded-xl py-2.5 text-xs font-bold active:scale-[0.98] hover:bg-accent-700 transition-colors disabled:opacity-50">

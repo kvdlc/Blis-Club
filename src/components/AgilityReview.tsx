@@ -203,12 +203,12 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
 
   if (saved) {
     return (
-      <div className="card-soft rounded-[1.5rem] p-5 space-y-5 bg-white dark:bg-zinc-900 border-2 border-accent-200 dark:border-accent-800">
+      <div className="card-soft rounded-[1.5rem] p-5 space-y-5 bg-white border-2 border-accent-200">
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-full bg-secondary-100 dark:bg-secondary-950 flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto">
             <Check className="w-8 h-8 text-secondary-600" />
           </div>
-          <h3 className="text-lg font-bold text-secondary-700 dark:text-secondary-300">¡Guardado!</h3>
+          <h3 className="text-lg font-bold text-secondary-700">¡Guardado!</h3>
         </div>
 
         {/* Share Card (hidden, used for html-to-image) */}
@@ -252,17 +252,17 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
 
         {photos.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Fotos de la sesión</p>
+            <p className="text-xs font-semibold text-zinc-500">Fotos de la sesión</p>
             <div className="flex gap-2">
               {photos.map((p, i) => (
-                <div key={i} className="w-20 h-20 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
+                <div key={i} className="w-20 h-20 rounded-xl overflow-hidden border border-zinc-200">
                   <img src={p} alt="" className="w-full h-full object-cover" />
                 </div>
               ))}
             </div>
             <button
               onClick={() => setShowCollageEditor(true)}
-              className="w-full py-3 rounded-xl bg-accent-50 dark:bg-accent-950 border border-accent-200 dark:border-accent-800 text-accent-700 dark:text-accent-300 font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-accent-50 border border-accent-200 text-accent-700 font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <ImagePlus className="w-4 h-4" />
               Crear collage para compartir
@@ -285,7 +285,7 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
         <div className="flex gap-2">
           <button
             onClick={downloadShareCard}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm active:scale-[0.98] transition-all"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-100 text-zinc-700 font-bold text-sm active:scale-[0.98] transition-all"
           >
             <Download className="w-4 h-4" />
             Descargar
@@ -301,7 +301,7 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
 
         <button
           onClick={onSaved}
-          className="w-full py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm"
+          className="w-full py-3 rounded-xl bg-zinc-100 text-zinc-700 font-bold text-sm"
         >
           Listo
         </button>
@@ -310,61 +310,61 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-950 p-4 pb-8 space-y-5 min-h-screen">
+    <div className="bg-white p-4 pb-8 space-y-5 min-h-screen">
       {/* Header */}
       <div className="text-center space-y-1">
-        <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">Resumen del entrenamiento</h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">{dog.nombre} lo hizo increíble.</p>
+        <h3 className="text-lg font-bold text-zinc-800">Resumen del entrenamiento</h3>
+        <p className="text-sm text-zinc-500">{dog.nombre} lo hizo increíble.</p>
       </div>
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4 text-center">
+        <div className="bg-zinc-50 rounded-xl p-4 text-center">
           <p className="text-2xl font-bold text-accent-600">{formatTime(rawTime)}</p>
           <p className="text-[10px] text-zinc-400">Tiempo bruto</p>
         </div>
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{formatTime(netTime)}</p>
+        <div className="bg-zinc-50 rounded-xl p-4 text-center">
+          <p className="text-2xl font-bold text-zinc-700">{formatTime(netTime)}</p>
           <p className="text-[10px] text-zinc-400">Tiempo neto</p>
         </div>
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{fouls.length}</p>
+        <div className="bg-zinc-50 rounded-xl p-4 text-center">
+          <p className="text-2xl font-bold text-zinc-700">{fouls.length}</p>
           <p className="text-[10px] text-zinc-400">Faltas</p>
         </div>
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{config.selectedObstacles.length}</p>
+        <div className="bg-zinc-50 rounded-xl p-4 text-center">
+          <p className="text-2xl font-bold text-zinc-700">{config.selectedObstacles.length}</p>
           <p className="text-[10px] text-zinc-400">Obstáculos</p>
         </div>
       </div>
 
       {isCleanRun && (
-        <div className="bg-secondary-50 dark:bg-secondary-950/30 border border-secondary-200 dark:border-secondary-800 rounded-xl p-3 text-center">
-          <span className="text-sm font-bold text-secondary-700 dark:text-secondary-300">🏆 CLEAN RUN — Sin faltas!</span>
+        <div className="bg-secondary-50 border border-secondary-200 rounded-xl p-3 text-center">
+          <span className="text-sm font-bold text-secondary-700">🏆 CLEAN RUN — Sin faltas!</span>
         </div>
       )}
 
       {/* Fouls list - editable */}
       {fouls.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Faltas registradas</h4>
+          <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Faltas registradas</h4>
           <div className="space-y-1.5">
             {fouls.map((foul) => {
               const obstacle = config.selectedObstacles.find((o) => o.id === foul.obstacle_id);
               return (
                 <div
                   key={foul.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-sm">{CATEGORY_CONFIG[obstacle?.category || ""]?.emoji || "🏁"}</span>
                     <div>
-                      <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{obstacle?.name || "Obstáculo"}</p>
+                      <p className="text-xs font-semibold text-zinc-700">{obstacle?.name || "Obstáculo"}</p>
                       <p className="text-[10px] text-zinc-400">Vuelta {foul.lap}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => removeFoul(foul.id)}
-                    className="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-500 flex items-center justify-center hover:bg-danger-100 hover:text-danger-500 transition-colors"
+                    className="w-7 h-7 rounded-full bg-zinc-200 text-zinc-500 flex items-center justify-center hover:bg-danger-100 hover:text-danger-500 transition-colors"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -382,7 +382,7 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
         </label>
         <div className="flex gap-2">
           {photos.map((photo, idx) => (
-            <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
+            <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-zinc-200">
               <img src={photo} alt="" className="w-full h-full object-cover" />
               <button
                 onClick={() => removePhoto(idx)}
@@ -395,7 +395,7 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
           {photos.length < 3 && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-20 h-20 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 flex flex-col items-center justify-center gap-1 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              className="w-20 h-20 rounded-xl border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center gap-1 text-zinc-400 hover:bg-zinc-50 transition-colors"
             >
               <ImagePlus className="w-5 h-5" />
               <span className="text-[10px]">Añadir</span>

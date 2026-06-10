@@ -41,8 +41,8 @@ export function AgilityChallenges({ sessions }: Props) {
   if (loading && challenges.length === 0) {
     return (
       <div className="card-soft rounded-[1.5rem] p-5 animate-pulse">
-        <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3 mb-3" />
-        <div className="h-8 bg-zinc-200 dark:bg-zinc-800 rounded w-full" />
+        <div className="h-4 bg-zinc-200 rounded w-1/3 mb-3" />
+        <div className="h-8 bg-zinc-200 rounded w-full" />
       </div>
     );
   }
@@ -55,15 +55,15 @@ export function AgilityChallenges({ sessions }: Props) {
     <div className="card-soft rounded-[1.5rem] p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-warning-100 dark:bg-warning-900 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-warning-100 flex items-center justify-center">
             <Trophy className="w-4 h-4 text-warning-600" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Desafíos de la semana</h3>
+            <h3 className="text-sm font-bold text-zinc-800">Desafíos de la semana</h3>
             <p className="text-[10px] text-zinc-400">{completedCount}/{challenges.length} completados</p>
           </div>
         </div>
-        <div className="w-10 h-10 rounded-full bg-warning-50 dark:bg-warning-950 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full bg-warning-50 flex items-center justify-center">
           <Flame className="w-5 h-5 text-warning-500" />
         </div>
       </div>
@@ -72,28 +72,16 @@ export function AgilityChallenges({ sessions }: Props) {
         {challenges.map((challenge) => (
           <div
             key={challenge.id}
-            className={`flex items-start gap-3 p-3 rounded-xl transition-all ${
-              challenge.completed
-                ? "bg-secondary-50 dark:bg-secondary-950/30 border border-secondary-200 dark:border-secondary-800"
-                : "bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800"
-            }`}
+            className={`flex items-start gap-3 p-3 rounded-xl transition-all ${ challenge.completed ? "bg-secondary-50 border border-secondary-200" : "bg-white border border-zinc-100" }`}
           >
             <div
-              className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                challenge.completed
-                  ? "bg-secondary-100 dark:bg-secondary-900 text-secondary-600"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
-              }`}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${ challenge.completed ? "bg-secondary-100 text-secondary-600" : "bg-zinc-100 text-zinc-400" }`}
             >
               {challenge.completed ? <CheckCircle className="w-4 h-4" /> : <Target className="w-4 h-4" />}
             </div>
             <div className="flex-1 min-w-0">
               <p
-                className={`text-xs font-semibold ${
-                  challenge.completed
-                    ? "text-secondary-700 dark:text-secondary-300"
-                    : "text-zinc-700 dark:text-zinc-300"
-                }`}
+                className={`text-xs font-semibold ${ challenge.completed ? "text-secondary-700" : "text-zinc-700" }`}
               >
                 {challenge.title}
               </p>

@@ -204,9 +204,7 @@ export function OnboardingTutorial({ userId, hasSeenTutorial = false, forceShow 
             <button
               key={i}
               onClick={() => setStep(i)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === step ? "w-6 bg-white" : "w-1.5 bg-white/40"
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${ i === step ? "w-6 bg-white" : "w-1.5 bg-white/40" }`}
               aria-label={`Ir al paso ${i + 1}`}
             />
           ))}

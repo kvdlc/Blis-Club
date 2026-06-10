@@ -42,7 +42,7 @@ function RingGauge({ pct, color, darkColor }: { pct: number; color: string; dark
   return (
     <div className="relative w-16 h-16">
       <svg className="w-full h-full -rotate-90" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeWidth="5" className="text-zinc-200 dark:text-zinc-700" />
+        <circle cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeWidth="5" className="text-zinc-200" />
         <circle cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round"
           className={color}
           strokeDasharray={circ}
@@ -111,17 +111,17 @@ export function DashboardWidgets({
 
   return (
     <div className="space-y-3">
-      <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">Resumen del día</h3>
+      <h3 className="font-bold text-zinc-900 text-sm">Resumen del día</h3>
 
       {/* ═══ Widget Medicamentos ═══ */}
       {(todayMeds.length > 0 || overdueMeds.length > 0) && (
-        <Link href="/guau/app/tracker/salud/medicamentos" className="card-soft rounded-[1.25rem] p-4 block space-y-2.5 transition-all active:scale-[0.98] hover:shadow-md border-l-4 border-warning-400 dark:border-warning-600">
+        <Link href="/guau/app/tracker/salud/medicamentos" className="card-soft rounded-[1.25rem] p-4 block space-y-2.5 transition-all active:scale-[0.98] hover:shadow-md border-l-4 border-warning-400">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-warning-100 dark:bg-warning-900 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-warning-100 flex items-center justify-center">
                 <Pill className="w-3.5 h-3.5 text-warning-600" />
               </div>
-              <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Medicamentos</span>
+              <span className="text-xs font-bold text-zinc-800">Medicamentos</span>
             </div>
             <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
           </div>
@@ -133,7 +133,7 @@ export function DashboardWidgets({
               <div key={med.id} className="flex items-center gap-2 text-xs">
                 <Clock className="w-3 h-3 text-warning-500 shrink-0" />
                 <span className="text-zinc-500">{doseHour}</span>
-                <span className="font-semibold text-zinc-700 dark:text-zinc-300 truncate flex-1">{med.medication_name}</span>
+                <span className="font-semibold text-zinc-700 truncate flex-1">{med.medication_name}</span>
                 <span className="text-[10px] text-zinc-400 shrink-0">pendiente</span>
               </div>
             );
@@ -141,15 +141,15 @@ export function DashboardWidgets({
 
           {/* Atrasadas */}
           {overdueMeds.length > 0 && (
-            <div className="space-y-1.5 pt-1 border-t border-danger-100 dark:border-danger-900/30">
+            <div className="space-y-1.5 pt-1 border-t border-danger-100">
               <div className="flex items-center gap-1.5">
                 <AlertTriangle className="w-3 h-3 text-danger-500" />
-                <span className="text-[10px] font-semibold text-danger-600 dark:text-danger-400">Atrasadas</span>
+                <span className="text-[10px] font-semibold text-danger-600">Atrasadas</span>
               </div>
               {overdueMeds.map(({ med, daysLate }) => (
                 <div key={med.id} className="flex items-center gap-2 text-xs">
                   <span className="text-danger-500 shrink-0">❌</span>
-                  <span className="font-semibold text-zinc-700 dark:text-zinc-300 truncate flex-1">{med.medication_name}</span>
+                  <span className="font-semibold text-zinc-700 truncate flex-1">{med.medication_name}</span>
                   <span className="text-[10px] text-danger-500 shrink-0">+{daysLate} días</span>
                 </div>
               ))}
@@ -162,7 +162,7 @@ export function DashboardWidgets({
         {/* ═══ 1. Academia — ring gauge ═══ */}
         <SPAButton tab="academia" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
           <RingGauge pct={academyPct} color="text-accent-500" darkColor="text-accent-400" />
-          <p className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300">Academia</p>
+          <p className="text-[11px] font-bold text-zinc-700">Academia</p>
           <span className="text-[10px] text-zinc-400 truncate max-w-full">{academyCompleted}/{academyTotal} lecciones</span>
         </SPAButton>
 
@@ -170,7 +170,7 @@ export function DashboardWidgets({
         <SPAButton tab="tracker" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
           <div className="relative w-16 h-16">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 64 64">
-              <circle cx="32" cy="32" r={calmaR} fill="none" stroke="currentColor" strokeWidth="5" className="text-zinc-200 dark:text-zinc-700" />
+              <circle cx="32" cy="32" r={calmaR} fill="none" stroke="currentColor" strokeWidth="5" className="text-zinc-200" />
               {greenPct > 0 && (
                 <circle cx="32" cy="32" r={calmaR} fill="none" stroke="#2ec4a8" strokeWidth="5" strokeLinecap="butt"
                   strokeDasharray={`${greenDash} ${calmaCirc - greenDash}`} strokeDashoffset={0} />
@@ -185,10 +185,10 @@ export function DashboardWidgets({
               )}
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-sm font-extrabold tabular-nums text-secondary-600 dark:text-secondary-400">{greenPct}%</span>
+              <span className="text-sm font-extrabold tabular-nums text-secondary-600">{greenPct}%</span>
             </div>
           </div>
-          <p className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300">Calma</p>
+          <p className="text-[11px] font-bold text-zinc-700">Calma</p>
           <div className="flex flex-wrap items-center gap-2 text-[10px] text-zinc-400">
             <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-secondary-400" />{greenPct}%</span>
             <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-warning-400" />{yellowPct}%</span>
@@ -200,7 +200,7 @@ export function DashboardWidgets({
         <SPAButton tab="nutricion" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
           <RingGauge pct={gramsPct} color="text-primary-500" darkColor="text-primary-400" />
           <div className="text-center max-w-full">
-            <span className="text-base font-extrabold text-primary-600 dark:text-primary-400 truncate">{gramsEaten}g</span>
+            <span className="text-base font-extrabold text-primary-600 truncate">{gramsEaten}g</span>
             <span className="text-[10px] text-zinc-400"> / {gramsTarget}g</span>
           </div>
           <span className="text-[10px] text-zinc-400">Comida hoy</span>
@@ -210,7 +210,7 @@ export function DashboardWidgets({
         <Link href="/guau/app/tracker/salud" className="card-soft rounded-[1.5rem] p-4 flex flex-col items-center gap-2 transition-all active:scale-[0.97] hover:shadow-md overflow-hidden">
           <RingGauge pct={vaccinePct} color="text-warning-500" darkColor="text-warning-400" />
           <div className="text-center">
-            <span className="text-lg font-extrabold text-warning-600 dark:text-warning-400">{vaccineGiven}</span>
+            <span className="text-lg font-extrabold text-warning-600">{vaccineGiven}</span>
             <span className="text-xs text-zinc-400">/{vaccineTotal}</span>
           </div>
           <span className="text-[10px] text-zinc-400">Vacunas</span>

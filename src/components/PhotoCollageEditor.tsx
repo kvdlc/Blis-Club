@@ -99,8 +99,8 @@ export function PhotoCollageEditor({
       {!exportedUrl ? (
         <>
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Editar collage</h3>
-            <button onClick={onDone} className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+            <h3 className="text-sm font-bold text-zinc-800">Editar collage</h3>
+            <button onClick={onDone} className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center">
               <X className="w-4 h-4 text-zinc-500" />
             </button>
           </div>
@@ -112,13 +112,9 @@ export function PhotoCollageEditor({
             {photos.map((photo, idx) => (
               <div
                 key={`${photo}-${idx}`}
-                className={`flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all ${
-                  idx === mainIndex
-                    ? "border-accent-400 bg-accent-50 dark:bg-accent-950/30"
-                    : "border-zinc-100 dark:border-zinc-800"
-                }`}
+                className={`flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all ${ idx === mainIndex ? "border-accent-400 bg-accent-50" : "border-zinc-100" }`}
               >
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-zinc-200 dark:border-zinc-700">
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-zinc-200">
                   <img src={photo} alt="" className="w-full h-full object-cover" />
                   {idx === mainIndex && (
                     <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-accent-500 text-white flex items-center justify-center">
@@ -127,7 +123,7 @@ export function PhotoCollageEditor({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  <p className="text-xs font-semibold text-zinc-700">
                     {idx === mainIndex ? "Foto principal" : `Foto ${idx + 1}`}
                   </p>
                 </div>
@@ -135,24 +131,20 @@ export function PhotoCollageEditor({
                   <button
                     onClick={() => moveLeft(idx)}
                     disabled={idx === 0}
-                    className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center disabled:opacity-30 active:scale-95"
+                    className="w-7 h-7 rounded-lg bg-zinc-100 flex items-center justify-center disabled:opacity-30 active:scale-95"
                   >
                     <MoveLeft className="w-3.5 h-3.5 text-zinc-600" />
                   </button>
                   <button
                     onClick={() => moveRight(idx)}
                     disabled={idx === photos.length - 1}
-                    className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center disabled:opacity-30 active:scale-95"
+                    className="w-7 h-7 rounded-lg bg-zinc-100 flex items-center justify-center disabled:opacity-30 active:scale-95"
                   >
                     <MoveRight className="w-3.5 h-3.5 text-zinc-600" />
                   </button>
                   <button
                     onClick={() => setAsMain(idx)}
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center active:scale-95 transition-colors ${
-                      idx === mainIndex
-                        ? "bg-accent-100 dark:bg-accent-900 text-accent-600"
-                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:text-accent-500"
-                    }`}
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center active:scale-95 transition-colors ${ idx === mainIndex ? "bg-accent-100 text-accent-600" : "bg-zinc-100 text-zinc-400 hover:text-accent-500" }`}
                     title="Establecer como principal"
                   >
                     {idx === mainIndex ? <Star className="w-3.5 h-3.5 fill-current" /> : <StarOff className="w-3.5 h-3.5" />}
@@ -167,11 +159,11 @@ export function PhotoCollageEditor({
             <p className="text-xs font-semibold text-zinc-500">Vista previa del collage</p>
             <div
               ref={collageRef}
-              className="bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-950 rounded-[1.5rem] p-4 space-y-3"
+              className="bg-gradient-to-br from-zinc-50 to-zinc-100 rounded-[1.5rem] p-4 space-y-3"
               style={{ width: 540, maxWidth: "100%" }}
             >
               {/* Main photo */}
-              <div className="relative rounded-[1.25rem] overflow-hidden aspect-[4/3] bg-zinc-200 dark:bg-zinc-800">
+              <div className="relative rounded-[1.25rem] overflow-hidden aspect-[4/3] bg-zinc-200">
                 <img src={photos[mainIndex]} alt="Principal" className="w-full h-full object-cover" />
                 {isCleanRun && (
                   <div className="absolute top-3 left-3 bg-secondary-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg">
@@ -183,32 +175,32 @@ export function PhotoCollageEditor({
               {/* Secondary photos */}
               <div className="grid grid-cols-2 gap-2">
                 {photos.filter((_, i) => i !== mainIndex).map((photo, i) => (
-                  <div key={i} className="rounded-xl overflow-hidden aspect-square bg-zinc-200 dark:bg-zinc-800">
+                  <div key={i} className="rounded-xl overflow-hidden aspect-square bg-zinc-200">
                     <img src={photo} alt="" className="w-full h-full object-cover" />
                   </div>
                 ))}
                 {/* If only 1 secondary photo, fill with placeholder or nothing */}
                 {photos.filter((_, i) => i !== mainIndex).length === 1 && (
-                  <div className="rounded-xl overflow-hidden aspect-square bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                  <div className="rounded-xl overflow-hidden aspect-square bg-zinc-100 flex items-center justify-center">
                     <ImagePlus className="w-6 h-6 text-zinc-300" />
                   </div>
                 )}
               </div>
 
               {/* Stats */}
-              <div className="flex items-center justify-between bg-white/60 dark:bg-zinc-800/60 rounded-xl p-3 backdrop-blur-sm">
+              <div className="flex items-center justify-between bg-white/60 rounded-xl p-3 backdrop-blur-sm">
                 <div className="text-center flex-1">
                   <p className="text-lg font-black text-accent-600">{formatTime(rawTime)}</p>
                   <p className="text-[9px] text-zinc-400 uppercase tracking-wider font-bold">Bruto</p>
                 </div>
-                <div className="w-px h-8 bg-zinc-200 dark:bg-zinc-700" />
+                <div className="w-px h-8 bg-zinc-200" />
                 <div className="text-center flex-1">
-                  <p className="text-lg font-black text-zinc-800 dark:text-zinc-200">{formatTime(netTime)}</p>
+                  <p className="text-lg font-black text-zinc-800">{formatTime(netTime)}</p>
                   <p className="text-[9px] text-zinc-400 uppercase tracking-wider font-bold">Neto</p>
                 </div>
-                <div className="w-px h-8 bg-zinc-200 dark:bg-zinc-700" />
+                <div className="w-px h-8 bg-zinc-200" />
                 <div className="text-center flex-1">
-                  <p className="text-lg font-black text-zinc-800 dark:text-zinc-200">{sessionTitle}</p>
+                  <p className="text-lg font-black text-zinc-800">{sessionTitle}</p>
                   <p className="text-[9px] text-zinc-400 uppercase tracking-wider font-bold">{dogName}</p>
                 </div>
               </div>
@@ -235,18 +227,18 @@ export function PhotoCollageEditor({
       ) : (
         <>
           <div className="text-center space-y-2">
-            <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">¡Collage listo!</h3>
+            <h3 className="text-lg font-bold text-zinc-900">¡Collage listo!</h3>
             <p className="text-sm text-zinc-500">Descárgalo o compártelo en redes</p>
           </div>
 
-          <div className="rounded-[1.5rem] overflow-hidden border border-zinc-200 dark:border-zinc-700">
+          <div className="rounded-[1.5rem] overflow-hidden border border-zinc-200">
             <img src={exportedUrl} alt="Collage" className="w-full h-auto" />
           </div>
 
           <div className="flex gap-2">
             <button
               onClick={downloadCollage}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm active:scale-[0.98] transition-all"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-100 text-zinc-700 font-bold text-sm active:scale-[0.98] transition-all"
             >
               <Download className="w-4 h-4" />
               Descargar
@@ -262,7 +254,7 @@ export function PhotoCollageEditor({
 
           <button
             onClick={onDone}
-            className="w-full py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm"
+            className="w-full py-3 rounded-xl bg-zinc-100 text-zinc-700 font-bold text-sm"
           >
             Listo
           </button>

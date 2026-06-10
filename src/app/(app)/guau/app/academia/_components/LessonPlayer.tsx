@@ -124,8 +124,8 @@ export function LessonPlayer({
             </div>
           )}
           <div className="w-full max-w-sm" onClick={() => cardIdx < cards.length - 1 ? setCardIdx(cardIdx + 1) : setPhase("check")}>
-            <div className="bg-primary-50 dark:bg-primary-950 rounded-3xl p-8 min-h-[280px] flex flex-col items-center justify-center">
-              <p className="text-lg text-primary-900 dark:text-primary-100 leading-relaxed">
+            <div className="bg-primary-50 rounded-3xl p-8 min-h-[280px] flex flex-col items-center justify-center">
+              <p className="text-lg text-primary-900 leading-relaxed">
                 {cards[cardIdx]?.content ?? ""}
               </p>
             </div>
@@ -134,9 +134,7 @@ export function LessonPlayer({
             {cards.map((_, i) => (
               <div
                 key={i}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  i <= cardIdx ? "bg-primary-600" : "bg-zinc-200 dark:bg-zinc-700"
-                }`}
+                className={`w-2 h-2 rounded-full transition-colors ${ i <= cardIdx ? "bg-primary-600" : "bg-zinc-200" }`}
               />
             ))}
           </div>
@@ -153,20 +151,20 @@ export function LessonPlayer({
     return (
       <div className="flex flex-col min-h-[70vh]">
         <div className="flex-1 flex flex-col items-center justify-center px-4 space-y-6">
-          <h3 className="text-lg font-semibold text-center text-zinc-900 dark:text-zinc-100">
+          <h3 className="text-lg font-semibold text-center text-zinc-900">
             {check.question ?? "¿Qué aprendiste?"}
           </h3>
           <div className="w-full max-w-sm space-y-3">
             {(check.options ?? []).map((opt: string, i: number) => {
               let classes = "w-full rounded-xl border px-4 py-3 text-sm text-left font-medium transition-colors ";
               if (selectedAnswer === null) {
-                classes += "border-zinc-200 dark:border-zinc-700 hover:border-primary-400 dark:hover:border-primary-600";
+                classes += "border-zinc-200 hover:border-primary-400";
               } else if (i === check.correct) {
-                classes += "border-secondary-500 bg-secondary-50 dark:bg-secondary-950 text-secondary-700 dark:text-secondary-300";
+                classes += "border-secondary-500 bg-secondary-50 text-secondary-700";
               } else if (i === selectedAnswer) {
-                classes += "border-danger-500 bg-danger-50 dark:bg-danger-950 text-danger-700 dark:text-danger-300";
+                classes += "border-danger-500 bg-danger-50 text-danger-700";
               } else {
-                classes += "border-zinc-200 dark:border-zinc-700 opacity-50";
+                classes += "border-zinc-200 opacity-50";
               }
               return (
                 <button
@@ -184,7 +182,7 @@ export function LessonPlayer({
             })}
           </div>
           {isCorrect !== null && (
-            <div className={`rounded-2xl p-4 text-center ${isCorrect ? "bg-secondary-50 dark:bg-secondary-950 text-secondary-700" : "bg-danger-50 dark:bg-danger-950 text-danger-700"}`}>
+            <div className={`rounded-2xl p-4 text-center ${isCorrect ? "bg-secondary-50 text-secondary-700" : "bg-danger-50 text-danger-700"}`}>
               <p className="font-semibold">{isCorrect ? "¡Correcto!" : "¡Sigue intentando!"}</p>
               {!isCorrect && <p className="text-sm mt-1">Revisa la teoría e inténtalo de nuevo.</p>}
             </div>
@@ -285,7 +283,7 @@ export function LessonPlayer({
 
     return (
       <div className="flex flex-col min-h-[70vh] items-center justify-center px-4 space-y-6">
-        <p className="text-lg font-semibold text-center text-zinc-900 dark:text-zinc-100">
+        <p className="text-lg font-semibold text-center text-zinc-900">
           {currentPrompt?.situation ?? "Elige el comando correcto"}
         </p>
         <div className="w-full max-w-sm space-y-2">
@@ -303,15 +301,7 @@ export function LessonPlayer({
                   setDictSelected(null);
                 }, 800);
               }}
-              className={`w-full rounded-xl border px-4 py-3 text-sm font-medium text-left transition-colors ${
-                dictSelected === null
-                  ? "border-zinc-200 dark:border-zinc-700 hover:border-primary-400"
-                  : dictSelected === word
-                    ? word === currentPrompt?.correct_word
-                      ? "border-secondary-500 bg-secondary-50"
-                      : "border-danger-500 bg-danger-50"
-                    : "border-zinc-200 opacity-50"
-              }`}
+              className={`w-full rounded-xl border px-4 py-3 text-sm font-medium text-left transition-colors ${ dictSelected === null ? "border-zinc-200 hover:border-primary-400" : dictSelected === word ? word === currentPrompt?.correct_word ? "border-secondary-500 bg-secondary-50" : "border-danger-500 bg-danger-50" : "border-zinc-200 opacity-50" }`}
             >
               {word}
             </button>
@@ -334,7 +324,7 @@ export function LessonPlayer({
       <div className="flex flex-col min-h-[70vh] items-center justify-center space-y-6">
         {!timerRunning && !timerDone ? (
           <>
-            <Timer className="w-16 h-16 text-primary-600 dark:text-primary-400" />
+            <Timer className="w-16 h-16 text-primary-600" />
             <p className="text-lg font-semibold text-center">
               {minigameConfig.exercise_name as string ?? "Práctica"}
             </p>
@@ -360,11 +350,7 @@ export function LessonPlayer({
                 <button
                   key={opt.value}
                   onClick={() => setPracticeRating(opt.value)}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${
-                    practiceRating === opt.value
-                      ? "border-primary-500 scale-105"
-                      : "border-transparent"
-                  }`}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${ practiceRating === opt.value ? "border-primary-500 scale-105" : "border-transparent" }`}
                 >
                   <div className={`w-12 h-12 rounded-full ${opt.color}`} />
                   <span className="text-xs font-medium">{opt.label}</span>
@@ -383,7 +369,7 @@ export function LessonPlayer({
           </div>
         ) : (
           <div className="text-center space-y-4">
-            <p className="text-5xl font-bold text-primary-600 dark:text-primary-400 tabular-nums">
+            <p className="text-5xl font-bold text-primary-600 tabular-nums">
               {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
             </p>
             <p className="text-sm text-zinc-500">Practicando: {minigameConfig.exercise_name as string}</p>
@@ -433,7 +419,7 @@ function CompletionScreen({
   return (
     <div className="flex flex-col min-h-[70vh] items-center justify-center text-center space-y-4 px-4">
       <Trophy className="w-16 h-16 text-accent-500" />
-      <h3 className="text-xl font-bold text-accent-700 dark:text-accent-400">
+      <h3 className="text-xl font-bold text-accent-700">
         {celebration.message ?? "¡Completado!"}
       </h3>
       <p className="text-zinc-500">
@@ -450,7 +436,7 @@ function CompletionScreen({
         )}
         <button
           onClick={() => router.push(`/guau/app/academia/${stageSlug}`)}
-          className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-6 py-3 font-semibold"
+          className="rounded-xl border border-zinc-300 px-6 py-3 font-semibold"
         >
           Volver al mapa
         </button>

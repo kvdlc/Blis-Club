@@ -160,17 +160,17 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
       <div className="card-soft rounded-2xl p-5 space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-lg">🎨</span>
-          <h2 className="font-bold text-zinc-800 dark:text-zinc-200">Editar Afiche</h2>
-          <span className="text-xs text-zinc-400 dark:text-zinc-500 ml-auto">
+          <h2 className="font-bold text-zinc-800">Editar Afiche</h2>
+          <span className="text-xs text-zinc-400 ml-auto">
             Campos vacíos no se muestran
           </span>
         </div>
 
         {/* Title */}
         <div>
-          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
             {POSTER_FIELDS.poster_title.label}
-            <span className="text-zinc-300 dark:text-zinc-600 ml-1">
+            <span className="text-zinc-300 ml-1">
               ({posterTitle.length}/{POSTER_FIELDS.poster_title.max})
             </span>
           </label>
@@ -179,13 +179,13 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
             maxLength={POSTER_FIELDS.poster_title.max}
             value={posterTitle}
             onChange={(e) => { setPosterTitle(e.target.value); persist("poster_title", e.target.value); }}
-            className="mt-1 w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-800 dark:text-zinc-200 font-bold focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40"
+            className="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-800 font-bold focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40"
           />
         </div>
 
         {/* Photo upload */}
         <div>
-          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
             Foto para el afiche
           </label>
           <input
@@ -209,7 +209,7 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
               {uploading ? "Subiendo..." : photoUrl ? "Cambiar foto" : "Subir foto"}
             </button>
             {photoUrl && (
-              <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-primary-200 dark:border-primary-800">
+              <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-primary-200">
                 <img src={photoUrl.replace(/ /g, "%20")} alt="Preview" className="w-full h-full object-cover" />
               </div>
             )}
@@ -221,9 +221,9 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
 
         {/* Location */}
         <div>
-          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
             {POSTER_FIELDS.lost_location.label}
-            <span className="text-zinc-300 dark:text-zinc-600 ml-1">
+            <span className="text-zinc-300 ml-1">
               ({lostLocation.length}/{POSTER_FIELDS.lost_location.max})
             </span>
           </label>
@@ -233,15 +233,15 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
             placeholder={POSTER_FIELDS.lost_location.placeholder}
             value={lostLocation}
             onChange={(e) => { setLostLocation(e.target.value); persist("lost_location", e.target.value); }}
-            className="mt-1 w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40"
+            className="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40"
           />
         </div>
 
         {/* Notes */}
         <div>
-          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
             {POSTER_FIELDS.lost_notes.label}
-            <span className="text-zinc-300 dark:text-zinc-600 ml-1">
+            <span className="text-zinc-300 ml-1">
               ({lostNotes.length}/{POSTER_FIELDS.lost_notes.max})
             </span>
           </label>
@@ -251,15 +251,15 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
             placeholder={POSTER_FIELDS.lost_notes.placeholder}
             value={lostNotes}
             onChange={(e) => { setLostNotes(e.target.value); persist("lost_notes", e.target.value); }}
-            className="mt-1 w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40 resize-none"
+            className="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40 resize-none"
           />
         </div>
 
         {/* Contact */}
         <div>
-          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
             {POSTER_FIELDS.poster_contact.label}
-            <span className="text-zinc-300 dark:text-zinc-600 ml-1">
+            <span className="text-zinc-300 ml-1">
               ({posterContact.length}/{POSTER_FIELDS.poster_contact.max})
             </span>
           </label>
@@ -269,15 +269,15 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
             placeholder={POSTER_FIELDS.poster_contact.placeholder}
             value={posterContact}
             onChange={(e) => { setPosterContact(e.target.value); persist("poster_contact", e.target.value); }}
-            className="mt-1 w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40"
+            className="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40"
           />
         </div>
 
         {/* Reward */}
         <div>
-          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
             {POSTER_FIELDS.poster_reward_amount.label}
-            <span className="text-zinc-300 dark:text-zinc-600 ml-1">
+            <span className="text-zinc-300 ml-1">
               ({posterReward.length}/{POSTER_FIELDS.poster_reward_amount.max})
             </span>
           </label>
@@ -287,7 +287,7 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
             placeholder={POSTER_FIELDS.poster_reward_amount.placeholder}
             value={posterReward}
             onChange={(e) => { setPosterReward(e.target.value); persist("poster_reward_amount", e.target.value); }}
-            className="mt-1 w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40"
+            className="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40"
           />
         </div>
       </div>
@@ -295,32 +295,32 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
       {/* Preview */}
       <div className="card-soft rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+          <h2 className="font-bold text-zinc-800 flex items-center gap-2">
             <span>👁️</span> Vista previa (A4)
           </h2>
 
           {/* Zoom controls */}
-          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl p-1">
+          <div className="flex items-center gap-1 bg-zinc-100 rounded-xl p-1">
             <button
               onClick={() => setUserZoom((z) => Math.max(0.25, +(z * 0.8).toFixed(2)))}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 transition-colors text-sm font-bold"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 hover:bg-white transition-colors text-sm font-bold"
               title="Alejar"
             >
               −
             </button>
-            <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 w-12 text-center">
+            <span className="text-xs font-semibold text-zinc-500 w-12 text-center">
               {Math.round(userZoom * 100)}%
             </span>
             <button
               onClick={() => setUserZoom((z) => Math.min(3, +(z * 1.25).toFixed(2)))}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 transition-colors text-sm font-bold"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 hover:bg-white transition-colors text-sm font-bold"
               title="Acercar"
             >
               +
             </button>
             <button
               onClick={() => setUserZoom(1)}
-              className="h-8 px-2 flex items-center justify-center rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 transition-colors text-xs font-bold"
+              className="h-8 px-2 flex items-center justify-center rounded-lg text-zinc-600 hover:bg-white transition-colors text-xs font-bold"
               title="Ajustar a pantalla"
             >
               Ajustar
@@ -330,7 +330,7 @@ export function PosterEditor({ dog, posterPhotoUrl, onFieldsUpdate }: Props) {
 
         <div
           ref={previewOuterRef}
-          className="overflow-auto rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900"
+          className="overflow-auto rounded-xl border border-zinc-200 bg-zinc-50"
           style={{ maxHeight: "80vh" }}
         >
           <div

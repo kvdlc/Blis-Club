@@ -125,8 +125,8 @@ export default function ProductsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Productos</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona productos de compra única</p>
+            <h1 className="text-2xl font-extrabold text-zinc-900">Productos</h1>
+            <p className="text-sm text-zinc-500 mt-1">Gestiona productos de compra única</p>
           </div>
           <button
             onClick={() => { setEditing(null); setShowNew(true); resetForm(); }}
@@ -139,7 +139,7 @@ export default function ProductsPage() {
         {(showNew || editing) && (
           <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">
+              <h2 className="text-base font-bold text-zinc-800">
                 {editing ? "Editar Producto" : "Nuevo Producto"}
               </h2>
               <button onClick={() => { setEditing(null); setShowNew(false); }} className="text-zinc-400 hover:text-zinc-600">
@@ -148,33 +148,33 @@ export default function ProductsPage() {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Nombre</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Nombre</label>
                 <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Precio (centavos)</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Precio (centavos)</label>
                 <input type="number" value={form.price_cents} onChange={(e) => setForm({ ...form, price_cents: parseInt(e.target.value) || 0 })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Moneda</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Moneda</label>
                 <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
                   <option value="USD">USD ($)</option>
                   <option value="PEN">PEN (S/)</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Stock (vacío = ilimitado)</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Stock (vacío = ilimitado)</label>
                 <input type="number" value={form.stock_quantity} onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })}
                   placeholder="Ilimitado"
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Aplicación</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Aplicación</label>
                 <select value={form.application_id} onChange={(e) => setForm({ ...form, application_id: e.target.value })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
                   <option value="">Ninguna</option>
                   {applications.map((app) => (
                     <option key={app.id} value={app.id}>{app.name}</option>
@@ -182,16 +182,16 @@ export default function ProductsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">URL de imagen</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">URL de imagen</label>
                 <input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
                   placeholder="https://..."
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Descripción</label>
+              <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Descripción</label>
               <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2}
-                className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
             </div>
             <button onClick={handleSave}
               className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all">
@@ -206,7 +206,7 @@ export default function ProductsPage() {
           <div className="grid gap-4">
             {products.map((p) => (
               <div key={p.id} className={`card-soft rounded-[1.25rem] p-5 flex items-center gap-4 ${!p.is_active ? "opacity-60" : ""}`}>
-                <div className="w-12 h-12 rounded-2xl bg-secondary-100 dark:bg-secondary-950 flex items-center justify-center text-secondary-600 overflow-hidden">
+                <div className="w-12 h-12 rounded-2xl bg-secondary-100 flex items-center justify-center text-secondary-600 overflow-hidden">
                   {p.image_url ? (
                     <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
                   ) : (
@@ -215,7 +215,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">{p.name}</p>
+                    <p className="text-base font-bold text-zinc-800">{p.name}</p>
                     {p.stock_quantity !== null && p.stock_quantity <= 5 && (
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-700">
                         Stock bajo: {p.stock_quantity}
@@ -251,11 +251,11 @@ export default function ProductsPage() {
                     stock_quantity: p.stock_quantity === null ? "" : p.stock_quantity,
                     application_id: p.application_id || "",
                   }); }}
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors">
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 transition-colors">
                     <Edit className="w-4 h-4" />
                   </button>
                   <button onClick={() => handleDelete(p.id)}
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-950 transition-colors">
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>

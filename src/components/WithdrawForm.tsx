@@ -53,12 +53,12 @@ export default function WithdrawForm({ availableCents, billingProfile, onRequest
 
   if (!billingProfile) {
     return (
-      <div className="card-soft rounded-[1.25rem] p-5 bg-warning-50/50 dark:bg-warning-950/20 border border-warning-200 dark:border-warning-800">
+      <div className="card-soft rounded-[1.25rem] p-5 bg-warning-50/50 border border-warning-200">
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-warning-500 shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-bold text-warning-800 dark:text-warning-200">Completa tu perfil de facturación</p>
-            <p className="text-xs text-warning-600 dark:text-warning-300 mt-1">
+            <p className="text-sm font-bold text-warning-800">Completa tu perfil de facturación</p>
+            <p className="text-xs text-warning-600 mt-1">
               Necesitamos tus datos legales y de retiro para procesar pagos de forma segura.
             </p>
             <button
@@ -76,21 +76,21 @@ export default function WithdrawForm({ availableCents, billingProfile, onRequest
   return (
     <div className="space-y-4">
       {/* Payment window banner */}
-      <div className="card-soft rounded-[1.25rem] p-4 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-800">
+      <div className="card-soft rounded-[1.25rem] p-4 bg-primary-50/50 border border-primary-200">
         <div className="flex items-center gap-2">
           <Wallet className="w-4 h-4 text-primary-500" />
-          <p className="text-xs text-primary-700 dark:text-primary-300">
+          <p className="text-xs text-primary-700">
             <span className="font-bold">Próxima ventana de pago:</span> 1 al 5 de {monthName}
           </p>
         </div>
       </div>
 
       {/* Saved method info */}
-      <div className="card-soft rounded-xl p-4 border border-zinc-200 dark:border-zinc-700">
+      <div className="card-soft rounded-xl p-4 border border-zinc-200">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[10px] text-zinc-400 uppercase font-bold">Método de retiro guardado</p>
-            <p className="text-sm font-bold text-zinc-900 dark:text-white mt-0.5">
+            <p className="text-sm font-bold text-zinc-900 mt-0.5">
               {method === "binance_pay" ? "Binance Pay" : "PayPal"}
             </p>
             {method === "binance_pay" && (
@@ -112,7 +112,7 @@ export default function WithdrawForm({ availableCents, billingProfile, onRequest
       </div>
 
       <form onSubmit={handleSubmit} className="card-soft rounded-[1.25rem] p-4 space-y-3">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Solicitar retiro</h3>
+        <h3 className="text-sm font-bold text-zinc-800">Solicitar retiro</h3>
         <p className="text-[11px] text-zinc-400">
           Mínimo: $10.00 · Disponible: ${(availableCents / 100).toFixed(2)}
         </p>
@@ -128,24 +128,24 @@ export default function WithdrawForm({ availableCents, billingProfile, onRequest
             onChange={(e) => setAmount(e.target.value)}
             placeholder="10.00"
             required
-            className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 text-sm"
+            className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2.5 text-sm"
           />
         </div>
 
         {/* Fee breakdown */}
         {amountCents > 0 && (
-          <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800/50 p-3 space-y-1.5">
+          <div className="rounded-xl bg-zinc-50 p-3 space-y-1.5">
             <div className="flex justify-between text-xs">
               <span className="text-zinc-500">Monto solicitado</span>
-              <span className="font-bold text-zinc-700 dark:text-zinc-300">${(amountCents / 100).toFixed(2)}</span>
+              <span className="font-bold text-zinc-700">${(amountCents / 100).toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-zinc-500">Comisión ({method === "binance_pay" ? "0%" : "5%"})</span>
-              <span className="font-bold text-zinc-700 dark:text-zinc-300">-${(feeCents / 100).toFixed(2)}</span>
+              <span className="font-bold text-zinc-700">-${(feeCents / 100).toFixed(2)}</span>
             </div>
-            <div className="h-px bg-zinc-200 dark:bg-zinc-700" />
+            <div className="h-px bg-zinc-200" />
             <div className="flex justify-between text-sm">
-              <span className="font-bold text-zinc-900 dark:text-white">Tú recibes</span>
+              <span className="font-bold text-zinc-900">Tú recibes</span>
               <span className="font-extrabold text-secondary-600">${(netCents / 100).toFixed(2)}</span>
             </div>
           </div>

@@ -44,7 +44,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <DogSwitcher />
             <div className="flex items-center gap-1.5">
               <SearchOverlay />
-              <button className="w-9 h-9 rounded-full bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-100 dark:border-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300 transition-all hover:scale-105 active:scale-95">
+              <button className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm border border-zinc-100 flex items-center justify-center text-zinc-600 transition-all hover:scale-105 active:scale-95">
                 <Bell className="w-4 h-4" />
               </button>
               <UserPill />

@@ -122,10 +122,10 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
   };
 
   return (
-    <div className="card-soft rounded-[1.5rem] p-5 space-y-5 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-700">
+    <div className="card-soft rounded-[1.5rem] p-5 space-y-5 bg-white border-2 border-zinc-200">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Circuito personalizado</h3>
-        <button onClick={onClose} className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+        <h3 className="text-sm font-bold text-zinc-800">Circuito personalizado</h3>
+        <button onClick={onClose} className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center">
           <X className="w-4 h-4 text-zinc-500" />
         </button>
       </div>
@@ -138,13 +138,9 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
             <button
               key={st.id}
               onClick={() => setSessionTypeId(st.id)}
-              className={`p-3 rounded-xl border-2 text-left text-xs transition-all ${
-                sessionTypeId === st.id
-                  ? "border-accent-400 bg-accent-50 dark:bg-accent-950/40"
-                  : "border-zinc-100 dark:border-zinc-800"
-              }`}
+              className={`p-3 rounded-xl border-2 text-left text-xs transition-all ${ sessionTypeId === st.id ? "border-accent-400 bg-accent-50" : "border-zinc-100" }`}
             >
-              <span className="font-bold text-zinc-700 dark:text-zinc-300">{st.name}</span>
+              <span className="font-bold text-zinc-700">{st.name}</span>
               <p className="text-[10px] text-zinc-400 mt-0.5 line-clamp-2">{st.description}</p>
             </button>
           ))}
@@ -159,11 +155,7 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
             <button
               key={lvl}
               onClick={() => setDifficulty(lvl)}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold capitalize transition-all ${
-                difficulty === lvl
-                  ? "bg-accent-600 text-white"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-              }`}
+              className={`flex-1 py-2 rounded-xl text-xs font-bold capitalize transition-all ${ difficulty === lvl ? "bg-accent-600 text-white" : "bg-zinc-100 text-zinc-600" }`}
             >
               {lvl}
             </button>
@@ -181,7 +173,7 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
             type="date"
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
-            className="w-full rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="w-full rounded-xl bg-white border border-zinc-200 px-3 py-2 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -192,7 +184,7 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
             type="number"
             value={durationMin}
             onChange={(e) => setDurationMin(parseInt(e.target.value) || 0)}
-            className="w-full rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="w-full rounded-xl bg-white border border-zinc-200 px-3 py-2 text-sm"
           />
         </div>
       </div>
@@ -208,7 +200,7 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
             setCircuitTimeSec(val ? parseInt(val) : null);
           }}
           placeholder="Ej: 45"
-          className="w-full rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+          className="w-full rounded-xl bg-white border border-zinc-200 px-3 py-2 text-sm"
         />
       </div>
 
@@ -229,7 +221,7 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
           onChange={(e) => setNotes(e.target.value)}
           placeholder="¿Cómo le fue a tu perro?"
           rows={3}
-          className="w-full rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm resize-none"
+          className="w-full rounded-xl bg-white border border-zinc-200 px-3 py-2 text-sm resize-none"
         />
       </div>
 
@@ -237,9 +229,7 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
       <div className="space-y-2">
         <button
           onClick={() => setSaveAsCircuit(!saveAsCircuit)}
-          className={`flex items-center gap-2 text-xs font-semibold transition-colors ${
-            saveAsCircuit ? "text-accent-600" : "text-zinc-500"
-          }`}
+          className={`flex items-center gap-2 text-xs font-semibold transition-colors ${ saveAsCircuit ? "text-accent-600" : "text-zinc-500" }`}
         >
           <Bookmark className={`w-3.5 h-3.5 ${saveAsCircuit ? "fill-current" : ""}`} />
           {saveAsCircuit ? "Guardar como circuito reutilizable" : "¿Guardar este circuito para reutilizarlo?"}
@@ -250,7 +240,7 @@ export function AgilityForm({ dog, userId, onClose, onSaved }: Props) {
             value={circuitName}
             onChange={(e) => setCircuitName(e.target.value)}
             placeholder="Ej: Mi rutina de mañanas"
-            className="w-full rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="w-full rounded-xl bg-white border border-zinc-200 px-3 py-2 text-sm"
           />
         )}
       </div>

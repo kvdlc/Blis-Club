@@ -14,20 +14,20 @@ interface Props {
 function StatusBadge({ status, endedAt }: { status: string; endedAt: string | null }) {
   if (status === "paid" && !endedAt) {
     return (
-      <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full">
+      <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
         <TrendingUp className="w-3 h-3" /> Activo
       </span>
     );
   }
   if (status === "paid" && endedAt) {
     return (
-      <span className="flex items-center gap-1 text-[10px] font-bold text-danger-600 bg-danger-50 dark:bg-danger-950/30 px-2 py-0.5 rounded-full">
+      <span className="flex items-center gap-1 text-[10px] font-bold text-danger-600 bg-danger-50 px-2 py-0.5 rounded-full">
         <TrendingDown className="w-3 h-3" /> Dado de baja
       </span>
     );
   }
   return (
-    <span className="flex items-center gap-1 text-[10px] font-bold text-warning-600 bg-warning-50 dark:bg-warning-950/30 px-2 py-0.5 rounded-full">
+    <span className="flex items-center gap-1 text-[10px] font-bold text-warning-600 bg-warning-50 px-2 py-0.5 rounded-full">
       <Clock className="w-3 h-3" /> Pendiente
     </span>
   );
@@ -36,9 +36,9 @@ function StatusBadge({ status, endedAt }: { status: string; endedAt: string | nu
 /* ─── Level badge ─── */
 function LevelBadge({ level }: { level: number }) {
   const colors: Record<number, string> = {
-    1: "bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 border-primary-200 dark:border-primary-800",
-    2: "bg-accent-100 text-accent-700 dark:bg-accent-900/40 dark:text-accent-300 border-accent-200 dark:border-accent-800",
-    3: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+    1: "bg-primary-100 text-primary-700 border-primary-200",
+    2: "bg-accent-100 text-accent-700 border-accent-200",
+    3: "bg-zinc-100 text-zinc-600 border-zinc-200",
   };
   const labels: Record<number, string> = {
     1: "Nivel 1",
@@ -134,10 +134,10 @@ function ReferralNodeCard({
   const displayName = showName ? (node.user?.displayName || code) : code;
 
   const borderColor: Record<number, string> = {
-    0: "border-l-primary-300 dark:border-l-primary-700",
-    1: "border-l-primary-300 dark:border-l-primary-700",
-    2: "border-l-accent-300 dark:border-l-accent-700",
-    3: "border-l-zinc-200 dark:border-l-zinc-700",
+    0: "border-l-primary-300",
+    1: "border-l-primary-300",
+    2: "border-l-accent-300",
+    3: "border-l-zinc-200",
   };
 
   return (
@@ -150,7 +150,7 @@ function ReferralNodeCard({
       <div className={`relative ml-${depth > 0 ? "8" : "0"} mb-2`} style={{ marginLeft: depth > 0 ? 32 : 0 }}>
         <button
           onClick={loadChildren}
-          className="w-full card-soft rounded-xl p-3.5 text-left hover:shadow-md transition-all border border-zinc-100 dark:border-zinc-800"
+          className="w-full card-soft rounded-xl p-3.5 text-left hover:shadow-md transition-all border border-zinc-100"
         >
           <div className="flex items-center gap-3">
             {/* Avatar */}
@@ -161,11 +161,11 @@ function ReferralNodeCard({
                 className="w-10 h-10 rounded-full object-cover border-2 border-primary-200 shrink-0"
               />
             ) : showAvatar ? (
-              <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-sm font-bold text-primary-600 shrink-0">
+              <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-sm font-bold text-primary-600 shrink-0">
                 {initials}
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
                 <Dog className="w-5 h-5 text-zinc-400" />
               </div>
             )}
@@ -173,7 +173,7 @@ function ReferralNodeCard({
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200 truncate">
+                <p className="text-sm font-bold text-zinc-800 truncate">
                   {displayName}
                 </p>
                 {depth > 0 && (
@@ -192,7 +192,7 @@ function ReferralNodeCard({
             <div className="flex items-center gap-2 shrink-0">
               <StatusBadge status={node.status} endedAt={node.endedAt} />
               {node.cashRewardUsd > 0 && (
-                <span className="flex items-center gap-0.5 text-xs font-bold text-primary-600 dark:text-primary-400">
+                <span className="flex items-center gap-0.5 text-xs font-bold text-primary-600">
                   <Crown className="w-3 h-3" />
                   ${(node.cashRewardUsd / 100).toFixed(2)}
                 </span>
@@ -200,7 +200,7 @@ function ReferralNodeCard({
             </div>
 
             {/* Expand chevron */}
-            <div className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
               {loadingChildren ? (
                 <div className="w-3 h-3 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
               ) : expanded ? (
@@ -240,11 +240,11 @@ function ReferralNodeCard({
 function SummaryBar({ summary }: { summary: CommissionsSummary }) {
   return (
     <div className="grid grid-cols-4 gap-2 mb-4">
-      <div className="card-soft rounded-xl p-3 text-center border border-primary-100 dark:border-primary-800/50">
+      <div className="card-soft rounded-xl p-3 text-center border border-primary-100">
         <p className="text-[10px] text-zinc-400 mb-0.5">Nivel 1</p>
         <p className="text-sm font-extrabold text-primary-600">${(summary.level1Cents / 100).toFixed(2)}</p>
       </div>
-      <div className="card-soft rounded-xl p-3 text-center border border-accent-100 dark:border-accent-800/50">
+      <div className="card-soft rounded-xl p-3 text-center border border-accent-100">
         <p className="text-[10px] text-zinc-400 mb-0.5">Nivel 2</p>
         <p className="text-sm font-extrabold text-accent-600">${(summary.level2Cents / 100).toFixed(2)}</p>
       </div>
@@ -252,9 +252,9 @@ function SummaryBar({ summary }: { summary: CommissionsSummary }) {
         <p className="text-[10px] text-zinc-400 mb-0.5">Nivel 3</p>
         <p className="text-sm font-extrabold text-zinc-500">${(summary.level3Cents / 100).toFixed(2)}</p>
       </div>
-      <div className="card-soft rounded-xl p-3 text-center bg-primary-50 dark:bg-primary-950/20">
+      <div className="card-soft rounded-xl p-3 text-center bg-primary-50">
         <p className="text-[10px] text-zinc-400 mb-0.5">Total</p>
-        <p className="text-sm font-extrabold text-primary-700 dark:text-primary-300">${(summary.totalCents / 100).toFixed(2)}</p>
+        <p className="text-sm font-extrabold text-primary-700">${(summary.totalCents / 100).toFixed(2)}</p>
       </div>
     </div>
   );
@@ -305,7 +305,7 @@ export default function ReferralTree({ userId }: Props) {
         </div>
       ) : (
         <div className="text-center py-8">
-          <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+          <div className="w-16 h-16 rounded-2xl bg-zinc-100 flex items-center justify-center mx-auto mb-3">
             <Users className="w-8 h-8 text-zinc-400" />
           </div>
           <p className="text-sm font-bold text-zinc-500">Aún no tienes referidos</p>

@@ -53,7 +53,7 @@ function TheoryEditor({ value, onChange }: { value: any; onChange: (v: any) => v
     <div className="space-y-4">
       <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Cards de teoría</p>
       {cards.map((card: any, i: number) => (
-        <div key={i} className="card-soft rounded-xl p-3 space-y-2 border border-zinc-200 dark:border-zinc-700">
+        <div key={i} className="card-soft rounded-xl p-3 space-y-2 border border-zinc-200">
           <div className="flex items-center gap-2">
             <GripVertical className="w-4 h-4 text-zinc-400" />
             <span className="text-xs font-bold text-zinc-500">Card {i + 1}</span>
@@ -67,37 +67,37 @@ function TheoryEditor({ value, onChange }: { value: any; onChange: (v: any) => v
             placeholder="Título de la card"
             value={card.title || ""}
             onChange={(e) => updateCard(i, "title", e.target.value)}
-            className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
           />
           <textarea
             placeholder="Contenido de la card..."
             value={card.body || ""}
             onChange={(e) => updateCard(i, "body", e.target.value)}
             rows={3}
-            className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
           />
           <input
             type="text"
             placeholder="URL de imagen (opcional)"
             value={card.image || ""}
             onChange={(e) => updateCard(i, "image", e.target.value)}
-            className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
           />
         </div>
       ))}
-      <button onClick={addCard} className="w-full py-2 rounded-xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-zinc-500 text-sm font-bold hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-2">
+      <button onClick={addCard} className="w-full py-2 rounded-xl border-2 border-dashed border-zinc-300 text-zinc-500 text-sm font-bold hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-2">
         <Plus className="w-4 h-4" /> Agregar card
       </button>
 
       {/* Comprehension check */}
-      <div className="pt-4 border-t border-zinc-200 dark:border-zinc-700">
+      <div className="pt-4 border-t border-zinc-200">
         <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Verificación de comprensión</p>
         <input
           type="text"
           placeholder="Pregunta de comprensión"
           value={check.question || ""}
           onChange={(e) => updateCheck("question", e.target.value)}
-          className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm mb-2"
+          className="w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm mb-2"
         />
         <div className="grid grid-cols-2 gap-2">
           {check.options.map((opt: string, i: number) => (
@@ -114,7 +114,7 @@ function TheoryEditor({ value, onChange }: { value: any; onChange: (v: any) => v
                 placeholder={`Opción ${i + 1}`}
                 value={opt || ""}
                 onChange={(e) => updateOption(i, e.target.value)}
-                className="flex-1 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+                className="flex-1 rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
               />
             </div>
           ))}
@@ -155,7 +155,7 @@ function QuizEditor({ value, onChange }: { value: any; onChange: (v: any) => voi
     <div className="space-y-4">
       <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Preguntas</p>
       {questions.map((q: any, i: number) => (
-        <div key={i} className="card-soft rounded-xl p-3 space-y-2 border border-zinc-200 dark:border-zinc-700">
+        <div key={i} className="card-soft rounded-xl p-3 space-y-2 border border-zinc-200">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-500">Pregunta {i + 1}</span>
             <button onClick={() => removeQuestion(i)} className="text-danger-400 hover:text-danger-600"><Trash2 className="w-3.5 h-3.5" /></button>
@@ -165,7 +165,7 @@ function QuizEditor({ value, onChange }: { value: any; onChange: (v: any) => voi
             placeholder="Escribe la pregunta..."
             value={q.question || ""}
             onChange={(e) => updateQuestion(i, "question", e.target.value)}
-            className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
           />
           <div className="grid grid-cols-2 gap-2">
             {q.options.map((opt: string, oi: number) => (
@@ -182,14 +182,14 @@ function QuizEditor({ value, onChange }: { value: any; onChange: (v: any) => voi
                   placeholder={`Opción ${oi + 1}`}
                   value={opt || ""}
                   onChange={(e) => updateOption(i, oi, e.target.value)}
-                  className="flex-1 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+                  className="flex-1 rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
                 />
               </div>
             ))}
           </div>
         </div>
       ))}
-      <button onClick={addQuestion} className="w-full py-2 rounded-xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-zinc-500 text-sm font-bold hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-2">
+      <button onClick={addQuestion} className="w-full py-2 rounded-xl border-2 border-dashed border-zinc-300 text-zinc-500 text-sm font-bold hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-2">
         <Plus className="w-4 h-4" /> Agregar pregunta
       </button>
     </div>
@@ -208,7 +208,7 @@ function PracticeTimerEditor({ value, onChange }: { value: any; onChange: (v: an
           max={600}
           value={value?.duration_seconds || 60}
           onChange={(e) => onChange({ ...value, duration_seconds: parseInt(e.target.value) || 60 })}
-          className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+          className="w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
         />
       </div>
       <div>
@@ -218,7 +218,7 @@ function PracticeTimerEditor({ value, onChange }: { value: any; onChange: (v: an
           placeholder="Ej: Sentado con temporizador"
           value={value?.exercise_name || ""}
           onChange={(e) => onChange({ ...value, exercise_name: e.target.value })}
-          className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+          className="w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
         />
       </div>
       <div>
@@ -228,7 +228,7 @@ function PracticeTimerEditor({ value, onChange }: { value: any; onChange: (v: an
           value={value?.instructions || ""}
           onChange={(e) => onChange({ ...value, instructions: e.target.value })}
           rows={4}
-          className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+          className="w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
         />
       </div>
     </div>
@@ -264,7 +264,7 @@ function ReflexGameEditor({ value, onChange }: { value: any; onChange: (v: any) 
             placeholder="Nombre del nivel"
             value={t.label || ""}
             onChange={(e) => updateTiming(i, "label", e.target.value)}
-            className="flex-1 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="flex-1 rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
           />
           <input
             type="number"
@@ -272,12 +272,12 @@ function ReflexGameEditor({ value, onChange }: { value: any; onChange: (v: any) 
             placeholder="Segundos"
             value={t.seconds || ""}
             onChange={(e) => updateTiming(i, "seconds", e.target.value)}
-            className="w-24 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="w-24 rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
           />
           <button onClick={() => removeTiming(i)} className="text-danger-400 hover:text-danger-600"><Trash2 className="w-4 h-4" /></button>
         </div>
       ))}
-      <button onClick={addTiming} className="w-full py-2 rounded-xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-zinc-500 text-sm font-bold hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-2">
+      <button onClick={addTiming} className="w-full py-2 rounded-xl border-2 border-dashed border-zinc-300 text-zinc-500 text-sm font-bold hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-2">
         <Plus className="w-4 h-4" /> Agregar nivel
       </button>
     </div>
@@ -313,19 +313,19 @@ function DictionaryGameEditor({ value, onChange }: { value: any; onChange: (v: a
             placeholder="Palabra / Término"
             value={p.word || ""}
             onChange={(e) => updatePair(i, "word", e.target.value)}
-            className="flex-1 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="flex-1 rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
           />
           <input
             type="text"
             placeholder="Definición"
             value={p.definition || ""}
             onChange={(e) => updatePair(i, "definition", e.target.value)}
-            className="flex-1 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="flex-1 rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
           />
           <button onClick={() => removePair(i)} className="text-danger-400 hover:text-danger-600"><Trash2 className="w-4 h-4" /></button>
         </div>
       ))}
-      <button onClick={addPair} className="w-full py-2 rounded-xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-zinc-500 text-sm font-bold hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-2">
+      <button onClick={addPair} className="w-full py-2 rounded-xl border-2 border-dashed border-zinc-300 text-zinc-500 text-sm font-bold hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-2">
         <Plus className="w-4 h-4" /> Agregar par
       </button>
     </div>
@@ -358,7 +358,7 @@ function RawJsonEditor({ value, onChange }: { value: any; onChange: (v: any) => 
         onChange={(e) => setText(e.target.value)}
         onBlur={handleBlur}
         rows={12}
-        className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs font-mono"
+        className="w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-xs font-mono"
       />
       {error && <p className="text-xs text-danger-600">{error}</p>}
     </div>
@@ -389,7 +389,7 @@ export default function LessonContentEditor({ type, value, onChange, videoUrl, o
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon className={`w-4 h-4 ${meta.color}`} />
-          <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{meta.label}</span>
+          <span className="text-sm font-bold text-zinc-800">{meta.label}</span>
         </div>
         <button
           onClick={() => setShowRaw(!showRaw)}
@@ -409,7 +409,7 @@ export default function LessonContentEditor({ type, value, onChange, videoUrl, o
             placeholder="https://youtube.com/watch?v=... o https://vimeo.com/..."
             value={videoUrl || ""}
             onChange={(e) => onVideoUrlChange(e.target.value)}
-            className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm"
           />
           <p className="text-[10px] text-zinc-400 mt-1">Soporta YouTube, Vimeo, y archivos MP4 directos.</p>
         </div>

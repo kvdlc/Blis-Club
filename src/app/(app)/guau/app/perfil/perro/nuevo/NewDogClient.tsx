@@ -241,17 +241,15 @@ export function NewDogClient({ userId }: Props) {
       {/* Header con indicador de pasos */}
       <div className="flex items-center gap-3 pt-1">
         <button onClick={() => step === 1 ? router.back() : setStep(step - 1)}
-          className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center">
+          className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
           <ArrowLeft className="w-4 h-4" />
         </button>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+        <h1 className="text-lg font-bold text-zinc-900">
           {step === 1 ? "Nuevo Perro" : step === 2 ? "Alimentación" : "Ración Diaria"}
         </h1>
         <div className="ml-auto flex items-center gap-1.5">
           {[1, 2, 3].map((s) => (
-            <div key={s} className={`w-2.5 h-2.5 rounded-full transition-colors ${
-              s === step ? "bg-primary-500" : s < step ? "bg-secondary-400" : "bg-zinc-300 dark:bg-zinc-700"
-            }`} />
+            <div key={s} className={`w-2.5 h-2.5 rounded-full transition-colors ${ s === step ? "bg-primary-500" : s < step ? "bg-secondary-400" : "bg-zinc-300" }`} />
           ))}
         </div>
       </div>
@@ -263,7 +261,7 @@ export function NewDogClient({ userId }: Props) {
         <>
           {/* Avatar */}
           <div className="flex flex-col items-center gap-1.5">
-            <label htmlFor="newDogPhoto" className="relative w-20 h-20 rounded-2xl bg-white flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-700 overflow-hidden cursor-pointer group">
+            <label htmlFor="newDogPhoto" className="relative w-20 h-20 rounded-2xl bg-white flex items-center justify-center border-2 border-dashed border-zinc-300 overflow-hidden cursor-pointer group">
               <img src={photo || "/icons/dog-default.png"} alt="" className="w-full h-full object-contain object-center" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                 {uploading ? (
@@ -272,7 +270,7 @@ export function NewDogClient({ userId }: Props) {
                   <Camera className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                 )}
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white dark:bg-zinc-700 shadow-sm border border-zinc-200 dark:border-zinc-600 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white shadow-sm border border-zinc-200 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
                 <PenLine className="w-3 h-3 text-zinc-500" />
               </div>
             </label>
@@ -291,27 +289,27 @@ export function NewDogClient({ userId }: Props) {
           <div>
             <label className="text-xs text-zinc-500 block mb-1">Nombre *</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm" placeholder="Rex" />
+              className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm" placeholder="Rex" />
           </div>
 
           {/* Breed */}
           <div className="relative">
             <label className="text-xs text-zinc-500 block mb-1">Raza *</label>
             <button type="button" onClick={() => setShowBreeds(!showBreeds)}
-              className="w-full flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm text-left hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
-              <span className={breed ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-400"}>{breed || "Buscar raza..."}</span>
-              <div className={`w-5 h-5 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center transition-transform ${showBreeds ? "rotate-180" : ""}`}>
+              className="w-full flex items-center justify-between rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm text-left hover:bg-zinc-100 transition-colors">
+              <span className={breed ? "text-zinc-900" : "text-zinc-400"}>{breed || "Buscar raza..."}</span>
+              <div className={`w-5 h-5 rounded-lg bg-zinc-200 flex items-center justify-center transition-transform ${showBreeds ? "rotate-180" : ""}`}>
                 <ChevronDown className="w-3 h-3 text-zinc-500" />
               </div>
             </button>
             {showBreeds && (
-              <div className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-2xl max-h-56 overflow-hidden">
-                <div className="sticky top-0 bg-white dark:bg-zinc-900 p-2 border-b border-zinc-100 dark:border-zinc-800">
+              <div className="absolute z-50 mt-1 w-full bg-white rounded-xl border border-zinc-200 shadow-2xl max-h-56 overflow-hidden">
+                <div className="sticky top-0 bg-white p-2 border-b border-zinc-100">
                   <div className="relative">
                     <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-400" />
                     <input type="text" value={breedSearch} onChange={(e) => setBreedSearch(e.target.value)}
                       placeholder="Escribe para buscar..." autoFocus
-                      className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 pl-7 pr-3 py-1.5 text-xs focus:outline-none" />
+                      className="w-full rounded-lg bg-zinc-50 border border-zinc-200 pl-7 pr-3 py-1.5 text-xs focus:outline-none" />
                   </div>
                 </div>
                 <div className="overflow-y-auto max-h-44">
@@ -320,7 +318,7 @@ export function NewDogClient({ userId }: Props) {
                   ) : (
                     filteredBreeds.map((b) => (
                       <button key={b} onClick={() => { setBreed(b); setBreedSearch(""); setShowBreeds(false); }}
-                        className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors ${b === breed ? "bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-300 font-semibold" : "text-zinc-700 dark:text-zinc-300"}`}>
+                        className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition-colors ${b === breed ? "bg-primary-50 text-primary-700 font-semibold" : "text-zinc-700"}`}>
                         <span className="mr-2">{b === breed ? "✓" : ""}</span>{b}
                       </button>
                     ))
@@ -342,12 +340,12 @@ export function NewDogClient({ userId }: Props) {
               <input type="text" inputMode="decimal" value={weightDisplay}
                 onChange={(e) => setWeightDisplay(e.target.value)}
                 placeholder="10,5"
-                className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm" />
+                className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm" />
             </div>
             <div>
               <label className="text-xs text-zinc-500 block mb-1">Tamaño</label>
               <select value={tamano} onChange={(e) => setTamano(e.target.value)}
-                className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-2 py-2 text-xs">
+                className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-2 py-2 text-xs">
                 <option value="">Auto</option>
                 {Object.entries(BREED_SIZE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
@@ -355,7 +353,7 @@ export function NewDogClient({ userId }: Props) {
           </div>
 
           <button onClick={goToStep2} disabled={!canProceedStep1}
-            className={`w-full rounded-xl py-3.5 text-sm font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${!canProceedStep1 ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed" : "bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-600/20"}`}>
+            className={`w-full rounded-xl py-3.5 text-sm font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${!canProceedStep1 ? "bg-zinc-200 text-zinc-400 cursor-not-allowed" : "bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-600/20"}`}>
             Siguiente: Configurar Alimentación <ChevronRight className="w-4 h-4" />
           </button>
         </>
@@ -367,8 +365,8 @@ export function NewDogClient({ userId }: Props) {
       {step === 2 && (
         <>
           {/* Resumen del perro */}
-          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-950/20 dark:to-secondary-950/20 border border-primary-100 dark:border-primary-900/30">
-            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{name}</p>
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-r from-primary-50 to-secondary-50 border border-primary-100">
+            <p className="text-sm font-bold text-zinc-800">{name}</p>
             <p className="text-xs text-zinc-500">{breed} · {getAgeMonths(birthDate)} meses · {getWeight()} kg</p>
           </div>
 
@@ -376,7 +374,7 @@ export function NewDogClient({ userId }: Props) {
           <div>
             <label className="text-xs text-zinc-500 block mb-1.5">Nivel de actividad</label>
             <select value={activity} onChange={(e) => setActivity(e.target.value as ActivityLevel)}
-              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 text-sm">
+              className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2.5 text-sm">
               {Object.entries(ACTIVITY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
@@ -404,11 +402,7 @@ export function NewDogClient({ userId }: Props) {
                 { key: "mixta" as DietType, label: "Mixta", icon: "⚖️" },
               ].map((opt) => (
                 <button key={opt.key} onClick={() => setDietType(opt.key)}
-                  className={`rounded-xl p-3 text-xs font-bold transition-all border-2 ${
-                    dietType === opt.key
-                      ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300"
-                      : "bg-zinc-50 dark:bg-zinc-800 border-transparent text-zinc-600 dark:text-zinc-400"
-                  }`}
+                  className={`rounded-xl p-3 text-xs font-bold transition-all border-2 ${ dietType === opt.key ? "bg-primary-50 border-primary-500 text-primary-700" : "bg-zinc-50 border-transparent text-zinc-600" }`}
                 >
                   <span className="text-lg block mb-0.5">{opt.icon}</span>
                   {opt.label}
@@ -426,11 +420,7 @@ export function NewDogClient({ userId }: Props) {
                   setMealFreq(n);
                   setMealSlots(sugerirMealSlots(lifeStage, n));
                 }}
-                  className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-all border-2 ${
-                    mealFreq === n
-                      ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300"
-                      : "bg-zinc-50 dark:bg-zinc-800 border-transparent text-zinc-600 dark:text-zinc-400"
-                  }`}
+                  className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-all border-2 ${ mealFreq === n ? "bg-primary-50 border-primary-500 text-primary-700" : "bg-zinc-50 border-transparent text-zinc-600" }`}
                 >
                   {n} {n === 1 ? "vez" : "veces"}
                 </button>
@@ -443,14 +433,14 @@ export function NewDogClient({ userId }: Props) {
             <label className="text-xs text-zinc-500 block mb-1.5">Horarios de comida</label>
             <div className="space-y-1.5">
               {mealSlots.map((slot, i) => (
-                <div key={i} className="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800">
+                <div key={i} className="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-50 border border-zinc-100">
                   <Clock className="w-4 h-4 text-zinc-400" />
                   <input type="text" value={slot.label}
                     onChange={(e) => { const u = [...mealSlots]; u[i] = { ...u[i], label: e.target.value }; setMealSlots(u); }}
-                    className="flex-1 min-w-0 bg-transparent text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none" />
+                    className="flex-1 min-w-0 bg-transparent text-sm font-medium text-zinc-800 focus:outline-none" />
                   <input type="time" value={slot.time}
                     onChange={(e) => { const u = [...mealSlots]; u[i] = { ...u[i], time: e.target.value }; setMealSlots(u); }}
-                    className="bg-zinc-100 dark:bg-zinc-700 rounded-lg px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                    className="bg-zinc-100 rounded-lg px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                 </div>
               ))}
             </div>
@@ -469,10 +459,10 @@ export function NewDogClient({ userId }: Props) {
       {step === 3 && (
         <>
           {/* Resumen */}
-          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-r from-secondary-50 to-primary-50 dark:from-secondary-950/20 dark:to-primary-950/20 border border-secondary-200 dark:border-secondary-900/30">
+          <div className="card-soft rounded-[1.25rem] p-4 bg-gradient-to-r from-secondary-50 to-primary-50 border border-secondary-200">
             <div className="flex items-center gap-2 mb-2">
               <Target className="w-5 h-5 text-secondary-600" />
-              <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Ración diaria estimada</span>
+              <span className="text-sm font-bold text-zinc-800">Ración diaria estimada</span>
             </div>
             {/* Selector rápido de tipo de dieta */}
             <div className="flex gap-1.5 mb-2">
@@ -493,18 +483,14 @@ export function NewDogClient({ userId }: Props) {
                       setFeedingPct(BARF_PCT_BY_STAGE[lifeStage].default);
                     }
                   }}
-                  className={`text-[10px] px-2 py-1 rounded-lg font-semibold transition-all border ${
-                    dietType === opt.key
-                      ? "bg-white dark:bg-zinc-800 border-primary-400 text-primary-700 dark:text-primary-300 shadow-sm"
-                      : "bg-white/40 dark:bg-zinc-800/40 border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                  }`}
+                  className={`text-[10px] px-2 py-1 rounded-lg font-semibold transition-all border ${ dietType === opt.key ? "bg-white border-primary-400 text-primary-700 shadow-sm" : "bg-white/40 border-transparent text-zinc-400 hover:text-zinc-600" }`}
                 >
                   {opt.label}
                 </button>
               ))}
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-primary-700 dark:text-primary-300">{dailyGrams}</span>
+              <span className="text-3xl font-black text-primary-700">{dailyGrams}</span>
               <span className="text-sm text-zinc-500">gramos/día</span>
               <span className="text-sm text-zinc-400">· {dailyKcal} kcal</span>
             </div>
@@ -542,7 +528,7 @@ export function NewDogClient({ userId }: Props) {
                   <Info className="w-3 h-3" />
                 </button>
               </div>
-              <span className="text-sm font-bold text-primary-700 dark:text-primary-300">
+              <span className="text-sm font-bold text-primary-700">
                 {dietType === "mixta" ? `${Math.round(feedingPct)}%` : `${Math.round(feedingPct * 10) / 10}%`}
               </span>
             </div>
@@ -582,8 +568,8 @@ export function NewDogClient({ userId }: Props) {
               </div>
               {/* Porcentajes explícitos */}
               <div className="flex items-center justify-between text-sm font-bold">
-                <span className="text-primary-600 dark:text-primary-400">🦴 Croquetas {100 - mixtaBarfProp}%</span>
-                <span className="text-accent-600 dark:text-accent-400">{mixtaBarfProp}% Natural 🥩</span>
+                <span className="text-primary-600">🦴 Croquetas {100 - mixtaBarfProp}%</span>
+                <span className="text-accent-600">{mixtaBarfProp}% Natural 🥩</span>
               </div>
               <input type="range" min={0} max={100} step={5} value={mixtaBarfProp}
                 onChange={(e) => setMixtaBarfProp(Number(e.target.value))}
@@ -601,7 +587,7 @@ export function NewDogClient({ userId }: Props) {
             <div className="card-soft rounded-[1.25rem] p-4 space-y-2">
               <div className="flex items-center gap-2">
                 <Beef className="w-4 h-4 text-red-500" />
-                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Distribución Natural</span>
+                <span className="text-xs font-bold text-zinc-700">Distribución Natural</span>
                 <button
                   onClick={() => setInfoModal({
                     open: true, icon: "🍖",
@@ -622,7 +608,7 @@ export function NewDogClient({ userId }: Props) {
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${item.color}`} />
-                  <span className="text-xs text-zinc-600 dark:text-zinc-400 flex-1">{item.label}</span>
+                  <span className="text-xs text-zinc-600 flex-1">{item.label}</span>
                   <span className="text-xs font-mono text-zinc-500">{item.pct}%</span>
                 </div>
               ))}
@@ -647,23 +633,23 @@ export function NewDogClient({ userId }: Props) {
       {infoModal.open && (
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setInfoModal({ ...infoModal, open: false })} />
-          <div className="relative bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-[1.5rem] px-5 pt-6 pb-8 max-w-md w-full shadow-2xl border border-zinc-100 dark:border-zinc-800 space-y-4 overflow-hidden animate-slide-up">
+          <div className="relative bg-white rounded-t-[2rem] sm:rounded-[1.5rem] px-5 pt-6 pb-8 max-w-md w-full shadow-2xl border border-zinc-100 space-y-4 overflow-hidden animate-slide-up">
             {/* Fondo decorativo */}
-            <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-accent-100/40 dark:from-accent-950/30 to-transparent pointer-events-none" />
+            <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-accent-100/40 to-transparent pointer-events-none" />
             {/* Header */}
             <div className="relative flex items-start gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-accent-100 dark:bg-accent-950/50 flex items-center justify-center text-2xl shrink-0">
+              <div className="w-11 h-11 rounded-2xl bg-accent-100 flex items-center justify-center text-2xl shrink-0">
                 {infoModal.icon}
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-zinc-900 dark:text-zinc-100">{infoModal.title}</h3>
+                <h3 className="text-base font-extrabold text-zinc-900">{infoModal.title}</h3>
                 {infoModal.example && (
                   <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">{infoModal.example}</p>
                 )}
               </div>
             </div>
             {/* Cuerpo */}
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-line">{infoModal.body}</p>
+            <p className="text-sm text-zinc-600 leading-relaxed whitespace-pre-line">{infoModal.body}</p>
             {/* Botón */}
             <button
               onClick={() => setInfoModal({ ...infoModal, open: false })}

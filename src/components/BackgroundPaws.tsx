@@ -42,7 +42,7 @@ export function BackgroundPaws() {
               animation: `icon-pulse 6s ease-in-out ${pos.delay}s infinite`,
               filter: "brightness(0) saturate(100%)",
             }}
-            className="dark:invert dark:opacity-30"
+            className=""
           />
         );
       })}

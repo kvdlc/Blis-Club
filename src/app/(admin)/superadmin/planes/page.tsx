@@ -83,8 +83,8 @@ export default function PlanesPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Planes</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gestiona planes de suscripción</p>
+            <h1 className="text-2xl font-extrabold text-zinc-900">Planes</h1>
+            <p className="text-sm text-zinc-500 mt-1">Gestiona planes de suscripción</p>
           </div>
           <button
             onClick={() => { setEditing(null); setShowNew(true); setForm({ name: "", price_cents: 0, max_dogs: 1, features: "", billing_interval: "month" }); }}
@@ -97,7 +97,7 @@ export default function PlanesPage() {
         {(showNew || editing) && (
           <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">
+              <h2 className="text-base font-bold text-zinc-800">
                 {editing ? "Editar Plan" : "Nuevo Plan"}
               </h2>
               <button onClick={() => { setEditing(null); setShowNew(false); }} className="text-zinc-400 hover:text-zinc-600">
@@ -106,24 +106,24 @@ export default function PlanesPage() {
             </div>
             <div className="grid md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Nombre</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Nombre</label>
                 <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Precio (centavos)</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Precio (centavos)</label>
                 <input type="number" value={form.price_cents} onChange={(e) => setForm({ ...form, price_cents: parseInt(e.target.value) || 0 })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Máx. perros</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Máx. perros</label>
                 <input type="number" value={form.max_dogs} onChange={(e) => setForm({ ...form, max_dogs: parseInt(e.target.value) || 0 })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Facturación</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Facturación</label>
                 <select value={form.billing_interval} onChange={(e) => setForm({ ...form, billing_interval: e.target.value })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
                   {BILLING_INTERVALS.map((bi) => (
                     <option key={bi} value={bi}>{bi === "month" ? "Mensual" : "Anual"}</option>
                   ))}
@@ -131,10 +131,10 @@ export default function PlanesPage() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Features (separadas por coma)</label>
+              <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Features (separadas por coma)</label>
               <textarea value={form.features} onChange={(e) => setForm({ ...form, features: e.target.value })} rows={2}
                 placeholder="Acceso a academia, Recetas premium, Soporte prioritario"
-                className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
             </div>
             <button onClick={handleSave}
               className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all">
@@ -149,11 +149,11 @@ export default function PlanesPage() {
           <div className="grid gap-4">
             {plans.map((p) => (
               <div key={p.id} className="card-soft rounded-[1.25rem] p-5 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-secondary-100 dark:bg-secondary-950 flex items-center justify-center text-secondary-600">
+                <div className="w-12 h-12 rounded-2xl bg-secondary-100 flex items-center justify-center text-secondary-600">
                   <DollarSign className="w-6 h-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">{p.name}</p>
+                  <p className="text-base font-bold text-zinc-800">{p.name}</p>
                   <p className="text-sm text-zinc-500 truncate">
                     {formatPrice(p.price_cents)} · Hasta {p.max_dogs} perro{p.max_dogs !== 1 ? "s" : ""}
                     {(p.features || []).length > 0 && ` · ${(p.features || []).length} features`}
@@ -164,11 +164,11 @@ export default function PlanesPage() {
                 </span>
                 <div className="flex gap-1">
                   <button onClick={() => { setEditing(p); setForm({ name: p.name, price_cents: p.price_cents, max_dogs: p.max_dogs, features: (p.features || []).join(", "), billing_interval: p.billing_interval || "month" }); }}
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors">
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 transition-colors">
                     <Edit className="w-4 h-4" />
                   </button>
                   <button onClick={() => handleDelete(p.id)}
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-950 transition-colors">
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>

@@ -71,14 +71,14 @@ export function MealSlotsConfig({ dog, initialSlots }: Props) {
     <div className="card-soft rounded-[1.5rem] p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Horarios de Comida</h3>
+          <h3 className="text-sm font-bold text-zinc-800">Horarios de Comida</h3>
           <p className="text-xs text-zinc-500 mt-0.5">{activeCount} comidas al día</p>
         </div>
         <div className="flex items-center gap-2">
           {slots.length < 8 && (
             <button
               onClick={addSlot}
-              className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors"
+              className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center hover:bg-primary-200 transition-colors"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -90,17 +90,11 @@ export function MealSlotsConfig({ dog, initialSlots }: Props) {
         {slots.map((slot, index) => (
           <div
             key={index}
-            className={`flex items-center gap-2 p-3 rounded-xl border transition-all ${
-              slot.active
-                ? "bg-white/70 dark:bg-zinc-800/70 border-zinc-100 dark:border-zinc-800"
-                : "bg-zinc-50/50 dark:bg-zinc-900/30 border-zinc-100/50 dark:border-zinc-800/30 opacity-60"
-            }`}
+            className={`flex items-center gap-2 p-3 rounded-xl border transition-all ${ slot.active ? "bg-white/70 border-zinc-100" : "bg-zinc-50/50 border-zinc-100/50 opacity-60" }`}
           >
             <button
               onClick={() => updateSlot(index, { active: !slot.active })}
-              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
-                slot.active ? "bg-secondary-500 border-secondary-500" : "border-zinc-300 dark:border-zinc-600"
-              }`}
+              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${ slot.active ? "bg-secondary-500 border-secondary-500" : "border-zinc-300" }`}
             >
               {slot.active && <Check className="w-3 h-3 text-white" />}
             </button>
@@ -109,7 +103,7 @@ export function MealSlotsConfig({ dog, initialSlots }: Props) {
               type="text"
               value={slot.label}
               onChange={(e) => updateSlot(index, { label: e.target.value })}
-              className="flex-1 min-w-0 bg-transparent text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none"
+              className="flex-1 min-w-0 bg-transparent text-sm font-medium text-zinc-800 focus:outline-none"
               placeholder="Nombre"
             />
 
@@ -119,14 +113,14 @@ export function MealSlotsConfig({ dog, initialSlots }: Props) {
                 type="time"
                 value={slot.time_of_day.slice(0, 5)}
                 onChange={(e) => updateSlot(index, { time_of_day: `${e.target.value}:00` })}
-                className="bg-zinc-100 dark:bg-zinc-800 rounded-lg px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                className="bg-zinc-100 rounded-lg px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               />
             </div>
 
             {slots.length > 1 && (
               <button
                 onClick={() => removeSlot(index)}
-                className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-950/30 transition-colors"
+                className="w-7 h-7 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 hover:text-danger-500 hover:bg-danger-50 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -138,11 +132,7 @@ export function MealSlotsConfig({ dog, initialSlots }: Props) {
       <button
         onClick={handleSave}
         disabled={saving || saved}
-        className={`w-full rounded-xl py-2.5 text-sm font-bold transition-all ${
-          saved
-            ? "bg-secondary-500 text-white"
-            : "bg-primary-600 hover:bg-primary-700 text-white active:scale-[0.98]"
-        }`}
+        className={`w-full rounded-xl py-2.5 text-sm font-bold transition-all ${ saved ? "bg-secondary-500 text-white" : "bg-primary-600 hover:bg-primary-700 text-white active:scale-[0.98]" }`}
       >
         {saved ? "Guardado ✓" : saving ? "Guardando..." : "Guardar Horarios"}
       </button>

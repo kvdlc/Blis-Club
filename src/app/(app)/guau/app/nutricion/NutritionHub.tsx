@@ -62,11 +62,7 @@ export function NutritionHub(props: Props) {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`shrink-0 flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition-all whitespace-nowrap ${
-              activeTab === tab.key
-                ? "bg-primary-600 text-white shadow-md shadow-primary-600/20"
-                : "bg-white/60 dark:bg-zinc-800/60 text-zinc-600 dark:text-zinc-400 backdrop-blur-sm"
-            }`}
+            className={`shrink-0 flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition-all whitespace-nowrap ${ activeTab === tab.key ? "bg-primary-600 text-white shadow-md shadow-primary-600/20" : "bg-white/60 text-zinc-600 backdrop-blur-sm" }`}
           >
             <tab.icon className="w-3.5 h-3.5" />
             {tab.label}
@@ -108,11 +104,11 @@ export function NutritionHub(props: Props) {
 /*  RECETARIO PREMIUM                                                */
 /* ================================================================ */
 const CATEGORY_META: Record<string, { label: string; icon: string; bg: string; border: string }> = {
-  diario: { label: "Menú Diario", icon: "🍖", bg: "bg-primary-50 dark:bg-primary-900/30", border: "border-primary-200 dark:border-primary-800" },
-  snack:  { label: "Snacks",      icon: "🍪", bg: "bg-warning-50 dark:bg-warning-900/30", border: "border-warning-200 dark:border-warning-800" },
-  helado: { label: "Helados",     icon: "🍦", bg: "bg-secondary-50 dark:bg-secondary-900/30", border: "border-secondary-200 dark:border-secondary-800" },
-  pastel: { label: "Pasteles",    icon: "🎂", bg: "bg-accent-50 dark:bg-accent-900/30", border: "border-accent-200 dark:border-accent-800" },
-  croquetas: { label: "Croquetas", icon: "🥘", bg: "bg-zinc-50 dark:bg-zinc-900/30", border: "border-zinc-200 dark:border-zinc-800" },
+  diario: { label: "Menú Diario", icon: "🍖", bg: "bg-primary-50", border: "border-primary-200" },
+  snack:  { label: "Snacks",      icon: "🍪", bg: "bg-warning-50", border: "border-warning-200" },
+  helado: { label: "Helados",     icon: "🍦", bg: "bg-secondary-50", border: "border-secondary-200" },
+  pastel: { label: "Pasteles",    icon: "🎂", bg: "bg-accent-50", border: "border-accent-200" },
+  croquetas: { label: "Croquetas", icon: "🥘", bg: "bg-zinc-50", border: "border-zinc-200" },
 };
 
 function RecetarioView({
@@ -220,7 +216,7 @@ function RecetarioView({
       {dogSize && recommendedCroquetas.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+            <h3 className="text-sm font-bold text-zinc-800">
               Recomendado para {dogSize === "miniatura" ? "razas miniatura" : dogSize === "pequena" ? "razas pequeñas" : dogSize === "mediana" ? "razas medianas" : dogSize === "grande" ? "razas grandes" : "razas gigantes"} 🐾
             </h3>
           </div>
@@ -249,20 +245,16 @@ function RecetarioView({
 
       {/* Categories scrollable */}
       <div>
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-3">Categorías</h3>
+        <h3 className="text-sm font-bold text-zinc-800 mb-3">Categorías</h3>
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => setSelectedCategory("all")}
-            className={`shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${
-              selectedCategory === "all"
-                ? "border-primary-400 bg-primary-50 dark:bg-primary-950/50 shadow-sm"
-                : "border-zinc-100 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40"
-            }`}
+            className={`shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${ selectedCategory === "all" ? "border-primary-400 bg-primary-50 shadow-sm" : "border-zinc-100 bg-white/60" }`}
           >
             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-400 to-accent-500 flex items-center justify-center shadow-sm">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">Todos</span>
+            <span className="text-[10px] font-bold text-zinc-700">Todos</span>
           </button>
           {categories.map((cat) => {
             const meta = CATEGORY_META[cat];
@@ -270,32 +262,24 @@ function RecetarioView({
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${
-                  selectedCategory === cat
-                    ? "border-primary-400 bg-primary-50 dark:bg-primary-950/50 shadow-sm"
-                    : "border-zinc-100 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40"
-                }`}
+                className={`shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${ selectedCategory === cat ? "border-primary-400 bg-primary-50 shadow-sm" : "border-zinc-100 bg-white/60" }`}
               >
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-sm border ${meta?.bg ?? "bg-zinc-100 dark:bg-zinc-800"} ${meta?.border ?? "border-zinc-200 dark:border-zinc-700"}`}>
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-sm border ${meta?.bg ?? "bg-zinc-100"} ${meta?.border ?? "border-zinc-200"}`}>
                   {meta?.icon ?? "🍽️"}
                 </div>
-                <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">{meta?.label ?? cat}</span>
+                <span className="text-[10px] font-bold text-zinc-700">{meta?.label ?? cat}</span>
               </button>
             );
           })}
           {hasHidden && (
             <button
               onClick={() => setSelectedCategory("hidden")}
-              className={`shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${
-                selectedCategory === "hidden"
-                  ? "border-primary-400 bg-primary-50 dark:bg-primary-950/50 shadow-sm"
-                  : "border-zinc-100 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40"
-              }`}
+              className={`shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${ selectedCategory === "hidden" ? "border-primary-400 bg-primary-50 shadow-sm" : "border-zinc-100 bg-white/60" }`}
             >
-              <div className="w-14 h-14 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shadow-sm border border-zinc-200 dark:border-zinc-700">
+              <div className="w-14 h-14 rounded-full bg-zinc-100 flex items-center justify-center shadow-sm border border-zinc-200">
                 <EyeOff className="w-5 h-5 text-zinc-400" />
               </div>
-              <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">Ocultas</span>
+              <span className="text-[10px] font-bold text-zinc-700">Ocultas</span>
             </button>
           )}
         </div>
@@ -305,7 +289,7 @@ function RecetarioView({
       {(selectedCategory === "all" || selectedCategory === "diario") && proteinTypes.length > 0 && (
         <div className="flex items-center gap-2">
           <label className="text-xs font-semibold text-zinc-500 whitespace-nowrap">Filtrar por proteína:</label>
-          <select value={selectedProtein} onChange={e => setSelectedProtein(e.target.value)} className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+          <select value={selectedProtein} onChange={e => setSelectedProtein(e.target.value)} className="flex-1 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
             <option value="">Todas las proteínas</option>
             {proteinTypes.map(pt => <option key={pt} value={pt}>{pt}</option>)}
           </select>
@@ -339,7 +323,7 @@ function RecetarioView({
           {hasFavorites && (
             <section>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Tus Favoritos ❤️</h3>
+                <h3 className="text-sm font-bold text-zinc-800">Tus Favoritos ❤️</h3>
               </div>
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
                 {favoriteRecipes.map((r) => (
@@ -353,8 +337,8 @@ function RecetarioView({
           {popular.length > 0 && (
             <section>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Populares</h3>
-                <span className="text-xs text-primary-600 dark:text-primary-400 font-semibold">{visibleRecipes.length} recetas</span>
+                <h3 className="text-sm font-bold text-zinc-800">Populares</h3>
+                <span className="text-xs text-primary-600 font-semibold">{visibleRecipes.length} recetas</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {popular.map((r) => (
@@ -371,10 +355,10 @@ function RecetarioView({
             return (
               <section key={cat}>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{CATEGORY_META[cat]?.label ?? cat}</h3>
+                  <h3 className="text-sm font-bold text-zinc-800">{CATEGORY_META[cat]?.label ?? cat}</h3>
                   <button
                     onClick={() => setSelectedCategory(cat)}
-                    className="text-xs text-primary-600 dark:text-primary-400 font-semibold"
+                    className="text-xs text-primary-600 font-semibold"
                   >
                     Ver todo →
                   </button>
@@ -391,7 +375,7 @@ function RecetarioView({
           {/* Nuevas */}
           {newest.length > 0 && (
             <section>
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-3">Nuevas</h3>
+              <h3 className="text-sm font-bold text-zinc-800 mb-3">Nuevas</h3>
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
                 {newest.map((r) => (
                   <RecipeCard key={r.id} recipe={r} size="standard" />
@@ -406,10 +390,10 @@ function RecetarioView({
       {selectedCategory !== "all" && (
         <>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+            <h3 className="text-sm font-bold text-zinc-800">
               {selectedCategory === "hidden" ? "Recetas ocultas" : CATEGORY_META[selectedCategory]?.label ?? selectedCategory}
             </h3>
-            <span className="text-xs text-primary-600 dark:text-primary-400 font-semibold">{filteredRecipes.length} recetas</span>
+            <span className="text-xs text-primary-600 font-semibold">{filteredRecipes.length} recetas</span>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {filteredRecipes.map((r) => (
@@ -444,7 +428,7 @@ function RecipeCard({ recipe, size = "standard" }: { recipe: NutritionRecipe; si
         href={`/guau/app/nutricion/recetario/${recipe.id}`}
         className="shrink-0 w-40 snap-start card-soft rounded-[1.25rem] p-2.5 hover:shadow-lg transition-all active:scale-[0.97] block group"
       >
-        <div className="relative w-full aspect-[3/4] rounded-2xl mb-2 flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 dark:from-primary-900/40 dark:via-zinc-900/40 dark:to-accent-900/40 isolate">
+        <div className="relative w-full aspect-[3/4] rounded-2xl mb-2 flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 isolate">
           {recipe.image_url ? (
             <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover rounded-2xl" />
           ) : (
@@ -454,15 +438,15 @@ function RecipeCard({ recipe, size = "standard" }: { recipe: NutritionRecipe; si
             <span className="absolute top-2 right-2 bg-accent-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">Terapéutico</span>
           )}
         </div>
-        <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight">{recipe.title}</h4>
+        <h4 className="text-xs font-bold text-zinc-900 truncate leading-tight">{recipe.title}</h4>
         <div className="flex items-center gap-2 mt-1">
         {(recipe.prep_time_min ?? 0) > 0 && (
-          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+          <span className="text-[10px] text-zinc-500 bg-zinc-100/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
             <Clock className="w-2.5 h-2.5" />{recipe.prep_time_min}m
           </span>
         )}
         {(recipe.kcal_per_100g ?? 0) > 0 && (
-                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+                <span className="text-[10px] text-zinc-500 bg-zinc-100/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
                   <Flame className="w-2.5 h-2.5 text-orange-400" />{Math.round(recipe.kcal_per_100g ?? 0)}
                 </span>
               )}
@@ -490,7 +474,7 @@ function RecipeCard({ recipe, size = "standard" }: { recipe: NutritionRecipe; si
       href={`/guau/app/nutricion/recetario/${recipe.id}`}
       className="shrink-0 w-40 snap-start card-soft rounded-[1.25rem] p-3 hover:shadow-lg transition-all active:scale-[0.97] block group"
     >
-      <div className="relative w-full aspect-square rounded-2xl mb-2 flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 dark:from-primary-900/40 dark:via-zinc-900/40 dark:to-accent-900/40 isolate">
+      <div className="relative w-full aspect-square rounded-2xl mb-2 flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-white to-accent-50 isolate">
         {recipe.image_url ? (
           <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover rounded-2xl" />
         ) : (
@@ -499,19 +483,19 @@ function RecipeCard({ recipe, size = "standard" }: { recipe: NutritionRecipe; si
         {recipe.is_therapeutic && (
           <span className="absolute top-2 right-2 bg-accent-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">Terapéutico</span>
         )}
-        <div className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-white/90 dark:bg-zinc-800/90 flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
           <ArrowRight className="w-3.5 h-3.5 text-primary-600" />
         </div>
       </div>
-      <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight">{recipe.title}</h4>
+      <h4 className="text-xs font-bold text-zinc-900 truncate leading-tight">{recipe.title}</h4>
       <div className="flex items-center gap-2 mt-1.5">
               {(recipe.prep_time_min ?? 0) > 0 && (
-                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+                <span className="text-[10px] text-zinc-500 bg-zinc-100/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
                   <Clock className="w-2.5 h-2.5" />{recipe.prep_time_min}m
                 </span>
               )}
               {(recipe.kcal_per_100g ?? 0) > 0 && (
-          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+          <span className="text-[10px] text-zinc-500 bg-zinc-100/80 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
             <Flame className="w-2.5 h-2.5 text-orange-400" />{Math.round(recipe.kcal_per_100g ?? 0)}
           </span>
         )}
@@ -550,9 +534,9 @@ function DetoxTab({ dog, detoxDays, detoxProgress }: { dog: Dog | null; detoxDay
 
   return (
     <div className="space-y-3">
-      <div className="card-soft rounded-[1.5rem] p-4 bg-warning-50/60 dark:bg-warning-950/20 border-warning-200/50 dark:border-warning-900/30">
-        <p className="text-sm text-warning-700 dark:text-warning-300 font-bold">Reto Detox 14 Días</p>
-        <p className="text-xs text-warning-600 dark:text-warning-400 mt-1">Transición de croquetas a alimentación natural. Completa un día a la vez.</p>
+      <div className="card-soft rounded-[1.5rem] p-4 bg-warning-50/60 border-warning-200/50">
+        <p className="text-sm text-warning-700 font-bold">Reto Detox 14 Días</p>
+        <p className="text-xs text-warning-600 mt-1">Transición de croquetas a alimentación natural. Completa un día a la vez.</p>
       </div>
       {detoxDays.map((day) => {
         const isCompleted = completedDays.includes(day.day_number);
@@ -560,14 +544,10 @@ function DetoxTab({ dog, detoxDays, detoxProgress }: { dog: Dog | null; detoxDay
         return (
           <div
             key={day.day_number}
-            className={`rounded-[1.25rem] p-3.5 ${
-              isCompleted ? "card-soft bg-secondary-50/60 dark:bg-secondary-950/20" : isUnlocked ? "card-soft" : "card-soft opacity-50"
-            }`}
+            className={`rounded-[1.25rem] p-3.5 ${ isCompleted ? "card-soft bg-secondary-50/60" : isUnlocked ? "card-soft" : "card-soft opacity-50" }`}
           >
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${
-                isCompleted ? "bg-secondary-500 text-white" : isUnlocked ? "bg-primary-100 dark:bg-primary-900 text-primary-700" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
-              }`}>
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${ isCompleted ? "bg-secondary-500 text-white" : isUnlocked ? "bg-primary-100 text-primary-700" : "bg-zinc-100 text-zinc-400" }`}>
                 {isCompleted ? <Check className="w-4 h-4" /> : isUnlocked ? day.day_number : <Lock className="w-3.5 h-3.5" />}
               </div>
               <div className="flex-1 min-w-0">
@@ -581,7 +561,7 @@ function DetoxTab({ dog, detoxDays, detoxProgress }: { dog: Dog | null; detoxDay
               )}
             </div>
             {day.warning && isUnlocked && (
-              <p className="text-[10px] text-warning-600 dark:text-warning-400 mt-2 pl-10">{day.warning}</p>
+              <p className="text-[10px] text-warning-600 mt-2 pl-10">{day.warning}</p>
             )}
           </div>
         );
@@ -684,17 +664,17 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
     const parts = text.split(new RegExp(`(${escaped})`, "gi"));
     return parts.map((p, i) =>
       p.toLowerCase() === q.toLowerCase()
-        ? `<mark class="bg-warning-200 dark:bg-warning-800 text-warning-900 dark:text-warning-100 rounded px-0.5">${p}</mark>`
+        ? `<mark class="bg-warning-200 text-warning-900 rounded px-0.5">${p}</mark>`
         : p
     ).join("");
   };
 
   const severityBadge = (f: ToxicFood) => {
-    if (!f.is_toxic) return { emoji: "✅", label: "Seguro", bg: "bg-secondary-100 dark:bg-secondary-900/30", text: "text-secondary-700 dark:text-secondary-300" };
-    if (f.severity === "mortal") return { emoji: "☠️", label: "Mortal", bg: "bg-danger-100 dark:bg-danger-900/30", text: "text-danger-700 dark:text-danger-300" };
-    if (f.severity === "alto") return { emoji: "🔴", label: "Alto", bg: "bg-danger-100 dark:bg-danger-900/30", text: "text-danger-700 dark:text-danger-300" };
-    if (f.severity === "bajo" || f.severity === "medio") return { emoji: "🟡", label: "Precaución", bg: "bg-warning-100 dark:bg-warning-900/30", text: "text-warning-700 dark:text-warning-300" };
-    return { emoji: "ℹ️", label: "", bg: "bg-zinc-100 dark:bg-zinc-800", text: "text-zinc-500" };
+    if (!f.is_toxic) return { emoji: "✅", label: "Seguro", bg: "bg-secondary-100", text: "text-secondary-700" };
+    if (f.severity === "mortal") return { emoji: "☠️", label: "Mortal", bg: "bg-danger-100", text: "text-danger-700" };
+    if (f.severity === "alto") return { emoji: "🔴", label: "Alto", bg: "bg-danger-100", text: "text-danger-700" };
+    if (f.severity === "bajo" || f.severity === "medio") return { emoji: "🟡", label: "Precaución", bg: "bg-warning-100", text: "text-warning-700" };
+    return { emoji: "ℹ️", label: "", bg: "bg-zinc-100", text: "text-zinc-500" };
   };
 
   return (
@@ -707,7 +687,7 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
           onChange={(e) => { setQuery(e.target.value); setSearched(false); }}
           onKeyDown={handleKeyDown}
           placeholder="Ej: chocolate, uvas, cebolla..."
-          className="flex-1 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          className="flex-1 rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
         />
         <button onClick={doSearch}
           className="rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 text-sm font-bold transition-all active:scale-95 flex items-center gap-1.5">
@@ -722,7 +702,7 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
             {recents.map((r, i) => (
               <button key={i} onClick={() => { setQuery(r); setSearched(true); saveRecent(r); }}
-                className="shrink-0 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full px-3 py-1.5 text-zinc-600 dark:text-zinc-400 transition-colors whitespace-nowrap">
+                className="shrink-0 text-xs bg-zinc-100 hover:bg-zinc-200 rounded-full px-3 py-1.5 text-zinc-600 transition-colors whitespace-nowrap">
                 {r}
               </button>
             ))}
@@ -740,11 +720,7 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
           { key: "seguros", label: "✅ Seguros" },
         ].map((f) => (
           <button key={f.key} onClick={() => setFilter(f.key as typeof filter)}
-            className={`shrink-0 text-[10px] font-semibold rounded-full px-2.5 py-1.5 transition-all border ${
-              filter === f.key
-                ? "bg-primary-50 dark:bg-primary-950/30 border-primary-400 text-primary-700 dark:text-primary-300"
-                : "bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500"
-            }`}
+            className={`shrink-0 text-[10px] font-semibold rounded-full px-2.5 py-1.5 transition-all border ${ filter === f.key ? "bg-primary-50 border-primary-400 text-primary-700" : "bg-zinc-100 border-transparent text-zinc-500" }`}
           >
             {f.label}
           </button>
@@ -771,9 +747,7 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
               const isHighlighted = idx === 0 && mainResult?.id === f.id;
               return (
                 <div key={f.id}
-                  className={`card-soft rounded-xl overflow-hidden transition-all cursor-pointer ${
-                    isHighlighted ? "ring-2 ring-warning-400 dark:ring-warning-600 shadow-md" : ""
-                  }`}
+                  className={`card-soft rounded-xl overflow-hidden transition-all cursor-pointer ${ isHighlighted ? "ring-2 ring-warning-400 shadow-md" : "" }`}
                   onClick={() => toggleExpand(f.id)}
                 >
                   <div className="p-3 flex items-center gap-3">
@@ -782,14 +756,14 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate"
+                        <p className="text-sm font-semibold text-zinc-800 truncate"
                           dangerouslySetInnerHTML={{ __html: highlight(f.name, query) }} />
                         <span className={`text-[9px] font-semibold rounded-full px-1.5 py-0.5 shrink-0 ${badge.bg} ${badge.text}`}>
                           {badge.label}
                         </span>
                       </div>
                       {f.is_toxic && f.explanation && (
-                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                        <p className="text-[11px] text-zinc-500 truncate mt-0.5">
                           {f.explanation.slice(0, 80)}...
                         </p>
                       )}
@@ -799,18 +773,18 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
 
                   {/* Expandido */}
                   {isOpen && (
-                    <div className="px-3 pb-3 pt-0 space-y-2 border-t border-zinc-100 dark:border-zinc-800">
+                    <div className="px-3 pb-3 pt-0 space-y-2 border-t border-zinc-100">
                       {f.is_toxic && f.explanation && (
                         <div>
                           <p className="text-[10px] font-semibold text-zinc-500 mb-0.5">📋 Explicación</p>
-                          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed"
+                          <p className="text-xs text-zinc-600 leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: highlight(f.explanation, query) }} />
                         </div>
                       )}
                       {f.symptoms && (
                         <div>
                           <p className="text-[10px] font-semibold text-zinc-500 mb-0.5">🩺 Síntomas</p>
-                          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{f.symptoms}</p>
+                          <p className="text-xs text-zinc-600 leading-relaxed">{f.symptoms}</p>
                         </div>
                       )}
                       {f.category && (
@@ -843,7 +817,7 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 truncate">{f.name}</p>
+                          <p className="text-xs font-semibold text-zinc-700 truncate">{f.name}</p>
                           <span className={`text-[8px] font-semibold rounded-full px-1.5 py-0.5 shrink-0 ${badge.bg} ${badge.text}`}>
                             {badge.label}
                           </span>
@@ -853,9 +827,9 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
                       <span className="text-zinc-400 text-xs shrink-0">{isOpen ? "▲" : "▶"}</span>
                     </div>
                     {isOpen && f.explanation && (
-                      <div className="px-3 pb-3 pt-0 border-t border-zinc-100 dark:border-zinc-800">
+                      <div className="px-3 pb-3 pt-0 border-t border-zinc-100">
                         <p className="text-[10px] text-zinc-500 mb-0.5">📋 Explicación</p>
-                        <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{f.explanation}</p>
+                        <p className="text-xs text-zinc-600 leading-relaxed">{f.explanation}</p>
                         {f.symptoms && <p className="text-xs text-zinc-500 mt-1"><b>Síntomas:</b> {f.symptoms}</p>}
                       </div>
                     )}
@@ -871,7 +845,7 @@ function EscanerTab({ toxicFoods }: { toxicFoods: ToxicFood[] }) {
       {!searched && (
         <div className="text-center py-8 space-y-2">
           <div className="text-4xl mb-3">🔍</div>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Escribe un alimento y toca <b>Buscar</b></p>
+          <p className="text-sm text-zinc-500">Escribe un alimento y toca <b>Buscar</b></p>
           <p className="text-xs text-zinc-400">Ej: chocolate, uvas, cebolla, pollo, zanahoria...</p>
         </div>
       )}
@@ -942,12 +916,12 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
     }
   };
 
-  if (!dog) return <p className="text-zinc-500 dark:text-zinc-400 text-center py-8">Registra un perro primero.</p>;
+  if (!dog) return <p className="text-zinc-500 text-center py-8">Registra un perro primero.</p>;
 
   return (
     <div className="space-y-5">
       <div className="card-soft rounded-[1.5rem] p-5 space-y-4">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Calculadora de ración diaria</h3>
+        <h3 className="text-sm font-bold text-zinc-800">Calculadora de ración diaria</h3>
 
         {/* Tipo de dieta: 3 botones */}
         <div className="flex items-center gap-1.5 mb-1">
@@ -980,11 +954,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
                 setFeedingPct(BARF_PCT_BY_STAGE[lifeStage].default);
               }
             }}
-              className={`rounded-xl py-2 text-xs font-bold transition-all border-2 ${
-                dietType === opt.key
-                  ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300"
-                  : "bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500"
-              }`}
+              className={`rounded-xl py-2 text-xs font-bold transition-all border-2 ${ dietType === opt.key ? "bg-primary-50 border-primary-500 text-primary-700" : "bg-zinc-100 border-transparent text-zinc-500" }`}
             >
               <span className="text-base block">{opt.icon}</span>
               {opt.label}
@@ -996,7 +966,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
         <div>
           <label className="text-[10px] text-zinc-400 block mb-1">Nivel de actividad</label>
           <select value={activity} onChange={(e) => setActivity(e.target.value as ActivityLevel)}
-            className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs">
+            className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-xs">
             {Object.entries(FS_ACTIVITY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
@@ -1005,11 +975,11 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
         <div className="flex items-center justify-center py-4">
           <div className="relative w-40 h-40">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 64 64">
-              <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" className="text-zinc-100 dark:text-zinc-800" />
+              <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" className="text-zinc-100" />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-extrabold text-primary-600 dark:text-primary-400">{total}</span>
-              <span className="text-[10px] text-zinc-500 dark:text-zinc-400">gramos/día</span>
+              <span className="text-2xl font-extrabold text-primary-600">{total}</span>
+              <span className="text-[10px] text-zinc-500">gramos/día</span>
               <span className="text-[10px] text-zinc-400">{kcalTotal} kcal</span>
             </div>
           </div>
@@ -1050,7 +1020,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
                 <Info className="w-3 h-3" />
               </button>
             </div>
-            <span className="text-sm font-bold text-primary-700 dark:text-primary-300">
+            <span className="text-sm font-bold text-primary-700">
               {dietType === "mixta" ? `${Math.round(feedingPct)}%` : `${feedingPct.toFixed(1)}%`}
             </span>
           </div>
@@ -1085,8 +1055,8 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
             </div>
             {/* Porcentajes explícitos */}
             <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-primary-600 dark:text-primary-400">🦴 Croquetas {100 - mixtaBarfProp}%</span>
-              <span className="text-accent-600 dark:text-accent-400">{mixtaBarfProp}% Natural 🥩</span>
+              <span className="text-primary-600">🦴 Croquetas {100 - mixtaBarfProp}%</span>
+              <span className="text-accent-600">{mixtaBarfProp}% Natural 🥩</span>
             </div>
             <input type="range" min={0} max={100} step={5} value={mixtaBarfProp}
               onChange={(e) => setMixtaBarfProp(Number(e.target.value))}
@@ -1119,7 +1089,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
             ].map((item) => (
               <div key={item.label}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">{item.label}</span>
+                  <span className="text-[11px] font-semibold text-zinc-700">{item.label}</span>
                   <span className="text-[10px] text-zinc-400">{item.pct}% · {Math.round((dietType === "mixta" ? barfGrams : total) * (item.pct / 100))}g</span>
                 </div>
                 <input type="range" min={0} max={100} value={item.pct} onChange={(e) => item.set(Number(e.target.value))} className="w-full accent-primary-600" />
@@ -1128,7 +1098,7 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
           </div>
         )}
         <div className="flex gap-2 pt-2">
-          <button onClick={() => setExpertMode(!expertMode)} className="flex-1 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-xs font-bold text-zinc-700 dark:text-zinc-300">
+          <button onClick={() => setExpertMode(!expertMode)} className="flex-1 py-2.5 rounded-xl bg-zinc-100 text-xs font-bold text-zinc-700">
             {expertMode ? "Modo simple" : "Modo experto"}
           </button>
           <button onClick={handleSave} className="flex-1 py-2.5 rounded-xl bg-primary-600 text-white text-xs font-bold">
@@ -1140,20 +1110,20 @@ function CalculadoraTab({ dog, metabolicProfile, latestWeightKg }: { dog: Dog | 
         {infoModal.open && (
           <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setInfoModal({ ...infoModal, open: false })} />
-            <div className="relative bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-[1.5rem] px-5 pt-6 pb-8 max-w-md w-full shadow-2xl border border-zinc-100 dark:border-zinc-800 space-y-4 overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-accent-100/40 dark:from-accent-950/30 to-transparent pointer-events-none" />
+            <div className="relative bg-white rounded-t-[2rem] sm:rounded-[1.5rem] px-5 pt-6 pb-8 max-w-md w-full shadow-2xl border border-zinc-100 space-y-4 overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-accent-100/40 to-transparent pointer-events-none" />
               <div className="relative flex items-start gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-accent-100 dark:bg-accent-950/50 flex items-center justify-center text-2xl shrink-0">
+                <div className="w-11 h-11 rounded-2xl bg-accent-100 flex items-center justify-center text-2xl shrink-0">
                   {infoModal.icon}
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-zinc-900 dark:text-zinc-100">{infoModal.title}</h3>
+                  <h3 className="text-base font-extrabold text-zinc-900">{infoModal.title}</h3>
                   {infoModal.example && (
                     <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">{infoModal.example}</p>
                   )}
                 </div>
               </div>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-line">{infoModal.body}</p>
+              <p className="text-sm text-zinc-600 leading-relaxed whitespace-pre-line">{infoModal.body}</p>
               <button onClick={() => setInfoModal({ ...infoModal, open: false })}
                 className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-3 text-sm font-bold transition-all active:scale-[0.98]">
                 ¡Entendido!
@@ -1183,7 +1153,7 @@ function PlanTab(props: {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <CalendarDays className="w-5 h-5 text-primary-600" />
-        <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">Plan de Alimentación</h2>
+        <h2 className="text-base font-bold text-zinc-900">Plan de Alimentación</h2>
       </div>
       {props.dog ? (
         <MealCalendarWidget
@@ -1306,25 +1276,25 @@ function ListaTab({ userId }: { userId: string }) {
   return (
     <div className="space-y-4">
       {/* Tabs */}
-      <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-1">
-        <button onClick={() => setView("generator")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${view === "generator" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Generar Lista</button>
-        <button onClick={() => { setView("history"); loadHistory(); }} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${view === "history" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Historial</button>
-        <button onClick={() => setView("stores")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${view === "stores" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Tiendas</button>
+      <div className="flex bg-zinc-100 rounded-full p-1">
+        <button onClick={() => setView("generator")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${view === "generator" ? "bg-zinc-900 text-white" : "text-zinc-500"}`}>Generar Lista</button>
+        <button onClick={() => { setView("history"); loadHistory(); }} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${view === "history" ? "bg-zinc-900 text-white" : "text-zinc-500"}`}>Historial</button>
+        <button onClick={() => setView("stores")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${view === "stores" ? "bg-zinc-900 text-white" : "text-zinc-500"}`}>Tiendas</button>
       </div>
 
       {view === "generator" && (
         <div className="space-y-4">
           {/* Date range */}
           <div className="card-soft rounded-[1.5rem] p-4 space-y-3">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Rango de fechas</h3>
+            <h3 className="text-sm font-bold text-zinc-800">Rango de fechas</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-zinc-500 mb-1 block">Desde</label>
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm" />
               </div>
               <div>
                 <label className="text-[10px] text-zinc-500 mb-1 block">Hasta</label>
-                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm" />
               </div>
             </div>
             <button onClick={generateList} disabled={generating} className="w-full rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 text-white py-2.5 text-sm font-bold flex items-center justify-center gap-2">
@@ -1335,9 +1305,9 @@ function ListaTab({ userId }: { userId: string }) {
           {/* Results */}
           {listData && (
             <>
-              <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-1">
-                <button onClick={() => setGroupMode("combined")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${groupMode === "combined" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Todos los perros</button>
-                <button onClick={() => setGroupMode("byDog")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${groupMode === "byDog" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Por perro</button>
+              <div className="flex bg-zinc-100 rounded-full p-1">
+                <button onClick={() => setGroupMode("combined")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${groupMode === "combined" ? "bg-zinc-900 text-white" : "text-zinc-500"}`}>Todos los perros</button>
+                <button onClick={() => setGroupMode("byDog")} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${groupMode === "byDog" ? "bg-zinc-900 text-white" : "text-zinc-500"}`}>Por perro</button>
               </div>
 
               {groupMode === "combined" && (
@@ -1346,13 +1316,13 @@ function ListaTab({ userId }: { userId: string }) {
                     <div key={type} className="card-soft rounded-[1.5rem] p-4 space-y-2">
                       <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">{INGREDIENT_TYPE_LABELS[type] || type}</h4>
                       {items.map((item: any) => (
-                        <div key={item.ingredient_name} className={`flex items-center gap-3 p-2.5 rounded-xl text-sm ${item.purchased ? "bg-secondary-50/60 opacity-60" : "bg-white/50 dark:bg-zinc-800/30"}`}>
+                        <div key={item.ingredient_name} className={`flex items-center gap-3 p-2.5 rounded-xl text-sm ${item.purchased ? "bg-secondary-50/60 opacity-60" : "bg-white/50"}`}>
                           <span className="font-semibold flex-1">{item.ingredient_name}</span>
                           <span className="text-xs text-zinc-500">
                             {item.pieces ? `${item.pieces} ${item.display_unit || item.unit_type}` : `${item.total_g}g`}
                           </span>
                           {!item.purchased && (
-                            <button onClick={() => openPurchase(item)} className="text-primary-600 text-[10px] font-bold bg-primary-50 dark:bg-primary-950/30 px-2 py-1 rounded-lg">Registrar</button>
+                            <button onClick={() => openPurchase(item)} className="text-primary-600 text-[10px] font-bold bg-primary-50 px-2 py-1 rounded-lg">Registrar</button>
                           )}
                           {item.purchased && <Check className="w-4 h-4 text-secondary-500" />}
                         </div>
@@ -1369,13 +1339,13 @@ function ListaTab({ userId }: { userId: string }) {
                 <div className="space-y-4">
                   {listData.byDog.map((dog: any) => (
                     <div key={dog.dog_id} className="card-soft rounded-[1.5rem] p-4 space-y-2">
-                      <h4 className="text-sm font-bold text-primary-700 dark:text-primary-300">{dog.dog_name}</h4>
+                      <h4 className="text-sm font-bold text-primary-700">{dog.dog_name}</h4>
                       {dog.items.map((item: any) => (
-                        <div key={item.ingredient_name} className={`flex items-center gap-3 p-2.5 rounded-xl text-sm ${item.purchased ? "bg-secondary-50/60 opacity-60" : "bg-white/50 dark:bg-zinc-800/30"}`}>
+                        <div key={item.ingredient_name} className={`flex items-center gap-3 p-2.5 rounded-xl text-sm ${item.purchased ? "bg-secondary-50/60 opacity-60" : "bg-white/50"}`}>
                           <span className="font-semibold flex-1">{item.ingredient_name}</span>
                           <span className="text-xs text-zinc-500">{item.pieces ? `${item.pieces} ${item.display_unit || item.unit_type}` : `${item.total_g}g`}</span>
                           {!item.purchased && (
-                            <button onClick={() => openPurchase(item)} className="text-primary-600 text-[10px] font-bold bg-primary-50 dark:bg-primary-950/30 px-2 py-1 rounded-lg">Registrar</button>
+                            <button onClick={() => openPurchase(item)} className="text-primary-600 text-[10px] font-bold bg-primary-50 px-2 py-1 rounded-lg">Registrar</button>
                           )}
                           {item.purchased && <Check className="w-4 h-4 text-secondary-500" />}
                         </div>
@@ -1396,7 +1366,7 @@ function ListaTab({ userId }: { userId: string }) {
           {history.map((h: any) => (
             <div key={h.id} className="card-soft rounded-[1.25rem] p-4 text-sm space-y-1">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200">{h.ingredient_name}</span>
+                <span className="font-semibold text-zinc-800">{h.ingredient_name}</span>
                 <span className="text-xs text-zinc-400">{h.purchase_date}</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-zinc-500">
@@ -1405,7 +1375,7 @@ function ListaTab({ userId }: { userId: string }) {
                 <span>{h.currency} {h.price_total?.toFixed(2)}</span>
                 {h.price_per_kg && <span>· {h.currency} {h.price_per_kg.toFixed(2)}/kg</span>}
               </div>
-              {h.store && <span className="text-[10px] text-primary-600 bg-primary-50 dark:bg-primary-950/30 px-2 py-0.5 rounded-full">{h.store.name}</span>}
+              {h.store && <span className="text-[10px] text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full">{h.store.name}</span>}
             </div>
           ))}
         </div>
@@ -1414,17 +1384,17 @@ function ListaTab({ userId }: { userId: string }) {
       {view === "stores" && (
         <div className="space-y-4">
           <div className="card-soft rounded-[1.5rem] p-4 space-y-3">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Mis Tiendas</h3>
+            <h3 className="text-sm font-bold text-zinc-800">Mis Tiendas</h3>
             <div className="space-y-2">
-              <input value={newStoreName} onChange={e => setNewStoreName(e.target.value)} placeholder="Nombre de la tienda" className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
-              <input value={newStoreLocation} onChange={e => setNewStoreLocation(e.target.value)} placeholder="Ubicación (opcional)" className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+              <input value={newStoreName} onChange={e => setNewStoreName(e.target.value)} placeholder="Nombre de la tienda" className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm" />
+              <input value={newStoreLocation} onChange={e => setNewStoreLocation(e.target.value)} placeholder="Ubicación (opcional)" className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm" />
               <button onClick={addStore} className="w-full rounded-xl bg-primary-600 text-white py-2 text-sm font-bold">Añadir Tienda</button>
             </div>
           </div>
           <div className="space-y-2">
             {stores.map((s: any) => (
               <div key={s.id} className="flex items-center gap-3 p-3 rounded-[1.25rem] card-soft text-sm">
-                <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 flex items-center justify-center font-bold text-xs">{s.name[0]}</div>
+                <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-xs">{s.name[0]}</div>
                 <div className="flex-1">
                   <p className="font-semibold">{s.name}</p>
                   {s.location && <p className="text-xs text-zinc-400">{s.location}</p>}
@@ -1438,23 +1408,23 @@ function ListaTab({ userId }: { userId: string }) {
       {/* Purchase Modal */}
       {showPurchaseModal && purchaseItem && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4" onClick={() => setShowPurchaseModal(false)}>
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-white w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Registrar Compra</h3>
-              <button onClick={() => setShowPurchaseModal(false)} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center"><X className="w-4 h-4" /></button>
+              <h3 className="text-lg font-bold text-zinc-900">Registrar Compra</h3>
+              <button onClick={() => setShowPurchaseModal(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center"><X className="w-4 h-4" /></button>
             </div>
-            <div className="p-3 rounded-2xl bg-primary-50 dark:bg-primary-950/30">
-              <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{purchaseItem.ingredient_name}</p>
+            <div className="p-3 rounded-2xl bg-primary-50">
+              <p className="text-sm font-bold text-zinc-800">{purchaseItem.ingredient_name}</p>
               <p className="text-xs text-zinc-500">Necesitas: {purchaseItem.pieces ? `${purchaseItem.pieces} ${purchaseItem.display_unit || purchaseItem.unit_type}` : `${purchaseItem.total_g}g`}</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-zinc-500 mb-1 block">Cantidad comprada</label>
-                <input type="number" value={purchaseForm.quantity} onChange={e => setPurchaseForm({...purchaseForm, quantity: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+                <input type="number" value={purchaseForm.quantity} onChange={e => setPurchaseForm({...purchaseForm, quantity: e.target.value})} className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm" />
               </div>
               <div>
                 <label className="text-[10px] text-zinc-500 mb-1 block">Unidad</label>
-                <select value={purchaseForm.quantity_unit} onChange={e => setPurchaseForm({...purchaseForm, quantity_unit: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+                <select value={purchaseForm.quantity_unit} onChange={e => setPurchaseForm({...purchaseForm, quantity_unit: e.target.value})} className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm">
                   <option value="kg">kg</option><option value="g">g</option><option value="unidad">unidad</option><option value="pieza">pieza</option><option value="docena">docena</option>
                 </select>
               </div>
@@ -1462,25 +1432,25 @@ function ListaTab({ userId }: { userId: string }) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-zinc-500 mb-1 block">Precio total</label>
-                <input type="number" step="0.01" value={purchaseForm.price_total} onChange={e => setPurchaseForm({...purchaseForm, price_total: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+                <input type="number" step="0.01" value={purchaseForm.price_total} onChange={e => setPurchaseForm({...purchaseForm, price_total: e.target.value})} className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm" />
               </div>
               <div>
                 <label className="text-[10px] text-zinc-500 mb-1 block">Moneda</label>
-                <select value={purchaseForm.currency} onChange={e => setPurchaseForm({...purchaseForm, currency: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+                <select value={purchaseForm.currency} onChange={e => setPurchaseForm({...purchaseForm, currency: e.target.value})} className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm">
                   <option value="PEN">PEN (S/)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="MXN">MXN</option>
                 </select>
               </div>
             </div>
             <div>
               <label className="text-[10px] text-zinc-500 mb-1 block">Tienda</label>
-              <select value={purchaseForm.store_id} onChange={e => setPurchaseForm({...purchaseForm, store_id: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+              <select value={purchaseForm.store_id} onChange={e => setPurchaseForm({...purchaseForm, store_id: e.target.value})} className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm">
                 <option value="">Sin tienda</option>
                 {stores.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
             <div>
               <label className="text-[10px] text-zinc-500 mb-1 block">Notas</label>
-              <input value={purchaseForm.notes} onChange={e => setPurchaseForm({...purchaseForm, notes: e.target.value})} placeholder="Ej: oferta, marca..." className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm" />
+              <input value={purchaseForm.notes} onChange={e => setPurchaseForm({...purchaseForm, notes: e.target.value})} placeholder="Ej: oferta, marca..." className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm" />
             </div>
             <button onClick={savePurchase} disabled={savingPurchase} className="w-full rounded-2xl bg-gradient-to-r from-secondary-500 to-secondary-600 text-white py-3 text-sm font-bold disabled:opacity-50">
               {savingPurchase ? "Guardando..." : "Guardar Compra"}

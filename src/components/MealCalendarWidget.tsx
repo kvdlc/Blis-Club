@@ -200,10 +200,10 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
       {/* ═══ WIDGET 1: Plan Semanal ═══ */}
       <div className="card-soft rounded-[1.5rem] p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Plan Semanal</h3>
+          <h3 className="text-sm font-bold text-zinc-900">Plan Semanal</h3>
           <div className="flex items-center gap-1">
-            <button onClick={() => setWeekOffset((o) => o - 1)} className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors"><ChevronLeft className="w-4 h-4" /></button>
-            <button onClick={() => setWeekOffset((o) => o + 1)} className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors"><ChevronRight className="w-4 h-4" /></button>
+            <button onClick={() => setWeekOffset((o) => o - 1)} className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors"><ChevronLeft className="w-4 h-4" /></button>
+            <button onClick={() => setWeekOffset((o) => o + 1)} className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors"><ChevronRight className="w-4 h-4" /></button>
           </div>
         </div>
 
@@ -219,9 +219,7 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
               <button
                 key={dateStr}
                 onClick={() => setSelectedDate(d)}
-                className={`flex flex-col items-center gap-1 py-2 px-1.5 rounded-2xl transition-all min-w-[2.2rem] ${
-                  selected ? "bg-primary-100 dark:bg-primary-900/40 ring-2 ring-primary-300" : ""
-                } ${isTodayDate && !selected ? "bg-secondary-50 dark:bg-secondary-950/20" : ""}`}
+                className={`flex flex-col items-center gap-1 py-2 px-1.5 rounded-2xl transition-all min-w-[2.2rem] ${ selected ? "bg-primary-100 ring-2 ring-primary-300" : "" } ${isTodayDate && !selected ? "bg-secondary-50" : ""}`}
               >
                 <span className={`text-[9px] font-medium ${isTodayDate ? "text-primary-600" : "text-zinc-400"}`}>
                   {d.toLocaleDateString("es", { weekday: "narrow" }).toUpperCase()}
@@ -254,15 +252,7 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
             return (
               <div
                 key={slot.id}
-                className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
-                  item?.status === "fed"
-                    ? "bg-secondary-50/60 border-secondary-200/50"
-                    : item?.status === "skipped"
-                    ? "bg-zinc-50/60 border-zinc-200/50 opacity-60"
-                    : item?.status === "suggested"
-                    ? "bg-primary-50/60 border-primary-200/50"
-                    : "bg-white/60 border-zinc-100"
-                }`}
+                className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${ item?.status === "fed" ? "bg-secondary-50/60 border-secondary-200/50" : item?.status === "skipped" ? "bg-zinc-50/60 border-zinc-200/50 opacity-60" : item?.status === "suggested" ? "bg-primary-50/60 border-primary-200/50" : "bg-white/60 border-zinc-100" }`}
               >
                 <div className="flex flex-col items-center w-10 shrink-0">
                   <Clock className="w-3.5 h-3.5 text-zinc-400" />
@@ -308,9 +298,7 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
                     <>
                       <button
                         onClick={() => toggleStatus(item.id, item.status)}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                          item.status === "fed" ? "bg-secondary-500 text-white" : item.status === "skipped" ? "bg-zinc-300 text-white" : "bg-zinc-100 text-zinc-400 hover:bg-secondary-100"
-                        }`}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${ item.status === "fed" ? "bg-secondary-500 text-white" : item.status === "skipped" ? "bg-zinc-300 text-white" : "bg-zinc-100 text-zinc-400 hover:bg-secondary-100" }`}
                       >
                         {item.status === "fed" ? <Check className="w-4 h-4" /> : item.status === "skipped" ? <X className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
                       </button>
@@ -342,11 +330,11 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Flame className="w-5 h-5 text-orange-500" />
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Resumen Nutricional</h3>
+            <h3 className="text-sm font-bold text-zinc-900">Resumen Nutricional</h3>
           </div>
-          <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-1">
-            <button onClick={() => setView("today")} className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${view === "today" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Hoy</button>
-            <button onClick={() => setView("week")} className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${view === "week" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}>Semana</button>
+          <div className="flex bg-zinc-100 rounded-full p-1">
+            <button onClick={() => setView("today")} className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${view === "today" ? "bg-zinc-900 text-white" : "text-zinc-500"}`}>Hoy</button>
+            <button onClick={() => setView("week")} className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${view === "week" ? "bg-zinc-900 text-white" : "text-zinc-500"}`}>Semana</button>
           </div>
         </div>
 
@@ -354,22 +342,22 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
         <div className="flex flex-col items-center py-2">
           <div className="relative w-52 h-32">
             <svg className="w-52 h-32" viewBox="0 0 140 80">
-              <path d="M 20 70 A 50 50 0 0 1 120 70" fill="none" stroke="currentColor" strokeWidth="12" className="text-zinc-100 dark:text-zinc-800" strokeLinecap="round" />
+              <path d="M 20 70 A 50 50 0 0 1 120 70" fill="none" stroke="currentColor" strokeWidth="12" className="text-zinc-100" strokeLinecap="round" />
               <path d="M 20 70 A 50 50 0 0 1 120 70" fill="none" stroke="currentColor" strokeWidth="12" className="text-primary-500" strokeLinecap="round"
                 strokeDasharray={Math.PI * 50}
                 strokeDashoffset={Math.PI * 50 * (1 - kcalPercent / 100)}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center pt-6">
-              <span className="text-3xl font-bold text-primary-600 dark:text-primary-400">{kcalPercent.toFixed(0)}%</span>
+              <span className="text-3xl font-bold text-primary-600">{kcalPercent.toFixed(0)}%</span>
               <span className="text-[10px] text-zinc-500">de calorías</span>
             </div>
             <div className="absolute left-2 bottom-2 flex items-center gap-1">
-              <div className="w-6 h-6 rounded-full bg-rose-50 dark:bg-rose-950 flex items-center justify-center"><Flame className="w-3 h-3 text-rose-500" /></div>
+              <div className="w-6 h-6 rounded-full bg-rose-50 flex items-center justify-center"><Flame className="w-3 h-3 text-rose-500" /></div>
               <span className="text-[9px] font-bold text-zinc-600">{dayStats.kcal}</span>
             </div>
             <div className="absolute right-2 bottom-2 flex items-center gap-1 flex-row-reverse">
-              <div className="w-6 h-6 rounded-full bg-orange-50 dark:bg-orange-950 flex items-center justify-center"><Flame className="w-3 h-3 text-orange-500" /></div>
+              <div className="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center"><Flame className="w-3 h-3 text-orange-500" /></div>
               <span className="text-[9px] font-bold text-zinc-600">{kcalTarget}</span>
             </div>
           </div>
@@ -386,21 +374,21 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
       {/* ═══ ADD MEAL MODAL ═══ */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4" onClick={() => setShowAddModal(false)}>
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Agregar Comida</h3>
-              <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+              <h3 className="text-lg font-bold text-zinc-900">Agregar Comida</h3>
+              <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {!addMode ? (
               <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => setAddMode("recipe")} className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-primary-200 bg-primary-50 dark:bg-primary-950/30 hover:border-primary-400 transition-all">
+                <button onClick={() => setAddMode("recipe")} className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-primary-200 bg-primary-50 hover:border-primary-400 transition-all">
                   <ChefHat className="w-6 h-6 text-primary-600" />
                   <span className="text-sm font-bold text-primary-700">Elegir receta</span>
                 </button>
-                <button onClick={() => setAddMode("free")} className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-zinc-200 bg-zinc-50 dark:bg-zinc-800 hover:border-zinc-400 transition-all">
+                <button onClick={() => setAddMode("free")} className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-zinc-200 bg-zinc-50 hover:border-zinc-400 transition-all">
                   <UtensilsCrossed className="w-6 h-6 text-zinc-600" />
                   <span className="text-sm font-bold text-zinc-700">Comida libre</span>
                 </button>
@@ -408,7 +396,7 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
             ) : addMode === "recipe" ? (
               <div className="space-y-3">
                 <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Receta</label>
-                <select value={selectedRecipeId} onChange={(e) => setSelectedRecipeId(e.target.value)} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm">
+                <select value={selectedRecipeId} onChange={(e) => setSelectedRecipeId(e.target.value)} className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm">
                   <option value="">Selecciona una receta...</option>
                   {recipes.map((r) => (
                     <option key={r.id} value={r.id}>{r.title}</option>
@@ -417,9 +405,9 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Gramos</label>
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setAddGrams(Math.max(50, addGrams - 25))} className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-zinc-600">-</button>
-                    <div className="flex-1 text-center"><span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{addGrams}g</span></div>
-                    <button onClick={() => setAddGrams(addGrams + 25)} className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-zinc-600">+</button>
+                    <button onClick={() => setAddGrams(Math.max(50, addGrams - 25))} className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center font-bold text-zinc-600">-</button>
+                    <div className="flex-1 text-center"><span className="text-xl font-bold text-zinc-900">{addGrams}g</span></div>
+                    <button onClick={() => setAddGrams(addGrams + 25)} className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center font-bold text-zinc-600">+</button>
                   </div>
                 </div>
                 <button onClick={saveAddMeal} disabled={!selectedRecipeId} className="w-full rounded-2xl bg-gradient-to-r from-primary-500 to-accent-500 text-white py-3 text-sm font-bold disabled:opacity-50">Guardar</button>
@@ -428,14 +416,14 @@ export function MealCalendarWidget({ dog, mealSlots, mealSchedule, metabolicProf
               <div className="space-y-3">
                 <div>
                   <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-1.5">¿Qué comió?</label>
-                  <input value={freeText} onChange={(e) => setFreeText(e.target.value)} placeholder="Ej: 2 tazas de croquetas" className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm" />
+                  <input value={freeText} onChange={(e) => setFreeText(e.target.value)} placeholder="Ej: 2 tazas de croquetas" className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Gramos</label>
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setAddGrams(Math.max(50, addGrams - 25))} className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-zinc-600">-</button>
-                    <div className="flex-1 text-center"><span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{addGrams}g</span></div>
-                    <button onClick={() => setAddGrams(addGrams + 25)} className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-zinc-600">+</button>
+                    <button onClick={() => setAddGrams(Math.max(50, addGrams - 25))} className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center font-bold text-zinc-600">-</button>
+                    <div className="flex-1 text-center"><span className="text-xl font-bold text-zinc-900">{addGrams}g</span></div>
+                    <button onClick={() => setAddGrams(addGrams + 25)} className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center font-bold text-zinc-600">+</button>
                   </div>
                 </div>
                 <button onClick={saveAddMeal} disabled={!freeText.trim()} className="w-full rounded-2xl bg-gradient-to-r from-primary-500 to-accent-500 text-white py-3 text-sm font-bold disabled:opacity-50">Guardar</button>

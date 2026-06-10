@@ -116,14 +116,14 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800">
+        <div className="flex items-center justify-between p-4 border-b border-zinc-100">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-accent-100 dark:bg-accent-950/30 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-accent-100 flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-accent-600" />
             </div>
-            <h2 className="font-bold text-zinc-900 dark:text-white text-sm">
+            <h2 className="font-bold text-zinc-900 text-sm">
               {isRecipe
                 ? importMode === "import"
                   ? "Importar croqueta comercial"
@@ -131,7 +131,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                 : "Generar lección con AI"}
             </h2>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors">
+          <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-zinc-100 flex items-center justify-center transition-colors">
             <X className="w-4 h-4 text-zinc-500" />
           </button>
         </div>
@@ -139,16 +139,16 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
         <div className="p-4 space-y-4">
           {/* Mode toggle for recipes */}
           {isRecipe && (
-            <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-full p-0.5">
+            <div className="flex bg-zinc-100 rounded-full p-0.5">
               <button
                 onClick={() => { setImportMode("generate"); setPreview(null); setBreedSizes([]); }}
-                className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${importMode === "generate" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}
+                className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${importMode === "generate" ? "bg-zinc-900 text-white" : "text-zinc-500"}`}
               >
                 Generar receta
               </button>
               <button
                 onClick={() => { setImportMode("import"); setPreview(null); setBreedSizes([]); }}
-                className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${importMode === "import" ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" : "text-zinc-500"}`}
+                className={`flex-1 py-1.5 rounded-full text-[11px] font-bold transition-all ${importMode === "import" ? "bg-zinc-900 text-white" : "text-zinc-500"}`}
               >
                 Importar croqueta
               </button>
@@ -157,7 +157,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
 
           {/* Prompt input */}
           <div>
-            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 block mb-1">
+            <label className="text-xs font-semibold text-zinc-600 block mb-1">
               {importMode === "import" ? "Pega la información del producto" : "Describe lo que quieres generar"}
             </label>
             <textarea
@@ -171,7 +171,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                     : "Ej: Lección sobre cómo enseñar 'sentado' a un cachorro de 3 meses, con teoría y quiz..."
               }
               rows={6}
-              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 text-sm"
+              className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2.5 text-sm"
             />
           </div>
 
@@ -179,11 +179,11 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
           {isRecipe && importMode === "generate" && (
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 block mb-1">Categoría (opcional)</label>
+                <label className="text-xs font-semibold text-zinc-600 block mb-1">Categoría (opcional)</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 text-sm"
+                  className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2.5 text-sm"
                 >
                   <option value="">Auto-detectar</option>
                   <option value="diario">Diario</option>
@@ -194,11 +194,11 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 block mb-1">Dificultad (opcional)</label>
+                <label className="text-xs font-semibold text-zinc-600 block mb-1">Dificultad (opcional)</label>
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2.5 text-sm"
+                  className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2.5 text-sm"
                 >
                   <option value="">Auto-detectar</option>
                   <option value="facil">Fácil</option>
@@ -223,19 +223,19 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
           </button>
 
           {error && (
-            <div className="p-3 rounded-xl bg-danger-50 dark:bg-danger-950/30 text-danger-700 dark:text-danger-300 text-xs">
+            <div className="p-3 rounded-xl bg-danger-50 text-danger-700 text-xs">
               {error}
             </div>
           )}
 
           {/* Preview */}
           {preview && (
-            <div className="space-y-3 border-t border-zinc-200 dark:border-zinc-700 pt-4">
+            <div className="space-y-3 border-t border-zinc-200 pt-4">
               <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Vista previa generada</p>
 
               {isRecipe && (
                 <div className="card-soft rounded-xl p-3 space-y-3">
-                  <p className="text-sm font-bold text-zinc-900 dark:text-white">{preview.title}</p>
+                  <p className="text-sm font-bold text-zinc-900">{preview.title}</p>
                   {preview.description && <p className="text-xs text-zinc-500 line-clamp-3">{preview.description}</p>}
                   <div className="flex gap-2 flex-wrap">
                     <span className="text-[10px] bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">{preview.category}</span>
@@ -313,7 +313,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                   <p className="text-xs text-zinc-600">
                     Contenido generado para tipo: <strong>{lessonType}</strong>
                   </p>
-                  <pre className="text-[10px] text-zinc-500 bg-zinc-50 dark:bg-zinc-800 p-2 rounded-lg overflow-x-auto">
+                  <pre className="text-[10px] text-zinc-500 bg-zinc-50 p-2 rounded-lg overflow-x-auto">
                     {JSON.stringify(preview, null, 2)}
                   </pre>
                 </div>
@@ -329,7 +329,7 @@ export default function AIGenerateModal({ isOpen, onClose, onGenerate, mode, les
                 <button
                   onClick={handleRegenerate}
                   disabled={loading}
-                  className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 py-2.5 text-sm font-bold transition-colors disabled:opacity-50"
+                  className="flex-1 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 py-2.5 text-sm font-bold transition-colors disabled:opacity-50"
                 >
                   Regenerar
                 </button>

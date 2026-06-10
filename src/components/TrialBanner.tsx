@@ -11,11 +11,11 @@ export default function TrialBanner({ daysLeft }: Props) {
   if (daysLeft <= 0 || daysLeft > 5) return null;
 
   return (
-    <div className="bg-warning-50 dark:bg-warning-950/30 border-b border-warning-200 dark:border-warning-800 px-4 py-2.5">
+    <div className="bg-warning-50 border-b border-warning-200 px-4 py-2.5">
       <div className="flex items-center justify-between gap-3 max-w-5xl mx-auto">
         <div className="flex items-center gap-2 min-w-0">
-          <AlertTriangle className="w-4 h-4 text-warning-600 dark:text-warning-400 shrink-0" />
-          <p className="text-xs font-bold text-warning-700 dark:text-warning-300 truncate">
+          <AlertTriangle className="w-4 h-4 text-warning-600 shrink-0" />
+          <p className="text-xs font-bold text-warning-700 truncate">
             Tu experiencia completa termina en {daysLeft} día{daysLeft !== 1 ? "s" : ""}
           </p>
         </div>

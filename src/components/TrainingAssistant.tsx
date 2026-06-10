@@ -293,18 +293,18 @@ export function TrainingAssistant({ sessions, dog }: Props) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Lightbulb className="w-4 h-4 text-warning-500" />
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Sugerencias de entrenamiento</h3>
+        <h3 className="text-sm font-bold text-zinc-800">Sugerencias de entrenamiento</h3>
       </div>
       {activeSuggestions.map((suggestion) => (
         <a
           key={suggestion.id}
           href={suggestion.href || "#"}
-          className="card-soft rounded-[1.25rem] p-4 space-y-2 bg-warning-50/40 dark:bg-warning-950/20 border border-warning-100 dark:border-warning-900/40 block active:scale-[0.98] transition-transform"
+          className="card-soft rounded-[1.25rem] p-4 space-y-2 bg-warning-50/40 border border-warning-100 block active:scale-[0.98] transition-transform"
         >
-          <p className="text-sm font-bold text-warning-800 dark:text-warning-300">{suggestion.title}</p>
-          <p className="text-xs text-warning-600 dark:text-warning-400 leading-relaxed">{suggestion.subtitle}</p>
+          <p className="text-sm font-bold text-warning-800">{suggestion.title}</p>
+          <p className="text-xs text-warning-600 leading-relaxed">{suggestion.subtitle}</p>
           {suggestion.href && (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-warning-700 dark:text-warning-300">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-warning-700">
               {suggestion.action}
               <ChevronRight className="w-3 h-3" />
             </span>

@@ -178,10 +178,10 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
     <div className="space-y-5 pb-8">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={() => router.back()} className="w-9 h-9 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center">
+        <button onClick={() => router.back()} className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Agilidad</h1>
+        <h1 className="text-lg font-bold text-zinc-900">Agilidad</h1>
       </div>
 
       {/* 🎯 BOTONES PRINCIPALES — ARRIBA */}
@@ -196,7 +196,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
           </button>
           <button
             onClick={() => { setShowForm(true); setWizardStep(null); setSelectedCircuit(null); }}
-            className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm active:scale-[0.98] transition-all"
+            className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-zinc-100 text-zinc-700 font-bold text-sm active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             Circuito Personalizado
@@ -208,7 +208,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
       {visibleCircuits.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Circuitos rápidos</h3>
+            <h3 className="text-sm font-bold text-zinc-800">Circuitos rápidos</h3>
             <button
               onClick={() => setShowManageCircuits(!showManageCircuits)}
               className="text-[10px] font-semibold text-zinc-500 flex items-center gap-1"
@@ -229,18 +229,14 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
                   <button
                     key={circuit.id}
                     onClick={() => startCircuit(circuit)}
-                    className="snap-start flex flex-col items-center gap-2 p-4 rounded-[1.25rem] bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 min-w-[140px] active:scale-[0.97] transition-all hover:border-accent-300"
+                    className="snap-start flex flex-col items-center gap-2 p-4 rounded-[1.25rem] bg-white border border-zinc-100 min-w-[140px] active:scale-[0.97] transition-all hover:border-accent-300"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-accent-100 dark:bg-accent-900 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-accent-100 flex items-center justify-center">
                       {isCustom ? <Star className="w-5 h-5 text-accent-600" /> : <Zap className="w-5 h-5 text-accent-600" />}
                     </div>
-                    <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 text-center leading-tight">{circuit.name}</span>
+                    <span className="text-xs font-bold text-zinc-700 text-center leading-tight">{circuit.name}</span>
                     <span className="text-[10px] text-zinc-400">{obstacleCount} obstáculos</span>
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                      circuit.difficulty_level === "principiante" ? "bg-secondary-100 text-secondary-700" :
-                      circuit.difficulty_level === "intermedio" ? "bg-warning-100 text-warning-700" :
-                      "bg-danger-100 text-danger-700"
-                    }`}>
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${ circuit.difficulty_level === "principiante" ? "bg-secondary-100 text-secondary-700" : circuit.difficulty_level === "intermedio" ? "bg-warning-100 text-warning-700" : "bg-danger-100 text-danger-700" }`}>
                       {circuit.difficulty_level || "General"}
                     </span>
                   </button>
@@ -249,18 +245,18 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">Toca el ojo para ocultar/mostrar circuitos</p>
+              <p className="text-xs text-zinc-500">Toca el ojo para ocultar/mostrar circuitos</p>
               {[...circuits, ...customCircuits].map((circuit) => {
                 const isCustom = "user_id" in circuit;
                 return (
-                  <div key={circuit.id} className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                  <div key={circuit.id} className="flex items-center justify-between p-3 rounded-xl bg-white border border-zinc-100">
                     <div className="flex items-center gap-2">
                       {isCustom ? <Star className="w-4 h-4 text-accent-500" /> : <Zap className="w-4 h-4 text-accent-500" />}
                       <span className="text-xs font-semibold">{circuit.name}</span>
                     </div>
                     <button
                       onClick={() => toggleCircuitVisibility(circuit.id, isCustom, circuit.is_visible ?? true)}
-                      className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center"
+                      className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center"
                     >
                       {(circuit.is_visible ?? true) ? <Eye className="w-3.5 h-3.5 text-zinc-500" /> : <EyeOff className="w-3.5 h-3.5 text-zinc-400" />}
                     </button>
@@ -274,47 +270,47 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="card-soft rounded-[1.5rem] p-4 flex items-center gap-3 bg-accent-50/60 dark:bg-accent-950/20">
-          <div className="w-10 h-10 rounded-2xl bg-accent-100 dark:bg-accent-900 flex items-center justify-center">
+        <div className="card-soft rounded-[1.5rem] p-4 flex items-center gap-3 bg-accent-50/60">
+          <div className="w-10 h-10 rounded-2xl bg-accent-100 flex items-center justify-center">
             <Zap className="w-5 h-5 text-accent-600" />
           </div>
           <div>
-            <p className="text-xs text-accent-600 dark:text-accent-400 font-semibold">Récord bruto</p>
-            <p className="text-xl font-bold text-accent-700 dark:text-accent-300">{formatTime(bestCircuit)}</p>
+            <p className="text-xs text-accent-600 font-semibold">Récord bruto</p>
+            <p className="text-xl font-bold text-accent-700">{formatTime(bestCircuit)}</p>
           </div>
         </div>
-        <div className="card-soft rounded-[1.5rem] p-4 flex items-center gap-3 bg-secondary-50/60 dark:bg-secondary-950/20">
-          <div className="w-10 h-10 rounded-2xl bg-secondary-100 dark:bg-secondary-900 flex items-center justify-center">
+        <div className="card-soft rounded-[1.5rem] p-4 flex items-center gap-3 bg-secondary-50/60">
+          <div className="w-10 h-10 rounded-2xl bg-secondary-100 flex items-center justify-center">
             <Trophy className="w-5 h-5 text-secondary-600" />
           </div>
           <div>
-            <p className="text-xs text-secondary-600 dark:text-secondary-400 font-semibold">Récord neto</p>
-            <p className="text-xl font-bold text-secondary-700 dark:text-secondary-300">{formatTime(bestNetTime)}</p>
+            <p className="text-xs text-secondary-600 font-semibold">Récord neto</p>
+            <p className="text-xl font-bold text-secondary-700">{formatTime(bestNetTime)}</p>
           </div>
         </div>
         <div className="card-soft rounded-[1.5rem] p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-2xl bg-primary-100 flex items-center justify-center">
             <Target className="w-5 h-5 text-primary-600" />
           </div>
           <div>
-            <p className="text-xs text-primary-600 dark:text-primary-400 font-semibold">Clean Runs</p>
-            <p className="text-xl font-bold text-primary-700 dark:text-primary-300">{cleanRuns}</p>
+            <p className="text-xs text-primary-600 font-semibold">Clean Runs</p>
+            <p className="text-xl font-bold text-primary-700">{cleanRuns}</p>
           </div>
         </div>
         <div className="card-soft rounded-[1.5rem] p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-warning-100 dark:bg-warning-900 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-2xl bg-warning-100 flex items-center justify-center">
             <Flame className="w-5 h-5 text-warning-600" />
           </div>
           <div>
-            <p className="text-xs text-warning-600 dark:text-warning-400 font-semibold">Total</p>
-            <p className="text-xl font-bold text-warning-700 dark:text-warning-300">{totalSessions}</p>
+            <p className="text-xs text-warning-600 font-semibold">Total</p>
+            <p className="text-xl font-bold text-warning-700">{totalSessions}</p>
           </div>
         </div>
       </div>
 
       {/* Wizard Overlay */}
       {wizardStep && (
-        <div className="fixed inset-0 z-50 bg-white dark:bg-zinc-950 overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
           {wizardStep === "setup" && dog && (
             <AgilitySetup
               dog={dog}
@@ -344,7 +340,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
         </div>
       )}
       {showForm && dog && (
-        <div className="fixed inset-0 z-50 bg-white dark:bg-zinc-950 overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
           <AgilityForm
             dog={dog}
             userId={userId}
@@ -359,7 +355,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
         <div className="card-soft rounded-[1.5rem] p-5 space-y-3">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-accent-500" />
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Evolución de tiempos</h3>
+            <h3 className="text-sm font-bold text-zinc-800">Evolución de tiempos</h3>
           </div>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart
@@ -397,11 +393,11 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
       <div className="space-y-3">
         <button
           onClick={() => setShowSessions(!showSessions)}
-          className="w-full flex items-center justify-between p-4 rounded-[1.25rem] bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800"
+          className="w-full flex items-center justify-between p-4 rounded-[1.25rem] bg-white border border-zinc-100"
         >
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-zinc-400" />
-            <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Sesiones anteriores</span>
+            <span className="text-sm font-bold text-zinc-700">Sesiones anteriores</span>
             <span className="text-xs text-zinc-400">({filteredSessions.length})</span>
           </div>
           {showSessions ? <ChevronUp className="w-4 h-4 text-zinc-400" /> : <ChevronDown className="w-4 h-4 text-zinc-400" />}
@@ -414,9 +410,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
               <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
                 <button
                   onClick={() => setFilterType(null)}
-                  className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    filterType === null ? "bg-accent-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                  }`}
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${ filterType === null ? "bg-accent-600 text-white" : "bg-zinc-100 text-zinc-600" }`}
                 >
                   Todas
                 </button>
@@ -424,9 +418,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
                   <button
                     key={st.id}
                     onClick={() => setFilterType(st.id)}
-                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-                      filterType === st.id ? "bg-accent-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                    }`}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${ filterType === st.id ? "bg-accent-600 text-white" : "bg-zinc-100 text-zinc-600" }`}
                   >
                     {st.name}
                   </button>
@@ -446,12 +438,12 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{s.activity_type}</p>
+                        <p className="text-sm font-bold text-zinc-800">{s.activity_type}</p>
                         {s.clean_run && (
-                          <span className="text-[10px] font-bold bg-secondary-100 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-300 px-2 py-0.5 rounded-full">Clean Run</span>
+                          <span className="text-[10px] font-bold bg-secondary-100 text-secondary-700 px-2 py-0.5 rounded-full">Clean Run</span>
                         )}
                         {isBest && (
-                          <span className="text-[10px] font-bold bg-accent-100 dark:bg-accent-900 text-accent-700 dark:text-accent-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <span className="text-[10px] font-bold bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full flex items-center gap-1">
                             <Trophy className="w-3 h-3" /> Récord
                           </span>
                         )}
@@ -464,45 +456,45 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
                     </div>
                     <button
                       onClick={() => deleteSession(s.id)}
-                      className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-danger-500 transition-colors"
+                      className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400 hover:text-danger-500 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 text-center">
-                      <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{formatTime(s.raw_time_seconds ?? s.circuit_time_seconds)}</p>
+                    <div className="bg-zinc-50 rounded-xl p-2.5 text-center">
+                      <p className="text-sm font-bold text-zinc-700">{formatTime(s.raw_time_seconds ?? s.circuit_time_seconds)}</p>
                       <p className="text-[10px] text-zinc-400">Bruto</p>
                     </div>
-                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 text-center">
+                    <div className="bg-zinc-50 rounded-xl p-2.5 text-center">
                       <p className="text-sm font-bold text-accent-600">{formatTime(s.net_time_seconds ?? s.circuit_time_seconds)}</p>
                       <p className="text-[10px] text-zinc-400">Neto</p>
                     </div>
-                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 text-center">
-                      <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{s.fouls_total}</p>
+                    <div className="bg-zinc-50 rounded-xl p-2.5 text-center">
+                      <p className="text-sm font-bold text-zinc-700">{s.fouls_total}</p>
                       <p className="text-[10px] text-zinc-400">Faltas</p>
                     </div>
                   </div>
 
                   {s.video_url && (
-                    <div className="rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-black">
+                    <div className="rounded-xl overflow-hidden border border-zinc-200 bg-black">
                       <video src={s.video_url} controls className="w-full max-h-32" />
                     </div>
                   )}
 
                   <button
                     onClick={() => loadSessionObstacles(s.id)}
-                    className="w-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-accent-600 py-1 transition-colors"
+                    className="w-full text-xs font-semibold text-zinc-500 hover:text-accent-600 py-1 transition-colors"
                   >
                     {isExpanded ? "Ocultar detalles" : "Ver obstáculos"}
                   </button>
 
                   {isExpanded && sessionObstacles[s.id] && (
-                    <div className="space-y-1.5 pt-1 border-t border-zinc-100 dark:border-zinc-800">
+                    <div className="space-y-1.5 pt-1 border-t border-zinc-100">
                       {sessionObstacles[s.id].map((obs) => (
                         <div key={obs.id} className="flex items-center justify-between text-xs">
-                          <span className="text-zinc-600 dark:text-zinc-400">{obs.obstacle?.name}</span>
+                          <span className="text-zinc-600">{obs.obstacle?.name}</span>
                           {obs.fouls_count > 0 && <span className="text-warning-600 font-bold">{obs.fouls_count} faltas</span>}
                         </div>
                       ))}

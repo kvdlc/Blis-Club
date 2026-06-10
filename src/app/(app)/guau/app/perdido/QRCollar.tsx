@@ -60,14 +60,14 @@ export function QRCollar({ dogId, dogName }: Props) {
     <div className="card-soft rounded-2xl p-5 space-y-4">
       <div className="flex items-center gap-2">
         <Shield className="w-5 h-5 text-primary-500" />
-        <h2 className="font-bold text-zinc-800 dark:text-zinc-200">QR del Collar</h2>
+        <h2 className="font-bold text-zinc-800">QR del Collar</h2>
       </div>
 
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="text-sm text-zinc-500">
         Imprime este QR y ponlo en el collar de <strong>{dogName}</strong>. Si se pierde, quien lo encuentre podrá escanearlo y contactarte.
       </p>
 
-      <div className="qrcollar-qr flex flex-col items-center gap-3 p-4 bg-white rounded-xl border border-zinc-100 dark:border-zinc-800">
+      <div className="qrcollar-qr flex flex-col items-center gap-3 p-4 bg-white rounded-xl border border-zinc-100">
         {shortSlug ? (
           <QRCodeSVG
             value={profileUrl}
@@ -76,7 +76,7 @@ export function QRCollar({ dogId, dogName }: Props) {
             fgColor="#4a47d4"
           />
         ) : (
-          <div className="w-[180px] h-[180px] bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse flex items-center justify-center">
+          <div className="w-[180px] h-[180px] bg-zinc-100 rounded-lg animate-pulse flex items-center justify-center">
             <span className="text-zinc-400 text-xs">Generando...</span>
           </div>
         )}
@@ -89,7 +89,7 @@ export function QRCollar({ dogId, dogName }: Props) {
         <button
           onClick={handleDownloadSvg}
           disabled={!shortSlug}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary-50 dark:bg-primary-950/40 text-primary-700 dark:text-primary-300 text-sm font-semibold hover:bg-primary-100 dark:hover:bg-primary-950/70 transition-colors disabled:opacity-30"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary-50 text-primary-700 text-sm font-semibold hover:bg-primary-100 transition-colors disabled:opacity-30"
         >
           <Download className="w-4 h-4" />
           Descargar QR
@@ -97,7 +97,7 @@ export function QRCollar({ dogId, dogName }: Props) {
         <button
           onClick={handlePrint}
           disabled={!shortSlug}
-          className="flex items-center gap-1.5 py-2.5 px-4 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-sm font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-30"
+          className="flex items-center gap-1.5 py-2.5 px-4 rounded-xl bg-zinc-100 text-zinc-600 text-sm font-semibold hover:bg-zinc-200 transition-colors disabled:opacity-30"
         >
           <Printer className="w-4 h-4" />
           Imprimir

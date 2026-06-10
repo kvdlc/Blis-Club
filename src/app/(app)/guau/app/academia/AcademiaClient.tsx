@@ -76,12 +76,12 @@ export default function AcademiaClient({ stages, modules, lessons, progress, str
   return (
     <div className="space-y-6">
       {/* Progress bar */}
-      <div className="bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-sm border border-zinc-100 dark:border-zinc-800 p-4">
+      <div className="bg-white rounded-[1.25rem] shadow-sm border border-zinc-100 p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Progreso general</span>
-          <span className="text-xs font-bold text-primary-600 dark:text-primary-400">{overallPct}%</span>
+          <span className="text-xs font-bold text-zinc-700">Progreso general</span>
+          <span className="text-xs font-bold text-primary-600">{overallPct}%</span>
         </div>
-        <div className="bg-zinc-100 dark:bg-zinc-800 rounded-full h-2.5 overflow-hidden">
+        <div className="bg-zinc-100 rounded-full h-2.5 overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-secondary-400 to-secondary-600 rounded-full transition-all"
             style={{ width: `${overallPct}%` }}
@@ -118,8 +118,8 @@ export default function AcademiaClient({ stages, modules, lessons, progress, str
       {/* Learning Paths - Fixed 4 Routes */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">Rutas de aprendizaje</h3>
-          <Link href="/guau/app/academia" className="text-xs font-semibold text-primary-600 dark:text-primary-400">Ver todo</Link>
+          <h3 className="font-bold text-zinc-900 text-sm">Rutas de aprendizaje</h3>
+          <Link href="/guau/app/academia" className="text-xs font-semibold text-primary-600">Ver todo</Link>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {[
@@ -137,14 +137,14 @@ export default function AcademiaClient({ stages, modules, lessons, progress, str
               <Link
                 key={route.title}
                 href={`/guau/app/academia/${titleToSlug(route.title)}`}
-                className="flex flex-col items-center gap-2 p-4 rounded-[1.5rem] transition-all active:scale-95 bg-white dark:bg-zinc-900 shadow-sm border border-zinc-100 dark:border-zinc-800"
+                className="flex flex-col items-center gap-2 p-4 rounded-[1.5rem] transition-all active:scale-95 bg-white shadow-sm border border-zinc-100"
               >
                 <img src={route.img} alt={route.title} className="w-24 h-24 object-contain drop-shadow-md" />
-                <span className="text-xs font-bold text-center leading-tight text-zinc-800 dark:text-zinc-200">
+                <span className="text-xs font-bold text-center leading-tight text-zinc-800">
                   {route.title}
                 </span>
                 <div className="w-full">
-                  <div className="relative bg-zinc-200 dark:bg-zinc-700 rounded-full h-5 overflow-hidden">
+                  <div className="relative bg-zinc-200 rounded-full h-5 overflow-hidden">
                     <div
                       className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
                       style={{

@@ -53,8 +53,8 @@ export default function ApplicationsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Aplicaciones</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Administra las apps de tu fábrica SaaS</p>
+            <h1 className="text-2xl font-extrabold text-zinc-900">Aplicaciones</h1>
+            <p className="text-sm text-zinc-500 mt-1">Administra las apps de tu fábrica SaaS</p>
           </div>
           <button onClick={() => { setEditing(null); setShowForm(true); }}
             className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all">
@@ -65,31 +65,31 @@ export default function ApplicationsPage() {
         {(showForm || editing) && (
           <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">{editing ? "Editar" : "Nueva"} Aplicación</h2>
+              <h2 className="text-base font-bold text-zinc-800">{editing ? "Editar" : "Nueva"} Aplicación</h2>
               <button onClick={() => { setShowForm(false); setEditing(null); }} className="text-zinc-400 hover:text-zinc-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Nombre</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Nombre</label>
                 <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, "-") })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Slug</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Slug</label>
                 <input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Descripción</label>
+              <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Descripción</label>
               <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2}
-                className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => setForm({ ...form, is_active: !form.is_active })}
-                className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                className="flex items-center gap-2 text-sm text-zinc-600">
                 {form.is_active ? <ToggleRight className="w-5 h-5 text-secondary-500" /> : <ToggleLeft className="w-5 h-5 text-zinc-400" />}
                 {form.is_active ? "Activo" : "Inactivo"}
               </button>
@@ -111,7 +111,7 @@ export default function ApplicationsPage() {
                   <Globe className="w-6 h-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">{app.name}</p>
+                  <p className="text-base font-bold text-zinc-800">{app.name}</p>
                   <p className="text-sm text-zinc-500 truncate">{app.description || "Sin descripción"} — /{app.slug}</p>
                 </div>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${app.is_active ? "bg-secondary-100 text-secondary-700" : "bg-zinc-200 text-zinc-500"}`}>

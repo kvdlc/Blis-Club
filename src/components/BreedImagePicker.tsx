@@ -22,11 +22,7 @@ export function BreedImagePicker({ breed, selected, onSelect }: Props) {
           <button
             key={img.image_url}
             onClick={() => onSelect(img.image_url)}
-            className={`shrink-0 w-16 h-16 rounded-2xl overflow-hidden border-2 transition-all active:scale-95 ${
-              selected === img.image_url
-                ? "border-primary-500 shadow-md ring-2 ring-primary-200"
-                : "border-zinc-200 dark:border-zinc-700"
-            }`}
+            className={`shrink-0 w-16 h-16 rounded-2xl overflow-hidden border-2 transition-all active:scale-95 ${ selected === img.image_url ? "border-primary-500 shadow-md ring-2 ring-primary-200" : "border-zinc-200" }`}
           >
             <img src={img.image_url} alt={img.variant} className="w-full h-full object-cover object-center" />
           </button>

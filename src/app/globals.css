@@ -5,6 +5,11 @@ html {
   color-scheme: only light !important;
 }
 
+/* Block Samsung Internet forced dark mode (autofilter) */
+img, svg, picture, video, canvas, iframe {
+  filter: none !important;
+}
+
 body {
   background-color: #eeedff;
   color: #18181b;

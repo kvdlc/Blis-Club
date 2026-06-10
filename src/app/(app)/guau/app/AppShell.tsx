@@ -19,9 +19,9 @@ export type TabKey = "inicio" | "nutricion" | "academia" | "tracker" | "perdido"
 function TabSkeleton() {
   return (
     <div className="space-y-3 animate-pulse pt-2">
-      <div className="h-8 w-40 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
-      <div className="h-40 bg-zinc-100 dark:bg-zinc-800/60 rounded-[1.5rem]" />
-      <div className="h-20 bg-zinc-100 dark:bg-zinc-800/60 rounded-[1.25rem]" />
+      <div className="h-8 w-40 bg-zinc-200 rounded-xl" />
+      <div className="h-40 bg-zinc-100 rounded-[1.5rem]" />
+      <div className="h-20 bg-zinc-100 rounded-[1.25rem]" />
     </div>
   );
 }
@@ -172,8 +172,8 @@ function DashboardContent({ data, dog, userId }: { data: any; dog: Dog | null; u
   if (!dog) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
-        <div className="w-24 h-24 rounded-full bg-primary-50 dark:bg-primary-950 flex items-center justify-center"><span className="text-4xl">🐾</span></div>
-        <div><h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">¡Bienvenido a Blis Club!</h2><p className="text-zinc-500 dark:text-zinc-400 mt-2 max-w-sm text-sm leading-relaxed">Registra tu primer perro para empezar.</p></div>
+        <div className="w-24 h-24 rounded-full bg-primary-50 flex items-center justify-center"><span className="text-4xl">🐾</span></div>
+        <div><h2 className="text-2xl font-bold text-zinc-800">¡Bienvenido a Blis Club!</h2><p className="text-zinc-500 mt-2 max-w-sm text-sm leading-relaxed">Registra tu primer perro para empezar.</p></div>
         <AddDogForm userId={userId} />
       </div>
     );

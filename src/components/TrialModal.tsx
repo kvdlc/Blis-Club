@@ -21,10 +21,10 @@ export default function TrialModal({ daysLeft }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-6 w-full max-w-sm shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-[2rem] p-6 w-full max-w-sm shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
         <button
           onClick={() => setOpen(false)}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-200 transition-colors"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -35,7 +35,7 @@ export default function TrialModal({ daysLeft }: Props) {
           </div>
 
           <div>
-            <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+            <h3 className="text-lg font-bold text-zinc-900">
               Tu prueba gratis termina pronto
             </h3>
             <p className="text-sm text-zinc-500 mt-1">
@@ -43,16 +43,16 @@ export default function TrialModal({ daysLeft }: Props) {
             </p>
           </div>
 
-          <div className="w-full bg-primary-50 dark:bg-primary-950/30 rounded-2xl p-4 text-left space-y-2">
-            <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+          <div className="w-full bg-primary-50 rounded-2xl p-4 text-left space-y-2">
+            <div className="flex items-center gap-2 text-sm text-zinc-700">
               <Zap className="w-4 h-4 text-primary-500" />
               <span>Recetario completo</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+            <div className="flex items-center gap-2 text-sm text-zinc-700">
               <Zap className="w-4 h-4 text-primary-500" />
               <span>Todas las etapas de Academia</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+            <div className="flex items-center gap-2 text-sm text-zinc-700">
               <Zap className="w-4 h-4 text-primary-500" />
               <span>Perros ilimitados</span>
             </div>

@@ -61,7 +61,7 @@ export function PhoneInput({ value, onChange, defaultCountryCode }: Props) {
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+          className="flex items-center gap-1.5 rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm hover:bg-zinc-100 transition-colors"
         >
           <img src={displayCountry.flag} alt="" className="w-5 h-3.5 object-cover rounded-sm" />
           <span className="text-xs font-medium">{code}</span>
@@ -69,8 +69,8 @@ export function PhoneInput({ value, onChange, defaultCountryCode }: Props) {
         </button>
 
         {open && (
-          <div className="absolute z-50 mt-1 w-56 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-xl max-h-60 overflow-hidden">
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="absolute z-50 mt-1 w-56 bg-white rounded-xl border border-zinc-200 shadow-xl max-h-60 overflow-hidden">
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-zinc-100">
               <Search className="w-3.5 h-3.5 text-zinc-400" />
               <input
                 type="text"
@@ -85,9 +85,7 @@ export function PhoneInput({ value, onChange, defaultCountryCode }: Props) {
                 <button
                   key={c.cca2}
                   onClick={() => handleCodeSelect(c.callingCode)}
-                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors ${
-                    c.callingCode === code ? "bg-primary-50 dark:bg-primary-950/30" : ""
-                  }`}
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-50 transition-colors ${ c.callingCode === code ? "bg-primary-50" : "" }`}
                 >
                   <img src={c.flag} alt="" className="w-5 h-3.5 object-cover rounded-sm" />
                   <span className="flex-1 text-left text-xs">{c.name}</span>
@@ -104,7 +102,7 @@ export function PhoneInput({ value, onChange, defaultCountryCode }: Props) {
         value={number}
         onChange={handleNumberChange}
         placeholder="999888777"
-        className="flex-1 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+        className="flex-1 rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
       />
     </div>
   );

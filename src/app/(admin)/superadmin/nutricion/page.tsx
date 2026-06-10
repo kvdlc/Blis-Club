@@ -305,7 +305,7 @@ export default function NutricionPage() {
     <AdminGuard>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div><h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Nutrición</h1><p className="text-sm text-zinc-500 mt-1">Gestiona recetas, ingredientes, pasos y tabla nutricional</p></div>
+          <div><h1 className="text-2xl font-extrabold text-zinc-900">Nutrición</h1><p className="text-sm text-zinc-500 mt-1">Gestiona recetas, ingredientes, pasos y tabla nutricional</p></div>
           <div className="flex gap-2">
             <button onClick={() => { setEditing(null); setShowNew(true); setForm(emptyRecipe); setIngredients([]); setSteps([]); setFacts(emptyFacts); }}
               className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all">
@@ -330,18 +330,18 @@ export default function NutricionPage() {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Buscar receta..."
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  className="w-full rounded-xl border border-zinc-200 bg-white pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 />
               </div>
-              <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+              <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm">
                 <option value="">Todas las cats</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
-              <select value={filterProtein} onChange={e => setFilterProtein(e.target.value)} className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+              <select value={filterProtein} onChange={e => setFilterProtein(e.target.value)} className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm">
                 <option value="">Todas las proteínas</option>
                 {existingProteinTypes.map(pt => <option key={pt} value={pt}>{pt}</option>)}
               </select>
-              <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
+              <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm">
                 <option value="recent">Más reciente</option>
                 <option value="az">A-Z</option>
                 <option value="therapeutic">Terapéuticas primero</option>
@@ -367,16 +367,16 @@ export default function NutricionPage() {
                 .map(r => (
                 <div key={r.id} className="card-soft rounded-[1.25rem] p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onClick={() => handleEdit(r)}>
                   {r.image_url ? (
-                    <img src={r.image_url} alt={r.title} className="w-12 h-12 rounded-2xl object-cover border border-zinc-100 dark:border-zinc-700" />
+                    <img src={r.image_url} alt={r.title} className="w-12 h-12 rounded-2xl object-cover border border-zinc-100" />
                   ) : (
-                    <div className="w-12 h-12 rounded-2xl bg-warning-100 dark:bg-warning-950 flex items-center justify-center text-warning-600"><UtensilsCrossed className="w-6 h-6" /></div>
+                    <div className="w-12 h-12 rounded-2xl bg-warning-100 flex items-center justify-center text-warning-600"><UtensilsCrossed className="w-6 h-6" /></div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">{r.title}</p>
+                    <p className="text-base font-bold text-zinc-800">{r.title}</p>
                     <div className="flex gap-2 mt-1 flex-wrap">
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.category}</span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.difficulty}</span>
-                      {r.prep_time_min ? <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600">{r.prep_time_min}min</span> : null}
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">{r.category}</span>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">{r.difficulty}</span>
+                      {r.prep_time_min ? <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">{r.prep_time_min}min</span> : null}
                       {r.protein_type && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-100 text-primary-700">{r.protein_type}</span>}
                       {r.is_therapeutic && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary-100 text-secondary-700">Terapéutica</span>}
                       {(r as any).created_at && <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-50 text-zinc-400">{new Date((r as any).created_at).toLocaleDateString()}</span>}
@@ -394,7 +394,7 @@ export default function NutricionPage() {
         {(editing || showNew) && (
           <div className="space-y-6">
             {saveToast && (
-              <div className="flex items-center gap-2 bg-secondary-50 dark:bg-secondary-950/30 border border-secondary-200 dark:border-secondary-800 rounded-xl px-4 py-3 text-sm text-secondary-700 dark:text-secondary-300 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex items-center gap-2 bg-secondary-50 border border-secondary-200 rounded-xl px-4 py-3 text-sm text-secondary-700 animate-in fade-in slide-in-from-top-2 duration-300">
                 <Check className="w-4 h-4 text-secondary-500" />
                 Receta guardada correctamente
               </div>
@@ -403,47 +403,47 @@ export default function NutricionPage() {
 
             {/* Basic fields */}
             <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
-              <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">{editing ? `Editando: ${editing.title}` : "Nueva Receta"}</h2>
+              <h2 className="text-base font-bold text-zinc-800">{editing ? `Editando: ${editing.title}` : "Nueva Receta"}</h2>
               <div className="grid md:grid-cols-3 gap-4">
-                <div className="md:col-span-2"><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Título</label>
-                  <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
-                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Categoría</label>
-                  <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">{CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+                <div className="md:col-span-2"><label className="block text-sm font-semibold text-zinc-600 mb-1.5">Título</label>
+                  <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                <div><label className="block text-sm font-semibold text-zinc-600 mb-1.5">Categoría</label>
+                  <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">{CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
               </div>
-              <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Descripción</label>
-                <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={2} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+              <div><label className="block text-sm font-semibold text-zinc-600 mb-1.5">Descripción</label>
+                <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={2} className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
               <div className="grid md:grid-cols-4 gap-4">
-                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Dificultad</label>
-                  <select value={form.difficulty} onChange={e => setForm({...form, difficulty: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">{DIFFICULTIES.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
-                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Tiempo (min)</label>
-                  <input type="number" value={form.prep_time_min} onChange={e => setForm({...form, prep_time_min: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
-                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Kcal/100g</label>
-                  <input type="number" value={form.kcal_per_100g} onChange={e => setForm({...form, kcal_per_100g: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
-                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Proteína principal</label>
+                <div><label className="block text-sm font-semibold text-zinc-600 mb-1.5">Dificultad</label>
+                  <select value={form.difficulty} onChange={e => setForm({...form, difficulty: e.target.value})} className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">{DIFFICULTIES.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
+                <div><label className="block text-sm font-semibold text-zinc-600 mb-1.5">Tiempo (min)</label>
+                  <input type="number" value={form.prep_time_min} onChange={e => setForm({...form, prep_time_min: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                <div><label className="block text-sm font-semibold text-zinc-600 mb-1.5">Kcal/100g</label>
+                  <input type="number" value={form.kcal_per_100g} onChange={e => setForm({...form, kcal_per_100g: parseInt(e.target.value)||0})} className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                <div><label className="block text-sm font-semibold text-zinc-600 mb-1.5">Proteína principal</label>
                   {(() => {
                     const isCustom = form.protein_type && !existingProteinTypes.includes(form.protein_type);
                     return (
                       <>
-                        <select value={isCustom ? "__custom__" : form.protein_type} onChange={e => { const val = e.target.value; if (val === "__new__") { setNewProtein(""); setForm(f => ({...f, protein_type: ""})); } else if (val === "__custom__") { /* keep current */ } else { setForm(f => ({...f, protein_type: val})); } }} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                        <select value={isCustom ? "__custom__" : form.protein_type} onChange={e => { const val = e.target.value; if (val === "__new__") { setNewProtein(""); setForm(f => ({...f, protein_type: ""})); } else if (val === "__custom__") { /* keep current */ } else { setForm(f => ({...f, protein_type: val})); } }} className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
                           <option value="">Sin especificar</option>
                           {existingProteinTypes.map(pt => <option key={pt} value={pt}>{pt}</option>)}
                           {isCustom && <option value="__custom__">{form.protein_type}</option>}
                           <option value="__new__">+ Nueva proteína...</option>
                         </select>
                         {(form.protein_type === "" || isCustom) && (
-                          <input value={isCustom ? form.protein_type : newProtein} onChange={e => { setNewProtein(e.target.value); setForm(f => ({...f, protein_type: e.target.value})); }} placeholder="Ej: Pollo 30%" className="w-full mt-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                          <input value={isCustom ? form.protein_type : newProtein} onChange={e => { setNewProtein(e.target.value); setForm(f => ({...f, protein_type: e.target.value})); }} placeholder="Ej: Pollo 30%" className="w-full mt-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                         )}
                       </>
                     );
                   })()}
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Imagen de la Receta</label>
+                  <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Imagen de la Receta</label>
                   <div className="flex flex-col gap-3">
                     {form.image_url ? (
                       <div className="relative self-start">
                         <button onClick={() => { setImageEditorUrl(form.image_url); setShowImageEditor(true); }} className="relative group">
-                          <img src={form.image_url} alt="Preview" className="w-32 h-32 rounded-2xl object-cover border border-zinc-200 dark:border-zinc-700" />
+                          <img src={form.image_url} alt="Preview" className="w-32 h-32 rounded-2xl object-cover border border-zinc-200" />
                           <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <Edit className="w-5 h-5 text-white" />
                           </div>
@@ -454,7 +454,7 @@ export default function NutricionPage() {
                       </div>
                     ) : (
                       <label className="relative self-start cursor-pointer">
-                        <div className="w-32 h-32 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+                        <div className="w-32 h-32 rounded-2xl bg-zinc-100 flex items-center justify-center border-2 border-dashed border-zinc-300 hover:bg-zinc-200 transition-colors">
                           <div className="text-center">
                             <Camera className="w-8 h-8 text-zinc-400 mx-auto mb-1" />
                             <span className="text-[10px] text-zinc-400 font-semibold">Seleccionar foto</span>
@@ -478,14 +478,14 @@ export default function NutricionPage() {
                         Generar con AI
                       </button>
                       <button onClick={() => { setImageEditorUrl(form.image_url || "https://placehold.co/400x400/EEE/999?text=Imagen"); setShowImageEditor(true); }}
-                        className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg px-3 py-1.5 text-xs font-bold hover:bg-zinc-200 transition-all">
+                        className="flex items-center gap-1.5 bg-zinc-100 text-zinc-700 rounded-lg px-3 py-1.5 text-xs font-bold hover:bg-zinc-200 transition-all">
                         <Camera className="w-3 h-3" /> Editar / Recortar
                       </button>
                     </div>
                   </div>
                 </div>
-                <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">URL Video (YouTube/Vimeo)</label>
-                  <input value={form.video_url || ""} onChange={e => setForm({...form, video_url: e.target.value})} placeholder="https://youtube.com/watch?v=..." className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                <div><label className="block text-sm font-semibold text-zinc-600 mb-1.5">URL Video (YouTube/Vimeo)</label>
+                  <input value={form.video_url || ""} onChange={e => setForm({...form, video_url: e.target.value})} placeholder="https://youtube.com/watch?v=..." className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => setForm(f => ({...f, is_therapeutic: !f.is_therapeutic}))}
@@ -494,14 +494,14 @@ export default function NutricionPage() {
                   className={`text-xs font-bold px-3 py-1.5 rounded-full border-2 transition-all ${form.is_detox ? "border-accent-400 bg-accent-50 text-accent-700" : "border-zinc-200 text-zinc-500"}`}>🧪 Detox</button>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Health Tags</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Health Tags</label>
                 <div className="flex flex-wrap gap-1.5">{TAG_OPTIONS.map(t => (
                   <button key={t} onClick={() => toggleTag(t)}
                     className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-all ${form.health_tags.includes(t) ? "border-primary-400 bg-primary-50 text-primary-700" : "border-zinc-200 text-zinc-500"}`}>{t}</button>
                 ))}</div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Tamaños de raza (para croquetas)</label>
+                <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Tamaños de raza (para croquetas)</label>
                 <div className="flex flex-wrap gap-1.5">
                   {["miniatura", "pequena", "mediana", "grande", "gigante"].map(s => (
                     <button key={s} onClick={() => setForm(f => ({...f, breed_sizes: f.breed_sizes.includes(s) ? f.breed_sizes.filter(x => x !== s) : [...f.breed_sizes, s] }))}
@@ -509,27 +509,27 @@ export default function NutricionPage() {
                   ))}
                 </div>
               </div>
-              <div><label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Libro fuente / Fabricante</label>
-                <input value={form.source_book} onChange={e => setForm({...form, source_book: e.target.value})} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+              <div><label className="block text-sm font-semibold text-zinc-600 mb-1.5">Libro fuente / Fabricante</label>
+                <input value={form.source_book} onChange={e => setForm({...form, source_book: e.target.value})} className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
 
               {/* Croqueta-specific fields */}
               {form.category === "croquetas" && (
                 <>
                   <div>
-                    <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Ingredientes (uno por línea o separados por coma)</label>
+                    <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Ingredientes (uno por línea o separados por coma)</label>
                     <textarea value={form.ingredients_text || ""} onChange={e => setForm(f => ({...f, ingredients_text: e.target.value}))} rows={3}
                       placeholder="Proteína de pollo, arroz, maíz, aceite de pescado..."
-                      className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                     <p className="text-[10px] text-zinc-400 mt-0.5">Se guardarán como ingredientes individuales al guardar la receta</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Descripción nutricional (resumen en lenguaje natural)</label>
+                    <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Descripción nutricional (resumen en lenguaje natural)</label>
                     <textarea value={form.nutrition_description || ""} onChange={e => setForm(f => ({...f, nutrition_description: e.target.value}))} rows={2}
                       placeholder="Croqueta con alto contenido proteico ideal para..."
-                      className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Beneficios clave</label>
+                    <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Beneficios clave</label>
                     <div className="flex flex-wrap gap-1.5">
                       {form.benefits.map((b, i) => (
                         <span key={i} className="inline-flex items-center gap-1 text-[10px] bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">
@@ -539,14 +539,14 @@ export default function NutricionPage() {
                       ))}
                     </div>
                     <div className="flex gap-1 mt-1">
-                      <input placeholder="Nuevo beneficio..." className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-1.5 text-xs"
+                      <input placeholder="Nuevo beneficio..." className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs"
                         onKeyDown={e => { if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) { setForm(f => ({...f, benefits: [...f.benefits, (e.target as HTMLInputElement).value.trim()] })); (e.target as HTMLInputElement).value = ""; } }} />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5">Indicaciones de almacenamiento</label>
+                    <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Indicaciones de almacenamiento</label>
                     <textarea value={form.storage_instructions} onChange={e => setForm({...form, storage_instructions: e.target.value})} rows={2}
-                      className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   </div>
                 </>
               )}
@@ -559,30 +559,30 @@ export default function NutricionPage() {
             {/* ═══ INGREDIENTS ═══ */}
             {editing && (
               <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
-                <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">Ingredientes ({ingredients.length})</h2>
+                <h2 className="text-base font-bold text-zinc-800">Ingredientes ({ingredients.length})</h2>
                 <div className="flex gap-2 flex-wrap">
                   <input placeholder="Nombre" value={newIngredient.ingredient_name} onChange={e => setNewIngredient({...newIngredient, ingredient_name: e.target.value})}
-                    className="flex-1 min-w-[120px] rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                    className="flex-1 min-w-[120px] rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   <input type="number" placeholder="Gramos" value={newIngredient.quantity_per_serving_g || ""} onChange={e => setNewIngredient({...newIngredient, quantity_per_serving_g: parseInt(e.target.value)||0})}
-                    className="w-24 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                    className="w-24 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   <select value={newIngredient.ingredient_type} onChange={e => setNewIngredient({...newIngredient, ingredient_type: e.target.value})}
-                    className="w-32 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">{INGREDIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
+                    className="w-32 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">{INGREDIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
                   <select value={newIngredient.unit_type} onChange={e => setNewIngredient({...newIngredient, unit_type: e.target.value})}
-                    className="w-28 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                    className="w-28 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
                     <option value="g">g</option><option value="kg">kg</option><option value="pieza">pieza</option><option value="media_pieza">½ pieza</option>
                     <option value="taza">taza</option><option value="cda">cda</option><option value="cdta">cdta</option><option value="ml">ml</option><option value="litro">litro</option>
                   </select>
                   <input type="number" placeholder="g por unidad" value={newIngredient.unit_weight_g || ""} onChange={e => setNewIngredient({...newIngredient, unit_weight_g: parseFloat(e.target.value)||1})}
-                    className="w-28 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                    className="w-28 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   <input placeholder="Nombre descriptivo" value={newIngredient.display_unit} onChange={e => setNewIngredient({...newIngredient, display_unit: e.target.value})}
-                    className="flex-1 min-w-[120px] rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                    className="flex-1 min-w-[120px] rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   <button onClick={addIngredient} className="bg-primary-600 text-white rounded-xl px-4 py-2 text-sm font-bold"><Plus className="w-4 h-4" /></button>
                 </div>
                 <div className="space-y-1">
                   {ingredients.map(i => (
-                    <div key={i.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/50 dark:bg-zinc-800/30 text-sm">
+                    <div key={i.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/50 text-sm">
                       <span className="font-semibold flex-1">{i.ingredient_name} <span className="text-zinc-400 font-normal">({i.unit_type === 'g' ? i.quantity_per_serving_g + 'g' : Math.round(i.quantity_per_serving_g / (i.unit_weight_g || 1)) + ' ' + (i.display_unit || i.unit_type)})</span></span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800">{i.ingredient_type}</span>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100">{i.ingredient_type}</span>
                       <button onClick={() => { fetch(`/api/admin/recipe-ingredients?id=${i.id}`,{method:"DELETE"}).then(() => loadSubEntities(editing.id)); }}
                         className="text-zinc-400 hover:text-danger-500"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
@@ -594,19 +594,19 @@ export default function NutricionPage() {
             {/* ═══ STEPS ═══ */}
             {editing && (
               <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
-                <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">Pasos ({steps.length})</h2>
+                <h2 className="text-base font-bold text-zinc-800">Pasos ({steps.length})</h2>
                 <div className="flex gap-2">
                   <input placeholder="Instrucción del paso..." value={newStep.instruction} onChange={e => setNewStep({...newStep, instruction: e.target.value})}
-                    className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                    className="flex-1 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   <input type="number" placeholder="Min" value={newStep.duration_min || ""} onChange={e => setNewStep({...newStep, duration_min: parseInt(e.target.value)||0})}
-                    className="w-20 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                    className="w-20 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
                   <button onClick={addStep} className="bg-primary-600 text-white rounded-xl px-4 py-2 text-sm font-bold"><Plus className="w-4 h-4" /></button>
                 </div>
                 <div className="space-y-2">
                   {steps.map((s, i) => (
-                    <div key={s.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/50 dark:bg-zinc-800/30">
-                      <span className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i+1}</span>
-                      <p className="flex-1 text-sm text-zinc-700 dark:text-zinc-300">{s.instruction}</p>
+                    <div key={s.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/50">
+                      <span className="w-6 h-6 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i+1}</span>
+                      <p className="flex-1 text-sm text-zinc-700">{s.instruction}</p>
                       {s.duration_min ? <span className="text-xs text-zinc-500 shrink-0">{s.duration_min}min</span> : null}
                       <button onClick={() => { fetch(`/api/admin/recipe-steps?id=${s.id}`,{method:"DELETE"}).then(() => loadSubEntities(editing.id)); }}
                         className="text-zinc-400 hover:text-danger-500 shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
@@ -619,7 +619,7 @@ export default function NutricionPage() {
             {/* ═══ NUTRITION FACTS ═══ */}
             {editing && (
               <div className="card-soft rounded-[1.25rem] p-6 space-y-4">
-                <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">Tabla Nutricional</h2>
+                <h2 className="text-base font-bold text-zinc-800">Tabla Nutricional</h2>
                 <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
                   {[
                     { k: "protein_g", l: "Proteína (g)" }, { k: "fat_g", l: "Grasa (g)" }, { k: "carbs_g", l: "Carbs (g)" },
@@ -632,7 +632,7 @@ export default function NutricionPage() {
                     <div key={k}><label className="block text-[10px] font-semibold text-zinc-500 mb-1">{l}</label>
                       <input type="number" step="0.01" value={(facts as any)[k] || 0}
                         onChange={e => setFacts({...facts, [k]: parseFloat(e.target.value)||0})}
-                        className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
                   ))}
                 </div>
                 <button onClick={saveFacts} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all"><Save className="w-4 h-4" /> Guardar Nutrición</button>

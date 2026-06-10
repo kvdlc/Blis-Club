@@ -10,11 +10,11 @@ interface Props {
 }
 
 const CATEGORY_CONFIG: Record<string, { label: string; emoji: string; color: string; lightBg: string; border: string }> = {
-  contacto: { label: "Contacto", emoji: "🐾", color: "text-blue-600", lightBg: "bg-blue-50 dark:bg-blue-950/30", border: "border-blue-200 dark:border-blue-800" },
-  salto: { label: "Salto", emoji: "🦘", color: "text-green-600", lightBg: "bg-green-50 dark:bg-green-950/30", border: "border-green-200 dark:border-green-800" },
-  slalom: { label: "Slalom", emoji: "〰️", color: "text-yellow-600", lightBg: "bg-yellow-50 dark:bg-yellow-950/30", border: "border-yellow-200 dark:border-yellow-800" },
-  tunel: { label: "Túnel", emoji: "🌀", color: "text-purple-600", lightBg: "bg-purple-50 dark:bg-purple-950/30", border: "border-purple-200 dark:border-purple-800" },
-  entrenamiento: { label: "Entrenamiento", emoji: "🎯", color: "text-orange-600", lightBg: "bg-orange-50 dark:bg-orange-950/30", border: "border-orange-200 dark:border-orange-800" },
+  contacto: { label: "Contacto", emoji: "🐾", color: "text-blue-600", lightBg: "bg-blue-50", border: "border-blue-200" },
+  salto: { label: "Salto", emoji: "🦘", color: "text-green-600", lightBg: "bg-green-50", border: "border-green-200" },
+  slalom: { label: "Slalom", emoji: "〰️", color: "text-yellow-600", lightBg: "bg-yellow-50", border: "border-yellow-200" },
+  tunel: { label: "Túnel", emoji: "🌀", color: "text-purple-600", lightBg: "bg-purple-50", border: "border-purple-200" },
+  entrenamiento: { label: "Entrenamiento", emoji: "🎯", color: "text-orange-600", lightBg: "bg-orange-50", border: "border-orange-200" },
 };
 
 export function AgilityObstaclePicker({
@@ -115,7 +115,7 @@ export function AgilityObstaclePicker({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar obstáculo..."
-          className="w-full rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          className="w-full rounded-xl bg-white border border-zinc-200 pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20"
         />
       </div>
 
@@ -125,7 +125,7 @@ export function AgilityObstaclePicker({
           {selected.map((obs) => (
             <div
               key={obs.id}
-              className="inline-flex items-center gap-1 bg-primary-50 dark:bg-primary-950/40 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-300 text-xs font-semibold px-2.5 py-1 rounded-full"
+              className="inline-flex items-center gap-1 bg-primary-50 border border-primary-200 text-primary-700 text-xs font-semibold px-2.5 py-1 rounded-full"
             >
               {obs.name}
               <button
@@ -144,10 +144,10 @@ export function AgilityObstaclePicker({
         <div className="space-y-3 animate-pulse">
           {[1, 2, 3].map((i) => (
             <div key={i} className="space-y-2">
-              <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-24" />
+              <div className="h-3 bg-zinc-200 rounded w-24" />
               <div className="grid grid-cols-2 gap-2">
-                <div className="h-10 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
-                <div className="h-10 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+                <div className="h-10 bg-zinc-200 rounded-xl" />
+                <div className="h-10 bg-zinc-200 rounded-xl" />
               </div>
             </div>
           ))}
@@ -156,7 +156,7 @@ export function AgilityObstaclePicker({
 
       {/* Error state */}
       {loadError && !loading && (
-        <div className="p-3 rounded-xl bg-danger-50 dark:bg-danger-950/30 border border-danger-200 dark:border-danger-800 text-danger-700 dark:text-danger-300 text-xs text-center">
+        <div className="p-3 rounded-xl bg-danger-50 border border-danger-200 text-danger-700 text-xs text-center">
           {loadError}
         </div>
       )}
@@ -165,7 +165,7 @@ export function AgilityObstaclePicker({
       {!loading && !loadError && (
         <div className="max-h-80 overflow-y-auto space-y-5 pr-1">
           {Object.entries(grouped).map(([category, obstacles]) => {
-            const config = CATEGORY_CONFIG[category] || { label: category, emoji: "🏁", color: "text-zinc-600", lightBg: "bg-zinc-50 dark:bg-zinc-800/50", border: "border-zinc-200 dark:border-zinc-700" };
+            const config = CATEGORY_CONFIG[category] || { label: category, emoji: "🏁", color: "text-zinc-600", lightBg: "bg-zinc-50", border: "border-zinc-200" };
             return (
               <div key={category}>
                 <div className={`flex items-center gap-1.5 mb-2 px-2 py-1 rounded-lg ${config.lightBg} ${config.border} border w-fit`}>
@@ -185,19 +185,19 @@ export function AgilityObstaclePicker({
                         className={`relative flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all active:scale-[0.97] ${
                           isSelected
                             ? `${config.lightBg} ${config.border} border-2`
-                            : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-700"
+                            : "border-zinc-100 bg-white hover:border-zinc-200"
                         }`}
                       >
                         <div
                           className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-xs ${
                             isSelected
-                              ? `${config.color} bg-white dark:bg-zinc-800 shadow-sm`
-                              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+                              ? `${config.color} bg-white shadow-sm`
+                              : "bg-zinc-100 text-zinc-400"
                           }`}
                         >
                           {isSelected ? "✅" : "➕"}
                         </div>
-                        <span className={`font-semibold text-[11px] leading-tight ${isSelected ? config.color : "text-zinc-700 dark:text-zinc-300"}`}>
+                        <span className={`font-semibold text-[11px] leading-tight ${isSelected ? config.color : "text-zinc-700"}`}>
                           {obs.name}
                         </span>
                       </button>
@@ -222,25 +222,25 @@ export function AgilityObstaclePicker({
       {!suggesting ? (
         <button
           onClick={() => setSuggesting(true)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-zinc-200 text-xs font-semibold text-zinc-500 hover:bg-zinc-50 transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           Sugerir obstáculo
         </button>
       ) : (
-        <div className="space-y-2 p-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50">
+        <div className="space-y-2 p-3 rounded-xl border border-zinc-200 bg-zinc-50">
           <input
             type="text"
             value={suggestName}
             onChange={(e) => setSuggestName(e.target.value)}
             placeholder="Nombre del obstáculo"
-            className="w-full rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+            className="w-full rounded-lg bg-white border border-zinc-200 px-3 py-2 text-sm"
           />
           <div className="flex gap-2">
             <select
               value={suggestCategory}
               onChange={(e) => setSuggestCategory(e.target.value)}
-              className="flex-1 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+              className="flex-1 rounded-lg bg-white border border-zinc-200 px-3 py-2 text-sm"
             >
               {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
                 <option key={key} value={key}>{config.emoji} {config.label}</option>
@@ -249,7 +249,7 @@ export function AgilityObstaclePicker({
             <select
               value={suggestIcon}
               onChange={(e) => setSuggestIcon(e.target.value)}
-              className="w-24 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm"
+              className="w-24 rounded-lg bg-white border border-zinc-200 px-3 py-2 text-sm"
             >
               <option value="Zap">Rayo</option>
               <option value="Triangle">Triángulo</option>
@@ -261,7 +261,7 @@ export function AgilityObstaclePicker({
           <div className="flex gap-2">
             <button
               onClick={() => setSuggesting(false)}
-              className="flex-1 py-2 rounded-lg bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-bold"
+              className="flex-1 py-2 rounded-lg bg-zinc-200 text-zinc-700 text-xs font-bold"
             >
               Cancelar
             </button>

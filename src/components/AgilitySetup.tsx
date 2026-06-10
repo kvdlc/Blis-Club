@@ -129,14 +129,14 @@ export function AgilitySetup({ dog, onStart, onClose, onQuickStart }: Props) {
     <div className="space-y-5 p-4 pb-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Configurar entrenamiento</h3>
-        <button onClick={onClose} className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+        <h3 className="text-sm font-bold text-zinc-800">Configurar entrenamiento</h3>
+        <button onClick={onClose} className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center">
           <X className="w-4 h-4 text-zinc-500" />
         </button>
       </div>
 
       {loadError && (
-        <div className="p-3 rounded-xl bg-danger-50 dark:bg-danger-950/30 border border-danger-200 dark:border-danger-800 text-danger-700 dark:text-danger-300 text-xs">
+        <div className="p-3 rounded-xl bg-danger-50 border border-danger-200 text-danger-700 text-xs">
           {loadError}
         </div>
       )}
@@ -179,15 +179,11 @@ export function AgilitySetup({ dog, onStart, onClose, onQuickStart }: Props) {
                 <button
                   key={st.id}
                   onClick={() => setSessionTypeId(st.id)}
-                  className={`p-3 rounded-xl border-2 text-left text-xs transition-all active:scale-[0.97] ${
-                    isActive
-                      ? "border-accent-400 bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-950/40 dark:to-accent-900/40 shadow-md"
-                      : "border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
-                  }`}
+                  className={`p-3 rounded-xl border-2 text-left text-xs transition-all active:scale-[0.97] ${ isActive ? "border-accent-400 bg-gradient-to-br from-accent-50 to-accent-100 shadow-md" : "border-zinc-100 hover:border-zinc-200" }`}
                 >
                   <div className="flex items-center gap-1.5 mb-1">
                     <span className="text-base">{emojiMap[st.slug] || '🏁'}</span>
-                    <span className={`font-bold ${isActive ? 'text-accent-700 dark:text-accent-300' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                    <span className={`font-bold ${isActive ? 'text-accent-700' : 'text-zinc-700'}`}>
                       {st.name}
                     </span>
                   </div>
@@ -218,7 +214,7 @@ export function AgilitySetup({ dog, onStart, onClose, onQuickStart }: Props) {
                 className={`flex-1 py-2.5 rounded-xl text-xs font-bold capitalize transition-all active:scale-[0.97] flex flex-col items-center gap-0.5 ${
                   isActive
                     ? `${lvl.color} text-white shadow-lg`
-                    : `bg-white dark:bg-zinc-900 text-zinc-500 border-2 border-zinc-100 dark:border-zinc-800`
+                    : `bg-white text-zinc-500 border-2 border-zinc-100`
                 }`}
               >
                 <span className="text-base">{lvl.emoji}</span>
@@ -240,13 +236,13 @@ export function AgilitySetup({ dog, onStart, onClose, onQuickStart }: Props) {
           <span className={`transition-transform ${showPenaltyConfig ? 'rotate-180' : ''}`}>▼</span>
         </button>
         {showPenaltyConfig && (
-          <div className="space-y-2 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+          <div className="space-y-2 p-3 rounded-xl bg-zinc-50">
             {foulTypes.length === 0 ? (
               <p className="text-xs text-zinc-400">Cargando tipos de faltas...</p>
             ) : (
               foulTypes.map((ft) => (
                 <div key={ft.id} className="flex items-center justify-between text-xs">
-                  <span className="text-zinc-600 dark:text-zinc-400">{ft.name}</span>
+                  <span className="text-zinc-600">{ft.name}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-zinc-400">+</span>
                     <input
@@ -256,7 +252,7 @@ export function AgilitySetup({ dog, onStart, onClose, onQuickStart }: Props) {
                         const val = parseInt(e.target.value) || 0;
                         setPenaltySettings((prev) => ({ ...prev, [ft.id]: val }));
                       }}
-                      className="w-12 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-2 py-1 text-center text-xs"
+                      className="w-12 rounded-lg bg-white border border-zinc-200 px-2 py-1 text-center text-xs"
                     />
                     <span className="text-zinc-400">seg</span>
                   </div>

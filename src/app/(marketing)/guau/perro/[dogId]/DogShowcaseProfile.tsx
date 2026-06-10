@@ -710,12 +710,8 @@ function VaccineAccordion({ vaccines }: { vaccines: VaccineEntry[] }) {
               className="w-full flex items-center justify-between p-3 hover:bg-zinc-50/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                  hasOverdue ? "bg-red-100" : hasUpcoming ? "bg-green-100" : "bg-zinc-100"
-                }`}>
-                  <Syringe className={`w-4 h-4 ${
-                    hasOverdue ? "text-red-500" : hasUpcoming ? "text-green-600" : "text-zinc-400"
-                  }`} />
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${ hasOverdue ? "bg-red-100" : hasUpcoming ? "bg-green-100" : "bg-zinc-100" }`}>
+                  <Syringe className={`w-4 h-4 ${ hasOverdue ? "text-red-500" : hasUpcoming ? "text-green-600" : "text-zinc-400" }`} />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold text-zinc-700">{name}</p>
@@ -746,11 +742,7 @@ function VaccineAccordion({ vaccines }: { vaccines: VaccineEntry[] }) {
                     </div>
                     <div className="flex items-center gap-2">
                       {dose.next_due_date && (
-                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${
-                          new Date(dose.next_due_date) < new Date()
-                            ? "bg-red-100 text-red-600"
-                            : "bg-green-100 text-green-700"
-                        }`}>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${ new Date(dose.next_due_date) < new Date() ? "bg-red-100 text-red-600" : "bg-green-100 text-green-700" }`}>
                           {new Date(dose.next_due_date) < new Date()
                             ? `Venció: ${new Date(dose.next_due_date).toLocaleDateString("es-ES")}`
                             : `Próx: ${new Date(dose.next_due_date).toLocaleDateString("es-ES")}`}

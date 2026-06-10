@@ -138,7 +138,7 @@ export function SubscriptionClient({ plans }: Props) {
           return (
             <span
               key={i}
-              className="absolute animate-icon-pulse select-none text-zinc-400 dark:text-zinc-500"
+              className="absolute animate-icon-pulse select-none text-zinc-400"
               style={{
                 top: item.top,
                 left: item.left,
@@ -157,24 +157,24 @@ export function SubscriptionClient({ plans }: Props) {
       {/* ═══ HERO ═══ */}
       <section className="relative z-10 text-center pt-10 pb-8 px-4">
         {/* Badge con contador - pulso primary */}
-        <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border border-primary-200 dark:border-primary-800 rounded-full px-4 py-1.5 mb-6 animate-fade-in shadow-sm">
+        <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-primary-200 rounded-full px-4 py-1.5 mb-6 animate-fade-in shadow-sm">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500" />
           </span>
-          <span className="text-[11px] font-bold text-primary-700 dark:text-primary-300 tracking-wide">
+          <span className="text-[11px] font-bold text-primary-700 tracking-wide">
             {count.toLocaleString()} dueños de perros ya usan Blis Pro
           </span>
         </div>
 
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-zinc-900 dark:text-white mb-4 leading-tight animate-slide-up">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-zinc-900 mb-4 leading-tight animate-slide-up">
           Tu perro merece lo
           <span className="block bg-gradient-to-r from-primary-500 via-accent-500 to-primary-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(107,99,243,0.3)]">
             mejor
           </span>
         </h1>
 
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-md mx-auto mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+        <p className="text-sm text-zinc-500 max-w-md mx-auto mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
           Nutricion BARF personalizada, entrenamiento profesional y salud integral. Todo en una sola app.
         </p>
 
@@ -183,7 +183,7 @@ export function SubscriptionClient({ plans }: Props) {
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="w-5 h-5 text-warning-400 fill-warning-400 animate-pulse-star" style={{ animationDelay: `${i * 0.15}s` }} />
           ))}
-          <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300 ml-2">4.9/5</span>
+          <span className="text-sm font-bold text-zinc-700 ml-2">4.9/5</span>
         </div>
         <p className="text-xs text-zinc-400 animate-slide-up" style={{ animationDelay: "0.25s" }}>
           Basado en 1,200+ resenas de dueños de perros
@@ -194,25 +194,23 @@ export function SubscriptionClient({ plans }: Props) {
       <section className="relative z-10 px-4 pb-8">
         {/* Toggle */}
         <div className="flex items-center justify-center gap-3 mb-8">
-          <span className={`text-sm font-bold transition-colors ${!isAnnual ? "text-zinc-900 dark:text-white" : "text-zinc-400"}`}>
+          <span className={`text-sm font-bold transition-colors ${!isAnnual ? "text-zinc-900" : "text-zinc-400"}`}>
             Mensual
           </span>
           <button
             onClick={() => setIsAnnual(!isAnnual)}
-            className="relative w-14 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 transition-colors duration-300"
+            className="relative w-14 h-8 rounded-full bg-zinc-200 transition-colors duration-300"
           >
             <div
-              className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 ${
-                isAnnual ? "translate-x-6" : "translate-x-0"
-              }`}
+              className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 ${ isAnnual ? "translate-x-6" : "translate-x-0" }`}
             >
               <div className="w-full h-full rounded-full bg-gradient-to-br from-primary-400 to-accent-500" />
             </div>
           </button>
-          <span className={`text-sm font-bold transition-colors ${isAnnual ? "text-zinc-900 dark:text-white" : "text-zinc-400"}`}>
+          <span className={`text-sm font-bold transition-colors ${isAnnual ? "text-zinc-900" : "text-zinc-400"}`}>
             Anual
           </span>
-          <span className="text-[10px] font-bold bg-secondary-100 dark:bg-secondary-900/40 text-secondary-600 dark:text-secondary-400 rounded-full px-2 py-0.5">
+          <span className="text-[10px] font-bold bg-secondary-100 text-secondary-600 rounded-full px-2 py-0.5">
             Ahorra ${savings}
           </span>
         </div>
@@ -224,21 +222,21 @@ export function SubscriptionClient({ plans }: Props) {
             <div className="relative group animate-scale-in">
               {/* Glow effect brand */}
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-[1.5rem] blur opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
-              <div className="relative bg-white dark:bg-zinc-900 rounded-[1.5rem] p-6 border border-zinc-100 dark:border-zinc-800 overflow-hidden">
+              <div className="relative bg-white rounded-[1.5rem] p-6 border border-zinc-100 overflow-hidden">
                 {/* Shine sweep */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-400/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400">Mas popular</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary-600">Mas popular</span>
                   <div className="flex items-center gap-1">
                     <Sparkles className="w-4 h-4 text-warning-400 animate-pulse-glow" />
-                    <span className="text-[10px] font-bold text-warning-600 dark:text-warning-400">Ahorra 17%</span>
+                    <span className="text-[10px] font-bold text-warning-600">Ahorra 17%</span>
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-extrabold text-zinc-900 dark:text-white mb-1">Pro Anual</h3>
+                <h3 className="text-2xl font-extrabold text-zinc-900 mb-1">Pro Anual</h3>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight">${annualPrice}</span>
+                  <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">${annualPrice}</span>
                   <span className="text-zinc-400 font-medium">/año</span>
                 </div>
                 <p className="text-xs text-zinc-400 mb-6">${annualMonthly}/mes · Cancela cuando quieras</p>
@@ -258,18 +256,18 @@ export function SubscriptionClient({ plans }: Props) {
           {/* Monthly Card */}
           {!isAnnual && (
             <div className="relative group animate-scale-in">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-600 rounded-[1.5rem] blur opacity-20 group-hover:opacity-30 transition-opacity" />
-              <div className="relative bg-white dark:bg-zinc-900 rounded-[1.5rem] p-6 border border-zinc-100 dark:border-zinc-800">
-                <h3 className="text-2xl font-extrabold text-zinc-900 dark:text-white mb-1">Pro Mensual</h3>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-zinc-200 to-zinc-300 rounded-[1.5rem] blur opacity-20 group-hover:opacity-30 transition-opacity" />
+              <div className="relative bg-white rounded-[1.5rem] p-6 border border-zinc-100">
+                <h3 className="text-2xl font-extrabold text-zinc-900 mb-1">Pro Mensual</h3>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight">${monthlyPrice}</span>
+                  <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">${monthlyPrice}</span>
                   <span className="text-zinc-400 font-medium">/mes</span>
                 </div>
                 <p className="text-xs text-zinc-400 mb-6">Flexibilidad total · Cancela cuando quieras</p>
 
                 <Link
                   href={`/guau/app/checkout?plan=${monthly?.id ?? "monthly"}`}
-                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 py-3.5 font-bold text-sm transition-all active:scale-[0.98] hover:bg-zinc-800 dark:hover:bg-zinc-100"
+                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-zinc-900 text-white py-3.5 font-bold text-sm transition-all active:scale-[0.98] hover:bg-zinc-800"
                 >
                   Suscribirse ahora
                   <ArrowRight className="w-4 h-4" />
@@ -281,7 +279,7 @@ export function SubscriptionClient({ plans }: Props) {
 
         {/* Creative copy */}
         <div className="text-center mt-6">
-          <div className="inline-flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-full px-4 py-2">
+          <div className="inline-flex items-center gap-2 bg-zinc-50 rounded-full px-4 py-2">
             <span className="text-lg">🍪</span>
             <p className="text-xs text-zinc-500">
               Menos de lo que cuesta una galleta al dia. Tu perro se lo merece.
@@ -292,17 +290,17 @@ export function SubscriptionClient({ plans }: Props) {
 
       {/* ═══ FEATURES GRID ═══ */}
       <section className="relative z-10 px-4 py-8">
-        <h2 className="text-xl font-extrabold text-center text-zinc-900 dark:text-white mb-6">
+        <h2 className="text-xl font-extrabold text-center text-zinc-900 mb-6">
           Todo lo que incluye
         </h2>
         <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
           {ALL_FEATURES.map((f, i) => (
             <div
               key={i}
-              className="group card-soft rounded-2xl p-4 hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="group card-soft rounded-2xl p-4 hover:border-primary-300 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="text-2xl mb-2 group-hover:scale-110 transition-transform duration-300">{f.icon}</div>
-              <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1">{f.label}</h4>
+              <h4 className="text-xs font-bold text-zinc-800 mb-1">{f.label}</h4>
               <p className="text-[10px] text-zinc-400 leading-relaxed">{f.desc}</p>
             </div>
           ))}
@@ -311,7 +309,7 @@ export function SubscriptionClient({ plans }: Props) {
 
       {/* ═══ TESTIMONIALS ═══ */}
       <section className="relative z-10 px-4 py-8">
-        <h2 className="text-xl font-extrabold text-center text-zinc-900 dark:text-white mb-6">
+        <h2 className="text-xl font-extrabold text-center text-zinc-900 mb-6">
           Lo que dicen los dueños
         </h2>
         <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
@@ -325,7 +323,7 @@ export function SubscriptionClient({ plans }: Props) {
                   <Star key={s} className="w-3.5 h-3.5 text-warning-400 fill-warning-400" />
                 ))}
               </div>
-              <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-3 leading-relaxed">"{t.text}"</p>
+              <p className="text-sm text-zinc-700 mb-3 leading-relaxed">"{t.text}"</p>
               <p className="text-xs font-bold text-zinc-500">— {t.name}</p>
             </div>
           ))}
@@ -334,7 +332,7 @@ export function SubscriptionClient({ plans }: Props) {
 
       {/* ═══ FAQ ═══ */}
       <section className="relative z-10 px-4 py-8 max-w-lg mx-auto">
-        <h2 className="text-xl font-extrabold text-center text-zinc-900 dark:text-white mb-6">
+        <h2 className="text-xl font-extrabold text-center text-zinc-900 mb-6">
           Preguntas frecuentes
         </h2>
         <div className="space-y-2">
@@ -347,7 +345,7 @@ export function SubscriptionClient({ plans }: Props) {
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 className="w-full flex items-center justify-between p-4 text-left"
               >
-                <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200 pr-4">{faq.q}</span>
+                <span className="text-sm font-bold text-zinc-800 pr-4">{faq.q}</span>
                 <span className={`text-lg text-primary-500 transition-transform duration-300 shrink-0 ${openFaq === i ? "rotate-45" : ""}`}>
                   +
                 </span>
@@ -368,7 +366,7 @@ export function SubscriptionClient({ plans }: Props) {
           {/* Glow detras - accent brand */}
           <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-primary-500/10 via-accent-500/10 to-primary-600/10 blur-2xl" />
           
-          <div className="relative rounded-[2rem] p-8 text-white border border-primary-200/50 dark:border-primary-800/30 overflow-hidden"
+          <div className="relative rounded-[2rem] p-8 text-white border border-primary-200/50 overflow-hidden"
             style={{ background: 'linear-gradient(135deg, #6b63f3 0%, #8b5cf6 50%, #a855f7 100%)' }}>
             
             <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />

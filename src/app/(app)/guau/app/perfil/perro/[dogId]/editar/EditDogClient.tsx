@@ -274,14 +274,14 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
     : BREEDS;
 
   return (
-    <div className="space-y-4 pb-24" suppressHydrationWarning>
+    <div className="space-y-4 pb-24">
       {/* Header */}
       <div className="flex items-center gap-3 pt-1">
-        <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-800/80 flex items-center justify-center">
+        <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
           <ArrowLeft className="w-4 h-4" />
         </button>
         {saveIcon && (
-          <span className="flex items-center gap-1 text-xs text-secondary-600 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-950/30 rounded-full px-2 py-1">
+          <span className="flex items-center gap-1 text-xs text-secondary-600 bg-secondary-50 rounded-full px-2 py-1">
             <Check className="w-3 h-3" /> Guardando...
           </span>
         )}
@@ -289,7 +289,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
 
       {/* ═══ AVATAR ═══ */}
       <div className="flex flex-col items-center gap-1.5">
-        <label htmlFor="dogPhotoUpload" className="relative w-20 h-20 rounded-2xl bg-white flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-700 overflow-hidden cursor-pointer group">
+        <label htmlFor="dogPhotoUpload" className="relative w-20 h-20 rounded-2xl bg-white flex items-center justify-center border-2 border-dashed border-zinc-300 overflow-hidden cursor-pointer group">
           <img src={photo || "/icons/dog-default.png"} alt="" className="w-full h-full object-contain object-center" />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
             {uploading ? (
@@ -299,8 +299,8 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
             )}
           </div>
           {/* Pencil icon */}
-          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white dark:bg-zinc-700 shadow-sm border border-zinc-200 dark:border-zinc-600 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
-            <PenLine className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white shadow-sm border border-zinc-200 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
+            <PenLine className="w-3 h-3 text-zinc-500" />
           </div>
         </label>
         <input type="file" accept="image/*" className="hidden" id="dogPhotoUpload"
@@ -326,10 +326,10 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
                 onBlur={() => setEditingName(false)}
                 onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
                 autoFocus
-                className="text-4xl font-black text-center bg-transparent border-b-2 border-primary-400 outline-none text-zinc-800 dark:text-zinc-100 w-64"
+                className="text-4xl font-black text-center bg-transparent border-b-2 border-primary-400 outline-none text-zinc-800 w-64"
                 style={{ fontFamily: "var(--font-quicksand), 'Nunito', sans-serif", fontWeight: 900 }}
               />
-              <button onClick={() => setEditingName(false)} className="w-7 h-7 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+              <button onClick={() => setEditingName(false)} className="w-7 h-7 rounded-full bg-primary-100 flex items-center justify-center">
                 <Check className="w-4 h-4 text-primary-600" />
               </button>
             </div>
@@ -346,7 +346,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
           {!editingName && (
             <button
               onClick={() => setEditingName(true)}
-              className="absolute -bottom-1 -right-4 w-6 h-6 rounded-full bg-white dark:bg-zinc-800 shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity"
+              className="absolute -bottom-1 -right-4 w-6 h-6 rounded-full bg-white shadow-sm border border-zinc-200 flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity"
             >
               <PenLine className="w-3 h-3 text-primary-500" />
             </button>
@@ -356,28 +356,28 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
 
       {/* ═══ DATOS BÁSICOS ═══ */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Datos Básicos</h3>
+        <h3 className="text-sm font-bold text-zinc-800">Datos Básicos</h3>
 
         {/* Breed searchable */}
         <div className="relative" ref={breedRef}>
           <label className="text-xs text-zinc-500 block mb-1">Raza</label>
           <button type="button" onClick={() => setShowBreeds(!showBreeds)}
-            className="w-full flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm text-left hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
-            <span className={breed ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-400"}>{breed || "Buscar raza..."}</span>
-            <div className={`w-5 h-5 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center transition-transform ${showBreeds ? "rotate-180" : ""}`}>
+            className="w-full flex items-center justify-between rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm text-left hover:bg-zinc-100 transition-colors">
+            <span className={breed ? "text-zinc-900" : "text-zinc-400"}>{breed || "Buscar raza..."}</span>
+            <div className={`w-5 h-5 rounded-lg bg-zinc-200 flex items-center justify-center transition-transform ${showBreeds ? "rotate-180" : ""}`}>
               <ChevronDown className="w-3 h-3 text-zinc-500" />
             </div>
           </button>
           {showBreeds && (
-            <div className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-2xl max-h-56 overflow-hidden">
-              <div className="sticky top-0 bg-white dark:bg-zinc-900 p-2 border-b border-zinc-100 dark:border-zinc-800">
+            <div className="absolute z-50 mt-1 w-full bg-white rounded-xl border border-zinc-200 shadow-2xl max-h-56 overflow-hidden">
+              <div className="sticky top-0 bg-white p-2 border-b border-zinc-100">
                 <div className="relative">
                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-400" />
                   <input type="text" value={breedSearch}
                     onChange={(e) => { setBreedSearch(e.target.value); }}
                     placeholder="Escribe para buscar..."
                     autoFocus
-                    className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 pl-7 pr-3 py-1.5 text-xs focus:outline-none" />
+                    className="w-full rounded-lg bg-zinc-50 border border-zinc-200 pl-7 pr-3 py-1.5 text-xs focus:outline-none" />
                 </div>
               </div>
               <div className="overflow-y-auto max-h-44">
@@ -386,7 +386,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
                 ) : (
                   filteredBreeds.map((b) => (
                     <button key={b} onClick={() => { setBreed(b); setBreedSearch(""); setShowBreeds(false); }}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors ${b === breed ? "bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-300 font-semibold" : "text-zinc-700 dark:text-zinc-300"}`}>
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition-colors ${b === breed ? "bg-primary-50 text-primary-700 font-semibold" : "text-zinc-700"}`}>
                       <span className="mr-2">{b === breed ? "✓" : ""}</span>{b}
                     </button>
                   ))
@@ -409,7 +409,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
             <input type="text" inputMode="decimal" value={weightDisplay}
               onChange={(e) => setWeightDisplay(e.target.value)}
               placeholder="28,5"
-              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm" />
+              className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm" />
           </div>
         </div>
 
@@ -417,7 +417,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
         <div>
           <label className="text-xs text-zinc-500 block mb-1">Objetivo Principal</label>
           <select value={objective} onChange={(e) => setObjective(e.target.value)}
-            className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm">
+            className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm">
             <option value="">Sin objetivo</option>
             {OBJECTIVES.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
@@ -427,7 +427,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
         <div>
           <label className="text-xs text-zinc-500 block mb-1">Tamaño de raza</label>
           <select value={tamano} onChange={(e) => setTamano(e.target.value)}
-            className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm">
+            className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm">
             <option value="">Auto-detectar</option>
             {Object.entries(BREED_SIZE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
@@ -443,12 +443,12 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
 
       {/* ═══ ALIMENTACIÓN ═══ */}
       <div className="card-soft rounded-[1.5rem] p-5 space-y-4">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Alimentación</h3>
+        <h3 className="text-sm font-bold text-zinc-800">Alimentación</h3>
 
         {/* Etapa de vida */}
         <div className="flex items-center justify-between">
           <span className="text-xs text-zinc-500">Etapa de vida</span>
-          <span className="text-xs font-bold text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-950/30">
+          <span className="text-xs font-bold text-primary-700 px-2 py-0.5 rounded-full bg-primary-50">
             {lifeStage === "cachorro" ? "Cachorro" : lifeStage === "adolescente" ? "Adolescente" : "Adulto"}
             {tamano && ` · ${BREED_SIZE_LABELS[tamano] || tamano}`}
           </span>
@@ -469,11 +469,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
                 else if (opt.key === "croquetas") { setFeedingPct(CROQUETAS_PCT_BY_STAGE[lifeStage].default); }
                 else { setFeedingPct(BARF_PCT_BY_STAGE[lifeStage].default); }
               }}
-                className={`rounded-xl py-2 text-xs font-bold transition-all border-2 ${
-                  dietType === opt.key
-                    ? "bg-primary-50 dark:bg-primary-950/30 border-primary-500 text-primary-700 dark:text-primary-300"
-                    : "bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500"
-                }`}
+                className={`rounded-xl py-2 text-xs font-bold transition-all border-2 ${ dietType === opt.key ? "bg-primary-50 border-primary-500 text-primary-700" : "bg-zinc-100 border-transparent text-zinc-500" }`}
               >
                 <span className="text-base block">{opt.icon}</span>
                 {opt.label}
@@ -491,7 +487,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
             <select
               value={kibbleRecipeId ?? ""}
               onChange={(e) => setKibbleRecipeId(e.target.value || null)}
-              className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs"
+              className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-xs"
             >
               <option value="">Selecciona una croqueta...</option>
               {croquetasRecipes.map((r) => (
@@ -509,12 +505,12 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
           <div className="text-center">
             {mounted ? (
               <>
-                <span className="text-2xl font-extrabold text-primary-600 dark:text-primary-400">{total}</span>
+                <span className="text-2xl font-extrabold text-primary-600">{total}</span>
                 <span className="text-[10px] text-zinc-500 block">gramos/día</span>
                 <span className="text-[10px] text-zinc-400">{kcalTotal} kcal</span>
               </>
             ) : (
-              <span className="text-2xl font-extrabold text-primary-600 dark:text-primary-400">—</span>
+              <span className="text-2xl font-extrabold text-primary-600">—</span>
             )}
           </div>
         </div>
@@ -533,7 +529,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
         <div>
           <label className="text-[10px] text-zinc-400 block mb-1">Nivel de actividad</label>
           <select value={activity} onChange={(e) => setActivity(e.target.value as any)}
-            className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-xs">
+            className="w-full rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-xs">
             {Object.entries(FS_ACTIVITY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
@@ -544,7 +540,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
             <span className="text-xs text-zinc-500">
               {dietType === "mixta" ? "Ajuste de cantidad" : "% del peso corporal"}
             </span>
-            <span className="text-sm font-bold text-primary-700 dark:text-primary-300">
+            <span className="text-sm font-bold text-primary-700">
               {dietType === "mixta" ? `${Math.round(feedingPct)}%` : `${feedingPct.toFixed(1)}%`}
             </span>
           </div>
@@ -566,8 +562,8 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
         {dietType === "mixta" && (
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-primary-600 dark:text-primary-400">🦴 Croquetas {100 - mixtaBarfProp}%</span>
-              <span className="text-accent-600 dark:text-accent-400">{mixtaBarfProp}% Natural 🥩</span>
+              <span className="text-primary-600">🦴 Croquetas {100 - mixtaBarfProp}%</span>
+              <span className="text-accent-600">{mixtaBarfProp}% Natural 🥩</span>
             </div>
             <input type="range" min={0} max={100} step={5} value={mixtaBarfProp}
               onChange={(e) => setMixtaBarfProp(Number(e.target.value))}
@@ -596,14 +592,14 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
 
       {/* ═══ SALUD ═══ */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Salud</h3>
+        <h3 className="text-sm font-bold text-zinc-800">Salud</h3>
 
         <div>
           <label className="text-xs text-zinc-500 block mb-1">Alergias</label>
           <div className="flex flex-wrap gap-1.5">
             {ALLERGIES_LIST.map((a) => (
               <button key={a} onClick={() => setAllergies(toggleArray(allergies, a))}
-                className={`text-[10px] rounded-full px-2.5 py-1 transition-colors ${allergies.includes(a) ? "bg-warning-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600"}`}>{a}</button>
+                className={`text-[10px] rounded-full px-2.5 py-1 transition-colors ${allergies.includes(a) ? "bg-warning-500 text-white" : "bg-zinc-100 text-zinc-600"}`}>{a}</button>
             ))}
           </div>
         </div>
@@ -613,7 +609,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
           <div className="flex flex-wrap gap-1.5">
             {CONDITIONS_LIST.map((c) => (
               <button key={c} onClick={() => setConditions(toggleArray(conditions, c))}
-                className={`text-[10px] rounded-full px-2.5 py-1 transition-colors ${conditions.includes(c) ? "bg-accent-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600"}`}>{c}</button>
+                className={`text-[10px] rounded-full px-2.5 py-1 transition-colors ${conditions.includes(c) ? "bg-accent-500 text-white" : "bg-zinc-100 text-zinc-600"}`}>{c}</button>
             ))}
           </div>
         </div>
@@ -621,7 +617,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
 
       {/* ═══ HORARIOS DE COMIDA ═══ */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Horarios de Comida</h3>
+        <h3 className="text-sm font-bold text-zinc-800">Horarios de Comida</h3>
         <MealSlotsConfig dog={dog} initialSlots={mealSlots} />
       </div>
 
@@ -642,7 +638,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
             <Globe className="w-5 h-5 text-primary-600" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Perfil Público</p>
+            <p className="text-sm font-bold text-zinc-800">Perfil Público</p>
             <p className="text-[10px] text-zinc-400">Configura lo que el mundo ve de {name}</p>
           </div>
           <ChevronDown className="w-5 h-5 text-zinc-400 -rotate-90" />
@@ -650,23 +646,23 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
       </div>
 
       {/* ═══ ELIMINAR PERRO ═══ */}
-      <div className="pt-4 border-t border-zinc-200 dark:border-zinc-700">
+      <div className="pt-4 border-t border-zinc-200">
         {!showDeleteConfirm ? (
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="w-full flex items-center justify-center gap-2 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 px-4 py-3 text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors"
+            className="w-full flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 text-red-600 px-4 py-3 text-sm font-semibold hover:bg-red-100 transition-colors"
           >
             <Trash2 className="w-4 h-4" /> Eliminar perro
           </button>
         ) : (
-          <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 p-4 space-y-3">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 space-y-3">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-red-700 dark:text-red-300">
+                <p className="text-sm font-bold text-red-700">
                   ¿Eliminar a {name}?
                 </p>
-                <p className="text-xs text-red-600/80 dark:text-red-400/80 mt-1">
+                <p className="text-xs text-red-600/80 mt-1">
                   Se borrarán todos sus datos: paseos, vacunas, comidas, historial médico y fotos. Esta acción no se puede deshacer.
                 </p>
               </div>
@@ -674,7 +670,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
             <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+                className="flex-1 rounded-lg bg-white border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
               >
                 Cancelar
               </button>

@@ -54,12 +54,12 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
       <div className="flex items-center gap-3">
         <button
           onClick={() => router.push("/guau/app/academia")}
-          className="w-10 h-10 rounded-full bg-white dark:bg-zinc-900 shadow-sm border border-zinc-100 dark:border-zinc-800 flex items-center justify-center text-zinc-600 transition-transform active:scale-95"
+          className="w-10 h-10 rounded-full bg-white shadow-sm border border-zinc-100 flex items-center justify-center text-zinc-600 transition-transform active:scale-95"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Detalles de la ruta</h1>
+          <h1 className="text-lg font-bold text-zinc-900">Detalles de la ruta</h1>
         </div>
       </div>
 
@@ -89,12 +89,12 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
 
       {/* Stats & Continue */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-sm border border-zinc-100 dark:border-zinc-800 p-4 text-center">
+        <div className="bg-white rounded-[1.25rem] shadow-sm border border-zinc-100 p-4 text-center">
           <p className="text-[10px] text-zinc-500">Progreso</p>
-          <p className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">{stagePct}%</p>
+          <p className="text-2xl font-bold text-zinc-800">{stagePct}%</p>
         </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-sm border border-zinc-100 dark:border-zinc-800 p-4 text-center">
-          <p className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">{completedCount}/{totalLessons}</p>
+        <div className="bg-white rounded-[1.25rem] shadow-sm border border-zinc-100 p-4 text-center">
+          <p className="text-2xl font-bold text-zinc-800">{completedCount}/{totalLessons}</p>
           <p className="text-[10px] text-zinc-500 mt-1">Lecciones</p>
         </div>
         {nextLesson ? (
@@ -110,7 +110,7 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
             <p className="text-[10px] text-white/80 mt-1 truncate">{nextLesson.title}</p>
           </button>
         ) : completedCount >= totalLessons && totalLessons > 0 ? (
-          <div className="bg-secondary-50 dark:bg-secondary-950/40 rounded-[1.25rem] border border-secondary-200 dark:border-secondary-800/60 p-4 text-center">
+          <div className="bg-secondary-50 rounded-[1.25rem] border border-secondary-200 p-4 text-center">
             <Award className="w-5 h-5 text-secondary-600 mx-auto" />
             <p className="text-[10px] text-secondary-700 mt-1">¡Completado!</p>
           </div>
@@ -139,11 +139,7 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition-all ${
-              activeTab === tab.key
-                ? "bg-primary-600 text-white shadow-md shadow-primary-600/20"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-            }`}
+            className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition-all ${ activeTab === tab.key ? "bg-primary-600 text-white shadow-md shadow-primary-600/20" : "bg-zinc-100 text-zinc-600" }`}
           >
             {tab.label}
           </button>
@@ -153,8 +149,8 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
       {/* Info Tab */}
       {activeTab === "info" && (
         <div className="space-y-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-sm border border-zinc-100 dark:border-zinc-800 p-5">
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-2 flex items-center gap-2">
+          <div className="bg-white rounded-[1.25rem] shadow-sm border border-zinc-100 p-5">
+            <h3 className="text-sm font-bold text-zinc-900 mb-2 flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-primary-600" />
               Acerca de esta ruta
             </h3>
@@ -162,41 +158,41 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
               {stage.description ?? "Aprende paso a paso con lecciones prácticas y minijuegos."}
             </p>
             <div className="flex flex-wrap gap-2 mt-4">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 dark:bg-primary-950/40 text-primary-700 dark:text-primary-300 px-3 py-1.5 text-[11px] font-bold border border-primary-100 dark:border-primary-800/60">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 text-primary-700 px-3 py-1.5 text-[11px] font-bold border border-primary-100">
                 <BookOpen className="w-3.5 h-3.5" />{totalLessons} lecciones
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-50 dark:bg-secondary-950/40 text-secondary-700 dark:text-secondary-300 px-3 py-1.5 text-[11px] font-bold border border-secondary-100 dark:border-secondary-800/60">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-50 text-secondary-700 px-3 py-1.5 text-[11px] font-bold border border-secondary-100">
                 <Clock className="w-3.5 h-3.5" />~{estimatedMin} min total
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-50 dark:bg-warning-950/40 text-warning-700 dark:text-warning-300 px-3 py-1.5 text-[11px] font-bold border border-warning-100 dark:border-warning-800/60">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-50 text-warning-700 px-3 py-1.5 text-[11px] font-bold border border-warning-100">
                 <Award className="w-3.5 h-3.5" />{modules.length} temas
               </span>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-sm border border-zinc-100 dark:border-zinc-800 p-5">
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-3 flex items-center gap-2">
+          <div className="bg-white rounded-[1.25rem] shadow-sm border border-zinc-100 p-5">
+            <h3 className="text-sm font-bold text-zinc-900 mb-3 flex items-center gap-2">
               <Star className="w-4 h-4 text-warning-500" />
               Lo que aprenderás
             </h3>
             <div className="grid grid-cols-2 gap-2">
               {modules.map((mod, i) => (
-                <div key={mod.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+                <div key={mod.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-50">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0" style={{ backgroundColor: stage.color_hex }}>
                     <span className="text-[10px] font-bold">{i + 1}</span>
                   </div>
-                  <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 line-clamp-2">{mod.title}</span>
+                  <span className="text-xs font-semibold text-zinc-700 line-clamp-2">{mod.title}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-sm border border-zinc-100 dark:border-zinc-800 p-4 flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-primary-100 dark:bg-primary-950 flex items-center justify-center border-2 border-primary-200 dark:border-primary-800">
-              <span className="text-primary-700 dark:text-primary-300 font-bold text-lg">B</span>
+          <div className="bg-white rounded-[1.25rem] shadow-sm border border-zinc-100 p-4 flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center border-2 border-primary-200">
+              <span className="text-primary-700 font-bold text-lg">B</span>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Equipo Blis Club</h3>
+              <h3 className="text-sm font-bold text-zinc-900">Equipo Blis Club</h3>
               <p className="text-xs text-zinc-500">Instructor certificado · {modules.length} cursos publicados</p>
             </div>
           </div>
@@ -217,11 +213,11 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
             const firstLessonId = modLessons[0]?.id;
 
             return (
-              <div key={mod.id} className="bg-white dark:bg-zinc-900 rounded-[1.5rem] shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden">
+              <div key={mod.id} className="bg-white rounded-[1.5rem] shadow-sm border border-zinc-100 overflow-hidden">
                 {/* Module header */}
                 <Link
                   href={firstLessonId ? `/guau/app/academia/${stageSlug}/lesson/${firstLessonId}?start=1` : "#"}
-                  className="block p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                  className="block p-4 transition-colors hover:bg-zinc-50"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div
@@ -231,19 +227,19 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
                       {allDone ? <CheckCircle className="w-5 h-5" /> : modIdx + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                      <h3 className="text-sm font-bold text-zinc-900 truncate">
                         Tema {modIdx + 1}: {mod.title}
                       </h3>
                       {mod.description && (
                         <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">{mod.description}</p>
                       )}
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-primary-50 dark:bg-primary-950 flex items-center justify-center shrink-0 text-primary-600">
+                    <div className="w-9 h-9 rounded-full bg-primary-50 flex items-center justify-center shrink-0 text-primary-600">
                       <Play className="w-4 h-4 fill-current" />
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-zinc-500 bg-zinc-100 dark:bg-zinc-800 rounded-full px-2.5 py-0.5 font-medium">{modLessons.length} lecciones</span>
+                    <span className="text-[10px] text-zinc-500 bg-zinc-100 rounded-full px-2.5 py-0.5 font-medium">{modLessons.length} lecciones</span>
                     {modCompleted > 0 && (
                       <span className="text-[10px] font-bold rounded-full px-2.5 py-0.5"
                         style={{ backgroundColor: allDone ? "#d1fae5" : "#ede9fe", color: allDone ? "#065f46" : stage.color_hex }}
@@ -253,7 +249,7 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
                     )}
                     <span className="text-[10px] text-zinc-400 ml-auto">{pct}%</span>
                   </div>
-                  <div className="mt-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
+                  <div className="mt-2.5 bg-zinc-100 rounded-full h-1.5 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${allDone ? "bg-secondary-500" : ""}`}
                       style={{ width: `${pct}%`, backgroundColor: allDone ? undefined : stage.color_hex }}
@@ -263,29 +259,23 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
 
                 {/* Lessons list */}
                 {modLessons.length > 0 && (
-                  <div className="border-t border-zinc-100 dark:border-zinc-800">
+                  <div className="border-t border-zinc-100">
                     {modLessons.map((les, lesIdx) => {
                       const isLesCompleted = completedIds.has(les.id);
                       return (
                         <Link
                           key={les.id}
                           href={`/guau/app/academia/${stageSlug}/lesson/${les.id}`}
-                          className={`flex items-center gap-3 px-4 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${
-                            lesIdx < modLessons.length - 1 ? "border-b border-zinc-50 dark:border-zinc-800/50" : ""
-                          }`}
+                          className={`flex items-center gap-3 px-4 py-3 transition-colors hover:bg-zinc-50 ${ lesIdx < modLessons.length - 1 ? "border-b border-zinc-50" : "" }`}
                         >
-                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                            isLesCompleted
-                              ? "bg-secondary-100 dark:bg-secondary-900 text-secondary-600"
-                              : "bg-primary-50 dark:bg-primary-950 text-primary-500"
-                          }`}>
+                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${ isLesCompleted ? "bg-secondary-100 text-secondary-600" : "bg-primary-50 text-primary-500" }`}>
                             {isLesCompleted ? (
                               <CheckCircle className="w-4 h-4" />
                             ) : (
                               <Play className="w-3.5 h-3.5 fill-current" />
                             )}
                           </div>
-                          <span className={`text-xs flex-1 line-clamp-1 ${isLesCompleted ? "text-zinc-400 line-through" : "text-zinc-700 dark:text-zinc-300 font-medium"}`}>
+                          <span className={`text-xs flex-1 line-clamp-1 ${isLesCompleted ? "text-zinc-400 line-through" : "text-zinc-700 font-medium"}`}>
                             {les.title}
                           </span>
                           <span className="text-[9px] text-zinc-300 font-mono">{lesIdx + 1}</span>

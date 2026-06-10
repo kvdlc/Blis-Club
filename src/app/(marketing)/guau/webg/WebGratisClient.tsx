@@ -326,7 +326,7 @@ export function WebGratisClient({ plans }: Props) {
           return (
             <span
               key={i}
-              className="absolute animate-icon-pulse select-none text-zinc-400 dark:text-zinc-500"
+              className="absolute animate-icon-pulse select-none text-zinc-400"
               style={{
                 top: item.top,
                 left: item.left,
@@ -343,13 +343,13 @@ export function WebGratisClient({ plans }: Props) {
       </div>
 
       {/* ═══ NAVBAR ═══ */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm border-b border-zinc-100 dark:border-zinc-800" : "bg-transparent"}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-zinc-100" : "bg-transparent"}`}>
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/guau/web" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-extrabold text-sm">B</div>
-            <span className="font-extrabold text-zinc-900 dark:text-white text-sm">Blis Club</span>
+            <span className="font-extrabold text-zinc-900 text-sm">Blis Club</span>
           </Link>
-          <div className="hidden md:flex items-center gap-6 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+          <div className="hidden md:flex items-center gap-6 text-xs font-bold text-zinc-500">
             <a href="#registro" className="hover:text-primary-500 transition-colors">Registro</a>
             <a href="#features" className="hover:text-primary-500 transition-colors">Funciones</a>
             <a href="#screenshots" className="hover:text-primary-500 transition-colors">App</a>
@@ -363,24 +363,24 @@ export function WebGratisClient({ plans }: Props) {
 
       {/* ═══ HERO ═══ */}
       <section className="relative z-10 text-center pt-24 pb-12 px-4 max-w-5xl mx-auto">
-        <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border border-primary-200 dark:border-primary-800 rounded-full px-4 py-1.5 mb-6 animate-fade-in shadow-sm">
+        <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-primary-200 rounded-full px-4 py-1.5 mb-6 animate-fade-in shadow-sm">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500" />
           </span>
-          <span className="text-[11px] font-bold text-primary-700 dark:text-primary-300 tracking-wide">
+          <span className="text-[11px] font-bold text-primary-700 tracking-wide">
             {count.toLocaleString()} Mejoraron la vida de sus mascotas
           </span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-zinc-900 dark:text-white mb-5 leading-[1.1] animate-slide-up">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-zinc-900 mb-5 leading-[1.1] animate-slide-up">
           Tu perro merece vivir
           <span className="block bg-gradient-to-r from-primary-500 via-accent-500 to-primary-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(107,99,243,0.3)]">
             MEJOR
           </span>
         </h1>
 
-        <p className="text-base sm:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+        <p className="text-base sm:text-lg text-zinc-500 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
           La alimentación natural, el entrenamiento profesional y el seguimiento de salud que necesita tu perro, todo en una sola app. Únete a miles de dueños que ya cambiaron la vida de sus mascotas.
         </p>
 
@@ -395,7 +395,7 @@ export function WebGratisClient({ plans }: Props) {
           </a>
           <a
             href="#screenshots"
-            className="flex items-center gap-2 rounded-2xl bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 py-4 px-6 font-bold text-sm border border-zinc-200 dark:border-zinc-700 transition-all hover:bg-zinc-50 dark:hover:bg-zinc-700 active:scale-[0.97]"
+            className="flex items-center gap-2 rounded-2xl bg-white text-zinc-700 py-4 px-6 font-bold text-sm border border-zinc-200 transition-all hover:bg-zinc-50 active:scale-[0.97]"
           >
             Ver la app por dentro
           </a>
@@ -405,7 +405,7 @@ export function WebGratisClient({ plans }: Props) {
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="w-5 h-5 text-warning-400 fill-warning-400 animate-pulse-star" style={{ animationDelay: `${i * 0.15}s` }} />
           ))}
-          <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300 ml-2">4.9/5</span>
+          <span className="text-sm font-bold text-zinc-700 ml-2">4.9/5</span>
         </div>
         <p className="text-xs text-zinc-400 animate-slide-up" style={{ animationDelay: "0.3s" }}>
           Basado en 1,200+ reseñas de dueños de perros
@@ -415,7 +415,7 @@ export function WebGratisClient({ plans }: Props) {
         <div className="relative mt-12 max-w-xs mx-auto animate-scale-in" style={{ animationDelay: "0.4s" }}>
           <div className="absolute -inset-4 bg-gradient-to-r from-primary-500/20 to-accent-500/20 rounded-[3rem] blur-2xl" />
           <div className="relative bg-zinc-900 rounded-[2.5rem] p-3 shadow-2xl border-4 border-zinc-800">
-            <div className="bg-primary-50 dark:bg-zinc-950 rounded-[2rem] overflow-hidden aspect-[9/19]">
+            <div className="bg-primary-50 rounded-[2rem] overflow-hidden aspect-[9/19]">
               <img src="/icons/screen Home pantalla principal.png" alt="Dashboard Blis Club" className="w-full h-full object-cover" />
             </div>
           </div>
@@ -424,8 +424,8 @@ export function WebGratisClient({ plans }: Props) {
 
       {/* ═══ REGISTRO HERO ═══ */}
       <section className="relative z-10 px-4 pb-12 max-w-5xl mx-auto">
-        <div className="max-w-md mx-auto bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-lg border border-primary-100 dark:border-primary-800/30">
-          <h3 className="text-center text-lg font-extrabold text-zinc-900 dark:text-white mb-4">
+        <div className="max-w-md mx-auto bg-white rounded-2xl p-6 shadow-lg border border-primary-100">
+          <h3 className="text-center text-lg font-extrabold text-zinc-900 mb-4">
             Comienza ahora
           </h3>
           <InlineRegister
@@ -439,8 +439,8 @@ export function WebGratisClient({ plans }: Props) {
       {/* ═══ PAIN POINTS ═══ */}
       <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">El problema</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white mt-2">
+          <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">El problema</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
             ¿Te suena familiar?
           </h2>
           <p className="text-sm text-zinc-500 mt-2 max-w-lg mx-auto">
@@ -449,12 +449,12 @@ export function WebGratisClient({ plans }: Props) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {PAIN_POINTS.map((p, i) => (
-            <div key={i} className="card-soft rounded-2xl p-5 flex items-start gap-4 hover:border-primary-200 dark:hover:border-primary-700 transition-all duration-300">
+            <div key={i} className="card-soft rounded-2xl p-5 flex items-start gap-4 hover:border-primary-200 transition-all duration-300">
               <div className="w-20 h-20 shrink-0 flex items-center justify-center">
                 {p.icon}
               </div>
               <div>
-                <h3 className="text-sm font-extrabold text-zinc-800 dark:text-zinc-200 mb-1">{p.title}</h3>
+                <h3 className="text-sm font-extrabold text-zinc-800 mb-1">{p.title}</h3>
                 <p className="text-xs text-zinc-500 leading-relaxed">{p.desc}</p>
               </div>
             </div>
@@ -465,8 +465,8 @@ export function WebGratisClient({ plans }: Props) {
       {/* ═══ SCREENSHOTS ═══ */}
       <section id="screenshots" className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">Así se ve por dentro</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white mt-2">
+          <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Así se ve por dentro</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
             Conoce la app antes de unirte
           </h2>
           <p className="text-sm text-zinc-500 mt-2 max-w-lg mx-auto">
@@ -477,11 +477,11 @@ export function WebGratisClient({ plans }: Props) {
           {SCREENSHOTS.map((s, i) => (
             <div key={i} className={`group relative ${i === 0 ? "sm:col-span-2 lg:col-span-3" : ""}`}>
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-[1.5rem] blur opacity-0 group-hover:opacity-20 transition-opacity" />
-              <div className="relative bg-white dark:bg-zinc-900 rounded-[1.5rem] p-3 border border-zinc-100 dark:border-zinc-800 h-full">
-                <div className={`rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 mb-3 mx-auto ${i === 0 ? "max-w-md" : ""} ${s.wide ? "aspect-[406/210] max-h-48" : "aspect-[9/16] max-h-[500px]"}`}>
+              <div className="relative bg-white rounded-[1.5rem] p-3 border border-zinc-100 h-full">
+                <div className={`rounded-xl overflow-hidden bg-zinc-100 mb-3 mx-auto ${i === 0 ? "max-w-md" : ""} ${s.wide ? "aspect-[406/210] max-h-48" : "aspect-[9/16] max-h-[500px]"}`}>
                   <img src={s.src} alt={s.title} className="w-full h-full object-contain" />
                 </div>
-                <h3 className="text-sm font-extrabold text-zinc-900 dark:text-white mb-1">{s.title}</h3>
+                <h3 className="text-sm font-extrabold text-zinc-900 mb-1">{s.title}</h3>
                 <p className="text-xs text-zinc-500 leading-relaxed">{s.desc}</p>
               </div>
             </div>
@@ -492,8 +492,8 @@ export function WebGratisClient({ plans }: Props) {
       {/* ═══ SOLUTION ═══ */}
       <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">La solución</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white mt-2">
+          <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">La solución</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
             Blis es todo lo que necesitas
           </h2>
           <p className="text-sm text-zinc-500 mt-2 max-w-lg mx-auto">
@@ -504,11 +504,11 @@ export function WebGratisClient({ plans }: Props) {
           {SOLUTION_PILLARS.map((s, i) => (
             <div key={i} className="relative group">
               <div className={`absolute -inset-0.5 bg-gradient-to-r ${s.color} rounded-[1.5rem] blur opacity-20 group-hover:opacity-40 transition-opacity`} />
-              <div className="relative bg-white dark:bg-zinc-900 rounded-[1.5rem] p-6 border border-zinc-100 dark:border-zinc-800 h-full text-center">
+              <div className="relative bg-white rounded-[1.5rem] p-6 border border-zinc-100 h-full text-center">
                 <div className="w-24 h-24 mb-4 mx-auto flex items-center justify-center">
                   {s.icon}
                 </div>
-                <h3 className="text-base font-extrabold text-zinc-900 dark:text-white mb-2">{s.title}</h3>
+                <h3 className="text-base font-extrabold text-zinc-900 mb-2">{s.title}</h3>
                 <p className="text-xs text-zinc-500 leading-relaxed">{s.desc}</p>
               </div>
             </div>
@@ -519,22 +519,16 @@ export function WebGratisClient({ plans }: Props) {
       {/* ═══ BEFORE/AFTER ═══ */}
       <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">Antes vs Después</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white mt-2">
+          <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Antes vs Después</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
             Esto es lo que cambia con Blis
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {BEFORE_AFTER.map((item, i) => (
-            <div key={i} className={`rounded-2xl p-5 border transition-all ${
-              item.bad
-                ? "bg-danger-50 dark:bg-danger-900/10 border-danger-200 dark:border-danger-900/30"
-                : "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-900/30 shadow-lg"
-            }`}>
+            <div key={i} className={`rounded-2xl p-5 border transition-all ${ item.bad ? "bg-danger-50 border-danger-200" : "bg-emerald-50 border-emerald-200 shadow-lg" }`}>
               <div className="flex items-center gap-2 mb-3">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                  item.bad ? "bg-danger-100 dark:bg-danger-900/40 text-danger-700 dark:text-danger-300" : "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                }`}>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${ item.bad ? "bg-danger-100 text-danger-700" : "bg-emerald-100 text-emerald-700" }`}>
                   {item.bad ? <X className="w-3 h-3" /> : <Check className="w-3 h-3" />}
                   {item.label}
                 </span>
@@ -544,8 +538,8 @@ export function WebGratisClient({ plans }: Props) {
                   {item.icon}
                 </div>
                 <div>
-                  <h4 className="text-sm font-extrabold text-zinc-800 dark:text-zinc-200 mb-1">{item.title}</h4>
-                  <p className={`text-xs leading-relaxed ${item.bad ? "text-zinc-500" : "text-emerald-700 dark:text-emerald-300"}`}>{item.desc}</p>
+                  <h4 className="text-sm font-extrabold text-zinc-800 mb-1">{item.title}</h4>
+                  <p className={`text-xs leading-relaxed ${item.bad ? "text-zinc-500" : "text-emerald-700"}`}>{item.desc}</p>
                 </div>
               </div>
             </div>
@@ -556,8 +550,8 @@ export function WebGratisClient({ plans }: Props) {
       {/* ═══ EXPANDABLE FEATURES ═══ */}
       <section id="features" className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">Todo incluido</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white mt-2">
+          <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Todo incluido</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
             Una app, once superpoderes
           </h2>
           <p className="text-sm text-zinc-500 mt-2 max-w-lg mx-auto">
@@ -568,35 +562,35 @@ export function WebGratisClient({ plans }: Props) {
           {EXPANDABLE_FEATURES.map((f, i) => {
             const isOpen = openFeature === i;
             return (
-              <div key={i} className="card-soft rounded-2xl overflow-hidden transition-all border border-zinc-100 dark:border-zinc-800">
+              <div key={i} className="card-soft rounded-2xl overflow-hidden transition-all border border-zinc-100">
                 <button onClick={() => setOpenFeature(isOpen ? null : i)} className="w-full flex items-center justify-between p-4 text-left">
                   <div className="flex items-center gap-3">
                     <div className="w-20 h-20 shrink-0 flex items-center justify-center">
                       {f.icon}
                     </div>
-                    <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200 pr-4">{f.title}</span>
+                    <span className="text-sm font-bold text-zinc-800 pr-4">{f.title}</span>
                   </div>
                   <ChevronDown className={`w-5 h-5 text-primary-500 transition-transform duration-300 shrink-0 ${isOpen ? "rotate-180" : ""}`} />
                 </button>
                 <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
                   <div className="px-4 pb-4 space-y-3">
                     <div>
-                      <p className="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider mb-1">Lo que incluye</p>
-                      <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">{f.has}</p>
+                      <p className="text-[10px] font-bold text-primary-600 uppercase tracking-wider mb-1">Lo que incluye</p>
+                      <p className="text-xs text-zinc-600 leading-relaxed">{f.has}</p>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="rounded-xl p-3 bg-danger-50 dark:bg-danger-900/10 border border-danger-100 dark:border-danger-900/20">
-                        <p className="text-[10px] font-bold text-danger-600 dark:text-danger-400 mb-1">Antes (sin Blis)</p>
-                        <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">{f.before}</p>
+                      <div className="rounded-xl p-3 bg-danger-50 border border-danger-100">
+                        <p className="text-[10px] font-bold text-danger-600 mb-1">Antes (sin Blis)</p>
+                        <p className="text-xs text-zinc-600 leading-relaxed">{f.before}</p>
                       </div>
-                      <div className="rounded-xl p-3 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/20">
-                        <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mb-1">Después (con Blis)</p>
-                        <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">{f.after}</p>
+                      <div className="rounded-xl p-3 bg-emerald-50 border border-emerald-100">
+                        <p className="text-[10px] font-bold text-emerald-600 mb-1">Después (con Blis)</p>
+                        <p className="text-xs text-zinc-600 leading-relaxed">{f.after}</p>
                       </div>
                     </div>
-                    <div className="rounded-xl p-3 bg-primary-50 dark:bg-primary-900/10 border border-primary-100 dark:border-primary-900/20">
-                      <p className="text-[10px] font-bold text-primary-600 dark:text-primary-400 mb-1">¿Qué vas a lograr?</p>
-                      <p className="text-xs text-zinc-700 dark:text-zinc-200 leading-relaxed font-medium">{f.win}</p>
+                    <div className="rounded-xl p-3 bg-primary-50 border border-primary-100">
+                      <p className="text-[10px] font-bold text-primary-600 mb-1">¿Qué vas a lograr?</p>
+                      <p className="text-xs text-zinc-700 leading-relaxed font-medium">{f.win}</p>
                     </div>
                   </div>
                 </div>
@@ -609,8 +603,8 @@ export function WebGratisClient({ plans }: Props) {
       {/* ═══ SUCCESS STORIES ═══ */}
       <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">Historias de éxito</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white mt-2">
+          <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Historias de éxito</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
             Refléjate en estos dueños
           </h2>
           <p className="text-sm text-zinc-500 mt-2 max-w-lg mx-auto">
@@ -621,20 +615,20 @@ export function WebGratisClient({ plans }: Props) {
           {SUCCESS_STORIES.map((s, i) => (
             <div key={i} className="relative group">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-[1.5rem] blur opacity-0 group-hover:opacity-20 transition-opacity" />
-              <div className="relative bg-white dark:bg-zinc-900 rounded-[1.5rem] p-6 border border-zinc-100 dark:border-zinc-800 h-full flex flex-col">
+              <div className="relative bg-white rounded-[1.5rem] p-6 border border-zinc-100 h-full flex flex-col">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-24 h-24 shrink-0 flex items-center justify-center">
                     {s.icon}
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">{s.tag}</span>
-                    <h3 className="text-sm font-extrabold text-zinc-900 dark:text-white">{s.title}</h3>
+                    <span className="text-[10px] font-bold text-primary-600 uppercase tracking-wider">{s.tag}</span>
+                    <h3 className="text-sm font-extrabold text-zinc-900">{s.title}</h3>
                   </div>
                 </div>
                 <p className="text-xs text-zinc-500 leading-relaxed mb-4 flex-1">{s.story}</p>
-                <div className="rounded-xl p-3 bg-accent-50 dark:bg-accent-900/10 border border-accent-100 dark:border-accent-900/20">
-                  <p className="text-[10px] font-bold text-accent-600 dark:text-accent-400 mb-1">Reflexión para ti</p>
-                  <p className="text-xs text-zinc-700 dark:text-zinc-200 leading-relaxed italic">"{s.reflection}"</p>
+                <div className="rounded-xl p-3 bg-accent-50 border border-accent-100">
+                  <p className="text-[10px] font-bold text-accent-600 mb-1">Reflexión para ti</p>
+                  <p className="text-xs text-zinc-700 leading-relaxed italic">"{s.reflection}"</p>
                 </div>
               </div>
             </div>
@@ -645,8 +639,8 @@ export function WebGratisClient({ plans }: Props) {
       {/* ═══ TESTIMONIALS ═══ */}
       <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">Historias reales</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white mt-2">
+          <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Historias reales</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
             Lo que dicen los dueños
           </h2>
         </div>
@@ -654,13 +648,13 @@ export function WebGratisClient({ plans }: Props) {
           {TESTIMONIALS.map((t, i) => (
             <div
               key={i}
-              className="snap-start shrink-0 w-[280px] bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-100 dark:border-zinc-800 shadow-sm"
+              className="snap-start shrink-0 w-[280px] bg-white rounded-2xl p-5 border border-zinc-100 shadow-sm"
             >
               <div className="flex gap-0.5 mb-3">{renderStars(t.stars)}</div>
-              <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-4 leading-relaxed">"{t.text}"</p>
+              <p className="text-sm text-zinc-700 mb-4 leading-relaxed">"{t.text}"</p>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{t.name}</p>
+                  <p className="text-xs font-bold text-zinc-800">{t.name}</p>
                   <p className="text-[10px] text-zinc-400">{t.dog}</p>
                 </div>
                 <div className="text-right">
@@ -676,8 +670,8 @@ export function WebGratisClient({ plans }: Props) {
       {/* ═══ REGISTRO GRATIS #1 ═══ */}
       <section id="registro" className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-8">
-          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">Sin compromiso</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white mt-2">
+          <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Sin compromiso</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
             Empieza sin compromiso
           </h2>
           <p className="text-sm text-zinc-500 mt-2 max-w-lg mx-auto">
@@ -689,7 +683,7 @@ export function WebGratisClient({ plans }: Props) {
             appSlug="guau"
             buttonText="Empezar ahora"
             placeholder="tu@correo.com"
-            className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-lg border border-primary-100 dark:border-primary-800/30"
+            className="bg-white rounded-2xl p-6 shadow-lg border border-primary-100"
           />
         </div>
       </section>
@@ -700,8 +694,8 @@ export function WebGratisClient({ plans }: Props) {
       {/* ═══ FAQ ═══ */}
       <section id="faq" className="relative z-10 px-4 py-16 max-w-2xl mx-auto">
         <div className="text-center mb-10">
-          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">Preguntas</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white mt-2">
+          <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Preguntas</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
             Todo lo que necesitas saber
           </h2>
         </div>
@@ -709,7 +703,7 @@ export function WebGratisClient({ plans }: Props) {
           {FAQS.map((faq, i) => (
             <div key={i} className="card-soft rounded-2xl overflow-hidden transition-all">
               <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between p-4 text-left">
-                <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200 pr-4">{faq.q}</span>
+                <span className="text-sm font-bold text-zinc-800 pr-4">{faq.q}</span>
                 <ChevronDown className={`w-5 h-5 text-primary-500 transition-transform duration-300 shrink-0 ${openFaq === i ? "rotate-180" : ""}`} />
               </button>
               <div className={`overflow-hidden transition-all duration-300 ${openFaq === i ? "max-h-60 opacity-100" : "max-h-0 opacity-0"}`}>
@@ -724,7 +718,7 @@ export function WebGratisClient({ plans }: Props) {
       <section className="relative z-10 px-4 py-16">
         <div className="max-w-lg mx-auto text-center relative">
           <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-primary-500/10 via-accent-500/10 to-primary-600/10 blur-2xl" />
-          <div className="relative rounded-[2rem] p-8 text-white border border-primary-200/50 dark:border-primary-800/30 overflow-hidden" style={{ background: "linear-gradient(135deg, #6b63f3 0%, #8b5cf6 50%, #a855f7 100%)" }}>
+          <div className="relative rounded-[2rem] p-8 text-white border border-primary-200/50 overflow-hidden" style={{ background: "linear-gradient(135deg, #6b63f3 0%, #8b5cf6 50%, #a855f7 100%)" }}>
             <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
             <div className="relative z-10 space-y-4">
               <h2 className="text-2xl font-extrabold">¿Qué estás esperando?</h2>

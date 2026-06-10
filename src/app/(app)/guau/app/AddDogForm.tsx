@@ -54,15 +54,15 @@ export function AddDogForm({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="w-full max-w-sm mx-auto bg-white dark:bg-zinc-900 rounded-[1.5rem] shadow-lg border border-zinc-100 dark:border-zinc-800 p-6 space-y-4 text-left">
+    <div className="w-full max-w-sm mx-auto bg-white rounded-[1.5rem] shadow-lg border border-zinc-100 p-6 space-y-4 text-left">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-950 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center">
           <PawPrint className="w-5 h-5 text-primary-600" />
         </div>
-        <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-lg">Nuevo perro</h3>
+        <h3 className="font-bold text-zinc-900 text-lg">Nuevo perro</h3>
       </div>
       {error && (
-        <p className="text-sm text-danger-600 bg-danger-50 dark:bg-danger-950/40 rounded-xl p-3">{error}</p>
+        <p className="text-sm text-danger-600 bg-danger-50 rounded-xl p-3">{error}</p>
       )}
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
@@ -70,14 +70,14 @@ export function AddDogForm({ userId }: { userId: string }) {
           placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
+          className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
         />
         <input
           required
           placeholder="Raza (ej: American Bully)"
           value={raza}
           onChange={(e) => setRaza(e.target.value)}
-          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
+          className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
         />
         <div className="grid grid-cols-2 gap-3">
           <input
@@ -86,7 +86,7 @@ export function AddDogForm({ userId }: { userId: string }) {
             placeholder="Edad (meses)"
             value={edadMeses}
             onChange={(e) => setEdadMeses(e.target.value)}
-            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
+            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
           />
           <input
             required
@@ -95,13 +95,13 @@ export function AddDogForm({ userId }: { userId: string }) {
             placeholder="Peso (kg)"
             value={pesoKg}
             onChange={(e) => setPesoKg(e.target.value)}
-            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
+            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
           />
         </div>
         <select
           value={objetivo}
           onChange={(e) => setObjetivo(e.target.value)}
-          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
+          className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
         >
           <option>Obediencia básica</option>
           <option>Control de reactividad</option>
@@ -120,7 +120,7 @@ export function AddDogForm({ userId }: { userId: string }) {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded-xl bg-zinc-100 dark:bg-zinc-800 px-5 py-3 text-sm font-semibold transition-colors"
+            className="rounded-xl bg-zinc-100 px-5 py-3 text-sm font-semibold transition-colors"
           >
             Cancelar
           </button>

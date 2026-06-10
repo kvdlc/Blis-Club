@@ -20,7 +20,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
   }
 
   return (
-    <div className="min-h-screen md:pl-60 bg-zinc-100 dark:bg-zinc-950">
+    <div className="min-h-screen md:pl-60 bg-zinc-100">
       <AdminNav userRole={role} userName={profile?.display_name || user.email || ""} />
       <main className="pb-28 md:pb-8 px-4 md:px-8 pt-6 max-w-7xl mx-auto">
         {children}

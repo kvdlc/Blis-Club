@@ -71,7 +71,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Checkout</h1>
+      <h1 className="text-lg font-bold text-zinc-900">Checkout</h1>
       <p className="text-sm text-zinc-500">
         Plan seleccionado: <span className="font-semibold text-zinc-800">{planId}</span>
       </p>
