@@ -2,7 +2,6 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import { createClient } from "@/lib/supabase/client";
 import IzipayCheckout from "@/components/IzipayCheckout";
 import { Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -11,6 +10,9 @@ function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const planId = searchParams.get("plan") ?? "quarterly";
+  const email = searchParams.get("email") ?? "";
+  const firstName = searchParams.get("firstName") ?? "";
+  const lastName = searchParams.get("lastName") ?? "";
 
   const [formToken, setFormToken] = useState("");
   const [publicKey, setPublicKey] = useState("");
@@ -20,23 +22,20 @@ function CheckoutContent() {
   const [paymentError, setPaymentError] = useState("");
   const [totalLabel, setTotalLabel] = useState("$1.00/trimestre");
 
-  const supabase = createClient();
-
   useEffect(() => {
     const init = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace(`/guau/web?register=true&plan=${encodeURIComponent(planId)}`);
-        return;
-      }
-
-      // Fetch formToken
       setPaymentLoading(true);
       try {
         const res = await fetch("/api/izipay/create-subscription", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ planId, appId: "guau" }),
+          body: JSON.stringify({
+            planId,
+            appId: "guau",
+            ...(email ? { email } : {}),
+            ...(firstName ? { firstName } : {}),
+            ...(lastName ? { lastName } : {}),
+          }),
         });
         const data = await res.json();
         if (data.formToken) {
@@ -55,7 +54,7 @@ function CheckoutContent() {
     };
 
     init();
-  }, [planId, router]);
+  }, [planId, email, firstName, lastName]);
 
   return (
     <div className="min-h-[100dvh] bg-primary-50">

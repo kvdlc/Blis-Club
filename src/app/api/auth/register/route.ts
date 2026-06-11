@@ -1,108 +1,78 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { sendTemplateEmail } from "@/lib/email/sendTemplateEmail";
-
-function generatePassword(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$";
-  const length = 16;
-  const array = new Uint32Array(length);
-  crypto.getRandomValues(array);
-  return Array.from(array, (v) => chars[v % chars.length]).join("");
-}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { email, firstName, lastName, sourceApp } = body as {
+    const { email, firstName, lastName } = body as {
       email?: string;
       firstName?: string;
       lastName?: string;
-      sourceApp?: string;
     };
 
-    if (!email || !firstName || !lastName) {
+    if (!email) {
       return NextResponse.json(
-        { error: "Email, nombre y apellido son requeridos" },
+        { error: "Email es requerido" },
         { status: 400 }
       );
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-    const password = generatePassword();
-
     const serviceClient = createServiceClient();
+    const supabase = await createClient();
 
-    let userId: string;
-
-    const { data: existingUsers, error: lookupError } = await serviceClient.auth.admin.listUsers();
+    // Check if user already exists
+    const { data: existingUsers } = await serviceClient.auth.admin.listUsers();
     const existing = existingUsers?.users?.find(
       (u) => u.email?.toLowerCase() === normalizedEmail
     );
 
     if (existing) {
-      userId = existing.id;
-
-      // Usuario existente: resetear contraseña para que pueda iniciar sesión
+      // Existing user: sign them in with a magic link (no password reset!)
+      // We generate a temporary password, sign in, then immediately sign out
+      // so they have a session cookie for the checkout flow
+      const tempPassword = crypto.randomUUID().replace(/-/g, "") + "!Aa1";
       await serviceClient.auth.admin.updateUserById(existing.id, {
-        password,
+        password: tempPassword,
         email_confirm: true,
-        user_metadata: {
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-        },
       });
 
-      const updateData: Record<string, unknown> = {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-      };
-      if (sourceApp) updateData.source_app = sourceApp;
-      await serviceClient
-        .from("profiles")
-        .update(updateData)
-        .eq("id", userId);
-
-      // Iniciar sesión para establecer cookies
-      const supabase = await createClient();
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
-        password,
+        password: tempPassword,
       });
 
       if (signInError) {
         console.error("[Register] Sign in failed for existing user:", signInError);
-        return NextResponse.json({
-          success: true,
-          existing: true,
-          message: "Ya tienes una cuenta. Te enviamos un correo con tu nueva contraseña para que puedas continuar.",
-        });
+        return NextResponse.json(
+          { error: "No se pudo iniciar sesión. Intenta de nuevo." },
+          { status: 500 }
+        );
       }
 
-      // Enviar email con nueva contraseña temporal
-      sendTemplateEmail({
-        evento: "bienvenida",
-        to: normalizedEmail,
-        variables: {
-          nombre: firstName.trim(),
-          display_name: `${firstName.trim()} ${lastName.trim()}`,
-          email: normalizedEmail,
-          password,
-        },
-      }).catch((err) => console.error("[Register] Email to existing user failed:", err));
+      // Update profile name if provided
+      if (firstName || lastName) {
+        await serviceClient.from("profiles").update({
+          ...(firstName ? { first_name: firstName.trim() } : {}),
+          ...(lastName ? { last_name: lastName.trim() } : {}),
+        }).eq("id", existing.id);
+      }
 
       return NextResponse.json({ success: true, existing: true });
     }
 
-    // Crear nuevo usuario
+    // New user: create account (will be a "lead" until payment confirmed)
+    // The webhook will mark is_lead=false on successful payment
+    const password = crypto.randomUUID().replace(/-/g, "") + "!Aa1";
     const { data: newUser, error: createError } =
       await serviceClient.auth.admin.createUser({
         email: normalizedEmail,
         password,
         email_confirm: true,
         user_metadata: {
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
+          first_name: firstName?.trim() || "",
+          last_name: lastName?.trim() || "",
         },
       });
 
@@ -114,20 +84,19 @@ export async function POST(request: Request) {
       );
     }
 
-    userId = newUser.user.id;
+    const userId = newUser.user.id;
 
     await serviceClient
       .from("profiles")
-      .update({
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
+      .upsert({
+        id: userId,
+        first_name: firstName?.trim() || "",
+        last_name: lastName?.trim() || "",
+        email: normalizedEmail,
         is_lead: true,
-        source_app: sourceApp || null,
-      })
-      .eq("id", userId);
+      }, { onConflict: "id" });
 
-    // Sign in para establecer cookies de sesión
-    const supabase = await createClient();
+    // Sign in to establish session cookies
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: normalizedEmail,
       password,
@@ -141,17 +110,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // Enviar email de bienvenida con contraseña temporal
-    sendTemplateEmail({
-      evento: "bienvenida",
-      to: normalizedEmail,
-      variables: {
-        nombre: firstName.trim(),
-        display_name: `${firstName.trim()} ${lastName.trim()}`,
-        email: normalizedEmail,
-        password,
-      },
-    }).catch((err) => console.error("[Register] Welcome email failed:", err));
+    // Send welcome email with temporary password
+    try {
+      const { sendTemplateEmail } = await import("@/lib/email/sendTemplateEmail");
+      sendTemplateEmail({
+        evento: "bienvenida",
+        to: normalizedEmail,
+        variables: {
+          nombre: firstName?.trim() || normalizedEmail.split("@")[0],
+          display_name: `${firstName?.trim() || ""} ${lastName?.trim() || ""}`.trim() || normalizedEmail.split("@")[0],
+          email: normalizedEmail,
+          password,
+        },
+      }).catch((err: unknown) => console.error("[Register] Welcome email failed:", err));
+    } catch {}
 
     return NextResponse.json({ success: true });
   } catch (error) {

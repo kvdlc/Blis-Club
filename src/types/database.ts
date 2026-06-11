@@ -244,13 +244,16 @@ export interface Plan {
 
 export interface Subscription {
   id: string;
-  user_id: string;
-  plan_id: string;
+  user_id: string | null;
+  plan_id: string | null;
   status: SubscriptionStatus;
   current_period_start: string | null;
   current_period_end: string | null;
   izipay_subscription_id: string | null;
   created_at: string;
+  plan_type: string;
+  expires_at: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 export interface UserChallenge {

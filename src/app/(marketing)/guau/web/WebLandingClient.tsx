@@ -235,36 +235,19 @@ export function WebLandingClient({ plans }: Props) {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setRegisterLoading(true);
-    setRegisterError("");
-
-    try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: registerEmail,
-          firstName: registerFirstName,
-          lastName: registerLastName,
-          sourceApp: "guau",
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        if (data.existing) {
-          router.push(`/guau/web/checkout?plan=${planId}`);
-        } else {
-          router.push(`/guau/web/checkout?plan=${planId}`);
-        }
-      } else {
-        setRegisterError(data.error || "Error al crear la cuenta. Intenta de nuevo.");
-      }
-    } catch {
-      setRegisterError("Error de conexión. Verifica tu internet.");
+    if (!registerEmail.trim()) {
+      setRegisterError("Ingresa tu correo electrónico.");
+      return;
     }
-    setRegisterLoading(false);
+
+    const params = new URLSearchParams({
+      plan: planId,
+      ...(registerEmail.trim() ? { email: registerEmail.trim().toLowerCase() } : {}),
+      ...(registerFirstName.trim() ? { firstName: registerFirstName.trim() } : {}),
+      ...(registerLastName.trim() ? { lastName: registerLastName.trim() } : {}),
+    });
+
+    router.push(`/guau/web/checkout?${params.toString()}`);
   };
 
   const handleShowRegister = () => {

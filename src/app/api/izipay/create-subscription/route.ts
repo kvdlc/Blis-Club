@@ -45,7 +45,13 @@ async function getIzipayConfig(): Promise<IzipayConfig | null> {
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { planId, appId } = body as { planId?: string; appId?: string };
+    const { planId, appId, email, firstName, lastName } = body as {
+      planId?: string;
+      appId?: string;
+      email?: string;
+      firstName?: string;
+      lastName?: string;
+    };
 
     if (!planId) {
       return NextResponse.json({ error: "planId requerido" }, { status: 400 });
@@ -53,13 +59,49 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-    }
-
     const serviceSupabase = createServiceClient();
 
-    const { data: plan } = await supabase
+    // Resolve customer info: authenticated user OR guest
+    let customerEmail: string;
+    let customerReference: string;
+    let userId: string | null = null;
+
+    if (user) {
+      customerEmail = user.email || "";
+      customerReference = user.id;
+      userId = user.id;
+    } else {
+      if (!email) {
+        return NextResponse.json({ error: "Email requerido para continuar" }, { status: 400 });
+      }
+      customerEmail = email.trim().toLowerCase();
+      customerReference = customerEmail;
+
+      // Look up existing user by email (no account creation!)
+      const { data: existingUsers } = await serviceSupabase.auth.admin.listUsers();
+      const existing = existingUsers?.users?.find(
+        (u) => u.email?.toLowerCase() === customerEmail
+      );
+      if (existing) {
+        userId = existing.id;
+        customerReference = existing.id;
+      }
+    }
+
+    // Get name from profile if authenticated and not provided
+    let shippingFirstName = firstName?.trim() || "";
+    let shippingLastName = lastName?.trim() || "";
+    if (userId && !shippingFirstName) {
+      const { data: profile } = await serviceSupabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("id", userId)
+        .maybeSingle();
+      shippingFirstName = profile?.first_name || "";
+      shippingLastName = profile?.last_name || "";
+    }
+
+    const { data: plan } = await serviceSupabase
       .from("plans")
       .select("*")
       .eq("id", planId)
@@ -72,28 +114,32 @@ export async function POST(request: Request) {
     const config = await getIzipayConfig();
     if (!config) {
       return NextResponse.json({
-        error: "Izipay no está configurado. Agrega las claves en tabla api_keys (izipay_shop_id, izipay_secret_key, izipay_public_key, izipay_hmac_key).",
+        error: "Izipay no está configurado.",
       }, { status: 500 });
     }
 
-    // Leer nombre/apellido del perfil
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("first_name, last_name")
-      .eq("id", user.id)
-      .single();
+    // Create subscription — user_id may be null for guest checkout
+    // Webhook will fill user_id after payment (creating account if needed)
+    const subscriptionData: Record<string, unknown> = {
+      plan_id: planId,
+      status: "pending",
+      plan_type: "premium",
+      current_period_start: new Date().toISOString(),
+      current_period_end: null,
+      metadata: {
+        guest_email: customerEmail,
+        guest_first_name: shippingFirstName,
+        guest_last_name: shippingLastName,
+        created_via: user ? "izipay_checkout" : "izipay_guest_checkout",
+      },
+    };
+    if (userId) {
+      subscriptionData.user_id = userId;
+    }
 
-    // Crear suscripción con service_role para bypass RLS
     const { data: order, error: orderError } = await serviceSupabase
       .from("subscriptions")
-      .insert({
-        user_id: user.id,
-        plan_id: planId,
-        status: "pending",
-        plan_type: "premium",
-        current_period_start: new Date().toISOString(),
-        current_period_end: null,
-      })
+      .insert(subscriptionData)
       .select()
       .single();
 
@@ -110,12 +156,14 @@ export async function POST(request: Request) {
         currency: "USD",
         orderId,
         customer: {
-          email: user.email || "",
-          reference: user.id,
-          shippingDetails: {
-            firstName: profile?.first_name || "",
-            lastName: profile?.last_name || "",
-          },
+          email: customerEmail,
+          reference: customerReference,
+          ...(shippingFirstName || shippingLastName ? {
+            shippingDetails: {
+              firstName: shippingFirstName,
+              lastName: shippingLastName,
+            },
+          } : {}),
         },
       },
       config
@@ -123,29 +171,26 @@ export async function POST(request: Request) {
 
     if (paymentResponse.status !== "SUCCESS" || !paymentResponse.answer.formToken) {
       console.error("[Izipay Create Subscription] Error generando formToken:", paymentResponse);
-      // Clean up the pending subscription since payment wasn't initiated
       await serviceSupabase.from("subscriptions").delete().eq("id", orderId);
       return NextResponse.json({
         error: "Error al conectar con la pasarela de pago. Intenta de nuevo.",
       }, { status: 502 });
     }
 
-    // Intentar guardar metadata con service_role para bypass RLS
+    // Update subscription metadata with form token
     try {
       await serviceSupabase
         .from("subscriptions")
         .update({
           metadata: {
+            ...(order.metadata as Record<string, unknown> || {}),
+            izipay_form_token: paymentResponse.answer.formToken,
             app_id: appId || null,
             plan_name: plan.name,
-            created_via: "izipay_checkout",
-            izipay_form_token: paymentResponse.answer.formToken,
           },
         })
-        .eq("id", order.id);
-    } catch {
-      // metadata column might not exist yet, ignore
-    }
+        .eq("id", orderId);
+    } catch {}
 
     return NextResponse.json({
       success: true,

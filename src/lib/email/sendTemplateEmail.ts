@@ -37,6 +37,16 @@ function buildWelcomeHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://blis.club') || "https://blis.club";
   const enlace = vars.enlace_acceso || `${siteUrl}/guau/app`;
+  const email = vars.email || "";
+  const password = vars.password || "";
+
+  const credentialsBlock = password ? `
+      <div style="background:#f0f0ff;border-radius:16px;padding:20px 24px;margin:24px 0;text-align:center;">
+        <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">Tus datos de acceso:</p>
+        <p style="margin:0 0 4px;font-size:14px;color:#374151;"><strong>Correo:</strong> ${email}</p>
+        <p style="margin:0;font-size:14px;color:#374151;"><strong>Contraseña:</strong> <span style="font-family:monospace;background:#e0e0ff;padding:2px 8px;border-radius:6px;font-size:13px;">${password}</span></p>
+      </div>` : "";
+
   return `
   <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
     <div style="text-align:center;margin-bottom:24px;">
@@ -47,6 +57,7 @@ function buildWelcomeHTML(vars: Record<string, string>): string {
     <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
       <h1 style="font-size:24px;font-weight:800;color:#4a47d4;text-align:center;margin:0 0 8px;">¡Bienvenido a Blis Club!</h1>
       <p style="text-align:center;color:#6b7280;margin:0 0 24px;">Hola <strong style="color:#1f2937">${nombre}</strong>, tu cuenta ha sido creada exitosamente.</p>
+      ${credentialsBlock}
       <p style="text-align:center;color:#6b7280;font-size:14px;">Comienza a explorar nutrición, entrenamiento y seguimiento para tu perro.</p>
       <div style="text-align:center;margin:32px 0;">
         <a href="${enlace}" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Ingresar a Blis Club →</a>
