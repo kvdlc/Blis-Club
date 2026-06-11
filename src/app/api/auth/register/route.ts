@@ -33,7 +33,6 @@ export async function POST(request: Request) {
 
     const serviceClient = createServiceClient();
 
-    // Intentar crear el usuario (si ya existe, actualizar contraseña)
     let userId: string;
 
     const { data: existingUsers, error: lookupError } = await serviceClient.auth.admin.listUsers();
@@ -43,8 +42,10 @@ export async function POST(request: Request) {
 
     if (existing) {
       userId = existing.id;
-      // Usuario existente: solo actualizar metadata, NO tocar password
+
+      // Usuario existente: resetear contraseña para que pueda iniciar sesión
       await serviceClient.auth.admin.updateUserById(existing.id, {
+        password,
         email_confirm: true,
         user_metadata: {
           first_name: firstName.trim(),
@@ -52,7 +53,6 @@ export async function POST(request: Request) {
         },
       });
 
-      // Actualizar profiles (actualizar source_app si viene)
       const updateData: Record<string, unknown> = {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
@@ -63,11 +63,35 @@ export async function POST(request: Request) {
         .update(updateData)
         .eq("id", userId);
 
-      return NextResponse.json({
-        success: true,
-        existing: true,
-        message: "Ya tienes una cuenta. Por favor inicia sesión para continuar.",
+      // Iniciar sesión para establecer cookies
+      const supabase = await createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
       });
+
+      if (signInError) {
+        console.error("[Register] Sign in failed for existing user:", signInError);
+        return NextResponse.json({
+          success: true,
+          existing: true,
+          message: "Ya tienes una cuenta. Te enviamos un correo con tu nueva contraseña para que puedas continuar.",
+        });
+      }
+
+      // Enviar email con nueva contraseña temporal
+      sendTemplateEmail({
+        evento: "bienvenida",
+        to: normalizedEmail,
+        variables: {
+          nombre: firstName.trim(),
+          display_name: `${firstName.trim()} ${lastName.trim()}`,
+          email: normalizedEmail,
+          password,
+        },
+      }).catch((err) => console.error("[Register] Email to existing user failed:", err));
+
+      return NextResponse.json({ success: true, existing: true });
     }
 
     // Crear nuevo usuario
@@ -92,7 +116,6 @@ export async function POST(request: Request) {
 
     userId = newUser.user.id;
 
-    // Actualizar profiles con nombre, apellido, source_app. is_lead = true (aún no ha pagado).
     await serviceClient
       .from("profiles")
       .update({
@@ -113,15 +136,12 @@ export async function POST(request: Request) {
     if (signInError) {
       console.error("[Register] Sign in failed:", signInError);
       return NextResponse.json(
-        {
-          error:
-            "Cuenta creada pero no se pudo iniciar sesión. Intenta de nuevo.",
-        },
+        { error: "Cuenta creada pero no se pudo iniciar sesión. Intenta de nuevo." },
         { status: 500 }
       );
     }
 
-    // Enviar email de bienvenida con contraseña temporal (solo nuevos usuarios)
+    // Enviar email de bienvenida con contraseña temporal
     sendTemplateEmail({
       evento: "bienvenida",
       to: normalizedEmail,

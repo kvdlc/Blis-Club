@@ -26,7 +26,7 @@ function CheckoutContent() {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push(`/guau/web?register=true&plan=${encodeURIComponent(planId)}`);
+        router.replace(`/guau/web?register=true&plan=${encodeURIComponent(planId)}`);
         return;
       }
 

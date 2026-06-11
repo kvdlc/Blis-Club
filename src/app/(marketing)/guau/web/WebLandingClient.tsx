@@ -254,7 +254,7 @@ export function WebLandingClient({ plans }: Props) {
 
       if (data.success) {
         if (data.existing) {
-          setRegisterError(data.message || "Ya tienes una cuenta. Inicia sesión para continuar.");
+          router.push(`/guau/web/checkout?plan=${planId}`);
         } else {
           router.push(`/guau/web/checkout?plan=${planId}`);
         }
