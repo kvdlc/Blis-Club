@@ -149,6 +149,11 @@ export async function POST(request: Request) {
       publicKey: config.publicKey,
       orderId,
       displayMode: config.displayMode,
+      totalLabel: plan.billing_interval === "quarter"
+        ? `$${(plan.price_cents / 100).toFixed(2)}/trimestre`
+        : plan.billing_interval === "year"
+          ? `$${(plan.price_cents / 100).toFixed(2)}/año`
+          : `$${(plan.price_cents / 100).toFixed(2)}/mes`,
     });
   } catch (error) {
     console.error("[IziPay Create Subscription] Error:", error);

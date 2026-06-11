@@ -41,7 +41,7 @@ const FAQS = [
 ];
 
 export function SubscriptionClient({ plans }: Props) {
-  const [isAnnual, setIsAnnual] = useState(true);
+  const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [count, setCount] = useState(0);
 
@@ -64,14 +64,15 @@ export function SubscriptionClient({ plans }: Props) {
   }, []);
 
   const monthly = plans.find((p) => p.billing_interval === "month");
+  const quarterly = plans.find((p) => p.billing_interval === "quarter");
   const annual = plans.find((p) => p.billing_interval === "year");
 
   const monthlyPrice = monthly ? (monthly.price_cents / 100).toFixed(2) : "9.99";
+  const quarterlyPrice = quarterly ? (quarterly.price_cents / 100).toFixed(2) : "1.00";
   const annualPrice = annual ? (annual.price_cents / 100).toFixed(2) : "99.00";
-  const annualMonthly = annual ? (annual.price_cents / 100 / 12).toFixed(2) : "8.25";
-  const savings = monthly && annual ? ((monthly.price_cents * 12 - annual.price_cents) / 100).toFixed(0) : "20";
+  const savings = quarterly && annual ? ((quarterly.price_cents * 4 - annual.price_cents) / 100).toFixed(0) : "20";
 
-  const activePlanId = isAnnual ? (annual?.id ?? "annual") : (monthly?.id ?? "monthly");
+  const activePlanId = quarterly?.id ?? monthly?.id ?? "quarterly";
 
   return (
     <div className="relative overflow-hidden -mx-4 -mt-3 bg-primary-50" style={{ minHeight: "100dvh" }}>
@@ -195,7 +196,7 @@ export function SubscriptionClient({ plans }: Props) {
         {/* Toggle */}
         <div className="flex items-center justify-center gap-3 mb-8">
           <span className={`text-sm font-bold transition-colors ${!isAnnual ? "text-zinc-900" : "text-zinc-400"}`}>
-            Mensual
+            Trimestral
           </span>
           <button
             onClick={() => setIsAnnual(!isAnnual)}
@@ -217,20 +218,48 @@ export function SubscriptionClient({ plans }: Props) {
 
         {/* Cards */}
         <div className="max-w-sm mx-auto space-y-4">
+          {/* Quarterly Card */}
+          {!isAnnual && (
+            <div className="relative group animate-scale-in">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-zinc-200 to-zinc-300 rounded-[1.5rem] blur opacity-20 group-hover:opacity-30 transition-opacity" />
+              <div className="relative bg-white rounded-[1.5rem] p-6 border border-zinc-100">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary-600">Oferta especial</span>
+                  <div className="flex items-center gap-1">
+                    <Sparkles className="w-4 h-4 text-warning-400 animate-pulse-glow" />
+                    <span className="text-[10px] font-bold text-warning-600">Ahorra 80%</span>
+                  </div>
+                </div>
+                <h3 className="text-2xl font-extrabold text-zinc-900 mb-1">Pro Trimestral</h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">${quarterlyPrice}</span>
+                  <span className="text-zinc-400 font-medium">/trimestre</span>
+                </div>
+                <p className="text-xs text-zinc-400 mb-6">Flexibilidad total · Cancela cuando quieras</p>
+
+                <Link
+                  href={`/guau/app/checkout?plan=${quarterly?.id ?? monthly?.id ?? "quarterly"}`}
+                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-zinc-900 text-white py-3.5 font-bold text-sm transition-all active:scale-[0.98] hover:bg-zinc-800"
+                >
+                  Suscribirse ahora
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Annual Card - Featured */}
           {isAnnual && (
             <div className="relative group animate-scale-in">
-              {/* Glow effect brand */}
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-[1.5rem] blur opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
               <div className="relative bg-white rounded-[1.5rem] p-6 border border-zinc-100 overflow-hidden">
-                {/* Shine sweep */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-400/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-primary-600">Mas popular</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary-600">Más popular</span>
                   <div className="flex items-center gap-1">
                     <Sparkles className="w-4 h-4 text-warning-400 animate-pulse-glow" />
-                    <span className="text-[10px] font-bold text-warning-600">Ahorra 17%</span>
+                    <span className="text-[10px] font-bold text-warning-600">Ahorra ${savings}</span>
                   </div>
                 </div>
 
@@ -239,7 +268,7 @@ export function SubscriptionClient({ plans }: Props) {
                   <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">${annualPrice}</span>
                   <span className="text-zinc-400 font-medium">/año</span>
                 </div>
-                <p className="text-xs text-zinc-400 mb-6">${annualMonthly}/mes · Cancela cuando quieras</p>
+                <p className="text-xs text-zinc-400 mb-6">La mejor opción · Cancela cuando quieras</p>
 
                 <Link
                   href={`/guau/app/checkout?plan=${annual?.id ?? "annual"}`}
@@ -248,29 +277,6 @@ export function SubscriptionClient({ plans }: Props) {
                   <Zap className="w-4 h-4" />
                   Suscribirse ahora
                   <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* Monthly Card */}
-          {!isAnnual && (
-            <div className="relative group animate-scale-in">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-zinc-200 to-zinc-300 rounded-[1.5rem] blur opacity-20 group-hover:opacity-30 transition-opacity" />
-              <div className="relative bg-white rounded-[1.5rem] p-6 border border-zinc-100">
-                <h3 className="text-2xl font-extrabold text-zinc-900 mb-1">Pro Mensual</h3>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">${monthlyPrice}</span>
-                  <span className="text-zinc-400 font-medium">/mes</span>
-                </div>
-                <p className="text-xs text-zinc-400 mb-6">Flexibilidad total · Cancela cuando quieras</p>
-
-                <Link
-                  href={`/guau/app/checkout?plan=${monthly?.id ?? "monthly"}`}
-                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-zinc-900 text-white py-3.5 font-bold text-sm transition-all active:scale-[0.98] hover:bg-zinc-800"
-                >
-                  Suscribirse ahora
-                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>

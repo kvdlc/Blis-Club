@@ -36,7 +36,21 @@ export async function POST(request: Request) {
 
     const now = new Date();
     const periodEnd = new Date(now);
-    periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+    const { data: billingPlan } = await serviceSupabase
+      .from("plans")
+      .select("billing_interval")
+      .eq("id", subscription.plan_id)
+      .maybeSingle();
+
+    const interval = billingPlan?.billing_interval || "quarter";
+    if (interval === "year") {
+      periodEnd.setMonth(periodEnd.getMonth() + 12);
+    } else if (interval === "quarter") {
+      periodEnd.setMonth(periodEnd.getMonth() + 3);
+    } else {
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+    }
 
     // Activar como Premium y convertir a Cliente
     const updateData: Record<string, unknown> = {

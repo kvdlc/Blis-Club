@@ -22,6 +22,7 @@ body {
   --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.06);
   --shadow-card-hover: 0 8px 32px -4px rgba(0, 0, 0, 0.1);
   --shadow-fab: 0 8px 24px -4px rgba(89, 86, 233, 0.45);
+
   --color-primary-50: #eeedff;
   --color-primary-100: #e0dfff;
   --color-primary-200: #c5c2fc;
@@ -81,6 +82,32 @@ body {
   --color-accent-800: #6d28d9;
   --color-accent-900: #5b21b6;
   --color-accent-950: #2e1065;
+
+  /* ── Cafecito Inmobiliario Palette ── */
+  --color-cafe-50: #FDFBF7;
+  --color-cafe-100: #f5ead5;
+  --color-cafe-200: #e8d5b0;
+  --color-cafe-300: #D4A574;
+  --color-cafe-400: #b8864e;
+  --color-cafe-500: #8B5E3C;
+  --color-cafe-600: #6B4423;
+  --color-cafe-700: #4a301a;
+  --color-cafe-800: #3a2512;
+  --color-cafe-900: #2C1810;
+
+  /* Accordion animation keyframes */
+  --animate-accordion-down: accordion-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-accordion-up: accordion-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes accordion-down {
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-accordion-content-height); opacity: 1; }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
 }
 
 /* App background - solid with subtle glows, floating icons via BackgroundPaws */
@@ -125,6 +152,170 @@ body {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Cafecito Premium Animations ── */
+
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -30px) scale(1.1); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(-30px, -10px) scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes gradient-spin {
+  0% { --gradient-angle: 0deg; }
+  100% { --gradient-angle: 360deg; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6); }
+  70% { transform: scale(1); box-shadow: 0 0 0 18px rgba(37, 211, 102, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-blob-float {
+  animation: blob-float 20s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 3s ease-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.7s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+/* Stagger delays */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* Conic gradient border */
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--gradient-angle), #6B4423, #D4A574, #8B5E3C, #6B4423);
+  animation: gradient-spin 4s linear infinite;
+  z-index: -1;
+}
+
+/* Logo marquee */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+/* Flip card countdown */
+@keyframes flip-top {
+  0% { transform: rotateX(0deg); }
+  100% { transform: rotateX(-90deg); }
+}
+
+@keyframes flip-bottom {
+  0% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+/* ── Button pulse effect ── */
+@keyframes btn-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(107, 68, 35, 0.5); }
+  50% { box-shadow: 0 0 0 12px rgba(107, 68, 35, 0); }
+}
+
+@keyframes btn-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(107, 68, 35, 0.3), 0 4px 12px rgba(107, 68, 35, 0.2); }
+  50% { box-shadow: 0 0 30px rgba(107, 68, 35, 0.5), 0 6px 16px rgba(107, 68, 35, 0.3); }
+}
+
+.animate-btn-pulse {
+  animation: btn-pulse 2.5s ease-in-out infinite;
+}
+
+.animate-btn-glow {
+  animation: btn-glow 2s ease-in-out infinite;
+}
+
+/* ── Float animation for cards ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+/* ── Border draw ── */
+@keyframes border-draw {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* ── Safe area padding for mobile bottom bars ── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 

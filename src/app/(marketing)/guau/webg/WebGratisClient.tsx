@@ -248,8 +248,8 @@ export function WebGratisClient({ plans }: Props) {
     return () => clearInterval(timer);
   }, []);
 
-  const monthly = plans.find((p) => p.billing_interval === "month");
-  const planId = monthly?.id ?? "monthly";
+  const quarterly = plans.find((p) => p.billing_interval === "quarter");
+  const planId = quarterly?.id ?? "quarterly";
 
   /* ─── Renders ─── */
   const renderStars = (n: number) =>

@@ -7,11 +7,23 @@ import type { IzipayIPNAnswer } from "@/lib/izipay/types";
 export async function POST(request: Request) {
   try {
     const raw = await request.text();
-    console.log("[Izipay Webhook] Raw body (first 300):", raw.substring(0, 300));
+    console.log("[Izipay Webhook] Raw body (first 500):", raw.substring(0, 500));
 
-    const params = new URLSearchParams(raw);
-    const krHash = params.get("kr-hash");
-    const krAnswer = params.get("kr-answer");
+    // Try JSON first (some Izipay versions send JSON)
+    let krHash: string | null = null;
+    let krAnswer: string | null = null;
+
+    try {
+      const jsonBody = JSON.parse(raw);
+      krHash = jsonBody["kr-hash"] || jsonBody.kr_hash || null;
+      krAnswer = jsonBody["kr-answer"] || jsonBody.kr_answer || null;
+      if (typeof krAnswer === "object") krAnswer = JSON.stringify(krAnswer);
+    } catch {
+      // Not JSON, try URL-encoded form data
+      const params = new URLSearchParams(raw);
+      krHash = params.get("kr-hash");
+      krAnswer = params.get("kr-answer");
+    }
 
     if (!krHash || !krAnswer) {
       console.error("[Izipay Webhook] Falta kr-hash o kr-answer");
@@ -70,7 +82,6 @@ export async function POST(request: Request) {
 
     if (!subscription) {
       console.error(`[Izipay Webhook] Suscripción no encontrada: ${referenceOrderId}. Creando nueva suscripción para el pago.`);
-      // Extraer user_id del customer.reference o customer.email
       const customerEmail = customer?.email as string;
       let userId: string | null = null;
       if (customerEmail) {
@@ -85,10 +96,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Suscripción no encontrada y no se pudo determinar el usuario" }, { status: 404 });
       }
 
-      // Crear suscripción nueva
       const now = new Date();
       const periodEnd = new Date(now);
-      periodEnd.setMonth(periodEnd.getMonth() + 1);
+      periodEnd.setMonth(periodEnd.getMonth() + 3);
 
       const { data: created, error: createError } = await serviceSupabase
         .from("subscriptions")
@@ -121,8 +131,22 @@ export async function POST(request: Request) {
 
     if (orderStatus === "PAID") {
       const now = new Date();
+
+      const { data: billingPlan } = await supabase
+        .from("plans")
+        .select("billing_interval")
+        .eq("id", subscription.plan_id)
+        .maybeSingle();
+
       const periodEnd = new Date(now);
-      periodEnd.setMonth(periodEnd.getMonth() + 1);
+      const interval = billingPlan?.billing_interval || "quarter";
+      if (interval === "year") {
+        periodEnd.setMonth(periodEnd.getMonth() + 12);
+      } else if (interval === "quarter") {
+        periodEnd.setMonth(periodEnd.getMonth() + 3);
+      } else {
+        periodEnd.setMonth(periodEnd.getMonth() + 1);
+      }
 
       // Activar suscripción Premium y mantener como cliente
     // Usar service_role para bypass RLS

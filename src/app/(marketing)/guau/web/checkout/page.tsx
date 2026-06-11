@@ -10,7 +10,7 @@ import Link from "next/link";
 function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const planId = searchParams.get("plan") ?? "monthly";
+  const planId = searchParams.get("plan") ?? "quarterly";
 
   const [formToken, setFormToken] = useState("");
   const [publicKey, setPublicKey] = useState("");
@@ -18,6 +18,7 @@ function CheckoutContent() {
   const [displayMode, setDisplayMode] = useState<"popup" | "embedded">("embedded");
   const [paymentLoading, setPaymentLoading] = useState(true);
   const [paymentError, setPaymentError] = useState("");
+  const [totalLabel, setTotalLabel] = useState("$1.00/trimestre");
 
   const supabase = createClient();
 
@@ -43,6 +44,7 @@ function CheckoutContent() {
           setPublicKey(data.publicKey || "");
           setOrderId(data.orderId || "");
           setDisplayMode(data.displayMode || "embedded");
+          if (data.totalLabel) setTotalLabel(data.totalLabel);
         } else {
           setPaymentError(data.error || "No se pudo iniciar el pago");
         }
@@ -82,7 +84,7 @@ function CheckoutContent() {
             formToken={formToken}
             publicKey={publicKey}
             orderId={orderId}
-            totalLabel="$9.99/mes"
+            totalLabel={totalLabel}
             displayMode={displayMode}
             onSuccess={async () => {
               if (orderId) {

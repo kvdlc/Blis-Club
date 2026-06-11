@@ -24,10 +24,11 @@ function getVideoEmbedUrl(url: string | null): string | null {
     return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
   }
 
+  // Adilo
+  if (url.includes("adilo.bigcommand.com")) return url;
+
   // Direct video file (mp4, webm)
-  if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(url)) {
-    return url; // will use <video> tag
-  }
+  if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(url)) return url;
 
   return null;
 }

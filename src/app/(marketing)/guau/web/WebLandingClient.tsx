@@ -298,8 +298,8 @@ export function WebLandingClient({ plans }: Props) {
     return () => clearInterval(timer);
   }, []);
 
-  const monthly = plans.find((p) => p.billing_interval === "month");
-  const planId = monthly?.id ?? "monthly";
+  const quarterly = plans.find((p) => p.billing_interval === "quarter");
+  const planId = quarterly?.id ?? "quarterly";
 
   /* ─── Renders ─── */
   const renderStars = (n: number) =>
@@ -753,13 +753,13 @@ export function WebLandingClient({ plans }: Props) {
                   <span className="text-[10px] font-bold text-warning-600">Ahorra 80%</span>
                 </div>
               </div>
-              <h3 className="text-2xl font-extrabold text-zinc-900 mb-1">Pro Mensual</h3>
+              <h3 className="text-2xl font-extrabold text-zinc-900 mb-1">Pro Trimestral</h3>
               <div className="flex items-baseline gap-2 mb-1">
                 <span className="text-2xl font-bold text-zinc-400 line-through decoration-danger-400">$49.99</span>
-                <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">$9.99</span>
-                <span className="text-zinc-400 font-medium">/mes</span>
+                <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">$1.00</span>
+                <span className="text-zinc-400 font-medium">/trimestre</span>
               </div>
-              <p className="text-xs text-zinc-400 mb-4">Precio real $49.99. Hoy solo $9.99 mensual. Cancela cuando quieras.</p>
+              <p className="text-xs text-zinc-400 mb-4">Precio real $49.99. Hoy solo $1.00 trimestral. Cancela cuando quieras.</p>
 
               {/* ═══ REGISTER FORM (dentro de la tarjeta) ═══ */}
               <AnimatePresence>
