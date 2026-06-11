@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { verifyKRHash } from "@/lib/izipay/client";
 import type { IzipayIPNAnswer } from "@/lib/izipay/types";
@@ -9,7 +8,6 @@ export async function POST(request: Request) {
     const raw = await request.text();
     console.log("[Izipay Webhook] Raw body (first 500):", raw.substring(0, 500));
 
-    // Try JSON first (some Izipay versions send JSON)
     let krHash: string | null = null;
     let krAnswer: string | null = null;
 
@@ -19,7 +17,6 @@ export async function POST(request: Request) {
       krAnswer = jsonBody["kr-answer"] || jsonBody.kr_answer || null;
       if (typeof krAnswer === "object") krAnswer = JSON.stringify(krAnswer);
     } catch {
-      // Not JSON, try URL-encoded form data
       const params = new URLSearchParams(raw);
       krHash = params.get("kr-hash");
       krAnswer = params.get("kr-answer");
@@ -40,10 +37,9 @@ export async function POST(request: Request) {
 
     console.log("[Izipay Webhook] orderStatus:", answerData.orderStatus);
 
-    const serviceSupabase = createServiceClient();
-    const supabase = await createClient();
+    const supabase = createServiceClient();
 
-    const { data: keys } = await serviceSupabase
+    const { data: keys } = await supabase
       .from("api_keys")
       .select("key_name, key_value")
       .eq("is_global", true)
@@ -71,9 +67,65 @@ export async function POST(request: Request) {
     const orderStatus = answerData.orderStatus;
 
     const referenceOrderId = orderDetails?.orderId as string || orderId;
+    const isTokenizationOnly = referenceOrderId.startsWith("addcard_") || (Number(tx?.amount) === 0);
 
-    console.log(`[Izipay Webhook] Buscando orden: ${referenceOrderId}`);
+    console.log(`[Izipay Webhook] Buscando orden: ${referenceOrderId}, isTokenization: ${isTokenizationOnly}`);
 
+    // ═══ TOKENIZATION-ONLY FLOW (add card, $0 verification) ═══
+    if (isTokenizationOnly) {
+      let userId: string | null = null;
+      const customerRef = customer?.reference as string;
+      const customerEmail = customer?.email as string;
+
+      if (customerRef) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", customerRef)
+          .maybeSingle();
+        userId = profile?.id || null;
+      }
+      if (!userId && customerEmail) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("email", customerEmail.toLowerCase())
+          .maybeSingle();
+        userId = profile?.id || null;
+      }
+
+      if (tx?.paymentMethodToken && userId) {
+        const { data: existingToken } = await supabase
+          .from("payment_tokens")
+          .select("id")
+          .eq("card_token", tx.paymentMethodToken)
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (!existingToken) {
+          await supabase.from("payment_tokens").insert({
+            user_id: userId,
+            card_token: tx.paymentMethodToken,
+            card_brand: tx.cardDetails?.brand || "",
+            card_last4: String(tx.cardDetails?.pan || "").slice(-4),
+            card_expiry: tx.cardDetails
+              ? `${tx.cardDetails.expiryMonth || ""}/${tx.cardDetails.expiryYear || ""}`
+              : "",
+            is_active: true,
+            metadata: {
+              izipay_transaction_uuid: tx.uuid,
+              izipay_order_id: orderId,
+              registration_type: "REGISTER",
+            },
+          });
+          console.log(`[Izipay Webhook] Token guardado (addcard) para usuario ${userId}`);
+        }
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
+    // ═══ PAYMENT FLOW (PAID, UNPAID, CANCELLED) ═══
     let { data: subscription } = await supabase
       .from("subscriptions")
       .select("id, user_id, plan_id, status, metadata")
@@ -85,7 +137,7 @@ export async function POST(request: Request) {
       const customerEmail = customer?.email as string;
       let userId: string | null = null;
       if (customerEmail) {
-        const { data: profile } = await serviceSupabase
+        const { data: profile } = await supabase
           .from("profiles")
           .select("id")
           .eq("email", customerEmail.toLowerCase())
@@ -96,15 +148,33 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Suscripción no encontrada y no se pudo determinar el usuario" }, { status: 404 });
       }
 
+      // Try to find the plan from order metadata or default
+      let planId: string | null = null;
+      const subMetadata = (answerData as unknown as Record<string, unknown>).orderDetails as Record<string, unknown> | undefined;
+      if (subMetadata?.planId) {
+        planId = subMetadata.planId as string;
+      }
+      if (!planId) {
+        const { data: defaultPlan } = await supabase
+          .from("plans")
+          .select("id")
+          .eq("billing_interval", "quarter")
+          .order("price_cents", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        planId = defaultPlan?.id || null;
+      }
+
       const now = new Date();
       const periodEnd = new Date(now);
       periodEnd.setMonth(periodEnd.getMonth() + 3);
 
-      const { data: created, error: createError } = await serviceSupabase
+      const { data: created, error: createError } = await supabase
         .from("subscriptions")
         .insert({
           id: referenceOrderId,
           user_id: userId,
+          plan_id: planId,
           status: "active",
           plan_type: "premium",
           current_period_start: now.toISOString(),
@@ -148,45 +218,40 @@ export async function POST(request: Request) {
         periodEnd.setMonth(periodEnd.getMonth() + 1);
       }
 
-      // Activar suscripción Premium y mantener como cliente
-    // Usar service_role para bypass RLS
-    await Promise.all([
-      serviceSupabase
-        .from("subscriptions")
-        .update({
-          status: "active",
-          plan_type: "premium",
-          current_period_start: now.toISOString(),
-          current_period_end: periodEnd.toISOString(),
-          expires_at: null,
-          izipay_subscription_id: orderId,
-        })
-        .eq("id", subscription.id),
-      serviceSupabase
-        .from("profiles")
-        .update({ is_lead: false })
-        .eq("id", subscription.user_id),
-    ]);
+      await Promise.all([
+        supabase
+          .from("subscriptions")
+          .update({
+            status: "active",
+            plan_type: "premium",
+            current_period_start: now.toISOString(),
+            current_period_end: periodEnd.toISOString(),
+            expires_at: null,
+            izipay_subscription_id: orderId,
+          })
+          .eq("id", subscription.id),
+        supabase
+          .from("profiles")
+          .update({ is_lead: false })
+          .eq("id", subscription.user_id),
+      ]);
 
-    // Intentar guardar metadata por separado (ignorar error si columna no existe)
-    try {
-      await serviceSupabase
-        .from("subscriptions")
-        .update({
-          metadata: {
-            ...((subscription.metadata as Record<string, unknown>) || {}),
-            izipay_status: "PAID",
-            izipay_webhook_received_at: new Date().toISOString(),
-            izipay_transaction_uuid: tx?.uuid || "",
-            izipay_payment_method: tx?.paymentMethodType || "",
-            izipay_card_brand: tx?.cardDetails?.brand || "",
-            izipay_card_last4: String(tx?.cardDetails?.pan || "").slice(-4),
-          },
-        })
-        .eq("id", subscription.id);
-    } catch {
-      // metadata column might not exist yet
-    }
+      try {
+        await supabase
+          .from("subscriptions")
+          .update({
+            metadata: {
+              ...((subscription.metadata as Record<string, unknown>) || {}),
+              izipay_status: "PAID",
+              izipay_webhook_received_at: new Date().toISOString(),
+              izipay_transaction_uuid: tx?.uuid || "",
+              izipay_payment_method: tx?.paymentMethodType || "",
+              izipay_card_brand: tx?.cardDetails?.brand || "",
+              izipay_card_last4: String(tx?.cardDetails?.pan || "").slice(-4),
+            },
+          })
+          .eq("id", subscription.id);
+      } catch {}
 
       if (tx?.paymentMethodToken) {
         const { data: existingToken } = await supabase
@@ -199,15 +264,18 @@ export async function POST(request: Request) {
         if (!existingToken) {
           await supabase.from("payment_tokens").insert({
             user_id: subscription.user_id,
+            subscription_id: subscription.id,
             card_token: tx.paymentMethodToken,
             card_brand: tx.cardDetails?.brand || "",
             card_last4: String(tx.cardDetails?.pan || "").slice(-4),
             card_expiry: tx.cardDetails
               ? `${tx.cardDetails.expiryMonth || ""}/${tx.cardDetails.expiryYear || ""}`
               : "",
+            is_active: true,
             metadata: {
               izipay_transaction_uuid: tx.uuid,
               izipay_order_id: orderId,
+              registration_type: "REGISTER_PAY",
             },
           });
         }
@@ -220,7 +288,8 @@ export async function POST(request: Request) {
         .single();
 
       if (plan) {
-        const txAmount = tx?.amount ? Math.round(tx.amount * 100) : plan.price_cents;
+        // Izipay returns amounts in minor units (cents) already
+        const txAmount = tx?.amount ? Math.round(tx.amount) : plan.price_cents;
 
         const { data: paymentRecord, error: paymentErr } = await supabase
           .from("subscription_payments")

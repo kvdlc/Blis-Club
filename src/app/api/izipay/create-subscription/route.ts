@@ -57,6 +57,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
+    const serviceSupabase = createServiceClient();
+
     const { data: plan } = await supabase
       .from("plans")
       .select("*")
@@ -81,8 +83,8 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single();
 
-    // Crear suscripción SIN metadata primero (para que funcione aunque metadata no exista aún)
-    const { data: order, error: orderError } = await supabase
+    // Crear suscripción con service_role para bypass RLS
+    const { data: order, error: orderError } = await serviceSupabase
       .from("subscriptions")
       .insert({
         user_id: user.id,
@@ -121,14 +123,16 @@ export async function POST(request: Request) {
 
     if (paymentResponse.status !== "SUCCESS" || !paymentResponse.answer.formToken) {
       console.error("[Izipay Create Subscription] Error generando formToken:", paymentResponse);
+      // Clean up the pending subscription since payment wasn't initiated
+      await serviceSupabase.from("subscriptions").delete().eq("id", orderId);
       return NextResponse.json({
         error: "Error al conectar con la pasarela de pago. Intenta de nuevo.",
       }, { status: 502 });
     }
 
-    // Intentar guardar metadata (ignorar error si la columna aún no existe)
+    // Intentar guardar metadata con service_role para bypass RLS
     try {
-      await supabase
+      await serviceSupabase
         .from("subscriptions")
         .update({
           metadata: {

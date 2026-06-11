@@ -41,6 +41,10 @@ export default function IzipayCheckout({
   const krContainerId = useRef(`kr-container-${Math.random().toString(36).slice(2)}`).current;
   const styleId = useRef(`kr-glue-style-${Math.random().toString(36).slice(2)}`).current;
   const initializedRef = useRef(false);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  onSuccessRef.current = onSuccess;
+  onErrorRef.current = onError;
 
   const addLog = useCallback((msg: string) => {
     console.log(`[IzipayCheckout] ${msg}`);
@@ -105,7 +109,7 @@ export default function IzipayCheckout({
           const st = response?.clientAnswer?.orderStatus;
           if (st === 'PAID') {
             setFormState('success');
-            onSuccess?.();
+            onSuccessRef.current?.();
           } else {
             setFormState('error');
             setErrorMsg(st ? `Pago rechazado (${st})` : 'El pago fue rechazado por la pasarela.');
@@ -116,8 +120,9 @@ export default function IzipayCheckout({
         KR.onError((error: any) => {
           addLog(`KR.onError: ${JSON.stringify(error)}`);
           setFormState('error');
-          setErrorMsg(error?.message || 'Error en la pasarela de pago. Intenta de nuevo.');
-          onError?.(error?.message || 'Error en la pasarela de pago.');
+          const errMsg = error?.message || 'Error en la pasarela de pago. Intenta de nuevo.';
+          setErrorMsg(errMsg);
+          onErrorRef.current?.(errMsg);
           return true;
         });
 
@@ -148,7 +153,7 @@ export default function IzipayCheckout({
       const existingStyle = document.getElementById(styleId);
       if (existingStyle) existingStyle.remove();
     };
-  }, [formToken, publicKey, displayMode, addLog, onSuccess, onError, styleId, krContainerId]);
+  }, [formToken, publicKey, displayMode, addLog, styleId, krContainerId]);
 
   return (
     <div className="bg-white rounded-[1.25rem] border border-zinc-200 shadow-sm overflow-hidden max-w-md mx-auto">

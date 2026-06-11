@@ -3,6 +3,7 @@ import type {
   IzipayCreatePaymentRequest,
   IzipayCreatePaymentResponse,
   IzipayConfig,
+  IzipayFormAction,
 } from './types'
 import { MICUENTAWEB_URLS } from './types'
 
@@ -17,10 +18,17 @@ export async function createPayment(
     amount: params.amount,
     currency: params.currency,
     orderId: params.orderId,
-    formAction: 'REGISTER_PAY',
     customer: {
       email: params.customer.email,
     },
+  }
+
+  if (params.paymentMethodToken) {
+    body.paymentMethodToken = params.paymentMethodToken
+  } else if (params.formAction) {
+    body.formAction = params.formAction
+  } else {
+    body.formAction = 'REGISTER_PAY'
   }
 
   if (params.customer.reference) {

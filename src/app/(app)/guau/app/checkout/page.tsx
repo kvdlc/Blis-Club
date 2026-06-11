@@ -14,6 +14,7 @@ export default function CheckoutPage() {
   const [publicKey, setPublicKey] = useState("");
   const [orderId, setOrderId] = useState("");
   const [displayMode, setDisplayMode] = useState<"popup" | "embedded">("embedded");
+  const [totalLabel, setTotalLabel] = useState("$1.00/trimestre");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -35,6 +36,7 @@ export default function CheckoutPage() {
           setPublicKey(data.publicKey || "");
           setOrderId(data.orderId || "");
           setDisplayMode(data.displayMode || "embedded");
+          if (data.totalLabel) setTotalLabel(data.totalLabel);
         } else {
           setError(data.error || "No se pudo iniciar el pago");
         }
@@ -80,7 +82,7 @@ export default function CheckoutPage() {
         formToken={formToken}
         publicKey={publicKey}
         orderId={orderId}
-        totalLabel="$9.99/mes"
+        totalLabel={totalLabel}
         displayMode={displayMode}
         onSuccess={async () => {
           if (orderId) {
@@ -92,7 +94,7 @@ export default function CheckoutPage() {
               });
             } catch { /* webhook handles it */ }
           }
-          router.push("/guau/app?tab=inicio&payment=success");
+          router.replace("/guau/app?tab=inicio&payment=success");
         }}
         onError={(msg) => setError(msg)}
         successRedirect="/guau/app?tab=inicio"

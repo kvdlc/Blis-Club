@@ -23,10 +23,14 @@ export interface IzipayConfig {
   displayMode: IzipayDisplayMode
 }
 
+export type IzipayFormAction = 'PAY' | 'REGISTER' | 'ASK_REGISTER_PAY' | 'REGISTER_PAY'
+
 export interface IzipayCreatePaymentRequest {
   amount: number
   currency: string
   orderId: string
+  formAction?: IzipayFormAction
+  paymentMethodToken?: string
   customer: {
     email: string
     reference?: string
@@ -36,6 +40,19 @@ export interface IzipayCreatePaymentRequest {
       country?: string
     }
   }
+}
+
+export interface PaymentToken {
+  id: string
+  user_id: string
+  subscription_id: string | null
+  card_token: string
+  card_brand: string
+  card_last4: string
+  card_expiry: string
+  is_active: boolean
+  metadata: Record<string, unknown>
+  created_at: string
 }
 
 export interface IzipayCreatePaymentResponse {

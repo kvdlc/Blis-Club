@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import type { Dog, WeeklyChallenge, UserChallenge, DogMetabolicProfile, Badge, UserBadge, Subscription, Plan, Profile } from "@/types/database";
-import { User, PawPrint, Award, Check, LogOut, MessageCircle, ExternalLink, Edit3, Plus, Building2, Crown, Shield, ChevronRight, Sparkles, Copy, Wallet, Clock, Gift, BookOpen } from "lucide-react";
-import { useState } from "react";
+import { User, PawPrint, Award, Check, LogOut, MessageCircle, ExternalLink, Edit3, Plus, Building2, Crown, Shield, ChevronRight, Sparkles, Copy, Wallet, Clock, Gift, BookOpen, CreditCard } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 
 interface Props {
@@ -30,6 +30,8 @@ interface Props {
 export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, challenges, userChallenges, subscription, userId, daysLeft = 0, referralCode = "", rewards = null }: Props) {
   const [copied, setCopied] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [cardLast4, setCardLast4] = useState<string | null>(null);
+  const [cardBrand, setCardBrand] = useState<string | null>(null);
 
   const handleCopyCode = () => {
     if (referralCode) {
@@ -38,6 +40,20 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const fetchCard = useCallback(async () => {
+    try {
+      const res = await fetch("/api/izipay/payment-methods");
+      const data = await res.json();
+      if (data.methods && data.methods.length > 0) {
+        setCardLast4(data.methods[0].card_last4);
+        setCardBrand(data.methods[0].card_brand);
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => { fetchCard(); }, [fetchCard]);
+
   const router = useRouter();
   const supabase = createClient();
 
@@ -72,16 +88,49 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold text-zinc-800">
-              Plan Pro
+              {subscription?.plans?.name || "Plan Pro"}
             </p>
             <p className="text-[10px] font-semibold text-secondary-600">
-              Activo
+              {subscription?.status === "active" ? "Activo" : subscription?.status === "trialing" ? "Prueba" : subscription?.status === "canceled" ? "Cancelado" : "Sin suscripción"}
             </p>
           </div>
           <Link href="/guau/app/suscripcion" className="text-xs font-bold text-primary-600 flex items-center gap-1">
             Ver planes <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
+
+        {subscription?.current_period_end && (
+          <div className="flex items-center gap-1.5 text-[10px] text-zinc-500">
+            <Clock className="w-3 h-3 text-zinc-400" />
+            {(() => {
+              const days = Math.max(0, Math.ceil((new Date(subscription.current_period_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+              return days > 0 ? `Vence en ${days} día${days !== 1 ? "s" : ""}` : "Vencida";
+            })()}
+          </div>
+        )}
+
+        {cardLast4 && (
+          <Link href="/guau/app/perfil/pago" className="flex items-center justify-between rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2.5 transition-colors hover:bg-zinc-100">
+            <div className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-zinc-400" />
+              <div>
+                <p className="text-xs font-semibold text-zinc-700">{cardBrand || "Tarjeta"} •••• {cardLast4}</p>
+                <p className="text-[10px] text-zinc-400">Método de pago</p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-zinc-400" />
+          </Link>
+        )}
+
+        {!cardLast4 && (
+          <Link href="/guau/app/perfil/pago" className="flex items-center justify-between rounded-xl bg-primary-50 border border-primary-200 px-3 py-2.5 transition-colors hover:bg-primary-100">
+            <div className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-primary-500" />
+              <p className="text-xs font-semibold text-primary-700">Agregar método de pago</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-primary-400" />
+          </Link>
+        )}
 
         {/* Referidos */}
         <div className="border-t border-zinc-100 pt-3 space-y-3">
