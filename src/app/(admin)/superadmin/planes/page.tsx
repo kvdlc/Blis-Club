@@ -13,14 +13,14 @@ interface Plan {
   billing_interval: string;
 }
 
-const BILLING_INTERVALS = ["month", "year"];
+const BILLING_INTERVALS = ["month", "quarter", "year"];
 
 export default function PlanesPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Plan | null>(null);
   const [showNew, setShowNew] = useState(false);
-  const [form, setForm] = useState({ name: "", price_cents: 0, max_dogs: 1, features: "", billing_interval: "month" });
+  const [form, setForm] = useState({ name: "", price_cents: 100, max_dogs: 999, features: "", billing_interval: "quarter" });
 
   const load = async () => {
     setLoading(true);
@@ -64,7 +64,7 @@ export default function PlanesPage() {
     }
     setEditing(null);
     setShowNew(false);
-    setForm({ name: "", price_cents: 0, max_dogs: 1, features: "", billing_interval: "month" });
+setForm({ name: "", price_cents: 100, max_dogs: 999, features: "", billing_interval: "quarter" });
     load();
   };
 
@@ -125,7 +125,7 @@ export default function PlanesPage() {
                 <select value={form.billing_interval} onChange={(e) => setForm({ ...form, billing_interval: e.target.value })}
                   className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
                   {BILLING_INTERVALS.map((bi) => (
-                    <option key={bi} value={bi}>{bi === "month" ? "Mensual" : "Anual"}</option>
+                    <option key={bi} value={bi}>{bi === "month" ? "Mensual" : bi === "quarter" ? "Trimestral" : "Anual"}</option>
                   ))}
                 </select>
               </div>
@@ -160,7 +160,7 @@ export default function PlanesPage() {
                   </p>
                 </div>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-secondary-100 text-secondary-700">
-                  {formatPrice(p.price_cents)}/{p.billing_interval === "year" ? "año" : "mes"}
+                  {formatPrice(p.price_cents)}/{p.billing_interval === "year" ? "año" : p.billing_interval === "quarter" ? "trimestre" : "mes"}
                 </span>
                 <div className="flex gap-1">
                   <button onClick={() => { setEditing(p); setForm({ name: p.name, price_cents: p.price_cents, max_dogs: p.max_dogs, features: (p.features || []).join(", "), billing_interval: p.billing_interval || "month" }); }}
