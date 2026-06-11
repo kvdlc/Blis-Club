@@ -26,13 +26,6 @@ interface TemplateEmailParams {
   variables: Record<string, string>;
 }
 
-interface SenderConfig {
-  provider: string;
-  config: Record<string, string>;
-  from_name?: string;
-  from_email?: string;
-}
-
 function buildWelcomeHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://blis.club') || "https://blis.club";
@@ -233,22 +226,22 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
       .eq("is_default", true)
       .maybeSingle();
 
-    const sender = senderData as unknown as SenderConfig | null;
+    const senderRow = senderData as Record<string, unknown> | null;
+    const senderConfig = (senderRow?.config as Record<string, string>) || {};
 
-    let fromName = "Blis Club";
-    let fromEmail = process.env.SMTP_USER || "hola@blis.club";
-
-    if (sender?.from_name) fromName = sender.from_name;
-    if (sender?.from_email) fromEmail = sender.from_email;
+    let fromName = senderConfig.from_name || String(senderRow?.nombre || "") || "Blis Club";
+    let fromEmail = senderConfig.from_email || process.env.SMTP_USER || "hola@blis.club";
 
     const finalSubject = subject || getSubjectForEvent(evento);
 
     // 3. Enviar según provider
-    if (sender?.provider === "resend" && sender.config?.api_key) {
+    const provider = String(senderRow?.provider || "smtp");
+
+    if (provider === "resend" && senderConfig.api_key) {
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${sender.config.api_key}`,
+          Authorization: `Bearer ${senderConfig.api_key}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ from: `${fromName} <${fromEmail}>`, to, subject: finalSubject, html }),
@@ -257,11 +250,11 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
       return res.ok;
     }
 
-    if (sender?.provider === "sendgrid" && sender.config?.api_key) {
+    if (provider === "sendgrid" && senderConfig.api_key) {
       const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${sender.config.api_key}`,
+          Authorization: `Bearer ${senderConfig.api_key}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -276,10 +269,10 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
     }
 
     // SMTP por defecto
-    const smtpHost = sender?.config?.smtp_host || process.env.SMTP_HOST || "";
-    const smtpPort = parseInt(sender?.config?.smtp_port || process.env.SMTP_PORT || "465");
-    const smtpUser = sender?.config?.smtp_user || process.env.SMTP_USER || "";
-    const smtpPass = sender?.config?.smtp_pass || process.env.SMTP_PASS || "";
+    const smtpHost = senderConfig.smtp_host || process.env.SMTP_HOST || "";
+    const smtpPort = parseInt(senderConfig.smtp_port || process.env.SMTP_PORT || "465");
+    const smtpUser = senderConfig.smtp_user || process.env.SMTP_USER || "";
+    const smtpPass = senderConfig.smtp_pass || process.env.SMTP_PASS || "";
 
     if (!smtpHost || !smtpUser) {
       console.log("[sendTemplateEmail] SMTP no configurado — no se pudo enviar");
