@@ -211,13 +211,28 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
 
     let html = "";
 
+    // Build credentials block for welcome email
+    const variablesWithBlock = { ...variables };
+    if (evento === "bienvenida" && variables.password) {
+      variablesWithBlock.credentials_block = `
+      <div style="background:#f0f0ff;border-radius:16px;padding:20px 24px;margin:24px 0;text-align:center;">
+        <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">Tus datos de acceso:</p>
+        <p style="margin:0 0 4px;font-size:14px;color:#374151;"><strong>Correo:</strong> ${variablesWithBlock.email || ""}</p>
+        <p style="margin:0;font-size:14px;color:#374151;"><strong>Contraseña:</strong> <span style="font-family:monospace;background:#e0e0ff;padding:2px 8px;border-radius:6px;font-size:13px;">${variablesWithBlock.password}</span></p>
+      </div>`;
+    } else {
+      variablesWithBlock.credentials_block = "";
+    }
+
     if (template?.html_body) {
       // Use DB template with variable substitution
       html = template.html_body;
-      for (const [key, value] of Object.entries(variables)) {
+      for (const [key, value] of Object.entries(variablesWithBlock)) {
         html = html.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
         html = html.replace(new RegExp(`\\[${key}\\]`, "g"), value);
       }
+      // Remove any unreplaced {{variable}} placeholders
+      html = html.replace(/\{\{(\w+)\}\}/g, "");
     } else {
       // Fallback to hardcoded templates
       html = buildFallbackForEvent(evento, variables);
