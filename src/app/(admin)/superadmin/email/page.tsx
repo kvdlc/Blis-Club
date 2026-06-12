@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { createClient } from "@/lib/supabase/client";
 import { createServiceClient } from "@/lib/supabase/service";
-import { Mail, Plus, Edit, Trash2, Save, X, Send, ToggleLeft, ToggleRight, TestTube } from "lucide-react";
+import { Mail, Plus, Edit, Trash2, Save, X, Send, ToggleLeft, ToggleRight, Eye } from "lucide-react";
 
 const TABS = [
   { key: "templates", label: "Plantillas" },
@@ -38,6 +38,9 @@ export default function EmailPage() {
   const [testEmail, setTestEmail] = useState("");
   const [testEvento, setTestEvento] = useState("bienvenida");
   const [testStatus, setTestStatus] = useState("");
+
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [previewNombre, setPreviewNombre] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -255,6 +258,9 @@ export default function EmailPage() {
                   </div>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent-100 text-accent-700">{t.evento || "sin evento"}</span>
                   <div className="flex gap-1">
+                    <button onClick={() => { setPreviewHtml(t.html_body || ""); setPreviewNombre(t.nombre); }} className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 transition-colors" title="Vista previa">
+                      <Eye className="w-4 h-4" />
+                    </button>
                     <button onClick={() => editTemplate(t)} className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 transition-colors">
                       <Edit className="w-4 h-4" />
                     </button>
@@ -458,6 +464,31 @@ export default function EmailPage() {
         </div>
 
         {renderTabContent()}
+
+        {/* Preview Modal */}
+        {previewHtml && (
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setPreviewHtml(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-4 border-b border-zinc-100">
+                <h3 className="text-base font-bold text-zinc-800">Vista Previa — {previewNombre}</h3>
+                <button onClick={() => setPreviewHtml(null)} className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto p-4">
+                <div className="bg-zinc-100 rounded-xl p-4 overflow-auto">
+                  <iframe
+                    srcDoc={previewHtml}
+                    className="w-full bg-white rounded-lg"
+                    style={{ minHeight: "500px", border: "none" }}
+                    title="Vista previa del email"
+                    sandbox="allow-same-origin"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AdminGuard>
   );
