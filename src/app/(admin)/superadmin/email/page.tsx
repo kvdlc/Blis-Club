@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { createClient } from "@/lib/supabase/client";
-import { createServiceClient } from "@/lib/supabase/service";
 import { Mail, Plus, Edit, Trash2, Save, X, Send, ToggleLeft, ToggleRight, Eye } from "lucide-react";
 
 const TABS = [
@@ -21,6 +20,8 @@ const EVENT_OPTIONS = [
   { value: "commission_available", label: "Comisión Disponible" },
   { value: "withdrawal_requested", label: "Retiro Solicitado" },
   { value: "withdrawal_completed", label: "Retiro Completado" },
+  { value: "withdrawal_failed", label: "Retiro Fallido" },
+  { value: "withdrawal_rejected", label: "Retiro Rechazado" },
 ];
 
 export default function EmailPage() {
@@ -34,6 +35,7 @@ export default function EmailPage() {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState<Record<string, string>>({});
   const [senderConfig, setSenderConfig] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
 
   const [testEmail, setTestEmail] = useState("");
   const [testEvento, setTestEvento] = useState("bienvenida");
@@ -42,16 +44,16 @@ export default function EmailPage() {
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [previewNombre, setPreviewNombre] = useState<string | null>(null);
 
-  const supabase = createClient();
-
   const loadTemplates = async () => {
-    const { data } = await supabase.from("email_templates").select("*").order("nombre");
-    setTemplates(data || []);
+    const res = await fetch("/api/admin/email/templates");
+    const json = await res.json();
+    setTemplates(json.data || []);
   };
 
   const loadSenders = async () => {
-    const { data } = await supabase.from("email_senders").select("*").order("nombre");
-    setSenders(data || []);
+    const res = await fetch("/api/admin/email/senders");
+    const json = await res.json();
+    setSenders(json.data || []);
   };
 
   useEffect(() => {
@@ -76,72 +78,74 @@ export default function EmailPage() {
     setShowForm(true);
   };
 
-const handleSaveTemplate = async () => {
-     const serviceClient = createServiceClient();
-     const row: Record<string, unknown> = {
-       nombre: form.nombre,
-       evento: form.evento,
-       subject: form.subject,
-       html_body: form.html_body,
-     };
-     if (editing) {
-       const { error } = await serviceClient.from("email_templates").update(row).eq("id", editing.id);
-       if (error) { alert("Error al actualizar: " + error.message); return; }
-     } else {
-       const appIdRow = await serviceClient.from("applications").select("id").eq("slug", "guau").maybeSingle();
-       if (appIdRow.data) row.application_id = (appIdRow.data as Record<string, unknown>).id;
-       const { error } = await serviceClient.from("email_templates").insert(row);
-       if (error) { alert("Error al crear: " + error.message); return; }
-     }
-    setShowForm(false);
-    setEditing(null);
-    loadTemplates();
+  const handleSaveTemplate = async () => {
+    setSaving(true);
+    try {
+      const payload: Record<string, unknown> = {
+        nombre: form.nombre,
+        evento: form.evento,
+        subject: form.subject,
+        html_body: form.html_body,
+      };
+      const res = await fetch("/api/admin/email/templates", {
+        method: editing ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editing ? { id: editing.id, ...payload } : payload),
+      });
+      const json = await res.json();
+      if (json.error) { alert("Error: " + json.error); return; }
+      setShowForm(false);
+      setEditing(null);
+      loadTemplates();
+    } catch { alert("Error de conexión"); }
+    setSaving(false);
   };
 
-const handleSaveSender = async () => {
-     const serviceClient = createServiceClient();
-     const configObj: Record<string, string> = {};
-     if (form.provider === "smtp") {
-       if (senderConfig.smtp_host) configObj.smtp_host = senderConfig.smtp_host;
-       if (senderConfig.smtp_port) configObj.smtp_port = senderConfig.smtp_port;
-       if (senderConfig.smtp_user) configObj.smtp_user = senderConfig.smtp_user;
-       if (senderConfig.smtp_pass) configObj.smtp_pass = senderConfig.smtp_pass;
-       if (senderConfig.from_name) configObj.from_name = senderConfig.from_name;
-       if (senderConfig.from_email) configObj.from_email = senderConfig.from_email;
-     } else if (senderConfig.api_key) {
-       configObj.api_key = senderConfig.api_key;
-       if (senderConfig.from_name) configObj.from_name = senderConfig.from_name;
-       if (senderConfig.from_email) configObj.from_email = senderConfig.from_email;
-     }
+  const handleSaveSender = async () => {
+    setSaving(true);
+    try {
+      const configObj: Record<string, string> = {};
+      if (form.provider === "smtp") {
+        if (senderConfig.smtp_host) configObj.smtp_host = senderConfig.smtp_host;
+        if (senderConfig.smtp_port) configObj.smtp_port = senderConfig.smtp_port;
+        if (senderConfig.smtp_user) configObj.smtp_user = senderConfig.smtp_user;
+        if (senderConfig.smtp_pass) configObj.smtp_pass = senderConfig.smtp_pass;
+        if (senderConfig.from_name) configObj.from_name = senderConfig.from_name;
+        if (senderConfig.from_email) configObj.from_email = senderConfig.from_email;
+      } else if (senderConfig.api_key) {
+        configObj.api_key = senderConfig.api_key;
+        if (senderConfig.from_name) configObj.from_name = senderConfig.from_name;
+        if (senderConfig.from_email) configObj.from_email = senderConfig.from_email;
+      }
 
-     const row: Record<string, unknown> = {
-       nombre: form.nombre,
-       provider: form.provider,
-       is_default: form.is_default === "true",
-       config: configObj,
-       email: senderConfig.from_email || form.nombre || "",
-     };
+      const payload: Record<string, unknown> = {
+        nombre: form.nombre,
+        provider: form.provider,
+        is_default: form.is_default === "true",
+        config: configObj,
+        email: senderConfig.from_email || "",
+      };
 
-     if (editing) {
-       const { error } = await serviceClient.from("email_senders").update(row).eq("id", editing.id);
-       if (error) { alert("Error al actualizar: " + error.message); return; }
-     } else {
-const appIdRow2 = await serviceClient.from("applications").select("id").eq("slug", "guau").maybeSingle();
-        if (appIdRow2.data) row.application_id = (appIdRow2.data as Record<string, unknown>).id;
-       const { error } = await serviceClient.from("email_senders").insert(row);
-       if (error) { alert("Error al crear: " + error.message); return; }
-     }
-     setShowForm(false);
-     setEditing(null);
-     loadSenders();
-   };
+      const res = await fetch("/api/admin/email/senders", {
+        method: editing ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editing ? { id: editing.id, ...payload } : payload),
+      });
+      const json = await res.json();
+      if (json.error) { alert("Error: " + json.error); return; }
+      setShowForm(false);
+      setEditing(null);
+      loadSenders();
+    } catch { alert("Error de conexión"); }
+    setSaving(false);
+  };
 
   const handleDelete = async (table: string, id: string) => {
     if (!confirm("¿Eliminar este registro?")) return;
-    const serviceClient = createServiceClient();
-    await serviceClient.from(table).delete().eq("id", id);
+    const endpoint = table === "email_templates" ? "/api/admin/email/templates" : "/api/admin/email/senders";
+    await fetch(`${endpoint}?id=${id}`, { method: "DELETE" });
     if (table === "email_templates") loadTemplates();
-    else if (table === "email_senders") loadSenders();
+    else loadSenders();
   };
 
   const handleSendTest = async () => {
@@ -155,14 +159,14 @@ const appIdRow2 = await serviceClient.from("applications").select("id").eq("slug
       });
       const data = await res.json();
       if (data.success) {
-        setTestStatus(`Email enviado a ${testEmail}`);
+        setTestStatus(`✓ Email enviado a ${testEmail}`);
       } else {
-        setTestStatus(`Error: ${data.error || "No se pudo enviar"}`);
+        setTestStatus(`✗ Error: ${data.error || "No se pudo enviar"}`);
       }
     } catch {
-      setTestStatus("Error de conexión");
+      setTestStatus("✗ Error de conexión");
     }
-    setTimeout(() => setTestStatus(""), 5000);
+    setTimeout(() => setTestStatus(""), 8000);
   };
 
   const editTemplate = (t: any) => {
@@ -243,9 +247,9 @@ const appIdRow2 = await serviceClient.from("applications").select("id").eq("slug
                 <div>
                   <label className="block text-sm font-semibold text-zinc-600 mb-1.5">HTML Body</label>
                   <textarea value={form.html_body || ""} onChange={(e) => setForm({ ...form, html_body: e.target.value })} rows={8} className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20" placeholder="&lt;div&gt;...&lt;/div&gt;" />
-                  <p className="text-xs text-zinc-400 mt-1">Variables disponibles: {`{{nombre}}`}, {`{{email}}`}, {`{{password}}`}, {`{{display_name}}`}</p>
+                  <p className="text-xs text-zinc-400 mt-1">Variables: {`{{nombre}}`}, {`{{email}}`}, {`{{password}}`}, {`{{credentials_block}}`}</p>
                 </div>
-                <button onClick={handleSaveTemplate} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all">
+                <button onClick={handleSaveTemplate} disabled={saving} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all disabled:opacity-50">
                   <Save className="w-4 h-4" /> {editing ? "Actualizar" : "Crear"}
                 </button>
               </div>
@@ -263,9 +267,11 @@ const appIdRow2 = await serviceClient.from("applications").select("id").eq("slug
                   </div>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent-100 text-accent-700">{t.evento || "sin evento"}</span>
                   <div className="flex gap-1">
-                    <button onClick={() => { setPreviewHtml(t.html_body || ""); setPreviewNombre(t.nombre); }} className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 transition-colors" title="Vista previa">
-                      <Eye className="w-4 h-4" />
-                    </button>
+                    {t.html_body && (
+                      <button onClick={() => { setPreviewHtml(t.html_body); setPreviewNombre(t.nombre); }} className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 transition-colors" title="Vista previa">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    )}
                     <button onClick={() => editTemplate(t)} className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-primary-600 hover:bg-primary-50 transition-colors">
                       <Edit className="w-4 h-4" />
                     </button>
@@ -369,7 +375,7 @@ const appIdRow2 = await serviceClient.from("applications").select("id").eq("slug
                   </div>
                 )}
 
-                <button onClick={handleSaveSender} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all">
+                <button onClick={handleSaveSender} disabled={saving} className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all disabled:opacity-50">
                   <Save className="w-4 h-4" /> {editing ? "Actualizar" : "Crear"}
                 </button>
               </div>
@@ -426,17 +432,17 @@ const appIdRow2 = await serviceClient.from("applications").select("id").eq("slug
                 </select>
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={handleSendTest} disabled={!testEmail}
+                <button onClick={handleSendTest} disabled={!testEmail || saving}
                   className="flex items-center gap-2 bg-primary-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary-700 active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                   <Send className="w-4 h-4" /> Enviar Email de Prueba
                 </button>
                 {testStatus && (
-                  <span className={`text-sm ${testStatus.includes("Error") ? "text-red-600" : "text-secondary-600"}`}>
+                  <span className={`text-sm ${testStatus.includes("Error") || testStatus.includes("✗") ? "text-red-600" : "text-emerald-600"}`}>
                     {testStatus}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-zinc-400 mt-2">Usa el remitente principal configurado arriba. Variables de ejemplo serán rellenadas automáticamente.</p>
+              <p className="text-xs text-zinc-400 mt-2">Usa el remitente principal configurado. Variables de ejemplo serán rellenadas automáticamente.</p>
             </div>
           </div>
         );
@@ -470,7 +476,6 @@ const appIdRow2 = await serviceClient.from("applications").select("id").eq("slug
 
         {renderTabContent()}
 
-        {/* Preview Modal */}
         {previewHtml && (
           <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setPreviewHtml(null)}>
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
