@@ -237,14 +237,19 @@ export interface Plan {
   id: string;
   name: string;
   price_cents: number;
+  original_price_cents: number | null;
   izipay_price_id: string | null;
   max_dogs: number;
   features: string[];
   billing_interval: string;
+  application_id: string | null;
   landing_visible: boolean;
   landing_order: number;
-  description?: string;
-  badge?: string;
+  landing_slug: string | null;
+  description: string | null;
+  badge: string | null;
+  payment_provider: string;
+  cta_text: string | null;
 }
 
 export interface Subscription {

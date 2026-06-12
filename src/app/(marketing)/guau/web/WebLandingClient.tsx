@@ -39,12 +39,16 @@ interface Plan {
   id: string;
   name: string;
   price_cents: number;
+  original_price_cents: number | null;
   billing_interval: string;
   features: string[];
   landing_visible: boolean;
   landing_order: number;
-  description?: string;
-  badge?: string;
+  landing_slug: string | null;
+  description: string | null;
+  badge: string | null;
+  payment_provider: string;
+  cta_text: string | null;
 }
 
 interface Props {
@@ -780,9 +784,15 @@ export function WebLandingClient({ plans }: Props) {
                       <p className="text-xs text-zinc-400 mb-2">{plan.description}</p>
                     )}
                     <div className="flex items-baseline gap-2 mb-1">
+                      {plan.original_price_cents && plan.original_price_cents > plan.price_cents && (
+                        <span className="text-xl font-bold text-zinc-400 line-through decoration-danger-400">{formatPrice(plan.original_price_cents)}</span>
+                      )}
                       <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">{price}</span>
                       <span className="text-zinc-400 font-medium">/{interval}</span>
                     </div>
+                    {plan.original_price_cents && plan.original_price_cents > plan.price_cents && (
+                      <p className="text-xs text-zinc-400 mb-1">Precio real {formatPrice(plan.original_price_cents)}. Hoy solo {price}. Cancela cuando quieras.</p>
+                    )}
 
                     {plan.features.length > 0 && (
                       <ul className="mt-4 space-y-2">
@@ -870,7 +880,7 @@ export function WebLandingClient({ plans }: Props) {
                         }}
                         className={`flex items-center justify-center gap-2 w-full rounded-xl py-3.5 font-bold text-sm shadow-lg transition-all active:scale-[0.98] relative overflow-hidden group/btn mt-5 ${isFeatured ? "bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white shadow-primary-500/25 animate-glow-brand" : "bg-zinc-900 hover:bg-zinc-800 text-white shadow-zinc-500/15"}`}
                       >
-                        <Zap className="w-4 h-4" />Suscribirme ahora<ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                        <Zap className="w-4 h-4" />{plan.cta_text || "Suscribirme ahora"}<ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                       </button>
                     )}
 

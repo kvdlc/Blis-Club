@@ -8,8 +8,12 @@ interface Plan {
   id: string;
   name: string;
   price_cents: number;
+  original_price_cents: number | null;
   billing_interval: string;
   features: string[];
+  badge: string | null;
+  description: string | null;
+  cta_text: string | null;
 }
 
 interface Props {
@@ -63,13 +67,23 @@ export function SubscriptionClient({ plans }: Props) {
     return () => clearInterval(timer);
   }, []);
 
+  const intervalLabel: Record<string, string> = {
+    month: "mes",
+    quarter: "trimestre",
+    year: "año",
+  };
+
+  const formatPrice = (cents: number) => {
+    const dollars = cents / 100;
+    return dollars % 1 === 0 ? `$${dollars}` : `$${dollars.toFixed(2)}`;
+  };
+
   const monthly = plans.find((p) => p.billing_interval === "month");
   const quarterly = plans.find((p) => p.billing_interval === "quarter");
   const annual = plans.find((p) => p.billing_interval === "year");
 
-  const monthlyPrice = monthly ? (monthly.price_cents / 100).toFixed(2) : "9.99";
-  const quarterlyPrice = quarterly ? (quarterly.price_cents / 100).toFixed(2) : "1.00";
-  const annualPrice = annual ? (annual.price_cents / 100).toFixed(2) : "99.00";
+  const quarterlyPrice = quarterly ? formatPrice(quarterly.price_cents) : "1.00";
+  const annualPrice = annual ? formatPrice(annual.price_cents) : "99.00";
   const savings = quarterly && annual ? ((quarterly.price_cents * 4 - annual.price_cents) / 100).toFixed(0) : "20";
 
   const activePlanId = quarterly?.id ?? monthly?.id ?? "quarterly";
@@ -235,7 +249,12 @@ export function SubscriptionClient({ plans }: Props) {
                   <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">${quarterlyPrice}</span>
                   <span className="text-zinc-400 font-medium">/trimestre</span>
                 </div>
-                <p className="text-xs text-zinc-400 mb-6">Flexibilidad total · Cancela cuando quieras</p>
+                {quarterly?.original_price_cents && quarterly.original_price_cents > quarterly.price_cents && (
+                  <p className="text-xs text-zinc-400 mb-4">Precio real {formatPrice(quarterly.original_price_cents)}. Hoy solo {quarterlyPrice}.</p>
+                )}
+                {!quarterly?.original_price_cents && (
+                  <p className="text-xs text-zinc-400 mb-6">Flexibilidad total · Cancela cuando quieras</p>
+                )}
 
                 <Link
                   href={`/guau/app/checkout?plan=${quarterly?.id ?? monthly?.id ?? "quarterly"}`}
@@ -268,7 +287,12 @@ export function SubscriptionClient({ plans }: Props) {
                   <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">${annualPrice}</span>
                   <span className="text-zinc-400 font-medium">/año</span>
                 </div>
-                <p className="text-xs text-zinc-400 mb-6">La mejor opción · Cancela cuando quieras</p>
+                {annual?.original_price_cents && annual.original_price_cents > annual.price_cents && (
+                  <p className="text-xs text-zinc-400 mb-4">Precio real {formatPrice(annual.original_price_cents)}. Ahorras {formatPrice(annual.original_price_cents - annual.price_cents)}.</p>
+                )}
+                {!annual?.original_price_cents && (
+                  <p className="text-xs text-zinc-400 mb-6">La mejor opción · Cancela cuando quieras</p>
+                )}
 
                 <Link
                   href={`/guau/app/checkout?plan=${annual?.id ?? "annual"}`}
