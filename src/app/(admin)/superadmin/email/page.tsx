@@ -123,7 +123,6 @@ export default function EmailPage() {
         provider: form.provider,
         is_default: form.is_default === "true",
         config: configObj,
-        email: senderConfig.from_email || "",
       };
 
       const res = await fetch("/api/admin/email/senders", {
