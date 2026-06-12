@@ -76,60 +76,65 @@ export default function EmailPage() {
     setShowForm(true);
   };
 
-  const handleSaveTemplate = async () => {
-    const serviceClient = createServiceClient();
-    const row: Record<string, unknown> = {
-      nombre: form.nombre,
-      evento: form.evento,
-      subject: form.subject,
-      html_body: form.html_body,
-    };
-    if (editing) {
-      await serviceClient.from("email_templates").update(row).eq("id", editing.id);
-    } else {
-      const appIdRow = await serviceClient.from("applications").select("id").eq("slug", "guau").maybeSingle();
-      if (appIdRow?.data) row.application_id = appIdRow.data.id;
-      await serviceClient.from("email_templates").insert(row);
-    }
+const handleSaveTemplate = async () => {
+     const serviceClient = createServiceClient();
+     const row: Record<string, unknown> = {
+       nombre: form.nombre,
+       evento: form.evento,
+       subject: form.subject,
+       html_body: form.html_body,
+     };
+     if (editing) {
+       const { error } = await serviceClient.from("email_templates").update(row).eq("id", editing.id);
+       if (error) { alert("Error al actualizar: " + error.message); return; }
+     } else {
+       const appIdRow = await serviceClient.from("applications").select("id").eq("slug", "guau").maybeSingle();
+       if (appIdRow.data) row.application_id = (appIdRow.data as Record<string, unknown>).id;
+       const { error } = await serviceClient.from("email_templates").insert(row);
+       if (error) { alert("Error al crear: " + error.message); return; }
+     }
     setShowForm(false);
     setEditing(null);
     loadTemplates();
   };
 
-  const handleSaveSender = async () => {
-    const serviceClient = createServiceClient();
-    const configObj: Record<string, string> = {};
-    if (form.provider === "smtp") {
-      if (senderConfig.smtp_host) configObj.smtp_host = senderConfig.smtp_host;
-      if (senderConfig.smtp_port) configObj.smtp_port = senderConfig.smtp_port;
-      if (senderConfig.smtp_user) configObj.smtp_user = senderConfig.smtp_user;
-      if (senderConfig.smtp_pass) configObj.smtp_pass = senderConfig.smtp_pass;
-      if (senderConfig.from_name) configObj.from_name = senderConfig.from_name;
-      if (senderConfig.from_email) configObj.from_email = senderConfig.from_email;
-    } else if (senderConfig.api_key) {
-      configObj.api_key = senderConfig.api_key;
-      if (senderConfig.from_name) configObj.from_name = senderConfig.from_name;
-      if (senderConfig.from_email) configObj.from_email = senderConfig.from_email;
-    }
+const handleSaveSender = async () => {
+     const serviceClient = createServiceClient();
+     const configObj: Record<string, string> = {};
+     if (form.provider === "smtp") {
+       if (senderConfig.smtp_host) configObj.smtp_host = senderConfig.smtp_host;
+       if (senderConfig.smtp_port) configObj.smtp_port = senderConfig.smtp_port;
+       if (senderConfig.smtp_user) configObj.smtp_user = senderConfig.smtp_user;
+       if (senderConfig.smtp_pass) configObj.smtp_pass = senderConfig.smtp_pass;
+       if (senderConfig.from_name) configObj.from_name = senderConfig.from_name;
+       if (senderConfig.from_email) configObj.from_email = senderConfig.from_email;
+     } else if (senderConfig.api_key) {
+       configObj.api_key = senderConfig.api_key;
+       if (senderConfig.from_name) configObj.from_name = senderConfig.from_name;
+       if (senderConfig.from_email) configObj.from_email = senderConfig.from_email;
+     }
 
-    const row: Record<string, unknown> = {
-      nombre: form.nombre,
-      provider: form.provider,
-      is_default: form.is_default === "true",
-      config: configObj,
-    };
+     const row: Record<string, unknown> = {
+       nombre: form.nombre,
+       provider: form.provider,
+       is_default: form.is_default === "true",
+       config: configObj,
+       email: senderConfig.from_email || form.nombre || "",
+     };
 
-    if (editing) {
-      await serviceClient.from("email_senders").update(row).eq("id", editing.id);
-    } else {
-      const appIdRow2 = await serviceClient.from("applications").select("id").eq("slug", "guau").maybeSingle();
-      if (appIdRow2?.data) row.application_id = appIdRow2.data.id;
-      await serviceClient.from("email_senders").insert(row);
-    }
-    setShowForm(false);
-    setEditing(null);
-    loadSenders();
-  };
+     if (editing) {
+       const { error } = await serviceClient.from("email_senders").update(row).eq("id", editing.id);
+       if (error) { alert("Error al actualizar: " + error.message); return; }
+     } else {
+const appIdRow2 = await serviceClient.from("applications").select("id").eq("slug", "guau").maybeSingle();
+        if (appIdRow2.data) row.application_id = (appIdRow2.data as Record<string, unknown>).id;
+       const { error } = await serviceClient.from("email_senders").insert(row);
+       if (error) { alert("Error al crear: " + error.message); return; }
+     }
+     setShowForm(false);
+     setEditing(null);
+     loadSenders();
+   };
 
   const handleDelete = async (table: string, id: string) => {
     if (!confirm("¿Eliminar este registro?")) return;
