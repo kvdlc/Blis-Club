@@ -1,12 +1,30 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
+const ALLOWED_FIELDS = [
+  "name",
+  "price_cents",
+  "original_price_cents",
+  "izipay_price_id",
+  "max_dogs",
+  "features",
+  "billing_interval",
+  "application_id",
+  "landing_visible",
+  "landing_order",
+  "landing_slug",
+  "description",
+  "badge",
+  "payment_provider",
+  "cta_text",
+];
+
 export async function GET(request: Request) {
   const supabase = createServiceClient();
   const { searchParams } = new URL(request.url);
   const appSlug = searchParams.get("app");
 
-  let query = supabase.from("plans").select("*").order("price_cents");
+  let query = supabase.from("plans").select("*").order("landing_order", { ascending: true });
 
   if (appSlug) {
     const { data: app } = await supabase.from("applications").select("id").eq("slug", appSlug).single();
@@ -21,18 +39,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const supabase = createServiceClient();
   const body = await request.json();
-  const { name, price_cents, izipay_price_id, max_dogs, features, billing_interval, application_id } = body;
 
-  if (!name || !application_id) {
+  if (!body.name || !body.application_id) {
     return NextResponse.json({ error: "name and application_id are required" }, { status: 400 });
   }
 
-  const { data, error } = await supabase
-    .from("plans")
-    .insert({ name, price_cents, izipay_price_id, max_dogs, features, billing_interval, application_id })
-    .select()
-    .single();
+  const insertData: Record<string, unknown> = {};
+  for (const key of ALLOWED_FIELDS) {
+    if (body[key] !== undefined) insertData[key] = body[key];
+  }
 
+  const { data, error } = await supabase.from("plans").insert(insertData).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ data });
 }
@@ -45,8 +62,7 @@ export async function PUT(request: Request) {
   if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
   const validFields: Record<string, unknown> = {};
-  const allowed = ["name", "price_cents", "izipay_price_id", "max_dogs", "features", "billing_interval"];
-  for (const key of allowed) {
+  for (const key of ALLOWED_FIELDS) {
     if (updates[key] !== undefined) validFields[key] = updates[key];
   }
 
