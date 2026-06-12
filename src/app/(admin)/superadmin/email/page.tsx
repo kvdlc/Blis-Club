@@ -491,7 +491,7 @@ export default function EmailPage() {
                     className="w-full bg-white rounded-lg"
                     style={{ minHeight: "500px", border: "none" }}
                     title="Vista previa del email"
-                    sandbox="allow-same-origin"
+                    sandbox="allow-same-origin allow-scripts"
                   />
                 </div>
               </div>

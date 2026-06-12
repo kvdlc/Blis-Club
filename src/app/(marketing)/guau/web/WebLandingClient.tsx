@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Check,
   Zap,
@@ -41,6 +41,10 @@ interface Plan {
   price_cents: number;
   billing_interval: string;
   features: string[];
+  landing_visible: boolean;
+  landing_order: number;
+  description?: string;
+  badge?: string;
 }
 
 interface Props {
@@ -224,7 +228,7 @@ export function WebLandingClient({ plans }: Props) {
   const [openFeature, setOpenFeature] = useState<number | null>(null);
   const [count, setCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerFirstName, setRegisterFirstName] = useState("");
   const [registerLastName, setRegisterLastName] = useState("");
@@ -241,7 +245,7 @@ export function WebLandingClient({ plans }: Props) {
     }
 
     const params = new URLSearchParams({
-      plan: planId,
+      plan: selectedPlan || planId,
       ...(registerEmail.trim() ? { email: registerEmail.trim().toLowerCase() } : {}),
       ...(registerFirstName.trim() ? { firstName: registerFirstName.trim() } : {}),
       ...(registerLastName.trim() ? { lastName: registerLastName.trim() } : {}),
@@ -250,8 +254,12 @@ export function WebLandingClient({ plans }: Props) {
     router.push(`/guau/web/checkout?${params.toString()}`);
   };
 
-  const handleShowRegister = () => {
-    setShowRegister(true);
+  const handleShowRegister = (planId: string) => {
+    setSelectedPlan(planId);
+    setRegisterEmail("");
+    setRegisterFirstName("");
+    setRegisterLastName("");
+    setRegisterError("");
     setTimeout(() => {
       document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 150);
@@ -282,7 +290,18 @@ export function WebLandingClient({ plans }: Props) {
   }, []);
 
   const quarterly = plans.find((p) => p.billing_interval === "quarter");
-  const planId = quarterly?.id ?? "quarterly";
+  const planId = quarterly?.id ?? plans[0]?.id ?? "quarterly";
+
+  const intervalLabel: Record<string, string> = {
+    month: "mes",
+    quarter: "trimestre",
+    year: "año",
+  };
+
+  const formatPrice = (cents: number) => {
+    const dollars = cents / 100;
+    return dollars % 1 === 0 ? `$${dollars}` : `$${dollars.toFixed(2)}`;
+  };
 
   /* ─── Renders ─── */
   const renderStars = (n: number) =>
@@ -420,7 +439,7 @@ export function WebLandingClient({ plans }: Props) {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
           <button
             type="button"
-            onClick={handleShowRegister}
+            onClick={() => handleShowRegister(planId)}
             className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-4 px-8 font-extrabold text-sm shadow-xl shadow-primary-500/30 transition-all active:scale-[0.97] animate-glow-brand"
           >
             <Zap className="w-4 h-4" />
@@ -719,125 +738,152 @@ export function WebLandingClient({ plans }: Props) {
         <div className="text-center mb-10">
           <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Precios</span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
-            Menos de lo que cuesta un café al día
+            Elige el plan ideal para tu perro
           </h2>
           <p className="text-sm text-zinc-500 mt-2">Inversión real en la salud y felicidad de tu perro.</p>
         </div>
 
-        <div className="max-w-sm mx-auto">
-          <div className="relative group animate-scale-in">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-[1.5rem] blur opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
-            <div className="relative bg-white rounded-[1.5rem] p-6 border border-zinc-100 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-400/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-primary-600">Oferta especial</span>
-                <div className="flex items-center gap-1">
-                  <Sparkles className="w-4 h-4 text-warning-400 animate-pulse-glow" />
-                  <span className="text-[10px] font-bold text-warning-600">Ahorra 80%</span>
-                </div>
-              </div>
-              <h3 className="text-2xl font-extrabold text-zinc-900 mb-1">Pro Trimestral</h3>
-              <div className="flex items-baseline gap-2 mb-1">
-                <span className="text-2xl font-bold text-zinc-400 line-through decoration-danger-400">$49.99</span>
-                <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">$1.00</span>
-                <span className="text-zinc-400 font-medium">/trimestre</span>
-              </div>
-              <p className="text-xs text-zinc-400 mb-4">Precio real $49.99. Hoy solo $1.00 trimestral. Cancela cuando quieras.</p>
-
-              {/* ═══ REGISTER FORM (dentro de la tarjeta) ═══ */}
-              <AnimatePresence>
-                {showRegister && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="overflow-hidden"
-                  >
-                    <div className="border-t border-zinc-100 pt-4 mt-1 mb-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-xs font-extrabold text-zinc-800">Datos de cliente</p>
-                        <button
-                          type="button"
-                          onClick={() => setShowRegister(false)}
-                          className="w-7 h-7 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center transition-colors"
-                        >
-                          <X className="w-3.5 h-3.5 text-zinc-500" />
-                        </button>
-                      </div>
-
-                      <form onSubmit={handleRegister} className="space-y-3">
-                        <input
-                          type="email"
-                          required
-                          placeholder="Correo electrónico"
-                          value={registerEmail}
-                          onChange={(e) => setRegisterEmail(e.target.value)}
-                          className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
-                        />
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <input
-                            type="text"
-                            required
-                            placeholder="Nombre"
-                            value={registerFirstName}
-                            onChange={(e) => setRegisterFirstName(e.target.value)}
-                            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
-                          />
-                          <input
-                            type="text"
-                            required
-                            placeholder="Apellido"
-                            value={registerLastName}
-                            onChange={(e) => setRegisterLastName(e.target.value)}
-                            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
-                          />
-                        </div>
-
-                        {registerError && (
-                          <p className="text-xs text-red-600 bg-red-50 rounded-xl p-2.5">{registerError}</p>
-                        )}
-
-                        <button
-                          type="submit"
-                          disabled={registerLoading}
-                          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-3 font-bold text-sm shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98] disabled:opacity-50"
-                        >
-                          {registerLoading ? (
-                            <>
-                              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                              Creando cuenta...
-                            </>
-                          ) : (
-                            <>
-                              <Lock className="w-4 h-4" />
-                              Continuar al pago seguro
-                            </>
-                          )}
-                        </button>
-                      </form>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {!showRegister && (
-                <button
-                  type="button"
-                  onClick={handleShowRegister}
-                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-3.5 font-bold text-sm shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98] relative overflow-hidden group/btn animate-glow-brand"
-                >
-                  <Zap className="w-4 h-4" />Suscribirme ahora<ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                </button>
-              )}
-              <div className="mt-4 flex items-center justify-center gap-1 text-[10px] text-zinc-400">
-                <Lock className="w-3 h-3 text-zinc-400" />
-                Pasarela de pago segura y privada
-              </div>
-            </div>
+        {plans.length === 0 ? (
+          <div className="text-center text-zinc-400 py-12">
+            <p>No hay planes disponibles en este momento.</p>
           </div>
-        </div>
+        ) : (
+          <div className={`grid gap-5 ${plans.length === 1 ? "max-w-sm mx-auto" : plans.length === 2 ? "max-w-2xl mx-auto grid-cols-1 sm:grid-cols-2" : "max-w-4xl mx-auto grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
+            {plans.map((plan, idx) => {
+              const isFeatured = idx === 0;
+              const price = formatPrice(plan.price_cents);
+              const interval = intervalLabel[plan.billing_interval] || plan.billing_interval;
+
+              return (
+                <div key={plan.id} className={`relative group animate-scale-in ${isFeatured ? "sm:scale-105 z-10" : ""}`}>
+                  {isFeatured && (
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-[1.5rem] blur opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
+                  )}
+                  <div className={`relative bg-white rounded-[1.5rem] p-6 border overflow-hidden ${isFeatured ? "border-primary-200" : "border-zinc-100"}`}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-400/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xs font-bold uppercase tracking-wider text-primary-600">{isFeatured ? "Oferta especial" : "Plan"}</span>
+                      {plan.badge ? (
+                        <div className="flex items-center gap-1">
+                          <Sparkles className="w-4 h-4 text-warning-400 animate-pulse-glow" />
+                          <span className="text-[10px] font-bold text-warning-600">{plan.badge}</span>
+                        </div>
+                      ) : isFeatured ? (
+                        <div className="flex items-center gap-1">
+                          <Sparkles className="w-4 h-4 text-warning-400 animate-pulse-glow" />
+                          <span className="text-[10px] font-bold text-warning-600">Popular</span>
+                        </div>
+                      ) : null}
+                    </div>
+                    <h3 className="text-2xl font-extrabold text-zinc-900 mb-1">{plan.name}</h3>
+                    {plan.description && (
+                      <p className="text-xs text-zinc-400 mb-2">{plan.description}</p>
+                    )}
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-5xl font-extrabold text-zinc-900 tracking-tight">{price}</span>
+                      <span className="text-zinc-400 font-medium">/{interval}</span>
+                    </div>
+
+                    {plan.features.length > 0 && (
+                      <ul className="mt-4 space-y-2">
+                        {plan.features.slice(0, 6).map((f, i) => (
+                          <li key={i} className="flex items-start gap-2 text-xs text-zinc-600">
+                            <Check className="w-3.5 h-3.5 text-primary-500 shrink-0 mt-0.5" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {selectedPlan === plan.id ? (
+                      <form onSubmit={handleRegister} className="mt-5 space-y-3">
+                        <div className="border-t border-zinc-100 pt-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-xs font-extrabold text-zinc-800">Datos de cliente</p>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedPlan(null)}
+                              className="w-7 h-7 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center transition-colors"
+                            >
+                              <X className="w-3.5 h-3.5 text-zinc-500" />
+                            </button>
+                          </div>
+                          <div className="space-y-3">
+                            <input
+                              type="email"
+                              required
+                              placeholder="Correo electrónico"
+                              value={registerEmail}
+                              onChange={(e) => setRegisterEmail(e.target.value)}
+                              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
+                            />
+                            <div className="grid grid-cols-2 gap-3">
+                              <input
+                                type="text"
+                                required
+                                placeholder="Nombre"
+                                value={registerFirstName}
+                                onChange={(e) => setRegisterFirstName(e.target.value)}
+                                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
+                              />
+                              <input
+                                type="text"
+                                required
+                                placeholder="Apellido"
+                                value={registerLastName}
+                                onChange={(e) => setRegisterLastName(e.target.value)}
+                                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all"
+                              />
+                            </div>
+                            {registerError && (
+                              <p className="text-xs text-red-600 bg-red-50 rounded-xl p-2.5">{registerError}</p>
+                            )}
+                            <button
+                              type="submit"
+                              disabled={registerLoading}
+                              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-3 font-bold text-sm shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98] disabled:opacity-50"
+                            >
+                              {registerLoading ? (
+                                <>
+                                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                  Creando cuenta...
+                                </>
+                              ) : (
+                                <>
+                                  <Lock className="w-4 h-4" />
+                                  Continuar al pago seguro
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedPlan(plan.id);
+                          setRegisterEmail("");
+                          setRegisterFirstName("");
+                          setRegisterLastName("");
+                          setRegisterError("");
+                        }}
+                        className={`flex items-center justify-center gap-2 w-full rounded-xl py-3.5 font-bold text-sm shadow-lg transition-all active:scale-[0.98] relative overflow-hidden group/btn mt-5 ${isFeatured ? "bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white shadow-primary-500/25 animate-glow-brand" : "bg-zinc-900 hover:bg-zinc-800 text-white shadow-zinc-500/15"}`}
+                      >
+                        <Zap className="w-4 h-4" />Suscribirme ahora<ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                      </button>
+                    )}
+
+                    <div className="mt-3 flex items-center justify-center gap-1 text-[10px] text-zinc-400">
+                      <Lock className="w-3 h-3 text-zinc-400" />
+                      Pago seguro y privado
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* ═══ FAQ ═══ */}
@@ -876,7 +922,7 @@ export function WebLandingClient({ plans }: Props) {
               </p>
               <button
                 type="button"
-                onClick={handleShowRegister}
+                onClick={() => handleShowRegister(planId)}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white py-4 px-8 font-extrabold text-sm shadow-xl transition-all active:scale-[0.98] hover:bg-zinc-50 animate-glow-gold"
                 style={{ color: "#6b63f3" }}
               >

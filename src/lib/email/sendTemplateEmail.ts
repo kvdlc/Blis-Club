@@ -1,22 +1,3 @@
-/**
- * Envío de emails transaccionales con templates
- * Soporta SMTP (nodemailer), Resend y SendGrid.
- *
- * Eventos soportados:
- * - bienvenida: email de bienvenida
- * - restablecer_password: reset de contraseña
- * - verificacion: verificación de email
- * - factura_emitida: confirmación de pago
- * - pago_vencido: aviso de suscripción por vencer
- * - invitacion: invitación a la plataforma
- * - commission_available: comisión lista para retirar
- * - withdrawal_requested: solicitud de retiro recibida
- * - withdrawal_processing: retiro en procesamiento
- * - withdrawal_completed: retiro completado
- * - withdrawal_failed: retiro fallido (saldo devuelto)
- * - withdrawal_rejected: retiro rechazado por admin
- */
-
 import { createClient } from "@supabase/supabase-js";
 
 interface TemplateEmailParams {
@@ -26,167 +7,371 @@ interface TemplateEmailParams {
   variables: Record<string, string>;
 }
 
+const PRIMARY = "#5956e9";
+const PRIMARY_DARK = "#4a47d4";
+const PRIMARY_LIGHT = "#eeedff";
+const TEXT_HEADING = "#1f2937";
+const TEXT_BODY = "#4b5563";
+const TEXT_MUTED = "#9ca3af";
+const BG_OUTER = "#f4f3ff";
+const BG_CARD = "#ffffff";
+const BORDER_LIGHT = "#e5e7eb";
+
+function emailShell(innerHtml: string, opts?: { accentColor?: string; footerText?: string }): string {
+  const accentNeutral = !opts?.accentColor;
+  const accent = accentNeutral ? PRIMARY : opts!.accentColor!;
+  const footerText = opts?.footerText || "Blis Club — Ecosistema digital";
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blis Club</title>
+  <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
+  <style>
+    body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}
+    table{border-collapse:collapse!important}
+    img{-ms-interpolation-mode:bicubic;border:0;height:auto;line-height:100%;outline:none;text-decoration:none}
+    body{margin:0!important;padding:0!important;width:100%!important}
+    a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important;font-size:inherit!important;font-family:inherit!important;font-weight:inherit!important;line-height:inherit!important}
+    @media only screen and (max-width:620px){
+      .email-container{width:100%!important;max-width:100%!important}
+      .fluid{width:100%!important;max-width:100%!important;height:auto!important}
+      .stack-column{display:block!important;width:100%!important;max-width:100%!important}
+      .stack-column-center{text-align:center!important}
+      .center-on-narrow{text-align:center!important;display:block!important;margin-left:auto!important;margin-right:auto!important;float:none!important}
+      .padding-mobile{padding-left:10px!important;padding-right:10px!important}
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:${BG_OUTER};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <center style="width:100%;background-color:${BG_OUTER};padding:32px 0;">
+
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="600" class="email-container" style="margin:auto;max-width:600px;">
+      <tr>
+        <td style="padding:0 20px;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:${BG_CARD};border-radius:20px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06),0 8px 24px rgba(89,86,233,0.08);">
+
+            <tr>
+              <td align="center" style="padding:36px 40px 0 40px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td align="center">
+                      <div style="width:52px;height:52px;background:${accent};border-radius:14px;display:inline-block;text-align:center;line-height:52px;">
+                        <span style="color:#fff;font-size:24px;font-weight:800;letter-spacing:-0.5px;">B</span>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:28px 40px 40px 40px;" class="padding-mobile">
+                ${innerHtml}
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:20px 20px 0 20px;text-align:center;">
+          <p style="margin:0;font-size:12px;line-height:1.5;color:${TEXT_MUTED};">${footerText}</p>
+          <p style="margin:4px 0 0;font-size:11px;line-height:1.4;color:${TEXT_MUTED};">Si no solicitaste este correo, puedes ignorarlo.</p>
+        </td>
+      </tr>
+
+    </table>
+  </center>
+</body>
+</html>`;
+}
+
+function heading(text: string, color?: string): string {
+  return `<h1 style="margin:0;font-size:22px;font-weight:700;color:${color || TEXT_HEADING};text-align:center;line-height:1.3;">${text}</h1>`;
+}
+
+function subheading(text: string): string {
+  return `<p style="margin:8px 0 0;font-size:15px;color:${TEXT_BODY};text-align:center;line-height:1.5;">${text}</p>`;
+}
+
+function paragraph(text: string, align?: string): string {
+  return `<p style="margin:16px 0 0;font-size:15px;color:${TEXT_BODY};text-align:${align || "center"};line-height:1.6;">${text}</p>`;
+}
+
+function paragraphMuted(text: string): string {
+  return `<p style="margin:12px 0 0;font-size:13px;color:${TEXT_MUTED};text-align:center;line-height:1.5;">${text}</p>`;
+}
+
+function spacer(h?: number): string {
+  return `<div style="height:${h || 24}px;font-size:0;line-height:0;">&nbsp;</div>`;
+}
+
+function divider(): string {
+  return `<div style="border-top:1px solid ${BORDER_LIGHT};margin:24px 0;font-size:0;line-height:0;">&nbsp;</div>`;
+}
+
+function button(text: string, url: string, color?: string): string {
+  const bg = color || PRIMARY;
+  return `<div style="text-align:center;margin:28px 0;">
+    <a href="${url}" style="display:inline-block;background:${bg};color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;padding:14px 36px;border-radius:12px;mso-padding-alt:0;text-underline:none;">${text}</a>
+  </div>`;
+}
+
+function detailRow(label: string, value: string): string {
+  return `<tr>
+    <td style="padding:8px 0;font-size:14px;color:${TEXT_MUTED};width:100px;text-align:right;vertical-align:top;">${label}</td>
+    <td style="padding:8px 0 8px 12px;font-size:14px;color:${TEXT_HEADING};vertical-align:top;font-weight:500;">${value}</td>
+  </tr>`;
+}
+
+function iconCircle(emoji: string, bgColor: string): string {
+  return `<div style="width:56px;height:56px;background:${bgColor};border-radius:50%;display:inline-block;text-align:center;line-height:56px;font-size:26px;margin:0 auto;">${emoji}</div>`;
+}
+
+function credentialsBlock(email: string, password: string): string {
+  if (!password) return "";
+  return `${spacer(8)}
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:${PRIMARY_LIGHT};border-radius:14px;margin:0;">
+    <tr>
+      <td style="padding:24px 28px;">
+        <p style="margin:0 0 14px;font-size:13px;color:${TEXT_MUTED};text-align:center;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;">Tus datos de acceso</p>
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" align="center">
+          ${detailRow("Correo", `<span style="font-family:ui-monospace,SFMono-Regular,'Courier New',monospace;font-size:13px;background:#fff;padding:3px 10px;border-radius:6px;">${email}</span>`)}
+          ${detailRow("Contraseña", `<span style="font-family:ui-monospace,SFMono-Regular,'Courier New',monospace;font-size:13px;background:#fff;padding:3px 10px;border-radius:6px;">${password}</span>`)}
+        </table>
+      </td>
+    </tr>
+  </table>`;
+}
+
 function buildWelcomeHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://blis.club') || "https://blis.club";
-  const enlace = vars.enlace_acceso || `${siteUrl}/guau/app`;
+  const appUrl = vars.app_url || "https://blis.club";
+  const appName = vars.app_name || "Blis Club";
   const email = vars.email || "";
   const password = vars.password || "";
 
-  const credentialsBlock = password ? `
-      <div style="background:#f0f0ff;border-radius:16px;padding:20px 24px;margin:24px 0;text-align:center;">
-        <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">Tus datos de acceso:</p>
-        <p style="margin:0 0 4px;font-size:14px;color:#374151;"><strong>Correo:</strong> ${email}</p>
-        <p style="margin:0;font-size:14px;color:#374151;"><strong>Contraseña:</strong> <span style="font-family:monospace;background:#e0e0ff;padding:2px 8px;border-radius:6px;font-size:13px;">${password}</span></p>
-      </div>` : "";
-
-  return `
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
-    <div style="text-align:center;margin-bottom:24px;">
-      <div style="background:#5956e9;width:64px;height:64px;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;">
-        <span style="color:#fff;font-size:28px;font-weight:900;">B</span>
-      </div>
-    </div>
-    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-      <h1 style="font-size:24px;font-weight:800;color:#4a47d4;text-align:center;margin:0 0 8px;">¡Bienvenido a Blis Club!</h1>
-      <p style="text-align:center;color:#6b7280;margin:0 0 24px;">Hola <strong style="color:#1f2937">${nombre}</strong>, tu cuenta ha sido creada exitosamente.</p>
-      ${credentialsBlock}
-      <p style="text-align:center;color:#6b7280;font-size:14px;">Comienza a explorar nutrición, entrenamiento y seguimiento para tu perro.</p>
-      <div style="text-align:center;margin:32px 0;">
-        <a href="${enlace}" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Ingresar a Blis Club →</a>
-      </div>
-    </div>
-    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
-  </div>`;
+  return emailShell(`
+    ${spacer(4)}
+    ${heading(`¡Bienvenido${appName !== "Blis Club" ? " a " + appName : ""}!`)}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>, tu cuenta está lista.`)}
+    ${credentialsBlock(email, password)}
+    ${paragraph("Puedes acceder ahora con los datos de arriba.")}
+    ${button("Ingresar", appUrl)}
+  `, { footerText: `${appName} — Ecosistema digital` });
 }
 
 function buildPasswordResetHTML(vars: Record<string, string>): string {
   const enlace = vars.enlace_reset || "#";
-  return `
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
-    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-      <h1 style="font-size:24px;font-weight:800;color:#4a47d4;text-align:center;">Restablecer contraseña</h1>
-      <p style="text-align:center;color:#6b7280;margin:16px 0;">Has solicitado restablecer tu contraseña. Haz clic en el botón para continuar.</p>
-      <div style="text-align:center;margin:32px 0;">
-        <a href="${enlace}" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Restablecer contraseña</a>
-      </div>
-      <p style="text-align:center;color:#9ca3af;font-size:12px;">Si no solicitaste esto, ignora este correo.</p>
-    </div>
-  </div>`;
+  return emailShell(`
+    ${spacer(4)}
+    ${heading("Restablecer contraseña")}
+    ${paragraph("Has solicitado restablecer tu contraseña. Haz clic en el botón para continuar:")}
+    ${button("Restablecer contraseña", enlace)}
+    ${paragraphMuted("Este enlace expira en 24 horas. Si no lo solicitaste, ignora este correo.")}
+  `, { footerText: "Blis Club — Ecosistema digital" });
 }
 
-function buildGenericHTML(vars: Record<string, string>, title: string, body: string): string {
+function buildPaymentConfirmedHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
-  return `
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
-    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-      <h1 style="font-size:22px;font-weight:800;color:#4a47d4;text-align:center;">${title}</h1>
-      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
-      <p style="text-align:center;color:#374151;">${body}</p>
-    </div>
-    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
-  </div>`;
+  const monto = vars.monto || "";
+  const plan = vars.plan || "";
+  const appUrl = vars.app_url || "https://blis.club";
+  const appName = vars.app_name || "Blis Club";
+  const appNameLabel = appName !== "Blis Club" ? ` a ${appName}` : "";
+  return emailShell(`
+    ${spacer(4)}
+    <div style="text-align:center;">${iconCircle("✓", "#d1fae5")}</div>
+    ${spacer(8)}
+    ${heading("¡Pago confirmado!")}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>, tu suscripción${appNameLabel} está activa.`)}
+    ${monto ? paragraph(`Monto: <strong>${monto}</strong>${plan ? ` · Plan: <strong>${plan}</strong>` : ""}`) : ""}
+    ${button("Ir a la app", appUrl)}
+  `, { footerText: `${appName} — Ecosistema digital` });
+}
+
+function buildSubscriptionExpiringHTML(vars: Record<string, string>): string {
+  const nombre = vars.nombre || vars.display_name || "Usuario";
+  const fecha = vars.fecha_expiracion || "";
+  const appUrl = vars.app_url || "https://blis.club";
+  const appName = vars.app_name || "Blis Club";
+  return emailShell(`
+    ${spacer(4)}
+    <div style="text-align:center;">${iconCircle("⏰", "#fef3c7")}</div>
+    ${spacer(8)}
+    ${heading("Tu suscripción está por vencer")}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>`)}
+    ${paragraph(fecha ? `Tu suscripción vence el <strong>${fecha}</strong>. Renueva para seguir disfrutando de todos los beneficios.` : "Tu suscripción está por vencer. Renueva para no perder acceso.")}
+    ${button("Renovar suscripción", `${appUrl}/suscripcion`)}
+  `, { footerText: `${appName} — Ecosistema digital` });
+}
+
+function buildSubscriptionExpiredHTML(vars: Record<string, string>): string {
+  const nombre = vars.nombre || vars.display_name || "Usuario";
+  const appUrl = vars.app_url || "https://blis.club";
+  const appName = vars.app_name || "Blis Club";
+  return emailShell(`
+    ${spacer(4)}
+    ${heading("Suscripción expirada")}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>`)}
+    ${paragraph("Tu período de suscripción ha finalizado. Suscríbete para continuar con acceso completo.")}
+    ${button("Suscribirme", `${appUrl}/suscripcion`)}
+  `, { footerText: `${appName} — Ecosistema digital` });
 }
 
 function buildCommissionAvailableHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
   const monto = vars.monto || "$0.00";
   const referido = vars.referido || "un referido";
-  return `
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
-    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-      <h1 style="font-size:22px;font-weight:800;color:#4a47d4;text-align:center;">¡Comisión Disponible!</h1>
-      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
-      <p style="text-align:center;color:#374151;">Tu comisión de <strong>${monto}</strong> por ${referido} ya está disponible para retirar.</p>
-      <div style="text-align:center;margin:32px 0;">
-        <a href="${(process.env.NEXT_PUBLIC_SITE_URL || 'https://blis.club')}/guau/app/perfil/billetera" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Ir a mi Billetera →</a>
-      </div>
-    </div>
-    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
-  </div>`;
+  const appUrl = vars.app_url || "https://blis.club";
+  return emailShell(`
+    ${spacer(4)}
+    ${heading("¡Comisión disponible!")}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>`)}
+    ${paragraph(`Tu comisión de <strong>${monto}</strong> por <strong>${referido}</strong> ya está disponible para retirar.`)}
+    ${button("Ir a mi Billetera", `${appUrl}/perfil/billetera`)}
+  `, { footerText: "Blis Club — Ecosistema digital" });
 }
 
 function buildWithdrawalRequestedHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
   const monto = vars.monto || "$0.00";
   const metodo = vars.metodo || "Binance Pay";
-  return `
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
-    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-      <h1 style="font-size:22px;font-weight:800;color:#4a47d4;text-align:center;">Solicitud de Retiro Recibida</h1>
-      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
-      <p style="text-align:center;color:#374151;">Hemos recibido tu solicitud de retiro por <strong>${monto}</strong> vía <strong>${metodo}</strong>.</p>
-      <p style="text-align:center;color:#6b7280;font-size:14px;margin-top:16px;">Los retiros se procesan del <strong>1 al 5 de cada mes</strong>. Tu solicitud quedará en cola y será ejecutada en la siguiente ventana de pago.</p>
-    </div>
-    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
-  </div>`;
+  return emailShell(`
+    ${spacer(4)}
+    ${heading("Solicitud de retiro recibida")}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>`)}
+    ${paragraph(`Hemos recibido tu solicitud de retiro por <strong>${monto}</strong> vía <strong>${metodo}</strong>.`)}
+    ${paragraphMuted("Los retiros se procesan del 1 al 5 de cada mes. Tu solicitud quedará en cola y será ejecutada en la siguiente ventana de pago.")}
+  `, { footerText: "Blis Club — Ecosistema digital" });
 }
 
 function buildWithdrawalProcessingHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
   const monto = vars.monto || "$0.00";
-  return `
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
-    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-      <h1 style="font-size:22px;font-weight:800;color:#4a47d4;text-align:center;">Retiro en Procesamiento</h1>
-      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
-      <p style="text-align:center;color:#374151;">Tu retiro de <strong>${monto}</strong> está siendo procesado. Te enviaremos otro email cuando se complete.</p>
-    </div>
-    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
-  </div>`;
+  return emailShell(`
+    ${spacer(4)}
+    ${heading("Retiro en procesamiento")}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>`)}
+    ${paragraph(`Tu retiro de <strong>${monto}</strong> está siendo procesado. Te notificaremos cuando se complete.`)}
+  `, { footerText: "Blis Club — Ecosistema digital" });
 }
 
 function buildWithdrawalCompletedHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
   const monto = vars.monto || "$0.00";
   const referencia = vars.referencia || "—";
-  return `
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
-    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-      <h1 style="font-size:22px;font-weight:800;color:#4a47d4;text-align:center;">¡Retiro Completado!</h1>
-      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
-      <p style="text-align:center;color:#374151;">Tu retiro de <strong>${monto}</strong> ha sido completado exitosamente.</p>
-      <p style="text-align:center;color:#6b7280;font-size:14px;margin-top:16px;"><strong>Referencia / TX ID:</strong> <span style="font-family:monospace;">${referencia}</span></p>
-    </div>
-    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
-  </div>`;
+  return emailShell(`
+    ${spacer(4)}
+    <div style="text-align:center;">${iconCircle("✓", "#d1fae5")}</div>
+    ${spacer(8)}
+    ${heading("¡Retiro completado!")}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>`)}
+    ${paragraph(`Tu retiro de <strong>${monto}</strong> se completó exitosamente.`)}
+    ${divider()}
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+      ${detailRow("Monto", `<strong>${monto}</strong>`)}
+      ${detailRow("Referencia", `<span style="font-family:ui-monospace,SFMono-Regular,'Courier New',monospace;font-size:12px;">${referencia}</span>`)}
+    </table>
+  `, { footerText: "Blis Club — Ecosistema digital" });
 }
 
 function buildWithdrawalFailedHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
   const monto = vars.monto || "$0.00";
   const razon = vars.razon || "Error técnico";
-  return `
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
-    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-      <h1 style="font-size:22px;font-weight:800;color:#dc2626;text-align:center;">Retiro Fallido</h1>
-      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
-      <p style="text-align:center;color:#374151;">Lamentamos informarte que tu retiro de <strong>${monto}</strong> no pudo completarse.</p>
-      <p style="text-align:center;color:#6b7280;font-size:14px;margin-top:16px;"><strong>Motivo:</strong> ${razon}</p>
-      <p style="text-align:center;color:#374151;margin-top:16px;">El saldo ha sido devuelto a tu billetera. Puedes intentar nuevamente.</p>
-      <div style="text-align:center;margin:32px 0;">
-        <a href="${(process.env.NEXT_PUBLIC_SITE_URL || 'https://blis.club')}/guau/app/perfil/billetera" style="display:inline-block;background:#5956e9;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:16px 40px;border-radius:16px;">Ir a mi Billetera →</a>
-      </div>
-    </div>
-    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
-  </div>`;
+  const appUrl = vars.app_url || "https://blis.club";
+  return emailShell(`
+    ${spacer(4)}
+    ${heading("Retiro fallido", "#b91c1c")}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>`)}
+    ${paragraph(`Tu retiro de <strong>${monto}</strong> no pudo completarse.`)}
+    ${divider()}
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+      ${detailRow("Motivo", razon)}
+    </table>
+    ${paragraph("El saldo ha sido devuelto a tu billetera. Puedes intentar nuevamente.")}
+    ${button("Reintentar retiro", `${appUrl}/perfil/billetera`)}
+  `, { accentColor: "#b91c1c", footerText: "Blis Club — Ecosistema digital" });
 }
 
 function buildWithdrawalRejectedHTML(vars: Record<string, string>): string {
   const nombre = vars.nombre || vars.display_name || "Usuario";
   const monto = vars.monto || "$0.00";
   const razon = vars.razon || "Verificación de seguridad";
-  return `
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#eeedff;font-family:Arial,sans-serif;">
-    <div style="background:rgba(255,255,255,0.9);border-radius:24px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-      <h1 style="font-size:22px;font-weight:800;color:#dc2626;text-align:center;">Retiro Rechazado</h1>
-      <p style="text-align:center;color:#6b7280;margin:16px 0;">Hola ${nombre},</p>
-      <p style="text-align:center;color:#374151;">Tu solicitud de retiro de <strong>${monto}</strong> ha sido rechazada por nuestro equipo de seguridad.</p>
-      <p style="text-align:center;color:#6b7280;font-size:14px;margin-top:16px;"><strong>Motivo:</strong> ${razon}</p>
-      <p style="text-align:center;color:#374151;margin-top:16px;">El saldo ha sido devuelto a tu billetera. Si crees que esto es un error, contacta a soporte.</p>
-    </div>
-    <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:24px;">Blis Club · Tu ecosistema de apps para mascotas</p>
-  </div>`;
+  return emailShell(`
+    ${spacer(4)}
+    ${heading("Retiro rechazado", "#b91c1c")}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>`)}
+    ${paragraph(`Tu solicitud de retiro de <strong>${monto}</strong> fue rechazada por nuestro equipo de seguridad.`)}
+    ${divider()}
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+      ${detailRow("Motivo", razon)}
+    </table>
+    ${paragraph("El saldo ha sido devuelto a tu billetera. Si crees que es un error, contacta a soporte.")}
+  `, { accentColor: "#b91c1c", footerText: "Blis Club — Ecosistema digital" });
+}
+
+function buildGenericHTML(vars: Record<string, string>, title: string, body: string): string {
+  const nombre = vars.nombre || vars.display_name || "Usuario";
+  return emailShell(`
+    ${spacer(4)}
+    ${heading(title)}
+    ${subheading(`Hola <strong style="color:${TEXT_HEADING}">${nombre}</strong>`)}
+    ${paragraph(body)}
+  `, { footerText: "Blis Club — Ecosistema digital" });
+}
+
+function getSubjectForEvent(evento: string): string {
+  const subjects: Record<string, string> = {
+    bienvenida: "¡Bienvenido a Blis Club!",
+    restablecer_password: "Restablece tu contraseña — Blis Club",
+    verificacion: "Verifica tu correo — Blis Club",
+    pago_confirmado: "Pago confirmado — Blis Club",
+    pago_vencido: "Tu suscripción está por vencer — Blis Club",
+    suscripcion_expirada: "Tu suscripción ha expirado — Blis Club",
+    invitacion: "Te han invitado a Blis Club",
+    commission_available: "¡Tu comisión está disponible! — Blis Club",
+    withdrawal_requested: "Solicitud de retiro recibida — Blis Club",
+    withdrawal_processing: "Tu retiro está siendo procesado — Blis Club",
+    withdrawal_completed: "¡Retiro completado! — Blis Club",
+    withdrawal_failed: "Tu retiro no pudo completarse — Blis Club",
+    withdrawal_rejected: "Tu retiro fue rechazado — Blis Club",
+  };
+  return subjects[evento] || "Notificación — Blis Club";
+}
+
+function buildFallbackForEvent(evento: string, vars: Record<string, string>): string {
+  switch (evento) {
+    case "bienvenida":
+      return buildWelcomeHTML(vars);
+    case "restablecer_password":
+      return buildPasswordResetHTML(vars);
+    case "pago_confirmado":
+      return buildPaymentConfirmedHTML(vars);
+    case "pago_vencido":
+      return buildSubscriptionExpiringHTML(vars);
+    case "suscripcion_expirada":
+      return buildSubscriptionExpiredHTML(vars);
+    case "commission_available":
+      return buildCommissionAvailableHTML(vars);
+    case "withdrawal_requested":
+      return buildWithdrawalRequestedHTML(vars);
+    case "withdrawal_processing":
+      return buildWithdrawalProcessingHTML(vars);
+    case "withdrawal_completed":
+      return buildWithdrawalCompletedHTML(vars);
+    case "withdrawal_failed":
+      return buildWithdrawalFailedHTML(vars);
+    case "withdrawal_rejected":
+      return buildWithdrawalRejectedHTML(vars);
+    default:
+      return buildGenericHTML(vars, "Notificación", "Tienes una notificación de Blis Club.");
+  }
 }
 
 export async function sendTemplateEmail(params: TemplateEmailParams): Promise<boolean> {
@@ -202,43 +387,32 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // 1. Buscar template por evento (si existe en DB)
     const { data: template } = await supabase
       .from("email_templates")
       .select("settings, blocks, nombre, html_body, subject")
       .eq("evento", evento)
       .maybeSingle();
 
-    let html = "";
-
-    // Build credentials block for welcome email
     const variablesWithBlock = { ...variables };
     if (evento === "bienvenida" && variables.password) {
-      variablesWithBlock.credentials_block = `
-      <div style="background:#f0f0ff;border-radius:16px;padding:20px 24px;margin:24px 0;text-align:center;">
-        <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">Tus datos de acceso:</p>
-        <p style="margin:0 0 4px;font-size:14px;color:#374151;"><strong>Correo:</strong> ${variablesWithBlock.email || ""}</p>
-        <p style="margin:0;font-size:14px;color:#374151;"><strong>Contraseña:</strong> <span style="font-family:monospace;background:#e0e0ff;padding:2px 8px;border-radius:6px;font-size:13px;">${variablesWithBlock.password}</span></p>
-      </div>`;
+      variablesWithBlock.credentials_block = credentialsBlock(variablesWithBlock.email || "", variablesWithBlock.password || "");
     } else {
       variablesWithBlock.credentials_block = "";
     }
 
+    let html = "";
+
     if (template?.html_body) {
-      // Use DB template with variable substitution
       html = template.html_body;
       for (const [key, value] of Object.entries(variablesWithBlock)) {
         html = html.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
         html = html.replace(new RegExp(`\\[${key}\\]`, "g"), value);
       }
-      // Remove any unreplaced {{variable}} placeholders
       html = html.replace(/\{\{(\w+)\}\}/g, "");
     } else {
-      // Fallback to hardcoded templates
       html = buildFallbackForEvent(evento, variables);
     }
 
-    // 2. Buscar sender configurado
     const { data: senderData } = await supabase
       .from("email_senders")
       .select("*")
@@ -248,21 +422,17 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
     const senderRow = senderData as Record<string, unknown> | null;
     const senderConfig = (senderRow?.config as Record<string, string>) || {};
 
-    let fromName = senderConfig.from_name || String(senderRow?.nombre || "") || "Blis Club";
-    let fromEmail = senderConfig.from_email || process.env.SMTP_USER || "hola@blis.club";
+    const fromName = senderConfig.from_name || String(senderRow?.nombre || "") || "Blis Club";
+    const fromEmail = senderConfig.from_email || process.env.SMTP_USER || "hola@blis.club";
 
     const finalSubject = subject || (template as Record<string, unknown>)?.subject as string || getSubjectForEvent(evento);
 
-    // 3. Enviar según provider
     const provider = String(senderRow?.provider || "smtp");
 
     if (provider === "resend" && senderConfig.api_key) {
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${senderConfig.api_key}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${senderConfig.api_key}`, "Content-Type": "application/json" },
         body: JSON.stringify({ from: `${fromName} <${fromEmail}>`, to, subject: finalSubject, html }),
       });
       console.log(`[sendTemplateEmail] Resend a ${to} (evento: ${evento}) → ${res.status}`);
@@ -272,10 +442,7 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
     if (provider === "sendgrid" && senderConfig.api_key) {
       const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${senderConfig.api_key}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${senderConfig.api_key}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           personalizations: [{ to: [{ email: to }] }],
           from: { email: fromEmail, name: fromName },
@@ -287,7 +454,6 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
       return res.ok;
     }
 
-    // SMTP por defecto
     const smtpHost = senderConfig.smtp_host || process.env.SMTP_HOST || "";
     const smtpPort = parseInt(senderConfig.smtp_port || process.env.SMTP_PORT || "465");
     const smtpUser = senderConfig.smtp_user || process.env.SMTP_USER || "";
@@ -298,7 +464,6 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
       return false;
     }
 
-    // Dynamic import para evitar error en Edge Runtime
     const nodemailer = await import("nodemailer");
     const transporter = nodemailer.default.createTransport({
       host: smtpHost,
@@ -319,55 +484,5 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
   } catch (e) {
     console.error("[sendTemplateEmail] Error:", e);
     return false;
-  }
-}
-
-function getSubjectForEvent(evento: string): string {
-  const subjects: Record<string, string> = {
-    bienvenida: "¡Bienvenido a Blis Club!",
-    restablecer_password: "Restablece tu contraseña — Blis Club",
-    verificacion: "Verifica tu correo — Blis Club",
-    pago_confirmado: "Pago confirmado — Blis Club",
-    pago_vencido: "Tu suscripción está por vencer — Blis Club",
-    suscripcion_expirada: "Tu suscripción ha expirado — Blis Club",
-    invitacion: "Te han invitado a Blis Club",
-    receta_semanal: "Receta semanal — Blis Club",
-    recordatorio_entrenamiento: "Recordatorio de entrenamiento — Blis Club",
-    commission_available: "¡Tu comisión está disponible! — Blis Club",
-    withdrawal_requested: "Solicitud de retiro recibida — Blis Club",
-    withdrawal_processing: "Tu retiro está siendo procesado — Blis Club",
-    withdrawal_completed: "¡Retiro completado! — Blis Club",
-    withdrawal_failed: "Tu retiro no pudo completarse — Blis Club",
-    withdrawal_rejected: "Tu retiro fue rechazado — Blis Club",
-  };
-  return subjects[evento] || "Blis Club";
-}
-
-function buildFallbackForEvent(evento: string, vars: Record<string, string>): string {
-  switch (evento) {
-    case "bienvenida":
-      return buildWelcomeHTML(vars);
-    case "restablecer_password":
-      return buildPasswordResetHTML(vars);
-    case "pago_confirmado":
-      return buildGenericHTML(vars, "¡Pago Confirmado!", "Hemos recibido tu pago correctamente. Tu suscripción está activa.");
-    case "pago_vencido":
-      return buildGenericHTML(vars, "Suscripción por vencer", "Tu suscripción está por vencer. Renueva para seguir disfrutando de Blis Club.");
-    case "suscripcion_expirada":
-      return buildGenericHTML(vars, "Suscripción Expirada", "Tu período de prueba ha finalizado. Suscríbete para continuar.");
-    case "commission_available":
-      return buildCommissionAvailableHTML(vars);
-    case "withdrawal_requested":
-      return buildWithdrawalRequestedHTML(vars);
-    case "withdrawal_processing":
-      return buildWithdrawalProcessingHTML(vars);
-    case "withdrawal_completed":
-      return buildWithdrawalCompletedHTML(vars);
-    case "withdrawal_failed":
-      return buildWithdrawalFailedHTML(vars);
-    case "withdrawal_rejected":
-      return buildWithdrawalRejectedHTML(vars);
-    default:
-      return buildGenericHTML(vars, "Blis Club", "Tienes una notificación de Blis Club.");
   }
 }

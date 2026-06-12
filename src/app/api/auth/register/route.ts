@@ -121,6 +121,9 @@ export async function POST(request: Request) {
           display_name: `${firstName?.trim() || ""} ${lastName?.trim() || ""}`.trim() || normalizedEmail.split("@")[0],
           email: normalizedEmail,
           password,
+          app_name: "Blis Club",
+          app_name_suffix: " a Blis Club",
+          app_url: "https://blis.club/guau/app",
         },
       }).catch((err: unknown) => console.error("[Register] Welcome email failed:", err));
     } catch {}

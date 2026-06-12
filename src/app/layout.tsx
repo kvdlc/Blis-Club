@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   title: "Blis Club",
   description: "Tu ecosistema de apps para mascotas",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icons/icon-192.png",
+  },
   appleWebApp: { capable: true, title: "Blis Club", statusBarStyle: "default" },
 };
 

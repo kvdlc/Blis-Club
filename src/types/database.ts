@@ -240,6 +240,11 @@ export interface Plan {
   izipay_price_id: string | null;
   max_dogs: number;
   features: string[];
+  billing_interval: string;
+  landing_visible: boolean;
+  landing_order: number;
+  description?: string;
+  badge?: string;
 }
 
 export interface Subscription {

@@ -45,6 +45,9 @@ export async function POST(request: Request) {
       nombre: "Usuario de Prueba",
       display_name: "Usuario de Prueba",
       email: to,
+      app_name: "Blis Club",
+      app_name_suffix: " a Blis Club",
+      app_url: "https://blis.club/guau/app",
     };
 
     if (evento === "bienvenida") {

@@ -65,6 +65,9 @@ async function ensureUserByEmail(
         display_name: `${firstName || ""} ${lastName || ""}`.trim() || normalizedEmail.split("@")[0],
         email: normalizedEmail,
         password,
+        app_name: "Blis Club",
+        app_name_suffix: " a Blis Club",
+        app_url: "https://blis.club/guau/app",
       },
     }).catch((err: unknown) => console.error("[Webhook] Welcome email failed:", err));
   } catch {}

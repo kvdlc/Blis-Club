@@ -6,6 +6,8 @@ export default async function WebPage() {
   const { data: plans } = await supabase
     .from("plans")
     .select("*")
+    .eq("landing_visible", true)
+    .order("landing_order", { ascending: true })
     .order("price_cents", { ascending: true });
 
   return <WebLandingClient plans={(plans ?? []) as any[]} />;
