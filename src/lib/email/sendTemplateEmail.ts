@@ -205,17 +205,21 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
     // 1. Buscar template por evento (si existe en DB)
     const { data: template } = await supabase
       .from("email_templates")
-      .select("settings, blocks, nombre")
+      .select("settings, blocks, nombre, html_body, subject")
       .eq("evento", evento)
       .maybeSingle();
 
     let html = "";
 
-    if (template?.settings && template?.blocks) {
-      // TODO: integrar con el HTML generator del builder visual cuando esté disponible
-      // Por ahora, usar fallback por tipo de evento
-      html = buildFallbackForEvent(evento, variables);
+    if (template?.html_body) {
+      // Use DB template with variable substitution
+      html = template.html_body;
+      for (const [key, value] of Object.entries(variables)) {
+        html = html.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
+        html = html.replace(new RegExp(`\\[${key}\\]`, "g"), value);
+      }
     } else {
+      // Fallback to hardcoded templates
       html = buildFallbackForEvent(evento, variables);
     }
 
@@ -232,7 +236,7 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
     let fromName = senderConfig.from_name || String(senderRow?.nombre || "") || "Blis Club";
     let fromEmail = senderConfig.from_email || process.env.SMTP_USER || "hola@blis.club";
 
-    const finalSubject = subject || getSubjectForEvent(evento);
+    const finalSubject = subject || (template as Record<string, unknown>)?.subject as string || getSubjectForEvent(evento);
 
     // 3. Enviar según provider
     const provider = String(senderRow?.provider || "smtp");
