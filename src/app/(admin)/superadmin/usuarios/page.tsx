@@ -101,6 +101,8 @@ export default function UsersPage() {
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const [editDate, setEditDate] = useState("");
   const [actionError, setActionError] = useState("");
+  const [userApps, setUserApps] = useState<string[]>([]);
+  const [availableApps, setAvailableApps] = useState<{ slug: string; name: string }[]>([]);
 
   const load = async () => {
     setLoading(true);
@@ -117,6 +119,19 @@ export default function UsersPage() {
     setEditRole(u.role);
     setConfirmAction(null);
     setActionError("");
+    // Cargar apps asignadas y disponibles
+    const [resUserApps, resApps] = await Promise.all([
+      fetch(`/api/admin/users/${u.id}/apps`),
+      fetch("/api/admin/applications"),
+    ]);
+    if (resUserApps.ok) {
+      const json = await resUserApps.json();
+      setUserApps(json.apps || []);
+    }
+    if (resApps.ok) {
+      const json = await resApps.json();
+      setAvailableApps((json.data || []).map((a: any) => ({ slug: a.slug, name: a.name })));
+    }
     setSubLoading(true);
     try {
       const res = await fetch(`/api/admin/users/${u.id}/subscription`);
@@ -138,6 +153,21 @@ export default function UsersPage() {
       setEditDate("");
     }
     setSubLoading(false);
+  };
+
+  const toggleUserApp = async (appSlug: string) => {
+    const has = userApps.includes(appSlug);
+    if (has) {
+      await fetch(`/api/admin/users/${manageUser?.id}/apps?app_slug=${appSlug}`, { method: "DELETE" });
+      setUserApps(userApps.filter((a) => a !== appSlug));
+    } else {
+      await fetch(`/api/admin/users/${manageUser?.id}/apps`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ app_slug: appSlug }),
+      });
+      setUserApps([...userApps, appSlug]);
+    }
   };
 
   const closeManage = () => {
@@ -272,7 +302,7 @@ export default function UsersPage() {
     });
   };
 
-  const roles = ["usuario", "institucion", "admin", "superadmin", "suspended"];
+  const roles = ["usuario", "institucion", "admin", "superadmin", "suspended", "empleado"];
 
   const totalUsers = users.length;
   const totalLeads = users.filter((u) => u.is_lead).length;
@@ -532,6 +562,33 @@ export default function UsersPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* ===== SECCIÓN 1.5: APPS ASIGNADAS (solo empleado) ===== */}
+                {editRole === "empleado" && (
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-zinc-700">Apps asignadas</label>
+                    <div className="flex flex-wrap gap-2">
+                      {availableApps.map((app) => {
+                        const assigned = userApps.includes(app.slug);
+                        return (
+                          <button
+                            key={app.slug}
+                            onClick={() => toggleUserApp(app.slug)}
+                            className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${
+                              assigned
+                                ? "bg-primary-100 text-primary-700 border-primary-300"
+                                : "bg-zinc-50 text-zinc-500 border-zinc-200 hover:border-primary-200"
+                            }`}
+                          >
+                            {assigned ? "✓ " : "+ "}
+                            {app.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[10px] text-zinc-400">El empleado solo verá datos de las apps marcadas.</p>
+                  </div>
+                )}
 
                 {/* ===== SECCIÓN 2: SUSCRIPCIÓN ===== */}
                 {subLoading ? (

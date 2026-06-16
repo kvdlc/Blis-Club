@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Dog, Loader2, ArrowRight, BadgeCheck, Clock, AlertTriangle } from "lucide-react";
+import { Dog, Car, Loader2, ArrowRight, BadgeCheck, Clock, AlertTriangle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { checkTrial } from "@/lib/trial";
 
@@ -21,6 +21,13 @@ const APP_REGISTRY: Record<string, AppInfo> = {
     name: "Guau",
     icon: <Dog className="w-8 h-8" />,
     color: "from-primary-500 to-primary-700",
+  },
+  auto: {
+    app_slug: "auto",
+    status: "active",
+    name: "Auto",
+    icon: <Car className="w-8 h-8" />,
+    color: "from-auto-500 to-auto-700",
   },
 };
 

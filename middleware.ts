@@ -68,9 +68,10 @@ export async function middleware(request: NextRequest) {
   const ua = request.headers.get("user-agent") || "";
 
   const isAuthCallback = path.startsWith("/auth/callback");
-  const isAppRoute = path.startsWith("/guau/app");
+  const isAppRoute = path.startsWith("/guau/app") || path.startsWith("/auto/app");
   const isAdminRoute = path.startsWith("/superadmin");
-  const isProtected = isAppRoute || isAdminRoute;
+  const isAdminApi = path.startsWith("/api/admin/");
+  const isProtected = isAppRoute || isAdminRoute || isAdminApi;
 
   // ═══════════════════════════════════════════
   // 1. PUBLIC ROUTE PASS-THROUGH (no auth, no security config)
@@ -135,18 +136,29 @@ export async function middleware(request: NextRequest) {
   // ═══════════════════════════════════════════
   // 5. ADMIN ROLE CHECK
   // ═══════════════════════════════════════════
-  if (user && isAdminRoute) {
+  let role: string | undefined;
+  if (user && (isAdminRoute || path === "/" || isAdminApi)) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
 
-    const role = profile?.role;
-    if (role !== "admin" && role !== "superadmin") {
+    role = profile?.role;
+  }
+
+  if (user && isAdminRoute) {
+    if (role !== "admin" && role !== "superadmin" && role !== "empleado") {
       const url = request.nextUrl.clone();
       url.pathname = "/guau/app";
       return NextResponse.redirect(url);
+    }
+  }
+
+  // Bloquear API admin sin rol adecuado
+  if (user && isAdminApi) {
+    if (role !== "admin" && role !== "superadmin" && role !== "empleado") {
+      return new NextResponse(JSON.stringify({ error: "No autorizado" }), { status: 403, headers: { "Content-Type": "application/json" } });
     }
   }
 
@@ -180,6 +192,13 @@ export async function middleware(request: NextRequest) {
   // 6. USER LOGIN ROUTING
   // ═══════════════════════════════════════════
   if (user && path === "/") {
+    // Empleados van directo al panel admin
+    if (role === "empleado") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/superadmin";
+      return NextResponse.redirect(url);
+    }
+
     // Multi-app: check user_apps for routing
     const { data: userApps } = await supabase
       .from("user_apps")

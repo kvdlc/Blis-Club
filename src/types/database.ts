@@ -47,6 +47,134 @@ export interface Dog {
   poster_reward_amount?: string | null;
 }
 
+export interface Vehicle {
+  id: string;
+  owner_id: string;
+  marca: string;
+  modelo: string;
+  año: number;
+  placa: string;
+  kilometraje: number;
+  foto_url: string | null;
+  color: string | null;
+  vin: string | null;
+  estado: "activo" | "en venta" | "robado" | "vendido";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FuelLog {
+  id: string;
+  vehicle_id: string;
+  fecha: string;
+  odometro: number;
+  litros: number;
+  precio_por_galon: number;
+  tipo_combustible: string;
+  created_at: string;
+}
+
+export interface VehicleDocument {
+  id: string;
+  vehicle_id: string;
+  tipo: "soat" | "revision_tecnica" | "poliza_seguro" | "matricula" | "licencia_conducir";
+  fecha_emision: string | null;
+  fecha_vencimiento: string;
+  imagen_url: string | null;
+  notas: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VehicleContact {
+  id: string;
+  vehicle_id: string | null;
+  nombre: string;
+  tipo: "mecanico" | "electromecanico" | "grua" | "tienda_repuestos" | "aseguradora" | "otro";
+  telefono: string | null;
+  whatsapp: string | null;
+  direccion: string | null;
+  notas: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VehicleSpecs {
+  id: string;
+  vehicle_id: string;
+  tipo_aceite: string | null;
+  viscosidad_aceite: string | null;
+  capacidad_aceite_litros: number | null;
+  tipo_refrigerante: string | null;
+  capacidad_refrigerante_litros: number | null;
+  tipo_freno: string | null;
+  presion_neumaticos_delante: number | null;
+  presion_neumaticos_atras: number | null;
+  presion_neumaticos_repuesto: number | null;
+  capacidad_tanque_galones: number | null;
+  octanaje_recomendado: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MaintenanceLog {
+  id: string;
+  vehicle_id: string;
+  tipo: "preventivo" | "correctivo" | "lavado" | "inspeccion" | "otro";
+  titulo: string;
+  descripcion: string | null;
+  fecha: string;
+  odometro: number | null;
+  costo: number | null;
+  taller: string | null;
+  factura_url: string | null;
+  garantia: boolean;
+  created_at: string;
+}
+
+export interface VehicleUpgrade {
+  id: string;
+  vehicle_id: string;
+  categoria: "estetico" | "tecnologico" | "performance" | "seguridad" | "confort" | "otro";
+  nombre: string;
+  descripcion: string | null;
+  costo: number | null;
+  fecha: string;
+  foto_url: string | null;
+  created_at: string;
+}
+
+export interface MarketplaceListing {
+  id: string;
+  user_id: string;
+  slug: string;
+  titulo: string;
+  categoria: "repuestos" | "accesorios" | "servicios" | "cupones" | "autos_usados";
+  marca: string | null;
+  modelo: string | null;
+  estado_item: "nuevo" | "usado";
+  precio: number;
+  descripcion: string | null;
+  fotos: string[];
+  whatsapp: string;
+  ciudad: string | null;
+  activo: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Provider {
+  id: string;
+  nombre: string;
+  contacto: string | null;
+  telefono: string | null;
+  email: string | null;
+  direccion: string | null;
+  notas: string | null;
+  activo: boolean;
+  created_at: string;
+}
+
 export interface DailyLog {
   id: string;
   dog_id: string;

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Clock, X } from "lucide-react";
 import Link from "next/link";
 
-export default function TrialWarningToast({ daysLeft }: { daysLeft: number }) {
+export default function TrialWarningToast({ daysLeft, appSlug = "guau" }: { daysLeft: number; appSlug?: string }) {
   const [visible, setVisible] = useState(true);
 
   if (!visible) return null;
@@ -20,7 +20,7 @@ export default function TrialWarningToast({ daysLeft }: { daysLeft: number }) {
             Tu prueba gratis termina en {daysLeft} día{daysLeft !== 1 ? "s" : ""}
           </p>
           <Link
-            href="/guau/app/suscripcion"
+            href={`/${appSlug}/app/suscripcion`}
             className="text-[10px] font-bold text-primary-600 hover:text-primary-700"
           >
             Ver planes de suscripción →
