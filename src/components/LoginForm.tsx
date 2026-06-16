@@ -97,14 +97,14 @@ export function LoginForm() {
 
   if (sent) {
     return (
-      <div className="bg-secondary-50 border border-secondary-100 rounded-[1.5rem] p-8 text-center space-y-3 shadow-sm">
-        <div className="w-14 h-14 mx-auto rounded-full bg-secondary-100 flex items-center justify-center">
-          <CheckCircle className="w-7 h-7 text-secondary-600" />
+      <div className="bg-zinc-50 border border-zinc-200 rounded-[1.5rem] p-8 text-center space-y-3 shadow-sm">
+        <div className="w-14 h-14 mx-auto rounded-full bg-zinc-100 flex items-center justify-center">
+          <CheckCircle className="w-7 h-7 text-zinc-600" />
         </div>
-        <h2 className="text-lg font-bold text-secondary-700">
+        <h2 className="text-lg font-bold text-zinc-800">
           {mode === "register" ? "¡Registro exitoso!" : "¡Magic Link enviado!"}
         </h2>
-        <p className="text-sm text-secondary-600">
+        <p className="text-sm text-zinc-600">
           {mode === "register"
             ? `Revisa ${email}. Te enviamos un enlace para confirmar tu cuenta.`
             : `Revisa ${email}. Te enviamos un enlace mágico para acceder.`}
@@ -140,7 +140,7 @@ export function LoginForm() {
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                 <input id="firstName" type="text" required value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Nombre"
-                  className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20" />
               </div>
             </div>
             <div>
@@ -148,7 +148,7 @@ export function LoginForm() {
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                 <input id="lastName" type="text" required value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Apellido"
-                  className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                  className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20" />
               </div>
             </div>
           </div>
@@ -157,8 +157,8 @@ export function LoginForm() {
           <label htmlFor="email" className="block text-sm font-semibold text-zinc-700 mb-2">Correo electrónico</label>
           <div className="relative">
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-            <input id="email" type="text" inputMode="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tutor@blis.club"
-              className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                <input id="email" type="text" inputMode="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tucorreo@blis.club"
+                  className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20" />
           </div>
         </div>
 
@@ -167,18 +167,18 @@ export function LoginForm() {
             <label htmlFor="password" className="block text-sm font-semibold text-zinc-700 mb-2">Contraseña</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-              <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
-                className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+                <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
+                  className="w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 py-3.5 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20" />
             </div>
           </div>
         )}
 
         {error && (
-          <p className="text-sm text-danger-600 bg-danger-50 rounded-xl p-3">{error}</p>
+          <p className="text-sm text-red-600 bg-red-50 rounded-xl p-3">{error}</p>
         )}
 
         <button type="submit" disabled={loading}
-          className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-3.5 font-bold text-sm transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-primary-600/25">
+          className="w-full rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white py-3.5 font-bold text-sm transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-zinc-900/25">
           {loading ? "Cargando..." : mode === "register" ? "Crear cuenta" : mode === "magic" ? "Enviar Magic Link" : "Iniciar Sesión"}
         </button>
       </form>

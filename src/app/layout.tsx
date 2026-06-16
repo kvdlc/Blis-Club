@@ -7,7 +7,7 @@ const nunito = Nunito({ subsets: ["latin"], weight: ["400", "700", "900"], varia
 
 export const metadata: Metadata = {
   title: "Blis Club",
-  description: "Tu ecosistema de apps para mascotas",
+  description: "Tu ecosistema de apps inteligentes: mascotas, autos, eventos y más. Todo en un solo lugar.",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",
