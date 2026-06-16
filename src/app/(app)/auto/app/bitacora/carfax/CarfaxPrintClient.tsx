@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { Clock } from "lucide-react";
 import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade, VehicleSpecs } from "@/types/database";
 
 interface Props {
@@ -54,7 +55,7 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
     <div className="max-w-2xl mx-auto p-6 bg-white/5 text-zinc-200 print:p-4 print:text-xs">
       {/* Solo mostrar en pantalla, ocultar al imprimir */}
       <div className="print:hidden mb-4 p-3 rounded-xl bg-auto-600/10 border border-auto-200 text-center">
-        <p className="text-sm font-bold text-auto-400">⏳ Abriendo ventana de impresión...</p>
+        <p className="text-sm font-bold text-auto-500 flex items-center justify-center gap-1"><Clock className="w-4 h-4" /> Abriendo ventana de impresión...</p>
         <p className="text-xs text-auto-500 mb-2">Guarda como PDF para compartir con futuros compradores.</p>
         <button onClick={() => window.print()} className="px-4 py-2 rounded-xl bg-auto-600 text-white text-xs font-bold hover:bg-auto-500 transition-colors">
           Imprimir ahora
@@ -63,7 +64,7 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
 
       {/* Header */}
       <div className="text-center mb-6 pb-4 border-b-2 border-white/10">
-        <h1 className="text-2xl font-black text-auto-400 print:text-xl">Reporte Carfax</h1>
+        <h1 className="text-2xl font-black text-auto-500 print:text-xl">Reporte Carfax</h1>
         <p className="text-sm text-zinc-400 mt-1">Historial completo del vehículo</p>
         <p className="text-xs text-zinc-500 mt-0.5">
           Generado el {new Date().toLocaleDateString("es-PE", { day: "numeric", month: "long", year: "numeric" })}
@@ -239,7 +240,7 @@ function SummaryRow({ label, value, bold }: { label: string; value: string; bold
   return (
     <div className="flex items-center justify-between">
       <span className={`${bold ? "text-sm font-extrabold text-zinc-200" : "text-xs text-zinc-400"}`}>{label}</span>
-      <span className={`${bold ? "text-lg font-black text-auto-400" : "text-sm font-bold text-zinc-200"}`}>{value}</span>
+      <span className={`${bold ? "text-lg font-black text-auto-500" : "text-sm font-bold text-zinc-200"}`}>{value}</span>
     </div>
   );
 }

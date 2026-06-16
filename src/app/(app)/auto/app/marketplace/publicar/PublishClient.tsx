@@ -91,7 +91,7 @@ export default function PublishClient({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/marketplace" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-700 transition-colors">
+      <Link href="/auto/app/marketplace" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-700 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Marketplace
       </Link>
 
@@ -179,7 +179,7 @@ export default function PublishClient({ userId }: { userId: string }) {
               placeholder="https://..."
               className="flex-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-xs focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             <button type="button" onClick={addFoto} disabled={!fotoUrl.trim() || form.fotos.length >= 5}
-              className="px-3 py-2.5 rounded-xl bg-white/5 text-zinc-400 hover:bg-auto-100 hover:text-auto-400 disabled:opacity-40 transition-colors">
+              className="px-3 py-2.5 rounded-xl bg-white/5 text-zinc-400 hover:bg-auto-100 hover:text-auto-500 disabled:opacity-40 transition-colors">
               <Plus className="w-4 h-4" />
             </button>
           </div>

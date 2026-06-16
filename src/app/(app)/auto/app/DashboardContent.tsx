@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs } from "@/types/database";
+import { Car } from "lucide-react";
 import { HeroCard } from "./HeroCard";
 import { QuickActions } from "./QuickActions";
 import { DashboardWidgets } from "./DashboardWidgets";
@@ -23,7 +24,7 @@ export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocE
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
         <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-lg">
-          <span className="text-4xl">🚗</span>
+          <Car className="w-10 h-10 text-zinc-400" />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-zinc-100">¡Bienvenido a Auto!</h2>

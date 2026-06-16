@@ -63,7 +63,7 @@ export default function AutoCheckoutPage() {
         <p className="text-sm text-red-400 font-semibold text-center">{error}</p>
         <button
           onClick={() => router.push("/auto/app/suscripcion")}
-          className="flex items-center gap-2 text-sm text-auto-400 font-semibold"
+          className="flex items-center gap-2 text-sm text-auto-500 font-semibold"
         >
           <ArrowLeft className="w-4 h-4" /> Volver a planes
         </button>

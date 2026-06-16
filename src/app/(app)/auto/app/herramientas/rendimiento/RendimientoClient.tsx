@@ -82,7 +82,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-400 transition-colors">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-500 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
 
@@ -99,7 +99,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
           </div>
           <input
             type="text" value={nombres.a} onChange={(e) => setNombres({ ...nombres, a: e.target.value })}
-            className="text-sm font-bold text-zinc-200 bg-transparent border-b border-dashed border-white/15 focus:outline-none focus:border-auto-400"
+            className="text-sm font-bold text-zinc-200 bg-transparent border-b border-dashed border-white/15 focus:outline-none focus:border-auto-500"
           />
         </div>
 
@@ -111,7 +111,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
                 onChange={(e) => setPrecioA(e.target.value)} placeholder="S/"
                 className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               {defaults.ultimosPrecios?.regular && (
-                <button onClick={() => usarPrecio("regular", "a")} className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-auto-600/15 hover:text-auto-600 transition-colors">
+                <button onClick={() => usarPrecio("regular", "a")} className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-auto-600/15 hover:text-auto-500 transition-colors">
                   S/{defaults.ultimosPrecios.regular}
                 </button>
               )}
@@ -141,7 +141,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
           </div>
           <input
             type="text" value={nombres.b} onChange={(e) => setNombres({ ...nombres, b: e.target.value })}
-            className="text-sm font-bold text-zinc-200 bg-transparent border-b border-dashed border-white/15 focus:outline-none focus:border-auto-400"
+            className="text-sm font-bold text-zinc-200 bg-transparent border-b border-dashed border-white/15 focus:outline-none focus:border-auto-500"
           />
         </div>
 

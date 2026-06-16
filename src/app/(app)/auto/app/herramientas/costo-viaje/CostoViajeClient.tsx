@@ -80,7 +80,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-400 transition-colors">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-500 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
 
@@ -115,7 +115,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               <Fuel className="w-3.5 h-3.5 text-auto-500" /> Rendimiento (km/galón)
             </span>
             {defaults.rendimientoPromedio && (
-              <button onClick={usarRendimientoPromedio} className="text-[10px] font-bold text-auto-600 bg-auto-600/10 px-2 py-0.5 rounded-full hover:bg-auto-600/15 transition-colors">
+              <button onClick={usarRendimientoPromedio} className="text-[10px] font-bold text-auto-500 bg-auto-600/10 px-2 py-0.5 rounded-full hover:bg-auto-600/15 transition-colors">
                 Usar {defaults.rendimientoPromedio} km/gal
               </button>
             )}
@@ -139,7 +139,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               <Coins className="w-3.5 h-3.5 text-auto-500" /> Precio por galón (S/)
             </span>
             {defaults.ultimoPrecio && (
-              <button onClick={usarUltimoPrecio} className="text-[10px] font-bold text-auto-600 bg-auto-600/10 px-2 py-0.5 rounded-full hover:bg-auto-600/15 transition-colors">
+              <button onClick={usarUltimoPrecio} className="text-[10px] font-bold text-auto-500 bg-auto-600/10 px-2 py-0.5 rounded-full hover:bg-auto-600/15 transition-colors">
                 S/ {defaults.ultimoPrecio}
               </button>
             )}
@@ -186,7 +186,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
             <button
               onClick={agregarPeaje}
               disabled={!nuevoPeaje.costo || parseFloat(nuevoPeaje.costo) <= 0}
-              className="px-3 py-2 rounded-xl bg-auto-600/15 text-auto-600 hover:bg-auto-200 transition-colors disabled:opacity-40"
+              className="px-3 py-2 rounded-xl bg-auto-600/15 text-auto-500 hover:bg-auto-200 transition-colors disabled:opacity-40"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -213,7 +213,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
 
           {/* Total grande */}
           <div className="text-center">
-            <p className="text-4xl font-black text-auto-600">
+            <p className="text-4xl font-black text-auto-500">
               S/ {resultados.costoTotal.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
             <p className="text-xs text-zinc-500 mt-1">Costo total del viaje</p>
@@ -250,7 +250,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
           {parseInt(pasajeros) > 1 && (
             <div className="bg-auto-600/10 rounded-2xl p-3 text-center">
               <p className="text-xs text-zinc-400">Por persona ({pasajeros} pasajeros)</p>
-              <p className="text-xl font-black text-auto-400">
+              <p className="text-xl font-black text-auto-500">
                 S/ {resultados.costoPorPersona.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
               </p>
             </div>

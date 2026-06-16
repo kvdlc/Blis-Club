@@ -1,7 +1,7 @@
 "use client";
 
 import type { Vehicle, FuelLog } from "@/types/database";
-import { MapPin, Calendar, Activity, TrendingUp, Link as LinkIcon } from "lucide-react";
+import { MapPin, Calendar, Activity, TrendingUp, Link as LinkIcon, Car } from "lucide-react";
 
 interface Props {
   vehicle: Vehicle;
@@ -43,7 +43,7 @@ export function HeroCard({ vehicle, fuelLogs, ecoScore }: Props) {
           {vehicle.foto_url ? (
             <img src={vehicle.foto_url} alt="" className="w-full h-full object-cover object-center" />
           ) : (
-            <span className="text-3xl">🚗</span>
+            <Car className="w-8 h-8 text-zinc-400" />
           )}
         </div>
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { Vehicle } from "@/types/database";
-import { ArrowLeft, Globe, Shield, Tag, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Globe, Shield, Tag, AlertTriangle, Eye, EyeOff, Car } from "lucide-react";
 
 type VehicleEstado = "activo" | "en venta" | "robado" | "vendido";
 
@@ -32,7 +32,7 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/perfil" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-700">
+      <Link href="/auto/app/perfil" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-700">
         <ArrowLeft className="w-4 h-4" /> Perfil
       </Link>
 
@@ -47,11 +47,11 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
           <Globe className="w-4 h-4 text-auto-500" />
           <h3 className="text-xs font-extrabold text-zinc-300">Vista previa</h3>
           <a href={`/auto/vehiculo/${vehicle.id}`} target="_blank" rel="noopener"
-            className="ml-auto text-[10px] font-bold text-auto-400 hover:underline">Ver perfil →</a>
+            className="ml-auto text-[10px] font-bold text-auto-500 hover:underline">Ver perfil →</a>
         </div>
 
-        <div className="h-32 bg-white/5 rounded-xl flex items-center justify-center text-3xl mb-3">
-          🚗
+        <div className="h-32 bg-white/5 rounded-xl flex items-center justify-center mb-3">
+          <Car className="w-10 h-10 text-zinc-400" />
         </div>
         <p className="text-sm font-bold text-zinc-200 text-center">{vehicle.marca} {vehicle.modelo}</p>
         <p className="text-xs text-zinc-500 text-center">{vehicle.año} · {vehicle.kilometraje.toLocaleString("es-PE")} km</p>

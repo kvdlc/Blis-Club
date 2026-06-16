@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Crown, Zap, Shield, Star } from "lucide-react";
+import { ArrowLeft, Check, Crown, Zap, Shield, Star, Fuel, Wrench, Calculator, FileText, ShoppingCart, BarChart3, Camera, ClipboardList } from "lucide-react";
 
 interface Props {
   subscription: any;
@@ -25,7 +25,7 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
 
   return (
     <div className="space-y-6">
-      <Link href="/auto/app/perfil" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-700">
+      <Link href="/auto/app/perfil" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-700">
         <ArrowLeft className="w-4 h-4" /> Perfil
       </Link>
 
@@ -90,7 +90,7 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
                 <p className="text-xs text-zinc-400">{plan.description || "Acceso completo a todas las herramientas"}</p>
               </div>
               <div className="text-right">
-                <p className="text-xl font-black text-auto-400">
+                <p className="text-xl font-black text-auto-500">
                   {plan.price_cents === 0 ? "Gratis" : formatPrice(plan.price_cents)}
                 </p>
                 <p className="text-[10px] text-zinc-500">/ {plan.billing_interval === "quarter" ? "trimestre" : plan.billing_interval === "year" ? "año" : "mes"}</p>
@@ -137,11 +137,23 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
             { icon: "📊", text: "Gráficos financieros" },
             { icon: "📸", text: "Fotos y perfil del vehículo" },
             { icon: "📋", text: "Reporte Carfax exportable" },
-          ].map((f) => (
-            <div key={f.text} className="flex items-center gap-1.5 text-[10px] text-zinc-400">
-              <span>{f.icon}</span> {f.text}
-            </div>
-          ))}
+          ].map((f) => {
+            const featureIconMap: Record<string, React.ReactNode> = {
+              "⛽": <Fuel className="w-3.5 h-3.5" />,
+              "🔧": <Wrench className="w-3.5 h-3.5" />,
+              "🧮": <Calculator className="w-3.5 h-3.5" />,
+              "📄": <FileText className="w-3.5 h-3.5" />,
+              "🛒": <ShoppingCart className="w-3.5 h-3.5" />,
+              "📊": <BarChart3 className="w-3.5 h-3.5" />,
+              "📸": <Camera className="w-3.5 h-3.5" />,
+              "📋": <ClipboardList className="w-3.5 h-3.5" />,
+            };
+            return (
+              <div key={f.text} className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+                <span>{featureIconMap[f.icon]}</span> {f.text}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

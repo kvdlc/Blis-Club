@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs } from "@/types/database";
-import { Calendar, TrendingUp, ShieldCheck, Droplets, DollarSign, Wrench, Clock, Gauge } from "lucide-react";
+import { Calendar, TrendingUp, ShieldCheck, Droplets, DollarSign, Wrench, Clock, Gauge, Trophy } from "lucide-react";
 
 interface Props {
   vehicle: Vehicle;
@@ -191,7 +191,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
 
       {badges.length > 0 && (
         <div className="card-auto-dark rounded-2xl p-4">
-          <h3 className="text-xs font-extrabold text-zinc-300 mb-2">🏆 Logros ({badges.length})</h3>
+          <h3 className="text-xs font-extrabold text-zinc-300 mb-2 flex items-center gap-1.5"><Trophy className="w-3.5 h-3.5 text-amber-400" /> Logros ({badges.length})</h3>
           <div className="flex flex-wrap gap-1.5">
             {badges.map((key) => (
               <span key={key} className="text-[9px] font-bold bg-auto-600/10 text-auto-500 px-2 py-1 rounded-full border border-auto-600/20">

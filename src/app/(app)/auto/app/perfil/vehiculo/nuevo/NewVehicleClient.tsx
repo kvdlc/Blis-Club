@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { uploadAutoPhoto } from "@/lib/storage";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, Check } from "lucide-react";
 import Link from "next/link";
 
 interface Props {
@@ -74,7 +74,7 @@ export default function NewVehicleClient({ userId }: Props) {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/perfil" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-700 transition-colors">
+      <Link href="/auto/app/perfil" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-700 transition-colors">
         <ArrowLeft className="w-4 h-4" />
         Perfil
       </Link>
@@ -172,7 +172,7 @@ export default function NewVehicleClient({ userId }: Props) {
           <div className="flex items-center gap-2 mt-1">
             <label className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm cursor-pointer hover:bg-white/5 transition-colors">
               <Upload className="w-4 h-4 text-zinc-500" />
-              <span className="text-zinc-400">{uploadingPhoto ? "Subiendo..." : form.foto_url ? "Foto cargada ✓" : "Seleccionar archivo"}</span>
+              <span className="text-zinc-400">{uploadingPhoto ? "Subiendo..." : form.foto_url ? <>Foto cargada <Check className="w-3.5 h-3.5 inline text-emerald-400" /></> : "Seleccionar archivo"}</span>
               <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" disabled={uploadingPhoto} />
             </label>
           </div>

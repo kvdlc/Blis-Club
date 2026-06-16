@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { MarketplaceListing } from "@/types/database";
-import { ShoppingBag, Search, Plus, MapPin, Tag } from "lucide-react";
+import { ShoppingBag, Search, Plus, MapPin, Tag, ShoppingCart, Wrench, Armchair, Ticket, Car, Package } from "lucide-react";
 
 const categories = [
   { key: "todas", label: "Todas", icon: "🛒" },
@@ -14,6 +14,15 @@ const categories = [
   { key: "cupones", label: "Cupones", icon: "🎫" },
   { key: "autos_usados", label: "Autos Usados", icon: "🚗" },
 ];
+
+const catIconMap: Record<string, React.ReactNode> = {
+  "🛒": <ShoppingCart className="w-3.5 h-3.5" />,
+  "🔧": <Wrench className="w-3.5 h-3.5" />,
+  "💺": <Armchair className="w-3.5 h-3.5" />,
+  "🛠️": <Wrench className="w-3.5 h-3.5" />,
+  "🎫": <Ticket className="w-3.5 h-3.5" />,
+  "🚗": <Car className="w-3.5 h-3.5" />,
+};
 
 interface Props {
   listings: MarketplaceListing[];
@@ -64,7 +73,7 @@ export default function MarketplaceClient({ listings, activeCat, searchMarca }: 
                 : "bg-white/5 text-zinc-400 hover:bg-white/10"
             }`}
           >
-            <span>{cat.icon}</span> {cat.label}
+            <span>{catIconMap[cat.icon]}</span> {cat.label}
           </Link>
         ))}
       </div>
@@ -89,7 +98,7 @@ export default function MarketplaceClient({ listings, activeCat, searchMarca }: 
       {/* Grid de productos */}
       {listings.length === 0 ? (
         <div className="card-auto-dark rounded-2xl p-8 text-center">
-          <p className="text-4xl mb-3">📦</p>
+          <Package className="w-12 h-12 mx-auto text-zinc-500 mb-3" />
           <p className="text-sm text-zinc-500">No hay publicaciones {activeCat !== "todas" ? "en esta categoría" : "aún"}</p>
           <Link href="/auto/app/marketplace/publicar"
             className="inline-block mt-3 px-4 py-2 rounded-xl bg-auto-600 text-white text-xs font-bold">
@@ -109,7 +118,7 @@ export default function MarketplaceClient({ listings, activeCat, searchMarca }: 
                 {listing.fotos?.[0] ? (
                   <img src={listing.fotos[0]} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-3xl">📦</span>
+                  <Package className="w-8 h-8 text-zinc-500" />
                 )}
               </div>
 

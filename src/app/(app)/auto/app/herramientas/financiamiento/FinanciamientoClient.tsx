@@ -35,7 +35,7 @@ export default function FinanciamientoClient() {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-700">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-700">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
       <div>

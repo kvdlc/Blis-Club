@@ -66,7 +66,7 @@ export default function ConsumoAceiteClient() {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-400 transition-colors">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-500 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
 
@@ -79,7 +79,7 @@ export default function ConsumoAceiteClient() {
       <div className="card-auto-dark rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-auto-600/15 flex items-center justify-center">
-            <Droplets className="w-3.5 h-3.5 text-auto-400" />
+            <Droplets className="w-3.5 h-3.5 text-auto-500" />
           </div>
           <h3 className="text-xs font-bold text-zinc-300">Datos de la última recarga</h3>
         </div>
@@ -129,7 +129,7 @@ export default function ConsumoAceiteClient() {
                   <path d="M 10 90 A 80 80 0 0 1 60 30" fill="none" stroke="#10b981" strokeWidth="14" strokeLinecap="butt" opacity="0.7" />
                   <path d="M 60 30 A 80 80 0 0 1 100 15" fill="none" stroke="#3b82f6" strokeWidth="14" strokeLinecap="butt" opacity="0.7" />
                   <path d="M 100 15 A 80 80 0 0 1 145 30" fill="none" stroke="#f59e0b" strokeWidth="14" strokeLinecap="butt" opacity="0.7" />
-                  <path d="M 145 30 A 80 80 0 0 1 170 90" fill="none" stroke="#ef4444" strokeWidth="14" strokeLinecap="butt" opacity="0.7" />
+                  <path d="M 145 30 A 80 80 0 0 1 170 90" fill="none" stroke="#10b981" strokeWidth="14" strokeLinecap="butt" opacity="0.7" />
                   {/* Aguja */}
                   <line
                     x1="90" y1="85" x2="90" y2="15"

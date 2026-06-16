@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Gauge, Fuel } from "lucide-react";
+import { ArrowLeft, Gauge, Fuel, Check } from "lucide-react";
 import type { FuelLog } from "@/types/database";
 
 interface Defaults {
@@ -53,7 +53,7 @@ export default function AutonomiaClient({ defaults }: { defaults: Defaults }) {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-700">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-700">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
       <div>
@@ -78,7 +78,7 @@ export default function AutonomiaClient({ defaults }: { defaults: Defaults }) {
             </span>
             {rendimientoPromedio && (
               <button onClick={() => { setUsarPromedio(!usarPromedio); if (!usarPromedio) setRendimiento(rendimientoPromedio.toString()); }}
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${usarPromedio ? "bg-auto-600/100 text-white" : "bg-auto-600/10 text-auto-400"}`}>
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${usarPromedio ? "bg-auto-600/100 text-white" : "bg-auto-600/10 text-auto-500"}`}>
                 {usarPromedio ? `${rendimientoPromedio} km/gal` : `Usar ${rendimientoPromedio} km/gal`}
               </button>
             )}
@@ -111,7 +111,7 @@ export default function AutonomiaClient({ defaults }: { defaults: Defaults }) {
                     <div className="flex-1 h-4 bg-white/5 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full ${alcanza ? "bg-emerald-500" : "bg-amber-500"}`} style={{ width: `${pct}%` }} />
                     </div>
-                    <span className="text-[10px] font-bold w-12 text-right">{alcanza ? "✓" : `${v.km} km`}</span>
+                    <span className="text-[10px] font-bold w-12 text-right flex items-center justify-end">{alcanza ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : `${v.km} km`}</span>
                   </div>
                 );
               })}

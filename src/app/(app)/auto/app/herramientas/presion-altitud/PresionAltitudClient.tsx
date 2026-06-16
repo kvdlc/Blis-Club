@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mountain, ArrowDown, ArrowUp, Gauge, Info, MapPin, Car } from "lucide-react";
+import { ArrowLeft, Mountain, ArrowDown, ArrowUp, Gauge, Info, MapPin, Car, AlertTriangle } from "lucide-react";
 
 interface Defaults {
   presionDelante: number | null;
@@ -74,7 +74,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-400 transition-colors">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-500 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
 
@@ -89,7 +89,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-7 h-7 rounded-lg bg-auto-600/15 flex items-center justify-center">
-              <Gauge className="w-3.5 h-3.5 text-auto-400" />
+              <Gauge className="w-3.5 h-3.5 text-auto-500" />
             </div>
             <h3 className="text-xs font-bold text-zinc-300">Presión en frío recomendada (PSI)</h3>
           </div>
@@ -104,7 +104,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
                   className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
                 {defaults.presionDelante && (
                   <button onClick={() => setPresionDelante(defaults.presionDelante!.toString())}
-                    className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-auto-600/15 hover:text-auto-400">
+                    className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-auto-600/15 hover:text-auto-500">
                     {defaults.presionDelante}
                   </button>
                 )}
@@ -126,7 +126,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
                 )}
                 {defaults.presionAtras && (
                   <button onClick={() => { setUsarMismaPresion(false); setPresionAtras(defaults.presionAtras!.toString()); }}
-                    className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-auto-600/15 hover:text-auto-400">
+                    className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-auto-600/15 hover:text-auto-500">
                     {defaults.presionAtras}
                   </button>
                 )}
@@ -176,7 +176,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
                   else if (!altitudDestino) usarCiudad(c.altitud, "destino");
                   else usarCiudad(c.altitud, "destino");
                 }}
-                className="text-[9px] font-medium px-2 py-1 rounded-full bg-zinc-900/5 text-zinc-400 hover:bg-auto-600/15 hover:text-auto-400 transition-colors"
+                className="text-[9px] font-medium px-2 py-1 rounded-full bg-zinc-900/5 text-zinc-400 hover:bg-auto-600/15 hover:text-auto-500 transition-colors"
               >
                 {c.nombre} ({c.altitud}m)
               </button>
@@ -217,7 +217,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
                 : "Resta 0.5 PSI por cada 300m de descenso"}
             </p>
             {resultados.excesivo && (
-              <p className="text-xs font-bold text-red-400 mt-1">⚠️ Ajuste mayor a 10 PSI. Verifica las altitudes.</p>
+              <p className="text-xs font-bold text-red-400 mt-1 flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> Ajuste mayor a 10 PSI. Verifica las altitudes.</p>
             )}
           </div>
 
@@ -229,14 +229,14 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-zinc-900/5 rounded-xl p-3 text-center">
                 <p className="text-[10px] text-zinc-500">Delante</p>
-                <p className="text-2xl font-black text-auto-400">
+                <p className="text-2xl font-black text-auto-500">
                   {resultados.nuevaDelante.toFixed(1)}
                 </p>
                 <p className="text-[10px] text-zinc-500 mt-0.5">PSI</p>
               </div>
               <div className="bg-zinc-900/5 rounded-xl p-3 text-center">
                 <p className="text-[10px] text-zinc-500">Atrás</p>
-                <p className="text-2xl font-black text-auto-400">
+                <p className="text-2xl font-black text-auto-500">
                   {resultados.nuevaAtras.toFixed(1)}
                 </p>
                 <p className="text-[10px] text-zinc-500 mt-0.5">PSI</p>

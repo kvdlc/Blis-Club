@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, AlertTriangle, RotateCcw, Droplets, Car, Lightbulb, Shield } from "lucide-react";
+import { ArrowLeft, CheckCircle2, AlertTriangle, RotateCcw, Droplets, Car, Lightbulb, Shield, Circle, Check } from "lucide-react";
 
 interface Defaults {
   presionDelante: number | null;
@@ -118,7 +118,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-400 transition-colors">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-500 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
 
@@ -150,12 +150,12 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
             style={{ width: `${progressPct}%` }}
           />
         </div>
-        <p className="text-[10px] text-zinc-500 mt-1.5">
+        <p className="text-[10px] text-zinc-500 mt-1.5 flex items-center gap-1">
           {progressPct >= 95
-            ? "✅ ¡Todo listo para viajar!"
+            ? <><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> ¡Todo listo para viajar!</>
             : progressPct >= 70
-            ? "🟡 Casi listo, revisa los pendientes"
-            : "🔴 Completa el checklist antes de salir"}
+            ? <><Circle className="w-3.5 h-3.5 text-amber-400" /> Casi listo, revisa los pendientes</>
+            : <><Circle className="w-3.5 h-3.5 text-red-400" /> Completa el checklist antes de salir</>}
         </p>
       </div>
 
@@ -182,7 +182,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
                       ? "bg-amber-500/10 text-amber-400"
                       : "bg-zinc-900/5 text-zinc-400"
                 }`}>
-                  {cat.catChecked === cat.catTotal ? "✓" : `${cat.catChecked}/${cat.catTotal}`}
+                  {cat.catChecked === cat.catTotal ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : `${cat.catChecked}/${cat.catTotal}`}
                 </span>
               </div>
 

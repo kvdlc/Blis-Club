@@ -70,7 +70,7 @@ export default function DepreciacionClient() {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-400 transition-colors">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-500 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
 
@@ -103,7 +103,7 @@ export default function DepreciacionClient() {
               value={anios} onChange={(e) => setAnios(e.target.value)}
               className="flex-1 accent-auto-600"
             />
-            <span className="text-sm font-bold text-auto-400 w-10 text-right">{anios}</span>
+            <span className="text-sm font-bold text-auto-500 w-10 text-right">{anios}</span>
           </div>
         </label>
 
@@ -127,7 +127,7 @@ export default function DepreciacionClient() {
               className={`text-[9px] font-medium px-2 py-1 rounded-full transition-colors ${
                 tasaAnual === t.tasa.toString()
                   ? "bg-auto-600/100 text-white"
-                  : "bg-zinc-900/5 text-zinc-400 hover:bg-auto-600/15 hover:text-auto-400"
+                  : "bg-zinc-900/5 text-zinc-400 hover:bg-auto-600/15 hover:text-auto-500"
               }`}
             >
               {t.label} {t.tasa}%

@@ -76,7 +76,7 @@ export default function EquivalenciaClient() {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-400 transition-colors">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-500 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
 
@@ -124,7 +124,7 @@ export default function EquivalenciaClient() {
       <div className="card-auto-dark rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-auto-600/15 flex items-center justify-center">
-            <Ruler className="w-3.5 h-3.5 text-auto-600" />
+            <Ruler className="w-3.5 h-3.5 text-auto-500" />
           </div>
           <h3 className="text-sm font-bold text-zinc-300">Llanta nueva</h3>
         </div>
@@ -192,13 +192,13 @@ export default function EquivalenciaClient() {
               {/* Nueva */}
               <div className="flex flex-col items-center gap-2">
                 <div
-                  className="rounded-full border-4 border-auto-400 bg-auto-600/10 flex items-center justify-center"
+                  className="rounded-full border-4 border-auto-500 bg-auto-600/10 flex items-center justify-center"
                   style={{
                     width: `${resultados.nuevo.diametroTotal * resultados.escalaVisual}px`,
                     height: `${resultados.nuevo.diametroTotal * resultados.escalaVisual}px`,
                   }}
                 />
-                <span className="text-[10px] font-bold text-auto-600">Nueva</span>
+                <span className="text-[10px] font-bold text-auto-500">Nueva</span>
                 <span className="text-[9px] text-zinc-500">{resultados.nuevo.diametroTotal.toFixed(1)} mm</span>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function EquivalenciaClient() {
             <div className="bg-zinc-900/5 rounded-xl p-3">
               <p className="text-xs text-zinc-400">
                 Cuando circulas a <strong>100 km/h</strong> reales, el velocímetro marcará aproximadamente{" "}
-                <strong className="text-auto-600">{resultados.velocidadIndicadaCuandoReal100.toFixed(1)} km/h</strong>
+                <strong className="text-auto-500">{resultados.velocidadIndicadaCuandoReal100.toFixed(1)} km/h</strong>
               </p>
               <p className="text-[10px] text-zinc-500 mt-1">
                 {resultados.esMayor
@@ -245,7 +245,7 @@ export default function EquivalenciaClient() {
             <div className="bg-zinc-900/5 rounded-xl p-3">
               <p className="text-xs text-zinc-400">
                 La altura de la carrocería cambia{" "}
-                <strong className={resultados.cambioAltura > 0 ? "text-auto-600" : "text-amber-400"}>
+                <strong className={resultados.cambioAltura > 0 ? "text-auto-500" : "text-amber-400"}>
                   {resultados.cambioAltura > 0 ? "+" : ""}{resultados.cambioAltura.toFixed(1)} mm
                 </strong>
               </p>
