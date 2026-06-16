@@ -102,7 +102,7 @@ export default function AutoWebGPage() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
-          <span className="text-[11px] font-bold text-emerald-400 tracking-wide">Prueba gratuita</span>
+          <span className="text-[11px] font-bold text-emerald-400 tracking-wide">Registro gratuito</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-zinc-100 mb-5 leading-[1.1]">
@@ -113,7 +113,7 @@ export default function AutoWebGPage() {
         </h1>
 
         <p className="text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto mb-8">
-          60 días de acceso completo a todas las herramientas. Sin tarjeta de crédito, sin compromiso. Cancela cuando quieras.
+          Acceso completo a todas las herramientas. Sin tarjeta de crédito, sin compromiso.
         </p>
 
         <div className="flex items-center justify-center gap-1 mb-2">
@@ -131,7 +131,7 @@ export default function AutoWebGPage() {
           {/* Form */}
           <div className="card-auto-dark-elevated rounded-[1.5rem] p-6 border border-emerald-500/15">
             <h3 className="text-lg font-extrabold text-zinc-100 mb-1">Crea tu cuenta gratis</h3>
-            <p className="text-xs text-zinc-500 mb-5">60 días de prueba completa. Sin tarjeta.</p>
+            <p className="text-xs text-zinc-500 mb-5">Accede a todas las funciones. Sin tarjeta.</p>
 
             {sent ? (
               <div className="text-center py-6">
@@ -182,10 +182,10 @@ export default function AutoWebGPage() {
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Creando cuenta...
                     </>
-                  ) : (
+                  )                   : (
                     <>
                       <Zap className="w-4 h-4" />
-                      Comenzar gratis — 60 días
+                      Crear cuenta gratis
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -222,9 +222,9 @@ export default function AutoWebGPage() {
       <section className="relative z-10 px-4 pb-12 max-w-5xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { icon: ShieldCheck, title: "Garantía 14 días", desc: "No te convence? Te devolvemos el 100% sin preguntas." },
-            { icon: Lock, title: "Sin tarjeta", desc: "La prueba no requiere método de pago. Solo tu correo." },
+            { icon: Lock, title: "Sin tarjeta", desc: "No requiere método de pago. Solo tu correo." },
             { icon: Heart, title: "Soporte real", desc: "Respuesta en menos de 24 horas. Gente real, no bots." },
+            { icon: Car, title: "Todo incluido", desc: "Acceso a bitácora, calculadoras, documentos y marketplace." },
           ].map((t, i) => {
             const Icon = t.icon;
             return (

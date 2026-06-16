@@ -27,7 +27,7 @@ export default async function AutoAppLayout({ children }: { children: React.Reac
       <CarProvider>
         <ReferralTracker />
         <AutoNav />
-        <main className="relative pb-28 md:pb-8 px-4 pt-3 max-w-3xl mx-auto">
+        <main className="relative z-10 pb-28 md:pb-8 px-4 pt-3 max-w-3xl mx-auto">
           <AutoAppHeader />
           {trial.isWarning && (
             <TrialWarningToast daysLeft={trial.daysLeft} appSlug="auto" />

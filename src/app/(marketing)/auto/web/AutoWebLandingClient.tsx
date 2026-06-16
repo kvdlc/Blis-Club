@@ -276,7 +276,7 @@ export function AutoWebLandingClient({ plans }: Props) {
       ...(registerLastName.trim() ? { lastName: registerLastName.trim() } : {}),
     });
 
-    router.push(`/auto/app?${params.toString()}`);
+    router.push(`/auto/web/checkout?${params.toString()}`);
   };
 
   const handleShowRegister = (planId: string) => {
@@ -373,7 +373,7 @@ export function AutoWebLandingClient({ plans }: Props) {
             <a href="#pricing" className="hover:text-emerald-400 transition-colors">Precios</a>
             <a href="#faq" className="hover:text-emerald-400 transition-colors">FAQ</a>
           </div>
-          <a href="#pricing" className="text-xs font-bold bg-auto-600 hover:bg-auto-500 text-white px-4 py-2 rounded-xl shadow-auto-glow transition-all active:scale-[0.97]">
+          <a href="/auto/webg" className="text-xs font-bold bg-auto-600 hover:bg-auto-500 text-white px-4 py-2 rounded-xl shadow-auto-glow transition-all active:scale-[0.97]">
             Probar gratis
           </a>
         </div>
@@ -423,20 +423,19 @@ export function AutoWebLandingClient({ plans }: Props) {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8"
         >
-          <button
-            type="button"
-            onClick={() => handleShowRegister(planId)}
+          <a
+            href="#pricing"
             className="flex items-center gap-2 rounded-2xl bg-auto-600 hover:bg-auto-500 text-white py-4 px-8 font-extrabold text-sm shadow-auto-glow transition-all active:scale-[0.97] animate-glow-brand"
           >
             <Zap className="w-4 h-4" />
-            Probar gratis — 60 días
+            Ver planes
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </a>
           <a
-            href="#app"
+            href="/auto/webg"
             className="flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 text-zinc-200 hover:bg-white/10 py-4 px-6 font-bold text-sm transition-all active:scale-[0.97]"
           >
-            Ver la app
+            Probar gratis
           </a>
         </motion.div>
 
@@ -754,16 +753,16 @@ export function AutoWebLandingClient({ plans }: Props) {
               <div className="w-14 h-14 mx-auto mb-4 flex items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20">
                 <Sparkles className="w-7 h-7 text-emerald-400" />
               </div>
-              <h3 className="text-xl font-extrabold text-zinc-100 mb-2">Prueba gratis 60 días</h3>
+              <h3 className="text-xl font-extrabold text-zinc-100 mb-2">Prueba gratis</h3>
               <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
-                Empieza hoy sin tarjeta de crédito. Accede a todas las funciones premium y decide luego.
+                Empieza hoy sin tarjeta de crédito. Accede a todas las funciones y decide luego.
               </p>
               <a
-                href="/auto/app"
+                href="/auto/webg"
                 className="inline-flex items-center gap-2 rounded-2xl bg-auto-600 hover:bg-auto-500 text-white py-4 px-8 font-extrabold text-sm shadow-auto-glow transition-all active:scale-[0.97]"
               >
                 <Zap className="w-4 h-4" />
-                Probar gratis — 60 días
+                Probar gratis
                 <ArrowRight className="w-4 h-4" />
               </a>
             </div>
