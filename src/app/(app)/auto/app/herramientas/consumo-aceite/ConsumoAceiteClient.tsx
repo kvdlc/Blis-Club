@@ -91,7 +91,7 @@ export default function ConsumoAceiteClient() {
               type="number" min="1" step="10"
               value={mlRellenados} onChange={(e) => setMlRellenados(e.target.value)}
               placeholder="Ej: 500"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">ml</span>
           </div>
@@ -105,7 +105,7 @@ export default function ConsumoAceiteClient() {
               type="number" min="1" step="100"
               value={kmRecorridos} onChange={(e) => setKmRecorridos(e.target.value)}
               placeholder="Ej: 5000"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">km</span>
           </div>
@@ -160,24 +160,24 @@ export default function ConsumoAceiteClient() {
 
           {/* Diagnóstico */}
           <div className={`rounded-2xl p-4 border-2 ${
-            resultados.diagnostico.color === "emerald" ? "bg-emerald-600/10 border-emerald-200" :
-            resultados.diagnostico.color === "blue" ? "bg-blue-600/10 border-blue-200" :
-            resultados.diagnostico.color === "amber" ? "bg-amber-600/10 border-amber-200" :
-            "bg-red-600/10 border-red-200"
+            resultados.diagnostico.color === "emerald" ? "bg-emerald-600/10 border-emerald-500/20" :
+            resultados.diagnostico.color === "blue" ? "bg-blue-600/10 border-blue-500/20" :
+            resultados.diagnostico.color === "amber" ? "bg-amber-600/10 border-amber-500/20" :
+            "bg-red-600/10 border-red-500/20"
           }`}>
             <div className="flex items-center gap-3">
               <resultados.diagnostico.icon className={`w-8 h-8 shrink-0 ${
-                resultados.diagnostico.color === "emerald" ? "text-emerald-600" :
-                resultados.diagnostico.color === "blue" ? "text-blue-600" :
-                resultados.diagnostico.color === "amber" ? "text-amber-600" :
-                "text-red-600"
+                resultados.diagnostico.color === "emerald" ? "text-emerald-400" :
+                resultados.diagnostico.color === "blue" ? "text-blue-400" :
+                resultados.diagnostico.color === "amber" ? "text-amber-400" :
+                "text-red-400"
               }`} />
               <div>
                 <p className={`text-lg font-black ${
-                  resultados.diagnostico.color === "emerald" ? "text-emerald-700" :
-                  resultados.diagnostico.color === "blue" ? "text-blue-700" :
-                  resultados.diagnostico.color === "amber" ? "text-amber-700" :
-                  "text-red-700"
+                  resultados.diagnostico.color === "emerald" ? "text-emerald-400" :
+                  resultados.diagnostico.color === "blue" ? "text-blue-400" :
+                  resultados.diagnostico.color === "amber" ? "text-amber-400" :
+                  "text-red-400"
                 }`}>
                   {resultados.diagnostico.nivel}
                 </p>

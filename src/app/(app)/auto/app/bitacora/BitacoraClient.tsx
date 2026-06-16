@@ -57,8 +57,8 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-auto-600/15 flex items-center justify-center text-lg">
-          <Gauge className="w-5 h-5 text-auto-400" />
+        <div className="w-10 h-10 rounded-xl bg-auto-600/10 flex items-center justify-center text-lg">
+          <Gauge className="w-5 h-5 text-auto-500" />
         </div>
         <div>
           <h1 className="text-xl font-extrabold text-zinc-200">Bitácora</h1>
@@ -135,7 +135,7 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
               {timeline.slice(0, 20).map((item, i) => (
                 <div key={`${item.type}-${item.data.id}`} className="relative">
                   <div className={`absolute left-[-18px] top-1.5 w-3 h-3 rounded-full border-2 ${
-                    item.type === "fuel" ? "bg-amber-100 border-amber-400" : "bg-blue-100 border-blue-400"
+                    item.type === "fuel" ? "bg-amber-500/10 border-amber-400" : "bg-blue-500/10 border-blue-400"
                   }`} />
                   <div className="bg-white/5 rounded-xl p-2.5">
                     <div className="flex items-start justify-between">
@@ -200,10 +200,10 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
   return (
     <div className="bg-amber-600/10 rounded-xl p-3 space-y-2">
       <div className="grid grid-cols-4 gap-1.5">
-        <input type="number" step="0.1" value={form.litros} onChange={(e) => setForm({ ...form, litros: e.target.value })} placeholder="Litros" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
-        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder="S/ gal" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
-        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
-        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs bg-white">
+        <input type="number" step="0.1" value={form.litros} onChange={(e) => setForm({ ...form, litros: e.target.value })} placeholder="Litros" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
+        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder="S/ gal" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
+        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
+        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5">
           <option value="regular">Regular</option>
           <option value="premium">Premium</option>
           <option value="diesel">Diésel</option>
@@ -244,16 +244,16 @@ function AddMaintForm({ vehicleId, onDone }: { vehicleId: string; onDone: (m: Ma
 
   return (
     <div className="bg-blue-600/10 rounded-xl p-3 space-y-2">
-      <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+      <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
       <div className="grid grid-cols-2 gap-1.5">
-        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white">
+        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5">
           {maintTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
-        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
       </div>
       <div className="grid grid-cols-2 gap-1.5">
-        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
-        <input value={form.taller} onChange={(e) => setForm({ ...form, taller: e.target.value })} placeholder="Taller" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
+        <input value={form.taller} onChange={(e) => setForm({ ...form, taller: e.target.value })} placeholder="Taller" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
       </div>
       <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
@@ -472,7 +472,7 @@ function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[];
                   <div className="grid grid-cols-3 gap-2">
                     <div className="text-center">
                       <p className="text-[10px] text-zinc-500">Gasto estimado</p>
-                      <p className="text-lg font-black text-auto-400">S/ {proyeccionAnual.toLocaleString("es-PE")}</p>
+                      <p className="text-lg font-black text-auto-500">S/ {proyeccionAnual.toLocaleString("es-PE")}</p>
                       <p className="text-[9px] text-zinc-500">próximos 12 meses</p>
                     </div>
                     <div className="text-center">
@@ -482,7 +482,7 @@ function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[];
                     </div>
                     <div className="text-center">
                       <p className="text-[10px] text-zinc-500">Tendencia</p>
-                      <p className={`text-lg font-black ${proyeccionAnual > 0 ? "text-amber-600" : "text-zinc-500"}`}>
+                      <p className={`text-lg font-black ${proyeccionAnual > 0 ? "text-amber-400" : "text-zinc-500"}`}>
                         {proyeccionAnual > 0 ? "→" : "—"}
                       </p>
                       <p className="text-[9px] text-zinc-500">basado en 3 meses</p>
@@ -614,12 +614,12 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
 
           {adding ? (
             <div className="bg-auto-600/10 rounded-xl p-3 space-y-2">
-              <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre de la mejora" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+              <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre de la mejora" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
               <div className="grid grid-cols-2 gap-1.5">
-                <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white">
+                <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5">
                   {upgradeCats.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
-                <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
               </div>
               <div className="flex gap-1.5">
                 <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">Guardar</button>
@@ -687,8 +687,8 @@ function TireRotationSection() {
             <div className="aspect-[3/2] rounded-xl border-2 border-white/10 bg-white/5 relative flex flex-col">
               {/* Fila delantera */}
               <div className="flex-1 flex items-center justify-around px-2">
-                <TireCircle label={tires.DI} name="Del. Izq." color="bg-auto-600/15 text-auto-400 border-auto-300" />
-                <TireCircle label={tires.DD} name="Del. Der." color="bg-auto-600/15 text-auto-400 border-auto-300" />
+                <TireCircle label={tires.DI} name="Del. Izq." color="bg-auto-600/10 text-auto-500 border-auto-300" />
+                <TireCircle label={tires.DD} name="Del. Der." color="bg-auto-600/10 text-auto-500 border-auto-300" />
               </div>
               {/* Separador visual */}
               <div className="h-px mx-8 bg-white/10" />
@@ -701,7 +701,7 @@ function TireRotationSection() {
           </div>
 
           <div className="flex gap-2">
-            <button onClick={rotate} className="flex-1 py-2.5 rounded-xl bg-auto-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-auto-700 transition-colors">
+            <button onClick={rotate} className="flex-1 py-2.5 rounded-xl bg-auto-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-auto-500 transition-colors">
               <RotateCw className="w-3.5 h-3.5" /> Rotar (cruzado)
             </button>
             <button onClick={reset} className="px-4 py-2.5 rounded-xl bg-white/5 text-zinc-400 text-xs font-medium hover:bg-white/10 transition-colors">
@@ -744,22 +744,22 @@ function CarfaxExportSection({ vehicle, fuelLogs, maintenances, upgrades }: {
 
           <div className="grid grid-cols-3 gap-2 mb-2">
             <div className="bg-white/5 rounded-xl p-2 text-center">
-              <p className="text-lg font-black text-amber-600">{fuelLogs.length}</p>
+              <p className="text-lg font-black text-amber-400">{fuelLogs.length}</p>
               <p className="text-[9px] text-zinc-500">Cargas</p>
             </div>
             <div className="bg-white/5 rounded-xl p-2 text-center">
-              <p className="text-lg font-black text-blue-600">{maintenances.length}</p>
+              <p className="text-lg font-black text-blue-400">{maintenances.length}</p>
               <p className="text-[9px] text-zinc-500">Mantenimientos</p>
             </div>
             <div className="bg-white/5 rounded-xl p-2 text-center">
-              <p className="text-lg font-black text-violet-600">{upgrades.length}</p>
+              <p className="text-lg font-black text-violet-400">{upgrades.length}</p>
               <p className="text-[9px] text-zinc-500">Mejoras</p>
             </div>
           </div>
 
           <button
             onClick={() => window.open("/auto/app/bitacora/carfax", "_blank")}
-            className="w-full py-3 rounded-xl bg-auto-600 text-white text-sm font-bold flex items-center justify-center gap-2 hover:bg-auto-700 transition-colors disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-auto-600 text-white text-sm font-bold flex items-center justify-center gap-2 hover:bg-auto-500 transition-colors disabled:opacity-50"
             disabled={totalEvents === 0}>
             <FileDown className="w-4 h-4" />
             Exportar reporte PDF

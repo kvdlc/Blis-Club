@@ -68,7 +68,7 @@ export default function AutonomiaClient({ defaults }: { defaults: Defaults }) {
           </span>
           <input type="number" min="1" step="0.1" value={capacidad}
             onChange={(e) => setCapacidad(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
 
         <label className="block">
@@ -87,7 +87,7 @@ export default function AutonomiaClient({ defaults }: { defaults: Defaults }) {
             onChange={(e) => setRendimiento(e.target.value)}
             disabled={usarPromedio}
             placeholder={usarPromedio ? "" : "Ej: 45"}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200 disabled:bg-white/5" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20 disabled:bg-white/5" />
         </label>
       </div>
 

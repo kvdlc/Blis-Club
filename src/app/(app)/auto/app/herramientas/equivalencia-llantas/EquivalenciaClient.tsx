@@ -97,15 +97,15 @@ export default function EquivalenciaClient() {
         <div className="flex items-center gap-1.5">
           <input type="number" min="100" max="500" value={original.ancho}
             onChange={(e) => setOriginal({ ...original, ancho: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           <span className="text-zinc-500 text-xs font-medium">/</span>
           <input type="number" min="20" max="100" value={original.perfil}
             onChange={(e) => setOriginal({ ...original, perfil: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           <span className="text-zinc-500 text-xs font-medium">R</span>
           <input type="number" min="12" max="30" value={original.rin}
             onChange={(e) => setOriginal({ ...original, rin: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </div>
 
         <p className="text-[10px] text-zinc-500 text-center">
@@ -132,15 +132,15 @@ export default function EquivalenciaClient() {
         <div className="flex items-center gap-1.5">
           <input type="number" min="100" max="500" value={nuevo.ancho}
             onChange={(e) => setNuevo({ ...nuevo, ancho: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           <span className="text-zinc-500 text-xs font-medium">/</span>
           <input type="number" min="20" max="100" value={nuevo.perfil}
             onChange={(e) => setNuevo({ ...nuevo, perfil: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           <span className="text-zinc-500 text-xs font-medium">R</span>
           <input type="number" min="12" max="30" value={nuevo.rin}
             onChange={(e) => setNuevo({ ...nuevo, rin: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </div>
 
         <p className="text-[10px] text-zinc-500 text-center">
@@ -154,19 +154,19 @@ export default function EquivalenciaClient() {
           {/* Estado de seguridad */}
           <div className={`rounded-2xl p-4 text-center border-2 ${
             resultados.estado === "seguro"
-              ? "bg-emerald-600/10 border-emerald-200"
+              ? "bg-emerald-600/10 border-emerald-500/20"
               : resultados.estado === "precaucion"
-                ? "bg-amber-600/10 border-amber-200"
-                : "bg-red-600/10 border-red-200"
+                ? "bg-amber-600/10 border-amber-500/20"
+                : "bg-red-600/10 border-red-500/20"
           }`}>
             <resultados.estadoIcon className={`w-8 h-8 mx-auto mb-2 ${
-              resultados.estado === "seguro" ? "text-emerald-600" : resultados.estado === "precaucion" ? "text-amber-600" : "text-red-600"
+              resultados.estado === "seguro" ? "text-emerald-400" : resultados.estado === "precaucion" ? "text-amber-400" : "text-red-400"
             }`} />
             <p className={`text-lg font-black ${
-              resultados.estado === "seguro" ? "text-emerald-700" : resultados.estado === "precaucion" ? "text-amber-700" : "text-red-700"
+              resultados.estado === "seguro" ? "text-emerald-400" : resultados.estado === "precaucion" ? "text-amber-400" : "text-red-400"
             }`}>{resultados.estadoLabel}</p>
             <p className={`text-sm font-bold ${
-              resultados.estado === "seguro" ? "text-emerald-600" : resultados.estado === "precaucion" ? "text-amber-600" : "text-red-600"
+              resultados.estado === "seguro" ? "text-emerald-400" : resultados.estado === "precaucion" ? "text-amber-400" : "text-red-400"
             } mt-1`}>
               Diferencia: {resultados.diferenciaPct > 0 ? "+" : ""}{resultados.diferenciaPct.toFixed(2)}%
             </p>
@@ -245,7 +245,7 @@ export default function EquivalenciaClient() {
             <div className="bg-zinc-900/5 rounded-xl p-3">
               <p className="text-xs text-zinc-400">
                 La altura de la carrocería cambia{" "}
-                <strong className={resultados.cambioAltura > 0 ? "text-auto-600" : "text-amber-600"}>
+                <strong className={resultados.cambioAltura > 0 ? "text-auto-600" : "text-amber-400"}>
                   {resultados.cambioAltura > 0 ? "+" : ""}{resultados.cambioAltura.toFixed(1)} mm
                 </strong>
               </p>

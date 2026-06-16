@@ -56,7 +56,7 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
       <div className="print:hidden mb-4 p-3 rounded-xl bg-auto-600/10 border border-auto-200 text-center">
         <p className="text-sm font-bold text-auto-400">⏳ Abriendo ventana de impresión...</p>
         <p className="text-xs text-auto-500 mb-2">Guarda como PDF para compartir con futuros compradores.</p>
-        <button onClick={() => window.print()} className="px-4 py-2 rounded-xl bg-auto-600 text-white text-xs font-bold hover:bg-auto-700 transition-colors">
+        <button onClick={() => window.print()} className="px-4 py-2 rounded-xl bg-auto-600 text-white text-xs font-bold hover:bg-auto-500 transition-colors">
           Imprimir ahora
         </button>
       </div>

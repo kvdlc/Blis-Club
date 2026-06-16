@@ -36,8 +36,8 @@ export default function MarketplaceClient({ listings, activeCat, searchMarca }: 
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-auto-600/15 flex items-center justify-center">
-            <ShoppingBag className="w-5 h-5 text-auto-400" />
+          <div className="w-10 h-10 rounded-xl bg-auto-600/10 flex items-center justify-center">
+            <ShoppingBag className="w-5 h-5 text-auto-500" />
           </div>
           <div>
             <h1 className="text-xl font-extrabold text-zinc-200">Marketplace</h1>
@@ -46,7 +46,7 @@ export default function MarketplaceClient({ listings, activeCat, searchMarca }: 
         </div>
         <Link
           href="/auto/app/marketplace/publicar"
-          className="px-3 py-2 rounded-xl bg-auto-600 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-auto-700 transition-colors shadow-lg shadow-auto-600/20"
+          className="px-3 py-2 rounded-xl bg-auto-600 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-auto-500 transition-colors shadow-lg shadow-auto-600/20"
         >
           <Plus className="w-3.5 h-3.5" /> Publicar
         </Link>
@@ -77,7 +77,7 @@ export default function MarketplaceClient({ listings, activeCat, searchMarca }: 
             type="text" value={marca} onChange={(e) => setMarca(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             placeholder="Buscar por marca o modelo..."
-            className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200"
+            className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </div>
         <button onClick={handleSearch}
@@ -114,17 +114,17 @@ export default function MarketplaceClient({ listings, activeCat, searchMarca }: 
               </div>
 
               <div className="p-3 space-y-1.5">
-                <p className="text-xs font-bold text-zinc-200 line-clamp-2 leading-tight group-hover:text-auto-400 transition-colors">
+                <p className="text-xs font-bold text-zinc-200 line-clamp-2 leading-tight group-hover:text-auto-500 transition-colors">
                   {listing.titulo}
                 </p>
 
-                <p className="text-sm font-black text-auto-400">
+                <p className="text-sm font-black text-auto-500">
                   {listing.precio === 0 ? "Gratis" : `S/ ${listing.precio.toLocaleString("es-PE")}`}
                 </p>
 
                 <div className="flex items-center gap-1.5">
                   <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                    listing.estado_item === "nuevo" ? "bg-emerald-100 text-emerald-700" : "bg-white/5 text-zinc-400"
+                    listing.estado_item === "nuevo" ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-zinc-400"
                   }`}>
                     {listing.estado_item === "nuevo" ? "Nuevo" : "Usado"}
                   </span>

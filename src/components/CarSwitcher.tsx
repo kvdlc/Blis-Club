@@ -133,7 +133,7 @@ export function CarSwitcher() {
                   {car.foto_url ? (
                     <img src={car.foto_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-xs font-black text-auto-400">{car.marca.charAt(0)}</span>
+                    <span className="text-xs font-black text-auto-500">{car.marca.charAt(0)}</span>
                   )}
                 </div>
                 <div className="text-left min-w-0 flex-1">
@@ -148,7 +148,7 @@ export function CarSwitcher() {
             <div className="border-t border-white/5 p-1.5">
               <button
                 onClick={() => { setOpen(false); router.push("/auto/app/perfil/vehiculo/nuevo"); }}
-                className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-auto-400 hover:bg-auto-600/10 transition-colors"
+                className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-auto-500 hover:bg-auto-600/10 transition-colors"
               >
                 + Agregar vehículo
               </button>

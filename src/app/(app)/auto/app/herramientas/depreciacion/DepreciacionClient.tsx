@@ -89,7 +89,7 @@ export default function DepreciacionClient() {
             type="number" min="1" step="1000"
             value={valorCompra} onChange={(e) => setValorCompra(e.target.value)}
             placeholder="Ej: 65000"
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </label>
 
@@ -114,7 +114,7 @@ export default function DepreciacionClient() {
           <input
             type="number" min="1" max="30" step="0.5"
             value={tasaAnual} onChange={(e) => setTasaAnual(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </label>
 
@@ -217,13 +217,13 @@ export default function DepreciacionClient() {
           <div className="grid grid-cols-3 gap-2">
             <div className="card-auto-dark rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Pérdida mensual</p>
-              <p className="text-sm font-bold text-red-600">
+              <p className="text-sm font-bold text-red-400">
                 S/ {Math.round(resultados.perdidaMensualLineal).toLocaleString("es-PE")}
               </p>
             </div>
             <div className="card-auto-dark rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Pérdida diaria</p>
-              <p className="text-sm font-bold text-red-600">
+              <p className="text-sm font-bold text-red-400">
                 S/ {Math.round(resultados.perdidaDiariaLineal).toLocaleString("es-PE")}
               </p>
             </div>

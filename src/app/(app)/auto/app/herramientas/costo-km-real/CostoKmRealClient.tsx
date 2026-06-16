@@ -81,26 +81,26 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
           <span className="text-xs font-bold text-zinc-400">Valor de compra (S/)</span>
           <input type="number" min="1" step="1000" value={valorCompra}
             onChange={(e) => setValorCompra(e.target.value)} placeholder="Ej: 65000"
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
         <div className="grid grid-cols-3 gap-2">
           <label className="block">
             <span className="text-[10px] font-bold text-zinc-400">Deprec. anual %</span>
             <input type="number" min="1" max="30" value={tasaDepreciacion}
               onChange={(e) => setTasaDepreciacion(e.target.value)}
-              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-[10px] font-bold text-zinc-400">Años</span>
             <input type="number" min="0.5" step="0.5" value={anios}
               onChange={(e) => setAnios(e.target.value)}
-              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-[10px] font-bold text-zinc-400">Km/año</span>
             <input type="number" min="100" step="1000" value={kmAnuales}
               onChange={(e) => setKmAnuales(e.target.value)}
-              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
       </div>

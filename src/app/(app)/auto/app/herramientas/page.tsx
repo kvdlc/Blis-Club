@@ -18,8 +18,8 @@ export default function HerramientasPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-auto-600/15 flex items-center justify-center">
-          <Wrench className="w-5 h-5 text-auto-400" />
+        <div className="w-10 h-10 rounded-xl bg-auto-600/10 flex items-center justify-center">
+          <Wrench className="w-5 h-5 text-auto-500" />
         </div>
         <div>
           <h1 className="text-xl font-extrabold text-zinc-200">Herramientas</h1>
@@ -34,8 +34,8 @@ export default function HerramientasPage() {
             href={`/auto/app/herramientas/${tool.slug}`}
             className="card-auto-dark rounded-2xl p-4 flex items-center gap-3 hover:shadow-md transition-shadow active:scale-[0.98]"
           >
-            <div className="w-10 h-10 rounded-xl bg-auto-600/15 flex items-center justify-center shrink-0">
-              <tool.icon className="w-5 h-5 text-auto-400" />
+            <div className="w-10 h-10 rounded-xl bg-auto-600/10 flex items-center justify-center shrink-0">
+              <tool.icon className="w-5 h-5 text-auto-500" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-zinc-200">{tool.label}</p>

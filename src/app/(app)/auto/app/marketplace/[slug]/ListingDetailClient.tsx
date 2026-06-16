@@ -50,7 +50,7 @@ export default function ListingDetailClient({ listing }: Props) {
 
         <div className="flex items-center gap-2 flex-wrap">
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-            listing.estado_item === "nuevo" ? "bg-emerald-100 text-emerald-700" : "bg-white/5 text-zinc-400"
+            listing.estado_item === "nuevo" ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-zinc-400"
           }`}>
             {listing.estado_item === "nuevo" ? "Nuevo" : "Usado"}
           </span>

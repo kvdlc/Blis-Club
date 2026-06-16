@@ -55,7 +55,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
   })();
 
   // Eco-score color
-  const ecoColor = ecoScore >= 70 ? "text-emerald-600" : ecoScore >= 40 ? "text-amber-600" : "text-red-600";
+  const ecoColor = ecoScore >= 70 ? "text-emerald-400" : ecoScore >= 40 ? "text-amber-400" : "text-red-400";
   const ecoBg = ecoScore >= 70 ? "bg-emerald-600/100" : ecoScore >= 40 ? "bg-amber-600/100" : "bg-red-600/100";
   const ecoDashOffset = 97.4 - (97.4 * ecoScore) / 100;
 
@@ -64,29 +64,29 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
       {/* Próximos trámites */}
       <div className="card-auto-dark rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center">
-            <Calendar className="w-4 h-4 text-amber-600" />
+          <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+            <Calendar className="w-4 h-4 text-amber-400" />
           </div>
-          <h3 className="text-sm font-bold text-zinc-200">Trámites por vencer</h3>
+          <h3 className="text-sm font-bold text-zinc-100">Trámites por vencer</h3>
         </div>
 
         {nextDocExpiry ? (
           (() => {
             const dias = daysUntil(nextDocExpiry.fecha_vencimiento);
             return (
-              <div className={`rounded-xl p-3 flex items-center justify-between ${
-                dias <= 7 ? "bg-red-600/10 border border-red-200" :
-                dias <= 15 ? "bg-amber-600/10 border border-amber-200" :
-                "bg-emerald-600/10 border border-emerald-200"
+              <div className={`rounded-xl p-3 flex items-center justify-between border ${
+                dias <= 7 ? "bg-red-500/10 border-red-500/20" :
+                dias <= 15 ? "bg-amber-500/10 border-amber-500/20" :
+                "bg-emerald-500/10 border-emerald-500/20"
               }`}>
                 <div>
-                  <p className="text-sm font-bold text-zinc-200">{documentLabels[nextDocExpiry.tipo] || nextDocExpiry.tipo}</p>
-                  <p className="text-xs text-zinc-400">Vence: {new Date(nextDocExpiry.fecha_vencimiento + "T12:00:00").toLocaleDateString("es-PE", { day: "numeric", month: "short", year: "numeric" })}</p>
+                  <p className="text-sm font-bold text-zinc-100">{documentLabels[nextDocExpiry.tipo] || nextDocExpiry.tipo}</p>
+                  <p className="text-xs text-zinc-500">Vence: {new Date(nextDocExpiry.fecha_vencimiento + "T12:00:00").toLocaleDateString("es-PE", { day: "numeric", month: "short", year: "numeric" })}</p>
                 </div>
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                  dias <= 7 ? "bg-red-100 text-red-700" :
-                  dias <= 15 ? "bg-amber-100 text-amber-700" :
-                  "bg-emerald-100 text-emerald-700"
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
+                  dias <= 7 ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                  dias <= 15 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+                  "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                 }`}>
                   {dias <= 0 ? "Vencido" : `${dias} días`}
                 </span>
@@ -105,15 +105,15 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
         {/* Eco-Score */}
         <div className="card-auto-dark rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
             </div>
             <h3 className="text-xs font-bold text-zinc-300">Eco-Score</h3>
           </div>
           <div className="flex items-center justify-center py-1">
             <div className="relative w-16 h-16">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="15.5" fill="none" stroke="#e5e7eb" strokeWidth="3" />
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
                 <circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" strokeWidth="3"
                   className={ecoColor} strokeDasharray="97.4" strokeDashoffset={ecoDashOffset} strokeLinecap="round" />
               </svg>
@@ -130,16 +130,16 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
         {/* Estado del vehículo */}
         <div className="card-auto-dark rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-auto-600/15 flex items-center justify-center">
-              <ShieldCheck className="w-3.5 h-3.5 text-auto-400" />
+            <div className="w-7 h-7 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
+              <ShieldCheck className="w-3.5 h-3.5 text-auto-500" />
             </div>
             <h3 className="text-xs font-bold text-zinc-300">Estado</h3>
           </div>
           <div className="flex items-center justify-center py-1">
-            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-              vehicle.estado === "activo" ? "bg-emerald-100 text-emerald-700" :
-              vehicle.estado === "en venta" ? "bg-amber-100 text-amber-700" :
-              "bg-red-100 text-red-700"
+            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+              vehicle.estado === "activo" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+              vehicle.estado === "en venta" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+              "bg-red-500/10 text-red-400 border-red-500/20"
             }`}>
               {vehicle.estado === "activo" ? "Todo al día" :
                vehicle.estado === "en venta" ? "En venta" :
@@ -154,13 +154,13 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
         {/* Gasto mensual */}
         <div className="card-auto-dark rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
-              <DollarSign className="w-3.5 h-3.5 text-blue-600" />
+            <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+              <DollarSign className="w-3.5 h-3.5 text-blue-400" />
             </div>
             <h3 className="text-xs font-bold text-zinc-300">Gasto 30d</h3>
           </div>
           <div className="flex items-center justify-center py-1">
-            <span className="text-lg font-black text-zinc-200">
+            <span className="text-lg font-black text-zinc-100">
               S/ {Math.round(gastoMensual).toLocaleString("es-PE")}
             </span>
           </div>
@@ -172,16 +172,16 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
         {/* Rendimiento promedio */}
         <div className="card-auto-dark rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
-              <Droplets className="w-3.5 h-3.5 text-violet-600" />
+            <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+              <Droplets className="w-3.5 h-3.5 text-violet-400" />
             </div>
             <h3 className="text-xs font-bold text-zinc-300">Rendimiento</h3>
           </div>
           <div className="flex items-center justify-center py-1">
-            <span className="text-lg font-black text-zinc-200">
+            <span className="text-lg font-black text-zinc-100">
               {rendimientoPromedio != null ? `${rendimientoPromedio}` : "—"}
             </span>
-            {rendimientoPromedio && <span className="text-xs text-zinc-400 ml-0.5">km/gal</span>}
+            {rendimientoPromedio && <span className="text-xs text-zinc-500 ml-0.5">km/gal</span>}
           </div>
           <p className="text-[10px] text-zinc-500 text-center mt-1">
             {fuelLogs.length >= 2 ? "Promedio general" : "Registra 2+ cargas"}
@@ -194,7 +194,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
           <h3 className="text-xs font-extrabold text-zinc-300 mb-2">🏆 Logros ({badges.length})</h3>
           <div className="flex flex-wrap gap-1.5">
             {badges.map((key) => (
-              <span key={key} className="text-[9px] font-bold bg-auto-600/10 text-auto-400 px-2 py-1 rounded-full border border-auto-200">
+              <span key={key} className="text-[9px] font-bold bg-auto-600/10 text-auto-500 px-2 py-1 rounded-full border border-auto-600/20">
                 {key.replace(/_/g, " ")}
               </span>
             ))}
@@ -230,8 +230,8 @@ function MaintenanceWidget({ maintenances, currentKm }: { maintenances: Maintena
     return (
       <div className="card-auto-dark rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
-            <Wrench className="w-3.5 h-3.5 text-violet-600" />
+          <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+            <Wrench className="w-3.5 h-3.5 text-violet-400" />
           </div>
           <h3 className="text-xs font-bold text-zinc-300">Próximo servicio</h3>
         </div>
@@ -247,14 +247,14 @@ function MaintenanceWidget({ maintenances, currentKm }: { maintenances: Maintena
   return (
     <div className="card-auto-dark rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
-          <Wrench className="w-3.5 h-3.5 text-violet-600" />
+        <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+          <Wrench className="w-3.5 h-3.5 text-violet-400" />
         </div>
         <h3 className="text-xs font-bold text-zinc-300">Próximo servicio</h3>
       </div>
-      <p className="text-lg font-black text-zinc-200">{kmRestantes.toLocaleString("es-PE")} km</p>
+      <p className="text-lg font-black text-zinc-100">{kmRestantes.toLocaleString("es-PE")} km</p>
       <div className="h-2 bg-white/5 rounded-full mt-1 overflow-hidden">
-        <div className={`h-full rounded-full ${pct > 90 ? "bg-red-600/100" : pct > 70 ? "bg-amber-600/100" : "bg-violet-500"}`} style={{ width: `${pct}%` }} />
+        <div className={`h-full rounded-full ${pct > 90 ? "bg-red-500" : pct > 70 ? "bg-amber-500" : "bg-violet-500"}`} style={{ width: `${pct}%` }} />
       </div>
       <p className="text-[10px] text-zinc-500 mt-1">{kmDesdeUltimo} km desde último · cada {intervalKm.toLocaleString("es-PE")} km</p>
     </div>
@@ -293,14 +293,14 @@ function CompareMonthWidget({ fuelLogs, maintenances }: { fuelLogs: FuelLog[]; m
   return (
     <div className="card-auto-dark rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg bg-cyan-100 flex items-center justify-center">
-          <DollarSign className="w-3.5 h-3.5 text-cyan-600" />
+        <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+          <DollarSign className="w-3.5 h-3.5 text-cyan-400" />
         </div>
         <h3 className="text-xs font-bold text-zinc-300">vs mes pasado</h3>
       </div>
-      <p className="text-lg font-black text-zinc-200">S/ {actual.toLocaleString("es-PE")}</p>
+      <p className="text-lg font-black text-zinc-100">S/ {actual.toLocaleString("es-PE")}</p>
       {pasado > 0 && (
-        <p className={`text-[10px] font-bold mt-1 ${subio ? "text-red-500" : "text-emerald-500"}`}>
+        <p className={`text-[10px] font-bold mt-1 ${subio ? "text-red-400" : "text-emerald-400"}`}>
           {subio ? "↑" : "↓"} {pctCambio}% vs S/ {pasado.toLocaleString("es-PE")}
         </p>
       )}
@@ -328,12 +328,12 @@ function AutonomiaWidget({ fuelLogs, specs }: { fuelLogs: FuelLog[]; specs: Vehi
   return (
     <div className="card-auto-dark rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-          <Gauge className="w-3.5 h-3.5 text-emerald-600" />
+        <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+          <Gauge className="w-3.5 h-3.5 text-emerald-400" />
         </div>
         <h3 className="text-xs font-bold text-zinc-300">Autonomía</h3>
       </div>
-      <p className="text-lg font-black text-zinc-200">
+      <p className="text-lg font-black text-zinc-100">
         {autonomia ? `${autonomia.toLocaleString("es-PE")} km` : "—"}
       </p>
       <p className="text-[10px] text-zinc-500 mt-1">
@@ -355,12 +355,12 @@ function LastFuelWidget({ fuelLogs }: { fuelLogs: FuelLog[] }) {
   return (
     <div className="card-auto-dark rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
-          <Clock className="w-3.5 h-3.5 text-amber-600" />
+        <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+          <Clock className="w-3.5 h-3.5 text-amber-400" />
         </div>
         <h3 className="text-xs font-bold text-zinc-300">Última carga</h3>
       </div>
-      <p className="text-lg font-black text-zinc-200">
+      <p className="text-lg font-black text-zinc-100">
         {diasSinCargar != null ? `${diasSinCargar} días` : "—"}
       </p>
       <p className="text-[10px] text-zinc-500 mt-1">

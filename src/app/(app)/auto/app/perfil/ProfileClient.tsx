@@ -56,8 +56,8 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-auto-600/15 flex items-center justify-center">
-          <User className="w-5 h-5 text-auto-400" />
+        <div className="w-10 h-10 rounded-xl bg-auto-600/10 flex items-center justify-center">
+          <User className="w-5 h-5 text-auto-500" />
         </div>
         <div>
           <h1 className="text-xl font-extrabold text-zinc-200">Perfil</h1>
@@ -70,7 +70,7 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-extrabold text-zinc-300">Datos personales</h3>
           <button onClick={() => setEditingProfile(!editingProfile)}
-            className="text-xs font-bold text-auto-400 hover:text-auto-700">
+            className="text-xs font-bold text-auto-500 hover:text-auto-700">
             {editingProfile ? "Cancelar" : "Editar"}
           </button>
         </div>
@@ -81,33 +81,33 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
               <label className="block">
                 <span className="text-[10px] font-bold text-zinc-400">Nombre</span>
                 <input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-                  placeholder="Tu nombre" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                  placeholder="Tu nombre" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-white/5 focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               </label>
               <label className="block">
                 <span className="text-[10px] font-bold text-zinc-400">Apellido</span>
                 <input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-                  placeholder="Tu apellido" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                  placeholder="Tu apellido" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-white/5 focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               </label>
             </div>
             <label className="block">
               <span className="text-[10px] font-bold text-zinc-400">Nombre público</span>
               <input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })}
-                placeholder="Cómo te verán otros usuarios" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                placeholder="Cómo te verán otros usuarios" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-white/5 focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             </label>
             <div className="grid grid-cols-2 gap-2">
               <label className="block">
                 <span className="text-[10px] font-bold text-zinc-400">WhatsApp</span>
                 <input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
-                  placeholder="+51 999 888 777" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                  placeholder="+51 999 888 777" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-white/5 focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               </label>
               <label className="block">
                 <span className="text-[10px] font-bold text-zinc-400">País</span>
                 <input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}
-                  placeholder="PE" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                  placeholder="PE" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-white/5 focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               </label>
             </div>
             <button onClick={handleSaveProfile} disabled={saving}
-              className="w-full py-2.5 rounded-xl bg-auto-600 text-white text-sm font-bold hover:bg-auto-700 transition-colors disabled:opacity-50">
+              className="w-full py-2.5 rounded-xl bg-auto-600 text-white text-sm font-bold hover:bg-auto-500 transition-colors disabled:opacity-50">
               {saving ? "Guardando..." : "Guardar cambios"}
             </button>
           </div>
@@ -127,7 +127,7 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-extrabold text-zinc-300">Mis vehículos</h3>
           <Link href="/auto/app/perfil/vehiculo/nuevo"
-            className="flex items-center gap-1 text-xs font-bold text-auto-400 hover:text-auto-700">
+            className="flex items-center gap-1 text-xs font-bold text-auto-500 hover:text-auto-700">
             <Plus className="w-3.5 h-3.5" /> Agregar
           </Link>
         </div>
@@ -139,27 +139,27 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
             {vehicles.map((v) => (
               <div key={v.id} className="flex items-center justify-between bg-white/5 rounded-xl p-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shrink-0 border border-white/10 text-lg">
+                  <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-lg">
                     🚗
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-zinc-200 truncate">{v.marca} {v.modelo}</p>
                     <p className="text-[10px] text-zinc-500">{v.año} · {v.placa} · {v.kilometraje.toLocaleString("es-PE")} km</p>
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                      v.estado === "activo" ? "bg-emerald-100 text-emerald-700" :
-                      v.estado === "en venta" ? "bg-amber-100 text-amber-700" :
-                      v.estado === "robado" ? "bg-red-100 text-red-700" :
+                      v.estado === "activo" ? "bg-emerald-500/10 text-emerald-400" :
+                      v.estado === "en venta" ? "bg-amber-500/10 text-amber-400" :
+                      v.estado === "robado" ? "bg-red-500/10 text-red-400" :
                       "bg-white/5 text-zinc-400"
                     }`}>{v.estado === "robado" ? "robado" : v.estado}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
                   <Link href={`/auto/app/perfil/vehiculo/${v.id}/editar`}
-                    className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-auto-400">
+                    className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-auto-500">
                     <Pencil className="w-3.5 h-3.5" />
                   </Link>
                   <Link href={`/auto/app/perfil/vehiculo/${v.id}/publico`}
-                    className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-auto-400">
+                    className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-auto-500">
                     <Settings className="w-3.5 h-3.5" />
                   </Link>
                   <button onClick={() => handleDeleteVehicle(v.id)}
@@ -179,7 +179,7 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
         <Link href="/auto/app/suscripcion"
           className="flex items-center justify-between bg-white/5 rounded-xl p-3 hover:bg-white/5 transition-colors">
           <span className="text-xs text-zinc-400">Ver mi plan actual</span>
-          <span className="text-xs font-bold text-auto-400">→</span>
+          <span className="text-xs font-bold text-auto-500">→</span>
         </Link>
       </div>
     </div>

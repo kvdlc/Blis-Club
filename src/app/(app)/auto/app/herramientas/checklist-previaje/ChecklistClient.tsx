@@ -54,10 +54,10 @@ const checklistData: ChecklistItem[] = [
 ];
 
 const categories = [
-  { key: "fluidos", label: "Fluidos", icon: Droplets, color: "bg-blue-100 text-blue-700" },
-  { key: "neumaticos", label: "Neumáticos", icon: Car, color: "bg-amber-100 text-amber-700" },
-  { key: "luces", label: "Luces", icon: Lightbulb, color: "bg-violet-100 text-violet-700" },
-  { key: "seguridad", label: "Seguridad", icon: Shield, color: "bg-emerald-100 text-emerald-700" },
+  { key: "fluidos", label: "Fluidos", icon: Droplets, color: "bg-blue-500/10 text-blue-400" },
+  { key: "neumaticos", label: "Neumáticos", icon: Car, color: "bg-amber-500/10 text-amber-400" },
+  { key: "luces", label: "Luces", icon: Lightbulb, color: "bg-violet-500/10 text-violet-400" },
+  { key: "seguridad", label: "Seguridad", icon: Shield, color: "bg-emerald-500/10 text-emerald-400" },
   { key: "documentos", label: "Documentos", icon: CheckCircle2, color: "bg-zinc-900/5 text-zinc-300" },
 ];
 
@@ -177,9 +177,9 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
                 </div>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                   cat.catChecked === cat.catTotal
-                    ? "bg-emerald-100 text-emerald-700"
+                    ? "bg-emerald-500/10 text-emerald-400"
                     : cat.catChecked >= cat.catTotal / 2
-                      ? "bg-amber-100 text-amber-700"
+                      ? "bg-amber-500/10 text-amber-400"
                       : "bg-zinc-900/5 text-zinc-400"
                 }`}>
                   {cat.catChecked === cat.catTotal ? "✓" : `${cat.catChecked}/${cat.catTotal}`}
@@ -222,18 +222,18 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
 
       {/* Resumen final */}
       {progressPct >= 95 && (
-        <div className="rounded-2xl bg-emerald-600/10 border-2 border-emerald-200 p-4 text-center">
-          <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-          <p className="text-lg font-black text-emerald-700">¡Listo para el viaje!</p>
-          <p className="text-xs text-emerald-600 mt-1">Todos los puntos del checklist están verificados. Buen viaje.</p>
+        <div className="rounded-2xl bg-emerald-600/10 border-2 border-emerald-500/20 p-4 text-center">
+          <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+          <p className="text-lg font-black text-emerald-400">¡Listo para el viaje!</p>
+          <p className="text-xs text-emerald-400 mt-1">Todos los puntos del checklist están verificados. Buen viaje.</p>
         </div>
       )}
 
       {progressPct > 0 && progressPct < 95 && (
-        <div className="rounded-2xl bg-amber-600/10 border-2 border-amber-200 p-4 text-center">
-          <AlertTriangle className="w-8 h-8 text-amber-600 mx-auto mb-2" />
-          <p className="text-lg font-black text-amber-700">Aún hay pendientes</p>
-          <p className="text-xs text-amber-600 mt-1">{totalCount - checkedCount} puntos sin verificar. No salgas sin revisarlos.</p>
+        <div className="rounded-2xl bg-amber-600/10 border-2 border-amber-500/20 p-4 text-center">
+          <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+          <p className="text-lg font-black text-amber-400">Aún hay pendientes</p>
+          <p className="text-xs text-amber-400 mt-1">{totalCount - checkedCount} puntos sin verificar. No salgas sin revisarlos.</p>
         </div>
       )}
     </div>

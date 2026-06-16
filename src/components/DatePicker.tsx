@@ -136,7 +136,7 @@ export function DatePicker({ value, onChange, min, max, label, colorTheme = "pri
         onClick={() => { setOpen(!open); setPickerMode("days"); }}
         className="w-full flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm text-left hover:bg-zinc-100 transition-colors"
       >
-        <CalendarDays className={`w-4 h-4 shrink-0 ${c === "auto" ? "text-auto-400" : "text-primary-400"}`} />
+        <CalendarDays className={`w-4 h-4 shrink-0 ${c === "auto" ? "text-auto-500" : "text-primary-400"}`} />
         <span className={`flex-1 truncate ${value ? "text-zinc-900" : "text-zinc-400"}`}>
           {value ? formatDisplay(value) : (label || "Seleccionar fecha")}
         </span>
@@ -163,7 +163,7 @@ export function DatePicker({ value, onChange, min, max, label, colorTheme = "pri
               <div className="grid grid-cols-4 gap-1">
                 {MONTHS_SHORT.map((m, i) => (
                   <button key={m} onClick={() => selectMonth(i)}
-                    className={`text-[10px] font-semibold rounded-lg py-1.5 transition-colors ${i === viewMonth ? (c === "auto" ? "bg-auto-100 text-auto-700" : "bg-primary-100 text-primary-700") : "text-zinc-500 hover:bg-zinc-100"}`}>
+                    className={`text-[10px] font-semibold rounded-lg py-1.5 transition-colors ${i === viewMonth ? (c === "auto" ? "bg-auto-600/10 text-auto-500" : "bg-primary-100 text-primary-700") : "text-zinc-500 hover:bg-zinc-100"}`}>
                     {m}
                   </button>
                 ))}

@@ -10,9 +10,9 @@ import { ArrowLeft, Globe, Shield, Tag, AlertTriangle, Eye, EyeOff } from "lucid
 type VehicleEstado = "activo" | "en venta" | "robado" | "vendido";
 
 const estados: { value: VehicleEstado; label: string; desc: string; icon: any; color: string }[] = [
-  { value: "activo", label: "Activo", desc: "Vehículo en uso normal. Visible en tu perfil.", icon: Shield, color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  { value: "en venta", label: "En venta", desc: "Visible públicamente en tu perfil y en Marketplace de Autos Usados.", icon: Tag, color: "bg-amber-100 text-amber-700 border-amber-200" },
-  { value: "robado", label: "Robado", desc: "Marca el vehículo como robado. Se mostrará una alerta en el perfil público.", icon: AlertTriangle, color: "bg-red-100 text-red-700 border-red-200" },
+  { value: "activo", label: "Activo", desc: "Vehículo en uso normal. Visible en tu perfil.", icon: Shield, color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  { value: "en venta", label: "En venta", desc: "Visible públicamente en tu perfil y en Marketplace de Autos Usados.", icon: Tag, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+  { value: "robado", label: "Robado", desc: "Marca el vehículo como robado. Se mostrará una alerta en el perfil público.", icon: AlertTriangle, color: "bg-red-500/10 text-red-400 border-red-500/20" },
   { value: "vendido", label: "Vendido", desc: "El vehículo ya no te pertenece. Se oculta de tu lista activa.", icon: EyeOff, color: "bg-white/5 text-zinc-400 border-white/10" },
 ];
 
@@ -57,9 +57,9 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
         <p className="text-xs text-zinc-500 text-center">{vehicle.año} · {vehicle.kilometraje.toLocaleString("es-PE")} km</p>
         <div className="flex justify-center mt-2">
           <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-            estado === "activo" ? "bg-emerald-100 text-emerald-700" :
-            estado === "en venta" ? "bg-amber-100 text-amber-700" :
-            estado === "robado" ? "bg-red-100 text-red-700" :
+            estado === "activo" ? "bg-emerald-500/10 text-emerald-400" :
+            estado === "en venta" ? "bg-amber-500/10 text-amber-400" :
+            estado === "robado" ? "bg-red-500/10 text-red-400" :
             "bg-white/5 text-zinc-400"
           }`}>{estado === "en venta" ? "En venta" : estado === "robado" ? "Robado" : estado === "vendido" ? "Vendido" : "Activo"}</span>
         </div>
@@ -81,9 +81,9 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
                 }`}
               >
                 <Icon className={`w-5 h-5 shrink-0 mt-0.5 ${
-                  e.value === "activo" ? "text-emerald-600" :
-                  e.value === "en venta" ? "text-amber-600" :
-                  e.value === "robado" ? "text-red-600" :
+                  e.value === "activo" ? "text-emerald-400" :
+                  e.value === "en venta" ? "text-amber-400" :
+                  e.value === "robado" ? "text-red-400" :
                   "text-zinc-400"
                 }`} />
                 <div>
@@ -96,7 +96,7 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
         </div>
 
         <button onClick={handleSave} disabled={saving}
-          className="w-full mt-4 py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-700 transition-colors active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-auto-600/20">
+          className="w-full mt-4 py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-500 transition-colors active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-auto-600/20">
           {saving ? "Guardando..." : "Guardar estado"}
         </button>
       </div>

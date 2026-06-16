@@ -22,18 +22,18 @@ export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocE
   if (!vehicle) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
-        <div className="w-24 h-24 rounded-full bg-auto-50 flex items-center justify-center">
+        <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-lg">
           <span className="text-4xl">🚗</span>
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-zinc-200">¡Bienvenido a Auto!</h2>
-          <p className="text-zinc-400 mt-2 max-w-sm text-sm leading-relaxed">
+          <h2 className="text-2xl font-bold text-zinc-100">¡Bienvenido a Auto!</h2>
+          <p className="text-zinc-500 mt-2 max-w-sm text-sm leading-relaxed">
             Registra tu primer vehículo para comenzar a usar todas las herramientas.
           </p>
         </div>
         <button
           onClick={() => router.push("/auto/app/perfil/vehiculo/nuevo")}
-          className="px-6 py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-700 transition-colors active:scale-95 shadow-lg shadow-auto-600/20"
+          className="px-6 py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-500 transition-colors active:scale-95 shadow-auto-glow"
         >
           Agregar vehículo
         </button>

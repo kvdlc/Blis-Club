@@ -102,7 +102,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               value={distancia}
               onChange={(e) => setDistancia(e.target.value)}
               placeholder="Ej: 350"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">km</span>
           </div>
@@ -126,7 +126,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               value={rendimiento}
               onChange={(e) => setRendimiento(e.target.value)}
               placeholder="Ej: 45"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">km/gal</span>
           </div>
@@ -150,7 +150,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               value={precioGalon}
               onChange={(e) => setPrecioGalon(e.target.value)}
               placeholder="Ej: 18.50"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">S/</span>
           </div>
@@ -175,13 +175,13 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               type="text" value={nuevoPeaje.nombre}
               onChange={(e) => setNuevoPeaje({ ...nuevoPeaje, nombre: e.target.value })}
               placeholder="Nombre"
-              className="flex-1 px-3 py-2 rounded-xl border border-white/10 bg-zinc-900 text-xs focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="flex-1 px-3 py-2 rounded-xl border border-white/10 bg-zinc-900 text-xs focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <input
               type="number" min="0" step="0.5" value={nuevoPeaje.costo}
               onChange={(e) => setNuevoPeaje({ ...nuevoPeaje, costo: e.target.value })}
               placeholder="S/"
-              className="w-20 px-3 py-2 rounded-xl border border-white/10 bg-zinc-900 text-xs focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="w-20 px-3 py-2 rounded-xl border border-white/10 bg-zinc-900 text-xs focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <button
               onClick={agregarPeaje}
@@ -201,7 +201,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
           <input
             type="number" min="1" max="20" value={pasajeros}
             onChange={(e) => setPasajeros(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </label>
       </div>

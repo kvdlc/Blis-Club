@@ -59,12 +59,12 @@ export default function EditVehicleClient({ userId, vehicle }: { userId: string;
           <label className="block">
             <span className="text-xs font-bold text-zinc-400">Marca *</span>
             <input required value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-xs font-bold text-zinc-400">Modelo *</span>
             <input required value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
 
@@ -73,12 +73,12 @@ export default function EditVehicleClient({ userId, vehicle }: { userId: string;
             <span className="text-xs font-bold text-zinc-400">Año *</span>
             <input required type="number" min={1950} max={new Date().getFullYear() + 1} value={form.año}
               onChange={(e) => setForm({ ...form, año: parseInt(e.target.value) || 0 })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-xs font-bold text-zinc-400">Placa *</span>
             <input required value={form.placa} onChange={(e) => setForm({ ...form, placa: e.target.value.toUpperCase() })}
-              maxLength={10} className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              maxLength={10} className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
 
@@ -87,24 +87,24 @@ export default function EditVehicleClient({ userId, vehicle }: { userId: string;
             <span className="text-xs font-bold text-zinc-400">Kilometraje</span>
             <input type="number" min={0} value={form.kilometraje}
               onChange={(e) => setForm({ ...form, kilometraje: parseInt(e.target.value) || 0 })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-xs font-bold text-zinc-400">Color</span>
             <input value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-xs font-bold text-zinc-400">VIN</span>
             <input value={form.vin} onChange={(e) => setForm({ ...form, vin: e.target.value.toUpperCase() })}
-              maxLength={17} className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              maxLength={17} className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
 
         <label className="block">
           <span className="text-xs font-bold text-zinc-400">URL de la foto</span>
           <input value={form.foto_url} onChange={(e) => setForm({ ...form, foto_url: e.target.value })}
-            placeholder="https://..." className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            placeholder="https://..." className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
 
         {form.foto_url && (
@@ -114,7 +114,7 @@ export default function EditVehicleClient({ userId, vehicle }: { userId: string;
         )}
 
         <button type="submit" disabled={saving}
-          className="w-full py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-700 transition-colors active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-auto-600/20">
+          className="w-full py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-500 transition-colors active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-auto-600/20">
           {saving ? "Guardando..." : "Guardar cambios"}
         </button>
       </form>

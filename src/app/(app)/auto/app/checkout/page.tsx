@@ -60,7 +60,7 @@ export default function AutoCheckoutPage() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
-        <p className="text-sm text-red-600 font-semibold text-center">{error}</p>
+        <p className="text-sm text-red-400 font-semibold text-center">{error}</p>
         <button
           onClick={() => router.push("/auto/app/suscripcion")}
           className="flex items-center gap-2 text-sm text-auto-400 font-semibold"

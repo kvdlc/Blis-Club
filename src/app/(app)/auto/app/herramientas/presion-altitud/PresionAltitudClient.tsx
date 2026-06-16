@@ -101,7 +101,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
                 <input type="number" min="20" max="80" step="1" value={presionDelante}
                   onChange={(e) => setPresionDelante(e.target.value)}
                   placeholder="32"
-                  className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                  className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
                 {defaults.presionDelante && (
                   <button onClick={() => setPresionDelante(defaults.presionDelante!.toString())}
                     className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-auto-600/15 hover:text-auto-400">
@@ -122,7 +122,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
                   <input type="number" min="20" max="80" step="1" value={presionAtras}
                     onChange={(e) => setPresionAtras(e.target.value)}
                     placeholder="32"
-                    className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                    className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
                 )}
                 {defaults.presionAtras && (
                   <button onClick={() => { setUsarMismaPresion(false); setPresionAtras(defaults.presionAtras!.toString()); }}
@@ -138,8 +138,8 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
         {/* Altitudes */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
-              <Mountain className="w-3.5 h-3.5 text-blue-600" />
+            <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <Mountain className="w-3.5 h-3.5 text-blue-400" />
             </div>
             <h3 className="text-xs font-bold text-zinc-300">Altitudes del viaje</h3>
           </div>
@@ -150,14 +150,14 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
               <input type="number" min="0" max="6000" step="10" value={altitudOrigen}
                 onChange={(e) => setAltitudOrigen(e.target.value)}
                 placeholder="Ej: 3400"
-                className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             </label>
             <label className="block">
               <span className="text-[10px] font-bold text-zinc-400">Altitud de destino (msnm)</span>
               <input type="number" min="0" max="6000" step="10" value={altitudDestino}
                 onChange={(e) => setAltitudDestino(e.target.value)}
                 placeholder="Ej: 150"
-                className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             </label>
           </div>
         </div>
@@ -190,16 +190,16 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
         <div className="space-y-3">
           {/* Dirección y ajuste */}
           <div className={`rounded-2xl p-4 text-center border-2 ${
-            resultados.excesivo ? "bg-red-600/10 border-red-200" : "bg-blue-600/10 border-blue-200"
+            resultados.excesivo ? "bg-red-600/10 border-red-500/20" : "bg-blue-600/10 border-blue-500/20"
           }`}>
             <div className="flex items-center justify-center gap-3 mb-2">
               <span className="text-xs font-bold text-zinc-400">
                 {Math.abs(resultados.deltaAltitud).toLocaleString("es-PE")} m
               </span>
               {resultados.esAscenso ? (
-                <ArrowUp className="w-6 h-6 text-emerald-600" />
+                <ArrowUp className="w-6 h-6 text-emerald-400" />
               ) : (
-                <ArrowDown className="w-6 h-6 text-amber-600" />
+                <ArrowDown className="w-6 h-6 text-amber-400" />
               )}
               <span className="text-xs font-bold text-zinc-400">
                 {resultados.esAscenso ? "Ascenso" : "Descenso"}
@@ -207,7 +207,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
             </div>
 
             <p className={`text-lg font-black ${
-              resultados.excesivo ? "text-red-700" : "text-zinc-200"
+              resultados.excesivo ? "text-red-400" : "text-zinc-200"
             }`}>
               {resultados.deltaPis > 0 ? "+" : ""}{resultados.deltaPis.toFixed(1)} PSI
             </p>
@@ -217,7 +217,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
                 : "Resta 0.5 PSI por cada 300m de descenso"}
             </p>
             {resultados.excesivo && (
-              <p className="text-xs font-bold text-red-600 mt-1">⚠️ Ajuste mayor a 10 PSI. Verifica las altitudes.</p>
+              <p className="text-xs font-bold text-red-400 mt-1">⚠️ Ajuste mayor a 10 PSI. Verifica las altitudes.</p>
             )}
           </div>
 

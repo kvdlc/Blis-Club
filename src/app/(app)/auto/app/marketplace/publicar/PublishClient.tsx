@@ -105,21 +105,21 @@ export default function PublishClient({ userId }: { userId: string }) {
           <span className="text-xs font-bold text-zinc-400">Título *</span>
           <input required value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })}
             placeholder="Ej: Faros LED para Toyota Corolla 2020"
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
 
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
             <span className="text-xs font-bold text-zinc-400">Categoría *</span>
             <select required value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200">
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20">
               {categories.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
           </label>
           <label className="block">
             <span className="text-xs font-bold text-zinc-400">Estado *</span>
             <select required value={form.estado_item} onChange={(e) => setForm({ ...form, estado_item: e.target.value })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200">
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20">
               <option value="usado">Usado</option>
               <option value="nuevo">Nuevo</option>
             </select>
@@ -130,7 +130,7 @@ export default function PublishClient({ userId }: { userId: string }) {
           <span className="text-xs font-bold text-zinc-400">Precio (S/) *</span>
           <input required type="number" min="0" step="0.01" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })}
             placeholder="0 = Gratis"
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
 
         <div className="grid grid-cols-2 gap-2">
@@ -138,13 +138,13 @@ export default function PublishClient({ userId }: { userId: string }) {
             <span className="text-xs font-bold text-zinc-400">Marca</span>
             <input value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })}
               placeholder="Ej: Toyota"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-xs font-bold text-zinc-400">Modelo</span>
             <input value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })}
               placeholder="Ej: Corolla"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
 
@@ -153,13 +153,13 @@ export default function PublishClient({ userId }: { userId: string }) {
             <span className="text-xs font-bold text-zinc-400">WhatsApp *</span>
             <input required value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
               placeholder="+51 999 888 777"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-xs font-bold text-zinc-400">Ciudad</span>
             <input value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })}
               placeholder="Ej: Lima"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
 
@@ -167,7 +167,7 @@ export default function PublishClient({ userId }: { userId: string }) {
           <span className="text-xs font-bold text-zinc-400">Descripción</span>
           <textarea rows={3} value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
             placeholder="Describe tu producto, compatibilidad, condición..."
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200 resize-none" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20 resize-none" />
         </label>
 
         {/* Fotos */}
@@ -177,7 +177,7 @@ export default function PublishClient({ userId }: { userId: string }) {
             <input value={fotoUrl} onChange={(e) => setFotoUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addFoto())}
               placeholder="https://..."
-              className="flex-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="flex-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-xs focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             <button type="button" onClick={addFoto} disabled={!fotoUrl.trim() || form.fotos.length >= 5}
               className="px-3 py-2.5 rounded-xl bg-white/5 text-zinc-400 hover:bg-auto-100 hover:text-auto-400 disabled:opacity-40 transition-colors">
               <Plus className="w-4 h-4" />
@@ -199,7 +199,7 @@ export default function PublishClient({ userId }: { userId: string }) {
         </div>
 
         <button type="submit" disabled={saving}
-          className="w-full py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-700 transition-colors active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-auto-600/20">
+          className="w-full py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-500 transition-colors active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-auto-600/20">
           {saving ? "Publicando..." : "Publicar artículo"}
         </button>
       </form>

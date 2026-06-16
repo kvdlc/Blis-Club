@@ -68,7 +68,7 @@ export default function GuanteraClient({ userId, vehicle, documents: initialDocs
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-auto-600/15 flex items-center justify-center text-lg">📄</div>
+        <div className="w-10 h-10 rounded-xl bg-auto-600/10 flex items-center justify-center text-lg">📄</div>
         <div>
           <h1 className="text-xl font-extrabold text-zinc-200">Guantera</h1>
           <p className="text-xs text-zinc-400">{vehicle.marca} {vehicle.modelo} · {vehicle.placa}</p>
@@ -118,7 +118,7 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
     const dias = Math.ceil((new Date(dateStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     return isNaN(dias) ? -999 : dias;
   };
-  const getUrgencyColor = (dias: number) => dias <= -900 ? "bg-red-100 text-red-700" : dias <= 0 ? "bg-red-100 text-red-700" : dias <= 15 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700";
+  const getUrgencyColor = (dias: number) => dias <= -900 ? "bg-red-500/10 text-red-400" : dias <= 0 ? "bg-red-500/10 text-red-400" : dias <= 15 ? "bg-amber-500/10 text-amber-400" : "bg-emerald-500/10 text-emerald-400";
 
   return (
     <div className="card-auto-dark rounded-2xl overflow-hidden">
@@ -160,14 +160,14 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
             <div className="bg-auto-600/10 rounded-xl p-3 space-y-2">
               <div className="grid grid-cols-2 gap-2">
                 <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-                  className="px-2.5 py-2 rounded-lg border border-white/10 text-xs font-medium bg-white">
+                  className="px-2.5 py-2 rounded-lg border border-white/10 text-xs font-medium bg-white/5">
                   {documentTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
                 <input type="date" value={form.fecha_emision} onChange={(e) => setForm({ ...form, fecha_emision: e.target.value })}
-                  className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white" placeholder="Emisión" />
+                  className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white/5" placeholder="Emisión" />
               </div>
               <input type="date" value={form.fecha_vencimiento} onChange={(e) => setForm({ ...form, fecha_vencimiento: e.target.value })}
-                required className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white" />
+                required className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white/5" />
               <div className="flex gap-1.5">
                 <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">
                   {saving ? "Guardando..." : "Guardar"}
@@ -241,7 +241,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
                 </div>
                 <div className="flex items-center gap-1">
                   {c.telefono && (
-                    <a href={`tel:${c.telefono}`} className="w-7 h-7 rounded-lg bg-emerald-600/10 flex items-center justify-center text-emerald-600 hover:bg-emerald-100 transition-colors">
+                    <a href={`tel:${c.telefono}`} className="w-7 h-7 rounded-lg bg-emerald-600/10 flex items-center justify-center text-emerald-400 hover:bg-emerald-500/10 transition-colors">
                       <Phone className="w-3.5 h-3.5" />
                     </a>
                   )}
@@ -256,14 +256,14 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
           {adding ? (
             <div className="bg-auto-600/10 rounded-xl p-3 space-y-2">
               <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                placeholder="Nombre del contacto *" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white" />
+                placeholder="Nombre del contacto *" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white/5" />
               <div className="grid grid-cols-2 gap-2">
                 <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-                  className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white">
+                  className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white/5">
                   {contactTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
                 <input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                  placeholder="Teléfono" className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white" />
+                  placeholder="Teléfono" className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white/5" />
               </div>
               <div className="flex gap-1.5">
                 <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">
@@ -365,44 +365,44 @@ function SpecsSection({ vehicleId, initialSpecs }: { vehicleId: string; initialS
             <div className="bg-auto-600/10 rounded-xl p-3 space-y-2">
               <div className="grid grid-cols-2 gap-2">
                 <label className="block"><span className="text-[10px] font-bold text-zinc-400">Tipo de aceite</span>
-                  <input value={form.tipo_aceite} onChange={(e) => setForm({ ...form, tipo_aceite: e.target.value })} placeholder="Ej: Sintético" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                  <input value={form.tipo_aceite} onChange={(e) => setForm({ ...form, tipo_aceite: e.target.value })} placeholder="Ej: Sintético" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
                 </label>
                 <label className="block"><span className="text-[10px] font-bold text-zinc-400">Viscosidad</span>
-                  <input value={form.viscosidad_aceite} onChange={(e) => setForm({ ...form, viscosidad_aceite: e.target.value })} placeholder="Ej: 5W-30" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                  <input value={form.viscosidad_aceite} onChange={(e) => setForm({ ...form, viscosidad_aceite: e.target.value })} placeholder="Ej: 5W-30" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
                 </label>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <label className="block"><span className="text-[10px] font-bold text-zinc-400">Cap. aceite (L)</span>
-                  <input type="number" step="0.1" value={form.capacidad_aceite_litros} onChange={(e) => setForm({ ...form, capacidad_aceite_litros: e.target.value })} placeholder="4.5" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                  <input type="number" step="0.1" value={form.capacidad_aceite_litros} onChange={(e) => setForm({ ...form, capacidad_aceite_litros: e.target.value })} placeholder="4.5" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
                 </label>
                 <label className="block"><span className="text-[10px] font-bold text-zinc-400">Refrigerante</span>
-                  <input value={form.tipo_refrigerante} onChange={(e) => setForm({ ...form, tipo_refrigerante: e.target.value })} placeholder="Ej: Etilenglicol" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                  <input value={form.tipo_refrigerante} onChange={(e) => setForm({ ...form, tipo_refrigerante: e.target.value })} placeholder="Ej: Etilenglicol" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
                 </label>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <label className="block"><span className="text-[10px] font-bold text-zinc-400">PSI delante</span>
-                  <input type="number" value={form.presion_neumaticos_delante} onChange={(e) => setForm({ ...form, presion_neumaticos_delante: e.target.value })} placeholder="32" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                  <input type="number" value={form.presion_neumaticos_delante} onChange={(e) => setForm({ ...form, presion_neumaticos_delante: e.target.value })} placeholder="32" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
                 </label>
                 <label className="block"><span className="text-[10px] font-bold text-zinc-400">PSI atrás</span>
-                  <input type="number" value={form.presion_neumaticos_atras} onChange={(e) => setForm({ ...form, presion_neumaticos_atras: e.target.value })} placeholder="32" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                  <input type="number" value={form.presion_neumaticos_atras} onChange={(e) => setForm({ ...form, presion_neumaticos_atras: e.target.value })} placeholder="32" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
                 </label>
                 <label className="block"><span className="text-[10px] font-bold text-zinc-400">PSI repuesto</span>
-                  <input type="number" value={form.presion_neumaticos_repuesto} onChange={(e) => setForm({ ...form, presion_neumaticos_repuesto: e.target.value })} placeholder="60" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                  <input type="number" value={form.presion_neumaticos_repuesto} onChange={(e) => setForm({ ...form, presion_neumaticos_repuesto: e.target.value })} placeholder="60" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
                 </label>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <label className="block"><span className="text-[10px] font-bold text-zinc-400">Tanque (gal)</span>
-                  <input type="number" step="0.1" value={form.capacidad_tanque_galones} onChange={(e) => setForm({ ...form, capacidad_tanque_galones: e.target.value })} placeholder="14" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                  <input type="number" step="0.1" value={form.capacidad_tanque_galones} onChange={(e) => setForm({ ...form, capacidad_tanque_galones: e.target.value })} placeholder="14" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
                 </label>
                 <label className="block"><span className="text-[10px] font-bold text-zinc-400">Cap. refrig. (L)</span>
-                  <input type="number" step="0.1" value={form.capacidad_refrigerante_litros} onChange={(e) => setForm({ ...form, capacidad_refrigerante_litros: e.target.value })} placeholder="5.0" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                  <input type="number" step="0.1" value={form.capacidad_refrigerante_litros} onChange={(e) => setForm({ ...form, capacidad_refrigerante_litros: e.target.value })} placeholder="5.0" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
                 </label>
                 <label className="block"><span className="text-[10px] font-bold text-zinc-400">Líq. frenos</span>
-                  <input value={form.tipo_freno} onChange={(e) => setForm({ ...form, tipo_freno: e.target.value })} placeholder="DOT 4" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                  <input value={form.tipo_freno} onChange={(e) => setForm({ ...form, tipo_freno: e.target.value })} placeholder="DOT 4" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
                 </label>
               </div>
               <label className="block"><span className="text-[10px] font-bold text-zinc-400">Octanaje</span>
-                <input value={form.octanaje_recomendado} onChange={(e) => setForm({ ...form, octanaje_recomendado: e.target.value })} placeholder="Ej: 95 RON" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+                <input value={form.octanaje_recomendado} onChange={(e) => setForm({ ...form, octanaje_recomendado: e.target.value })} placeholder="Ej: 95 RON" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5" />
               </label>
               <div className="flex gap-1.5">
                 <button onClick={handleSave} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "Guardando..." : "Guardar"}</button>
@@ -417,7 +417,7 @@ function SpecsSection({ vehicleId, initialSpecs }: { vehicleId: string; initialS
                   <span className="text-xs font-bold text-zinc-200">{row.value || "—"}</span>
                 </div>
               ))}
-              <button onClick={() => setEditing(true)} className="w-full mt-2 py-2 rounded-xl border border-white/10 text-xs font-medium text-zinc-400 hover:text-auto-400 hover:border-auto-300 transition-colors">
+              <button onClick={() => setEditing(true)} className="w-full mt-2 py-2 rounded-xl border border-white/10 text-xs font-medium text-zinc-400 hover:text-auto-500 hover:border-auto-300 transition-colors">
                 Editar especificaciones
               </button>
             </div>
@@ -467,8 +467,8 @@ function WarningLightsSection() {
                   <p className="text-[10px] text-zinc-500 truncate">{light.desc}</p>
                 </div>
                 <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-                  light.severity === "alto" ? "bg-red-100 text-red-700" :
-                  light.severity === "medio" ? "bg-amber-100 text-amber-700" :
+                  light.severity === "alto" ? "bg-red-500/10 text-red-400" :
+                  light.severity === "medio" ? "bg-amber-500/10 text-amber-400" :
                   "bg-white/5 text-zinc-400"
                 }`}>
                   {light.severity}
@@ -477,7 +477,7 @@ function WarningLightsSection() {
               {selected === i && (
                 <div className="bg-auto-600/10 rounded-xl p-3 ml-8 mb-1">
                   <p className="text-xs text-zinc-300">{light.desc}</p>
-                  <p className="text-[10px] text-auto-400 font-bold mt-1.5">Qué hacer: {light.action}</p>
+                  <p className="text-[10px] text-auto-500 font-bold mt-1.5">Qué hacer: {light.action}</p>
                 </div>
               )}
             </div>

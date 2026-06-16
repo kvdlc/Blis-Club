@@ -94,8 +94,8 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
       {/* Combustible A */}
       <div className="card-auto-dark rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
-            <Fuel className="w-3.5 h-3.5 text-amber-600" />
+          <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
+            <Fuel className="w-3.5 h-3.5 text-amber-400" />
           </div>
           <input
             type="text" value={nombres.a} onChange={(e) => setNombres({ ...nombres, a: e.target.value })}
@@ -109,7 +109,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <div className="flex gap-1 mt-0.5">
               <input type="number" min="1" step="0.01" value={precioA}
                 onChange={(e) => setPrecioA(e.target.value)} placeholder="S/"
-                className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               {defaults.ultimosPrecios?.regular && (
                 <button onClick={() => usarPrecio("regular", "a")} className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-auto-600/15 hover:text-auto-600 transition-colors">
                   S/{defaults.ultimosPrecios.regular}
@@ -121,7 +121,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <span className="text-[10px] font-bold text-zinc-400">Rendimiento (km/gal)</span>
             <input type="number" min="1" step="0.1" value={rendimientoA}
               onChange={(e) => setRendimientoA(e.target.value)} placeholder="Ej: 42"
-              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
       </div>
@@ -136,8 +136,8 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
       {/* Combustible B */}
       <div className="card-auto-dark rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-violet-600" />
+          <div className="w-7 h-7 rounded-lg bg-violet-500/10 flex items-center justify-center">
+            <Zap className="w-3.5 h-3.5 text-violet-400" />
           </div>
           <input
             type="text" value={nombres.b} onChange={(e) => setNombres({ ...nombres, b: e.target.value })}
@@ -151,9 +151,9 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <div className="flex gap-1 mt-0.5">
               <input type="number" min="1" step="0.01" value={precioB}
                 onChange={(e) => setPrecioB(e.target.value)} placeholder="S/"
-                className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+                className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               {defaults.ultimosPrecios?.premium && (
-                <button onClick={() => usarPrecio("premium", "b")} className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-violet-100 hover:text-violet-600 transition-colors">
+                <button onClick={() => usarPrecio("premium", "b")} className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-violet-500/10 hover:text-violet-400 transition-colors">
                   S/{defaults.ultimosPrecios.premium}
                 </button>
               )}
@@ -163,7 +163,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <span className="text-[10px] font-bold text-zinc-400">Rendimiento (km/gal)</span>
             <input type="number" min="1" step="0.1" value={rendimientoB}
               onChange={(e) => setRendimientoB(e.target.value)} placeholder="Ej: 46"
-              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
       </div>
@@ -178,13 +178,13 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <span className="text-[10px] font-bold text-zinc-400">Km por año</span>
             <input type="number" min="1" value={kmAnuales}
               onChange={(e) => setKmAnuales(e.target.value)}
-              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-[10px] font-bold text-zinc-400">Capacidad tanque (gal)</span>
             <input type="number" min="1" step="0.1" value={capacidadTanque}
               onChange={(e) => setCapacidadTanque(e.target.value)}
-              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
       </div>
@@ -193,12 +193,12 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
       {resultados ? (
         <div className="space-y-3">
           {/* Ganador */}
-          <div className={`rounded-2xl p-4 text-center border-2 ${resultados.mejor === "a" ? "bg-amber-600/10 border-amber-200" : "bg-violet-50 border-violet-200"}`}>
+          <div className={`rounded-2xl p-4 text-center border-2 ${resultados.mejor === "a" ? "bg-amber-600/10 border-amber-500/20" : "bg-violet-50 border-violet-500/20"}`}>
             <p className="text-xs text-zinc-400 mb-1">Más económico</p>
             <p className="text-lg font-black text-zinc-200">
               {resultados.mejor === "a" ? nombres.a : nombres.b}
             </p>
-            <p className="text-sm font-bold text-emerald-600 mt-1">
+            <p className="text-sm font-bold text-emerald-400 mt-1">
               {resultados.ventajaPct.toFixed(1)}% más barato por km
             </p>
           </div>
@@ -243,7 +243,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
               <p className="text-base font-black text-zinc-200">
                 {resultados.mejor === "a" ? "Ahorras" : "Ahorras"}
               </p>
-              <p className="text-xs font-bold text-emerald-600">
+              <p className="text-xs font-bold text-emerald-400">
                 S/ {resultados.diferenciaPorTanque.toFixed(2)}
               </p>
             </div>
@@ -252,7 +252,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
               <p className="text-base font-black text-zinc-200">
                 S/ {resultados.ahorroAnual.toLocaleString("es-PE", { maximumFractionDigits: 0 })}
               </p>
-              <p className="text-xs font-bold text-emerald-600">
+              <p className="text-xs font-bold text-emerald-400">
                 con {resultados.mejor === "a" ? nombres.a : nombres.b}
               </p>
             </div>

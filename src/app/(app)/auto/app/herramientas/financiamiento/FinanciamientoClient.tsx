@@ -47,17 +47,17 @@ export default function FinanciamientoClient() {
         <label className="block">
           <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5 text-auto-500" /> Monto del préstamo (S/)</span>
           <input type="number" min="1" step="100" value={monto} onChange={(e) => setMonto(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
         <label className="block">
           <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5"><Percent className="w-3.5 h-3.5 text-auto-500" /> Tasa de interés anual (%)</span>
           <input type="number" min="1" max="50" step="0.1" value={tasa} onChange={(e) => setTasa(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
         <label className="block">
           <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-auto-500" /> Plazo (meses)</span>
           <input type="number" min="1" max="96" value={plazo} onChange={(e) => setPlazo(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
       </div>
 
@@ -75,7 +75,7 @@ export default function FinanciamientoClient() {
             </div>
             <div className="card-auto-dark rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Intereses</p>
-              <p className="text-sm font-bold text-red-600">S/ {Math.round(resultados.intereses).toLocaleString("es-PE")}</p>
+              <p className="text-sm font-bold text-red-400">S/ {Math.round(resultados.intereses).toLocaleString("es-PE")}</p>
             </div>
             <div className="card-auto-dark rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Tasa mensual</p>
@@ -102,7 +102,7 @@ export default function FinanciamientoClient() {
                       <td className="py-1 px-1 font-bold">{r.mes}</td>
                       <td className="py-1 px-1">S/ {Math.round(r.cuota).toLocaleString("es-PE")}</td>
                       <td className="py-1 px-1 text-red-500">S/ {Math.round(r.interes).toLocaleString("es-PE")}</td>
-                      <td className="py-1 px-1 text-emerald-600">S/ {Math.round(r.capital).toLocaleString("es-PE")}</td>
+                      <td className="py-1 px-1 text-emerald-400">S/ {Math.round(r.capital).toLocaleString("es-PE")}</td>
                       <td className="py-1 px-1 text-right">S/ {Math.round(r.saldo).toLocaleString("es-PE")}</td>
                     </tr>
                   ))}

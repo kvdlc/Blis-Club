@@ -51,7 +51,7 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
               </div>
               <div>
                 <p className="text-sm font-bold text-zinc-200 capitalize">{planActual}</p>
-                <p className={`text-xs font-bold ${subscription.status === "active" ? "text-emerald-600" : "text-red-600"}`}>
+                <p className={`text-xs font-bold ${subscription.status === "active" ? "text-emerald-400" : "text-red-400"}`}>
                   {estado} · {diasRestantes} días restantes
                 </p>
               </div>
@@ -73,10 +73,10 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
             onClick={() => setIsAnnual(!isAnnual)}
             className={`relative w-12 h-6 rounded-full transition-colors ${isAnnual ? "bg-auto-600/100" : "bg-white/15"}`}
           >
-            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${isAnnual ? "translate-x-6" : "translate-x-0.5"}`} />
+            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white/5 shadow transition-transform ${isAnnual ? "translate-x-6" : "translate-x-0.5"}`} />
           </button>
           <span className={`text-xs font-bold ${isAnnual ? "text-zinc-200" : "text-zinc-500"}`}>Anual</span>
-          {isAnnual && <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">Ahorra 20%</span>}
+          {isAnnual && <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded-full">Ahorra 20%</span>}
         </div>
       )}
 
@@ -115,7 +115,7 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
                   ? "bg-white/5 text-zinc-500 cursor-default"
                   : plan.price_cents === 0
                     ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                    : "bg-auto-600 text-white hover:bg-auto-700"
+                    : "bg-auto-600 text-white hover:bg-auto-500"
               }`}
             >
               {plan.id === subscription?.plan_id ? "Plan actual" : plan.price_cents === 0 ? "Comenzar gratis" : "Contratar"}
