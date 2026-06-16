@@ -76,74 +76,74 @@ export default function EquivalenciaClient() {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-700 transition-colors">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-400 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
 
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-800">Equivalencia de Llantas</h1>
-        <p className="text-xs text-zinc-500 mt-1">Verifica si un cambio de aros o llantas es seguro para tu vehículo.</p>
+        <h1 className="text-xl font-extrabold text-zinc-200">Equivalencia de Llantas</h1>
+        <p className="text-xs text-zinc-400 mt-1">Verifica si un cambio de aros o llantas es seguro para tu vehículo.</p>
       </div>
 
       {/* Llanta actual */}
-      <div className="card-soft rounded-2xl p-4 space-y-3">
+      <div className="card-auto-dark rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-zinc-100 flex items-center justify-center">
-            <Car className="w-3.5 h-3.5 text-zinc-600" />
+          <div className="w-7 h-7 rounded-lg bg-zinc-900/5 flex items-center justify-center">
+            <Car className="w-3.5 h-3.5 text-zinc-400" />
           </div>
-          <h3 className="text-sm font-bold text-zinc-700">Llanta actual</h3>
+          <h3 className="text-sm font-bold text-zinc-300">Llanta actual</h3>
         </div>
 
         <div className="flex items-center gap-1.5">
           <input type="number" min="100" max="500" value={original.ancho}
             onChange={(e) => setOriginal({ ...original, ancho: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
-          <span className="text-zinc-400 text-xs font-medium">/</span>
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+          <span className="text-zinc-500 text-xs font-medium">/</span>
           <input type="number" min="20" max="100" value={original.perfil}
             onChange={(e) => setOriginal({ ...original, perfil: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
-          <span className="text-zinc-400 text-xs font-medium">R</span>
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+          <span className="text-zinc-500 text-xs font-medium">R</span>
           <input type="number" min="12" max="30" value={original.rin}
             onChange={(e) => setOriginal({ ...original, rin: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
         </div>
 
-        <p className="text-[10px] text-zinc-400 text-center">
+        <p className="text-[10px] text-zinc-500 text-center">
           {original.ancho}/{original.perfil} R{original.rin}
         </p>
       </div>
 
       {/* Flecha */}
       <div className="flex justify-center">
-        <div className="w-8 h-8 rounded-full bg-auto-100 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full bg-auto-600/15 flex items-center justify-center">
           <MoveDown className="w-4 h-4 text-auto-500" />
         </div>
       </div>
 
       {/* Llanta nueva */}
-      <div className="card-soft rounded-2xl p-4 space-y-3">
+      <div className="card-auto-dark rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-auto-100 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-auto-600/15 flex items-center justify-center">
             <Ruler className="w-3.5 h-3.5 text-auto-600" />
           </div>
-          <h3 className="text-sm font-bold text-zinc-700">Llanta nueva</h3>
+          <h3 className="text-sm font-bold text-zinc-300">Llanta nueva</h3>
         </div>
 
         <div className="flex items-center gap-1.5">
           <input type="number" min="100" max="500" value={nuevo.ancho}
             onChange={(e) => setNuevo({ ...nuevo, ancho: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
-          <span className="text-zinc-400 text-xs font-medium">/</span>
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+          <span className="text-zinc-500 text-xs font-medium">/</span>
           <input type="number" min="20" max="100" value={nuevo.perfil}
             onChange={(e) => setNuevo({ ...nuevo, perfil: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
-          <span className="text-zinc-400 text-xs font-medium">R</span>
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+          <span className="text-zinc-500 text-xs font-medium">R</span>
           <input type="number" min="12" max="30" value={nuevo.rin}
             onChange={(e) => setNuevo({ ...nuevo, rin: e.target.value })}
-            className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full px-2.5 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-auto-200" />
         </div>
 
-        <p className="text-[10px] text-zinc-400 text-center">
+        <p className="text-[10px] text-zinc-500 text-center">
           {nuevo.ancho}/{nuevo.perfil} R{nuevo.rin}
         </p>
       </div>
@@ -154,10 +154,10 @@ export default function EquivalenciaClient() {
           {/* Estado de seguridad */}
           <div className={`rounded-2xl p-4 text-center border-2 ${
             resultados.estado === "seguro"
-              ? "bg-emerald-50 border-emerald-200"
+              ? "bg-emerald-600/10 border-emerald-200"
               : resultados.estado === "precaucion"
-                ? "bg-amber-50 border-amber-200"
-                : "bg-red-50 border-red-200"
+                ? "bg-amber-600/10 border-amber-200"
+                : "bg-red-600/10 border-red-200"
           }`}>
             <resultados.estadoIcon className={`w-8 h-8 mx-auto mb-2 ${
               resultados.estado === "seguro" ? "text-emerald-600" : resultados.estado === "precaucion" ? "text-amber-600" : "text-red-600"
@@ -173,83 +173,83 @@ export default function EquivalenciaClient() {
           </div>
 
           {/* Visualización de llantas */}
-          <div className="card-soft rounded-2xl p-4">
-            <h3 className="text-xs font-extrabold text-zinc-700 mb-3 text-center">Comparación visual</h3>
+          <div className="card-auto-dark rounded-2xl p-4">
+            <h3 className="text-xs font-extrabold text-zinc-300 mb-3 text-center">Comparación visual</h3>
             <div className="flex items-end justify-center gap-8">
               {/* Original */}
               <div className="flex flex-col items-center gap-2">
                 <div
-                  className="rounded-full border-4 border-zinc-300 bg-zinc-50 flex items-center justify-center"
+                  className="rounded-full border-4 border-white/15 bg-zinc-900/5 flex items-center justify-center"
                   style={{
                     width: `${resultados.original.diametroTotal * resultados.escalaVisual}px`,
                     height: `${resultados.original.diametroTotal * resultados.escalaVisual}px`,
                   }}
                 />
-                <span className="text-[10px] font-bold text-zinc-500">Actual</span>
-                <span className="text-[9px] text-zinc-400">{resultados.original.diametroTotal.toFixed(1)} mm</span>
+                <span className="text-[10px] font-bold text-zinc-400">Actual</span>
+                <span className="text-[9px] text-zinc-500">{resultados.original.diametroTotal.toFixed(1)} mm</span>
               </div>
 
               {/* Nueva */}
               <div className="flex flex-col items-center gap-2">
                 <div
-                  className="rounded-full border-4 border-auto-400 bg-auto-50 flex items-center justify-center"
+                  className="rounded-full border-4 border-auto-400 bg-auto-600/10 flex items-center justify-center"
                   style={{
                     width: `${resultados.nuevo.diametroTotal * resultados.escalaVisual}px`,
                     height: `${resultados.nuevo.diametroTotal * resultados.escalaVisual}px`,
                   }}
                 />
                 <span className="text-[10px] font-bold text-auto-600">Nueva</span>
-                <span className="text-[9px] text-zinc-400">{resultados.nuevo.diametroTotal.toFixed(1)} mm</span>
+                <span className="text-[9px] text-zinc-500">{resultados.nuevo.diametroTotal.toFixed(1)} mm</span>
               </div>
             </div>
           </div>
 
           {/* Datos técnicos */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="card-soft rounded-xl p-3">
-              <p className="text-[10px] text-zinc-400">Alto del flanco (Orig.)</p>
-              <p className="text-sm font-bold text-zinc-800">{resultados.original.altoFlanco.toFixed(1)} mm</p>
+            <div className="card-auto-dark rounded-xl p-3">
+              <p className="text-[10px] text-zinc-500">Alto del flanco (Orig.)</p>
+              <p className="text-sm font-bold text-zinc-200">{resultados.original.altoFlanco.toFixed(1)} mm</p>
             </div>
-            <div className="card-soft rounded-xl p-3">
-              <p className="text-[10px] text-zinc-400">Alto del flanco (Nuevo)</p>
-              <p className="text-sm font-bold text-zinc-800">{resultados.nuevo.altoFlanco.toFixed(1)} mm</p>
+            <div className="card-auto-dark rounded-xl p-3">
+              <p className="text-[10px] text-zinc-500">Alto del flanco (Nuevo)</p>
+              <p className="text-sm font-bold text-zinc-200">{resultados.nuevo.altoFlanco.toFixed(1)} mm</p>
             </div>
-            <div className="card-soft rounded-xl p-3">
-              <p className="text-[10px] text-zinc-400">Diámetro total (Orig.)</p>
-              <p className="text-sm font-bold text-zinc-800">{resultados.original.diametroTotal.toFixed(1)} mm</p>
+            <div className="card-auto-dark rounded-xl p-3">
+              <p className="text-[10px] text-zinc-500">Diámetro total (Orig.)</p>
+              <p className="text-sm font-bold text-zinc-200">{resultados.original.diametroTotal.toFixed(1)} mm</p>
             </div>
-            <div className="card-soft rounded-xl p-3">
-              <p className="text-[10px] text-zinc-400">Diámetro total (Nuevo)</p>
-              <p className="text-sm font-bold text-zinc-800">{resultados.nuevo.diametroTotal.toFixed(1)} mm</p>
+            <div className="card-auto-dark rounded-xl p-3">
+              <p className="text-[10px] text-zinc-500">Diámetro total (Nuevo)</p>
+              <p className="text-sm font-bold text-zinc-200">{resultados.nuevo.diametroTotal.toFixed(1)} mm</p>
             </div>
           </div>
 
           {/* Efectos */}
-          <div className="card-soft rounded-2xl p-4 space-y-2">
-            <h3 className="text-xs font-extrabold text-zinc-700 flex items-center gap-1.5">
+          <div className="card-auto-dark rounded-2xl p-4 space-y-2">
+            <h3 className="text-xs font-extrabold text-zinc-300 flex items-center gap-1.5">
               <Gauge className="w-3.5 h-3.5 text-auto-500" /> Efectos en el vehículo
             </h3>
 
-            <div className="bg-zinc-50 rounded-xl p-3">
-              <p className="text-xs text-zinc-600">
+            <div className="bg-zinc-900/5 rounded-xl p-3">
+              <p className="text-xs text-zinc-400">
                 Cuando circulas a <strong>100 km/h</strong> reales, el velocímetro marcará aproximadamente{" "}
                 <strong className="text-auto-600">{resultados.velocidadIndicadaCuandoReal100.toFixed(1)} km/h</strong>
               </p>
-              <p className="text-[10px] text-zinc-400 mt-1">
+              <p className="text-[10px] text-zinc-500 mt-1">
                 {resultados.esMayor
                   ? "Llanta más grande → el velocímetro marca menos de lo real"
                   : "Llanta más pequeña → el velocímetro marca más de lo real"}
               </p>
             </div>
 
-            <div className="bg-zinc-50 rounded-xl p-3">
-              <p className="text-xs text-zinc-600">
+            <div className="bg-zinc-900/5 rounded-xl p-3">
+              <p className="text-xs text-zinc-400">
                 La altura de la carrocería cambia{" "}
                 <strong className={resultados.cambioAltura > 0 ? "text-auto-600" : "text-amber-600"}>
                   {resultados.cambioAltura > 0 ? "+" : ""}{resultados.cambioAltura.toFixed(1)} mm
                 </strong>
               </p>
-              <p className="text-[10px] text-zinc-400 mt-1">
+              <p className="text-[10px] text-zinc-500 mt-1">
                 {resultados.cambioAltura > 0
                   ? "Mayor altura al suelo, pero puede rozar el guardabarros al girar"
                   : "Menor altura al suelo, ojo con topes y baches"}
@@ -258,22 +258,11 @@ export default function EquivalenciaClient() {
           </div>
         </div>
       ) : (
-        <div className="card-soft rounded-2xl p-6 text-center">
-          <p className="text-sm text-zinc-400">Ingresa las medidas de ambas llantas</p>
-          <p className="text-xs text-zinc-300 mt-1">Ej: 205/55 R16 vs 225/45 R17</p>
+        <div className="card-auto-dark rounded-2xl p-6 text-center">
+          <p className="text-sm text-zinc-500">Ingresa las medidas de ambas llantas</p>
+          <p className="text-xs text-zinc-500 mt-1">Ej: 205/55 R16 vs 225/45 R17</p>
         </div>
       )}
-
-      {/* Fórmulas */}
-      <details className="card-soft rounded-2xl p-4">
-        <summary className="text-xs font-bold text-zinc-500 cursor-pointer">Ver fórmulas utilizadas</summary>
-        <div className="mt-3 space-y-2 text-xs text-zinc-600 bg-zinc-50 rounded-xl p-3">
-          <p><code className="text-auto-600 font-bold">Alto del Flanco</code> = Ancho (mm) × (Perfil / 100)</p>
-          <p><code className="text-auto-600 font-bold">Diámetro Total</code> = (Rin × 25.4) + (Alto del Flanco × 2)</p>
-          <p><code className="text-auto-600 font-bold">Diferencia %</code> = (Diámetro Nuevo − Diámetro Original) / Diámetro Original × 100</p>
-          <p className="text-zinc-400 mt-2">Tolerancia máxima recomendada: ±3%. Entre 3-5% requiere revisión. Más de 5% no es seguro.</p>
-        </div>
-      </details>
     </div>
   );
 }

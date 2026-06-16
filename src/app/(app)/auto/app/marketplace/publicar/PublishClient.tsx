@@ -91,35 +91,35 @@ export default function PublishClient({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/marketplace" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-700 transition-colors">
+      <Link href="/auto/app/marketplace" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-700 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Marketplace
       </Link>
 
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-800">Publicar artículo</h1>
-        <p className="text-xs text-zinc-500 mt-1">Llena los datos de tu producto o servicio.</p>
+        <h1 className="text-xl font-extrabold text-zinc-200">Publicar artículo</h1>
+        <p className="text-xs text-zinc-400 mt-1">Llena los datos de tu producto o servicio.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <label className="block">
-          <span className="text-xs font-bold text-zinc-600">Título *</span>
+          <span className="text-xs font-bold text-zinc-400">Título *</span>
           <input required value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })}
             placeholder="Ej: Faros LED para Toyota Corolla 2020"
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
         </label>
 
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
-            <span className="text-xs font-bold text-zinc-600">Categoría *</span>
+            <span className="text-xs font-bold text-zinc-400">Categoría *</span>
             <select required value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200">
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200">
               {categories.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-zinc-600">Estado *</span>
+            <span className="text-xs font-bold text-zinc-400">Estado *</span>
             <select required value={form.estado_item} onChange={(e) => setForm({ ...form, estado_item: e.target.value })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200">
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200">
               <option value="usado">Usado</option>
               <option value="nuevo">Nuevo</option>
             </select>
@@ -127,66 +127,66 @@ export default function PublishClient({ userId }: { userId: string }) {
         </div>
 
         <label className="block">
-          <span className="text-xs font-bold text-zinc-600">Precio (S/) *</span>
+          <span className="text-xs font-bold text-zinc-400">Precio (S/) *</span>
           <input required type="number" min="0" step="0.01" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })}
             placeholder="0 = Gratis"
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
         </label>
 
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
-            <span className="text-xs font-bold text-zinc-600">Marca</span>
+            <span className="text-xs font-bold text-zinc-400">Marca</span>
             <input value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })}
               placeholder="Ej: Toyota"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-zinc-600">Modelo</span>
+            <span className="text-xs font-bold text-zinc-400">Modelo</span>
             <input value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })}
               placeholder="Ej: Corolla"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
           </label>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
-            <span className="text-xs font-bold text-zinc-600">WhatsApp *</span>
+            <span className="text-xs font-bold text-zinc-400">WhatsApp *</span>
             <input required value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
               placeholder="+51 999 888 777"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-zinc-600">Ciudad</span>
+            <span className="text-xs font-bold text-zinc-400">Ciudad</span>
             <input value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })}
               placeholder="Ej: Lima"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200" />
           </label>
         </div>
 
         <label className="block">
-          <span className="text-xs font-bold text-zinc-600">Descripción</span>
+          <span className="text-xs font-bold text-zinc-400">Descripción</span>
           <textarea rows={3} value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
             placeholder="Describe tu producto, compatibilidad, condición..."
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200 resize-none" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-auto-200 resize-none" />
         </label>
 
         {/* Fotos */}
         <div>
-          <span className="text-xs font-bold text-zinc-600">Fotos (URL, máx 5)</span>
+          <span className="text-xs font-bold text-zinc-400">Fotos (URL, máx 5)</span>
           <div className="flex gap-1.5 mt-1">
             <input value={fotoUrl} onChange={(e) => setFotoUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addFoto())}
               placeholder="https://..."
-              className="flex-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-auto-200" />
+              className="flex-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-auto-200" />
             <button type="button" onClick={addFoto} disabled={!fotoUrl.trim() || form.fotos.length >= 5}
-              className="px-3 py-2.5 rounded-xl bg-zinc-100 text-zinc-600 hover:bg-auto-100 hover:text-auto-600 disabled:opacity-40 transition-colors">
+              className="px-3 py-2.5 rounded-xl bg-white/5 text-zinc-400 hover:bg-auto-100 hover:text-auto-400 disabled:opacity-40 transition-colors">
               <Plus className="w-4 h-4" />
             </button>
           </div>
           {form.fotos.length > 0 && (
             <div className="flex gap-1.5 mt-1.5 flex-wrap">
               {form.fotos.map((url, i) => (
-                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-zinc-100">
+                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-white/5">
                   <img src={url} alt="" className="w-full h-full object-cover" />
                   <button type="button" onClick={() => removeFoto(i)}
                     className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center">

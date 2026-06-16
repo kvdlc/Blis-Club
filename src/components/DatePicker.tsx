@@ -13,9 +13,11 @@ interface Props {
   min?: string;
   max?: string;
   label?: string;
+  colorTheme?: "primary" | "auto";
 }
 
-export function DatePicker({ value, onChange, min, max, label }: Props) {
+export function DatePicker({ value, onChange, min, max, label, colorTheme = "primary" }: Props) {
+  const c = colorTheme === "auto" ? "auto" : "primary";
   const [open, setOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState(() => {
     if (value) return new Date(value + "T00:00:00").getMonth();
@@ -134,7 +136,7 @@ export function DatePicker({ value, onChange, min, max, label }: Props) {
         onClick={() => { setOpen(!open); setPickerMode("days"); }}
         className="w-full flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm text-left hover:bg-zinc-100 transition-colors"
       >
-        <CalendarDays className="w-4 h-4 text-primary-400 shrink-0" />
+        <CalendarDays className={`w-4 h-4 shrink-0 ${c === "auto" ? "text-auto-400" : "text-primary-400"}`} />
         <span className={`flex-1 truncate ${value ? "text-zinc-900" : "text-zinc-400"}`}>
           {value ? formatDisplay(value) : (label || "Seleccionar fecha")}
         </span>
@@ -147,7 +149,7 @@ export function DatePicker({ value, onChange, min, max, label }: Props) {
             <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button onClick={goToYearPicker} className="text-sm font-bold text-zinc-800 hover:text-primary-500 transition-colors px-2">
+            <button onClick={goToYearPicker} className={`text-sm font-bold text-zinc-800 transition-colors px-2 ${c === "auto" ? "hover:text-auto-500" : "hover:text-primary-500"}`}>
               {pickerMode === "years" ? `${Math.floor(viewYear / 10) * 10} - ${Math.floor(viewYear / 10) * 10 + 9}` : `${MONTHS[viewMonth]} ${viewYear}`}
             </button>
             <button onClick={() => navigate(1)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors">
@@ -161,7 +163,7 @@ export function DatePicker({ value, onChange, min, max, label }: Props) {
               <div className="grid grid-cols-4 gap-1">
                 {MONTHS_SHORT.map((m, i) => (
                   <button key={m} onClick={() => selectMonth(i)}
-                    className={`text-[10px] font-semibold rounded-lg py-1.5 transition-colors ${i === viewMonth ? "bg-primary-100 text-primary-700" : "text-zinc-500 hover:bg-zinc-100"}`}>
+                    className={`text-[10px] font-semibold rounded-lg py-1.5 transition-colors ${i === viewMonth ? (c === "auto" ? "bg-auto-100 text-auto-700" : "bg-primary-100 text-primary-700") : "text-zinc-500 hover:bg-zinc-100"}`}>
                     {m}
                   </button>
                 ))}
@@ -178,7 +180,7 @@ export function DatePicker({ value, onChange, min, max, label }: Props) {
               <div className="grid grid-cols-7 gap-1">
                 {grid.map((cell, i) => (
                   <button key={i} type="button" onClick={() => !cell.isDisabled && selectDate(cell.date)} disabled={cell.isDisabled}
-                    className={`aspect-square rounded-xl flex items-center justify-center text-xs font-semibold transition-all ${ cell.isDisabled ? "text-zinc-300 cursor-not-allowed" : cell.isSelected ? "bg-primary-500 text-white shadow-md" : cell.isToday ? "bg-secondary-100 text-secondary-700 ring-1 ring-secondary-300" : cell.isCurrentMonth ? "text-zinc-700 hover:bg-zinc-100" : "text-zinc-300" }`}>
+                    className={`aspect-square rounded-xl flex items-center justify-center text-xs font-semibold transition-all ${ cell.isDisabled ? "text-zinc-300 cursor-not-allowed" : cell.isSelected ? (c === "auto" ? "bg-auto-500 text-white shadow-md" : "bg-primary-500 text-white shadow-md") : cell.isToday ? "bg-secondary-100 text-secondary-700 ring-1 ring-secondary-300" : cell.isCurrentMonth ? "text-zinc-700 hover:bg-zinc-100" : "text-zinc-300" }`}>
                     {cell.day}
                   </button>
                 ))}
@@ -190,7 +192,7 @@ export function DatePicker({ value, onChange, min, max, label }: Props) {
             <div className="grid grid-cols-4 gap-2">
               {years.map((y) => (
                 <button key={y} onClick={() => selectYear(y)}
-                  className={`text-xs font-semibold rounded-xl py-2.5 transition-colors ${y === viewYear ? "bg-primary-500 text-white shadow-md" : y === today.getFullYear() ? "bg-secondary-100 text-secondary-700" : "text-zinc-600 hover:bg-zinc-100"}`}>
+                  className={`text-xs font-semibold rounded-xl py-2.5 transition-colors ${y === viewYear ? (c === "auto" ? "bg-auto-500 text-white shadow-md" : "bg-primary-500 text-white shadow-md") : y === today.getFullYear() ? "bg-secondary-100 text-secondary-700" : "text-zinc-600 hover:bg-zinc-100"}`}>
                   {y}
                 </button>
               ))}

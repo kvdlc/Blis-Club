@@ -87,14 +87,14 @@ export function CarSwitcher() {
 
   if (allCars.length <= 1) return (
     <div className="flex items-center gap-2">
-      <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center overflow-hidden border border-zinc-200">
+      <div className="w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden border border-white/10">
         {currentCar.foto_url ? (
           <img src={currentCar.foto_url} alt="" className="w-full h-full object-cover object-center" />
         ) : (
           <span className="text-xs font-black text-auto-500">{currentCar.marca.charAt(0)}</span>
         )}
       </div>
-      <span className="text-xs font-bold text-zinc-600 truncate max-w-[140px]">
+      <span className="text-xs font-bold text-zinc-300 truncate max-w-[140px]">
         {currentCar.marca} {currentCar.modelo}
       </span>
     </div>
@@ -104,7 +104,7 @@ export function CarSwitcher() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-sm border border-zinc-200 pl-1.5 pr-2.5 py-1 transition-all hover:shadow-sm"
+        className="flex items-center gap-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 pl-1.5 pr-2.5 py-1 transition-all hover:bg-white/10"
       >
         <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center overflow-hidden border-2 border-white">
           {currentCar.foto_url ? (
@@ -113,42 +113,42 @@ export function CarSwitcher() {
             <span className="text-xs font-black text-auto-500">{currentCar.marca.charAt(0)}</span>
           )}
         </div>
-        <span className="text-xs font-bold text-zinc-700 max-w-[100px] truncate">
+        <span className="text-xs font-bold text-zinc-300 max-w-[100px] truncate">
           {currentCar.marca} {currentCar.modelo}
         </span>
-        <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-3 h-3 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute z-50 top-full mt-1 left-0 w-56 bg-white rounded-2xl border border-zinc-200 shadow-2xl overflow-hidden">
+          <div className="absolute z-50 top-full mt-1 left-0 w-56 bg-zinc-900 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
             {allCars.map((car) => (
               <button
                 key={car.id}
                 onClick={() => { setCurrentCarId(car.id); setOpen(false); router.refresh(); }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors hover:bg-zinc-50 ${car.id === currentCar.id ? "bg-auto-50" : ""}`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors hover:bg-white/5 ${car.id === currentCar.id ? "bg-auto-600/15" : ""}`}
               >
-                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0 border border-zinc-100">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden shrink-0 border border-white/5">
                   {car.foto_url ? (
                     <img src={car.foto_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-xs font-black text-auto-500">{car.marca.charAt(0)}</span>
+                    <span className="text-xs font-black text-auto-400">{car.marca.charAt(0)}</span>
                   )}
                 </div>
                 <div className="text-left min-w-0 flex-1">
-                  <p className="text-xs font-bold text-zinc-800 truncate">{car.marca} {car.modelo}</p>
-                  <p className="text-[9px] text-zinc-400 truncate">{car.año} · {car.placa}</p>
+                  <p className="text-xs font-bold text-zinc-200 truncate">{car.marca} {car.modelo}</p>
+                  <p className="text-[9px] text-zinc-500 truncate">{car.año} · {car.placa}</p>
                 </div>
                 {car.id === currentCar.id && (
                   <div className="ml-auto w-1.5 h-1.5 rounded-full bg-auto-500" />
                 )}
               </button>
             ))}
-            <div className="border-t border-zinc-100 p-1.5">
+            <div className="border-t border-white/5 p-1.5">
               <button
                 onClick={() => { setOpen(false); router.push("/auto/app/perfil/vehiculo/nuevo"); }}
-                className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-auto-600 hover:bg-auto-50 transition-colors"
+                className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-auto-400 hover:bg-auto-600/10 transition-colors"
               >
                 + Agregar vehículo
               </button>

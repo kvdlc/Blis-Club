@@ -16,12 +16,19 @@ export default async function SuscripcionPage() {
     .limit(1)
     .maybeSingle();
 
-  // Cargar planes disponibles para Auto
+  // Cargar app "auto" y sus planes
+  const { data: app } = await supabase
+    .from("applications")
+    .select("id")
+    .eq("slug", "auto")
+    .single();
+
   const { data: planes } = await supabase
     .from("plans")
     .select("*")
+    .eq("application_id", app?.id)
     .eq("is_active", true)
-    .order("price_monthly", { ascending: true });
+    .order("price_cents", { ascending: true });
 
   return <SuscripcionClient subscription={sub ?? null} planes={planes ?? []} />;
 }

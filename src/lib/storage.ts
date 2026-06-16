@@ -70,3 +70,39 @@ export async function uploadRecipeImage(dataUrl: string, recipeId: string): Prom
   const { data: urlData } = await supabase.storage.from("recipe-images").getPublicUrl(data.path);
   return urlData.publicUrl;
 }
+
+export async function uploadAutoPhoto(file: File, vehicleId: string): Promise<string | null> {
+  const supabase = createClient();
+  const compressed = await compressImage(file);
+  const fileName = `${vehicleId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+
+  const { data, error } = await supabase.storage
+    .from("auto-photos")
+    .upload(fileName, compressed, { upsert: true, contentType: "image/jpeg" });
+
+  if (error) {
+    console.error("Upload auto photo error:", error.message);
+    return null;
+  }
+
+  const { data: urlData } = supabase.storage.from("auto-photos").getPublicUrl(data.path);
+  return urlData.publicUrl;
+}
+
+export async function uploadMarketplacePhoto(file: File, listingId: string): Promise<string | null> {
+  const supabase = createClient();
+  const compressed = await compressImage(file);
+  const fileName = `marketplace/${listingId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.jpg`;
+
+  const { data, error } = await supabase.storage
+    .from("auto-photos")
+    .upload(fileName, compressed, { upsert: true, contentType: "image/jpeg" });
+
+  if (error) {
+    console.error("Upload marketplace photo error:", error.message);
+    return null;
+  }
+
+  const { data: urlData } = supabase.storage.from("auto-photos").getPublicUrl(data.path);
+  return urlData.publicUrl;
+}

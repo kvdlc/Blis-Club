@@ -58,7 +58,7 @@ const categories = [
   { key: "neumaticos", label: "Neumáticos", icon: Car, color: "bg-amber-100 text-amber-700" },
   { key: "luces", label: "Luces", icon: Lightbulb, color: "bg-violet-100 text-violet-700" },
   { key: "seguridad", label: "Seguridad", icon: Shield, color: "bg-emerald-100 text-emerald-700" },
-  { key: "documentos", label: "Documentos", icon: CheckCircle2, color: "bg-zinc-100 text-zinc-700" },
+  { key: "documentos", label: "Documentos", icon: CheckCircle2, color: "bg-zinc-900/5 text-zinc-300" },
 ];
 
 export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
@@ -118,39 +118,39 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-700 transition-colors">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-400 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
 
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-800">Checklist Pre-Viaje</h1>
-        <p className="text-xs text-zinc-500 mt-1">Formulario de verificación antes de salir a carretera.</p>
+        <h1 className="text-xl font-extrabold text-zinc-200">Checklist Pre-Viaje</h1>
+        <p className="text-xs text-zinc-400 mt-1">Formulario de verificación antes de salir a carretera.</p>
       </div>
 
       {/* Barra de progreso */}
-      <div className="card-soft rounded-2xl p-4">
+      <div className="card-auto-dark rounded-2xl p-4">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-extrabold text-zinc-700">Progreso</h3>
+          <h3 className="text-xs font-extrabold text-zinc-300">Progreso</h3>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-zinc-600">{checkedCount}/{totalCount}</span>
+            <span className="text-xs font-bold text-zinc-400">{checkedCount}/{totalCount}</span>
             <button
               onClick={resetAll}
-              className="flex items-center gap-1 text-[10px] font-medium text-zinc-400 hover:text-red-500 transition-colors"
+              className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 hover:text-red-500 transition-colors"
             >
               <RotateCcw className="w-3 h-3" /> Reiniciar
             </button>
           </div>
         </div>
 
-        <div className="relative h-3 bg-zinc-100 rounded-full overflow-hidden">
+        <div className="relative h-3 bg-zinc-900/5 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
-              progressPct >= 90 ? "bg-emerald-500" : progressPct >= 50 ? "bg-amber-500" : "bg-auto-500"
+              progressPct >= 90 ? "bg-emerald-600/100" : progressPct >= 50 ? "bg-amber-600/100" : "bg-auto-600/100"
             }`}
             style={{ width: `${progressPct}%` }}
           />
         </div>
-        <p className="text-[10px] text-zinc-400 mt-1.5">
+        <p className="text-[10px] text-zinc-500 mt-1.5">
           {progressPct >= 95
             ? "✅ ¡Todo listo para viajar!"
             : progressPct >= 70
@@ -164,15 +164,15 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
         {grouped.map((cat) => {
           const CatIcon = cat.icon;
           return (
-            <div key={cat.key} className="card-soft rounded-2xl overflow-hidden">
+            <div key={cat.key} className="card-auto-dark rounded-2xl overflow-hidden">
               <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className={`w-8 h-8 rounded-xl ${cat.color} flex items-center justify-center`}>
                     <CatIcon className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-zinc-800">{cat.label}</p>
-                    <p className="text-[10px] text-zinc-400">{cat.catChecked}/{cat.catTotal} verificados</p>
+                    <p className="text-sm font-bold text-zinc-200">{cat.label}</p>
+                    <p className="text-[10px] text-zinc-500">{cat.catChecked}/{cat.catTotal} verificados</p>
                   </div>
                 </div>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -180,7 +180,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
                     ? "bg-emerald-100 text-emerald-700"
                     : cat.catChecked >= cat.catTotal / 2
                       ? "bg-amber-100 text-amber-700"
-                      : "bg-zinc-100 text-zinc-500"
+                      : "bg-zinc-900/5 text-zinc-400"
                 }`}>
                   {cat.catChecked === cat.catTotal ? "✓" : `${cat.catChecked}/${cat.catTotal}`}
                 </span>
@@ -193,23 +193,23 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
                     onClick={() => toggle(item.id)}
                     className={`w-full flex items-start gap-3 py-2.5 px-3 rounded-xl text-left transition-colors ${
                       checks[item.id]
-                        ? "bg-emerald-50"
-                        : "bg-zinc-50 hover:bg-zinc-100"
+                        ? "bg-emerald-600/10"
+                        : "bg-zinc-900/5 hover:bg-zinc-900/10"
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                       checks[item.id]
-                        ? "bg-emerald-500 border-emerald-500"
-                        : "border-zinc-300"
+                        ? "bg-emerald-600/100 border-emerald-500"
+                        : "border-white/15"
                     }`}>
                       {checks[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                     </div>
                     <div className="min-w-0">
-                      <p className={`text-xs font-bold ${checks[item.id] ? "text-emerald-800 line-through" : "text-zinc-700"}`}>
+                      <p className={`text-xs font-bold ${checks[item.id] ? "text-emerald-800 line-through" : "text-zinc-300"}`}>
                         {item.label}{getPressureNote(item.id)}
                       </p>
                       {item.detail && (
-                        <p className="text-[10px] text-zinc-400 mt-0.5">{item.detail}</p>
+                        <p className="text-[10px] text-zinc-500 mt-0.5">{item.detail}</p>
                       )}
                     </div>
                   </button>
@@ -222,7 +222,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
 
       {/* Resumen final */}
       {progressPct >= 95 && (
-        <div className="rounded-2xl bg-emerald-50 border-2 border-emerald-200 p-4 text-center">
+        <div className="rounded-2xl bg-emerald-600/10 border-2 border-emerald-200 p-4 text-center">
           <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
           <p className="text-lg font-black text-emerald-700">¡Listo para el viaje!</p>
           <p className="text-xs text-emerald-600 mt-1">Todos los puntos del checklist están verificados. Buen viaje.</p>
@@ -230,7 +230,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
       )}
 
       {progressPct > 0 && progressPct < 95 && (
-        <div className="rounded-2xl bg-amber-50 border-2 border-amber-200 p-4 text-center">
+        <div className="rounded-2xl bg-amber-600/10 border-2 border-amber-200 p-4 text-center">
           <AlertTriangle className="w-8 h-8 text-amber-600 mx-auto mb-2" />
           <p className="text-lg font-black text-amber-700">Aún hay pendientes</p>
           <p className="text-xs text-amber-600 mt-1">{totalCount - checkedCount} puntos sin verificar. No salgas sin revisarlos.</p>

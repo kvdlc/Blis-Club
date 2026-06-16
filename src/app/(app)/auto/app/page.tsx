@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { cookies } from "next/headers";
-import type { Vehicle, FuelLog, VehicleDocument } from "@/types/database";
+import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs } from "@/types/database";
+import { AUTO_BADGES } from "@/lib/auto-badges";
 import DashboardContent from "./DashboardContent";
 
 async function getDashboardData(userId: string, carId: string | null) {
@@ -17,17 +18,21 @@ async function getDashboardData(userId: string, carId: string | null) {
       .single();
     carId = (fallback.data as { id: string } | null)?.id ?? null;
   }
-  if (!carId) return { vehicle: null, fuelLogs: [], documents: [], ecoScore: 0, nextDocExpiry: null };
+  if (!carId) return { vehicle: null, fuelLogs: [], documents: [], ecoScore: 0, nextDocExpiry: null, maintenances: [], specs: null };
 
-  // Fetch vehicle, fuel logs (last 30), and documents in parallel
+  // Fetch vehicle, fuel logs (last 30), documents, maintenances, and specs in parallel
   const [
     { data: vehicle },
     { data: fuelLogs },
     { data: documents },
+    { data: maintenances },
+    { data: specs },
   ] = await Promise.all([
     supabase.from("vehicles").select("*").eq("id", carId).single(),
     supabase.from("fuel_logs").select("*").eq("vehicle_id", carId).order("fecha", { ascending: false }).limit(30),
     supabase.from("vehicle_documents").select("*").eq("vehicle_id", carId).order("fecha_vencimiento", { ascending: true }),
+    supabase.from("maintenance_logs").select("*").eq("vehicle_id", carId).order("fecha", { ascending: false }).limit(50),
+    supabase.from("vehicle_specs").select("*").eq("vehicle_id", carId).maybeSingle(),
   ]);
 
   // Calculate eco-score from fuel logs
@@ -58,12 +63,24 @@ async function getDashboardData(userId: string, carId: string | null) {
   const limite = new Date(hoy.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
   const nextDocExpiry = docs.find((d) => d.fecha_vencimiento >= hoyStr && d.fecha_vencimiento <= limite) ?? null;
 
+  // Badges
+  const checkData = {
+    fuelLogs: (fuelLogs as FuelLog[] | null) ?? [],
+    maintenances: (maintenances as MaintenanceLog[] | null) ?? [],
+    documents: docs,
+    vehiclesCount: 1,
+  };
+  const unlockedBadges = AUTO_BADGES.filter((b) => b.check(checkData)).map((b) => b.key);
+
   return {
     vehicle: vehicle as Vehicle | null,
     fuelLogs: (fuelLogs as FuelLog[] | null) ?? [],
     documents: docs,
     ecoScore,
     nextDocExpiry,
+    maintenances: (maintenances as MaintenanceLog[] | null) ?? [],
+    specs: specs as VehicleSpecs | null,
+    badges: unlockedBadges,
   };
 }
 
@@ -76,10 +93,18 @@ export default async function AutoDashboardPage() {
   if (trial.isExpired) redirect("/auto/app/suscripcion");
 
   const cookieStore = await cookies();
+  const referralCookie = cookieStore.get("blis_referral_code")?.value;
+  if (referralCookie) {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      await fetch(`${baseUrl}/api/referrals/claim`, { method: "POST", headers: { "Content-Type": "application/json" } });
+    } catch {}
+  }
+
   const carId = cookieStore.get("blis_current_car")?.value ?? null;
   const data = await getDashboardData(user.id, carId);
 
   return (
-    <DashboardContent vehicle={data.vehicle} fuelLogs={data.fuelLogs} ecoScore={data.ecoScore} nextDocExpiry={data.nextDocExpiry} />
+    <DashboardContent vehicle={data.vehicle} fuelLogs={data.fuelLogs} ecoScore={data.ecoScore} nextDocExpiry={data.nextDocExpiry} maintenances={data.maintenances} specs={data.specs} badges={data.badges} />
   );
 }

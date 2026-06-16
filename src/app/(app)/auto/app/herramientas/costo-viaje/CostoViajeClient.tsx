@@ -80,20 +80,20 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-700 transition-colors">
+      <Link href="/auto/app/herramientas" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-400 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
 
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-800">Costo de Viaje</h1>
-        <p className="text-xs text-zinc-500 mt-1">Estima el presupuesto necesario para una ruta específica.</p>
+        <h1 className="text-xl font-extrabold text-zinc-200">Costo de Viaje</h1>
+        <p className="text-xs text-zinc-400 mt-1">Estima el presupuesto necesario para una ruta específica.</p>
       </div>
 
       {/* Inputs */}
-      <div className="card-soft rounded-2xl p-4 space-y-3">
+      <div className="card-auto-dark rounded-2xl p-4 space-y-3">
         {/* Distancia */}
         <label className="block">
-          <span className="text-xs font-bold text-zinc-600 flex items-center gap-1.5">
+          <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5">
             <Route className="w-3.5 h-3.5 text-auto-500" /> Distancia (km)
           </span>
           <div className="relative mt-1">
@@ -102,20 +102,20 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               value={distancia}
               onChange={(e) => setDistancia(e.target.value)}
               placeholder="Ej: 350"
-              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400">km</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">km</span>
           </div>
         </label>
 
         {/* Rendimiento */}
         <label className="block">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-zinc-600 flex items-center gap-1.5">
+            <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5">
               <Fuel className="w-3.5 h-3.5 text-auto-500" /> Rendimiento (km/galón)
             </span>
             {defaults.rendimientoPromedio && (
-              <button onClick={usarRendimientoPromedio} className="text-[10px] font-bold text-auto-600 bg-auto-50 px-2 py-0.5 rounded-full hover:bg-auto-100 transition-colors">
+              <button onClick={usarRendimientoPromedio} className="text-[10px] font-bold text-auto-600 bg-auto-600/10 px-2 py-0.5 rounded-full hover:bg-auto-600/15 transition-colors">
                 Usar {defaults.rendimientoPromedio} km/gal
               </button>
             )}
@@ -126,20 +126,20 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               value={rendimiento}
               onChange={(e) => setRendimiento(e.target.value)}
               placeholder="Ej: 45"
-              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400">km/gal</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">km/gal</span>
           </div>
         </label>
 
         {/* Precio por galón */}
         <label className="block">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-zinc-600 flex items-center gap-1.5">
+            <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5">
               <Coins className="w-3.5 h-3.5 text-auto-500" /> Precio por galón (S/)
             </span>
             {defaults.ultimoPrecio && (
-              <button onClick={usarUltimoPrecio} className="text-[10px] font-bold text-auto-600 bg-auto-50 px-2 py-0.5 rounded-full hover:bg-auto-100 transition-colors">
+              <button onClick={usarUltimoPrecio} className="text-[10px] font-bold text-auto-600 bg-auto-600/10 px-2 py-0.5 rounded-full hover:bg-auto-600/15 transition-colors">
                 S/ {defaults.ultimoPrecio}
               </button>
             )}
@@ -150,21 +150,21 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               value={precioGalon}
               onChange={(e) => setPrecioGalon(e.target.value)}
               placeholder="Ej: 18.50"
-              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400">S/</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">S/</span>
           </div>
         </label>
 
         {/* Peajes */}
         <div className="space-y-2">
-          <span className="text-xs font-bold text-zinc-600 block">Peajes (opcional)</span>
+          <span className="text-xs font-bold text-zinc-400 block">Peajes (opcional)</span>
 
           {peajes.map((p) => (
-            <div key={p.id} className="flex items-center gap-2 bg-zinc-50 rounded-xl px-3 py-2">
-              <span className="text-xs font-medium text-zinc-700 flex-1">{p.nombre}</span>
-              <span className="text-xs font-bold text-zinc-800">S/ {p.costo.toFixed(2)}</span>
-              <button onClick={() => eliminarPeaje(p.id)} className="text-zinc-400 hover:text-red-500 transition-colors">
+            <div key={p.id} className="flex items-center gap-2 bg-zinc-900/5 rounded-xl px-3 py-2">
+              <span className="text-xs font-medium text-zinc-300 flex-1">{p.nombre}</span>
+              <span className="text-xs font-bold text-zinc-200">S/ {p.costo.toFixed(2)}</span>
+              <button onClick={() => eliminarPeaje(p.id)} className="text-zinc-500 hover:text-red-500 transition-colors">
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -175,18 +175,18 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               type="text" value={nuevoPeaje.nombre}
               onChange={(e) => setNuevoPeaje({ ...nuevoPeaje, nombre: e.target.value })}
               placeholder="Nombre"
-              className="flex-1 px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="flex-1 px-3 py-2 rounded-xl border border-white/10 bg-zinc-900 text-xs focus:outline-none focus:ring-2 focus:ring-auto-200"
             />
             <input
               type="number" min="0" step="0.5" value={nuevoPeaje.costo}
               onChange={(e) => setNuevoPeaje({ ...nuevoPeaje, costo: e.target.value })}
               placeholder="S/"
-              className="w-20 px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-auto-200"
+              className="w-20 px-3 py-2 rounded-xl border border-white/10 bg-zinc-900 text-xs focus:outline-none focus:ring-2 focus:ring-auto-200"
             />
             <button
               onClick={agregarPeaje}
               disabled={!nuevoPeaje.costo || parseFloat(nuevoPeaje.costo) <= 0}
-              className="px-3 py-2 rounded-xl bg-auto-100 text-auto-600 hover:bg-auto-200 transition-colors disabled:opacity-40"
+              className="px-3 py-2 rounded-xl bg-auto-600/15 text-auto-600 hover:bg-auto-200 transition-colors disabled:opacity-40"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -195,62 +195,62 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
 
         {/* Pasajeros */}
         <label className="block">
-          <span className="text-xs font-bold text-zinc-600 flex items-center gap-1.5">
+          <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5">
             <Users className="w-3.5 h-3.5 text-auto-500" /> Pasajeros (para dividir)
           </span>
           <input
             type="number" min="1" max="20" value={pasajeros}
             onChange={(e) => setPasajeros(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-200"
           />
         </label>
       </div>
 
       {/* Resultados */}
       {resultados ? (
-        <div className="card-soft rounded-2xl p-4 space-y-4">
-          <h3 className="text-sm font-extrabold text-zinc-800 text-center">Presupuesto Estimado</h3>
+        <div className="card-auto-dark rounded-2xl p-4 space-y-4">
+          <h3 className="text-sm font-extrabold text-zinc-200 text-center">Presupuesto Estimado</h3>
 
           {/* Total grande */}
           <div className="text-center">
             <p className="text-4xl font-black text-auto-600">
               S/ {resultados.costoTotal.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-zinc-400 mt-1">Costo total del viaje</p>
+            <p className="text-xs text-zinc-500 mt-1">Costo total del viaje</p>
           </div>
 
           {/* Barras de desglose */}
           <div className="space-y-2">
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-bold text-zinc-700">Combustible</span>
-                <span className="font-bold text-zinc-800">S/ {resultados.costoCombustible.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</span>
+                <span className="font-bold text-zinc-300">Combustible</span>
+                <span className="font-bold text-zinc-200">S/ {resultados.costoCombustible.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</span>
               </div>
-              <div className="h-3 bg-zinc-100 rounded-full overflow-hidden">
-                <div className="h-full bg-auto-500 rounded-full transition-all duration-500" style={{ width: `${Math.max(resultados.barraCombustible, 5)}%` }} />
+              <div className="h-3 bg-zinc-900/5 rounded-full overflow-hidden">
+                <div className="h-full bg-auto-600/100 rounded-full transition-all duration-500" style={{ width: `${Math.max(resultados.barraCombustible, 5)}%` }} />
               </div>
-              <p className="text-[10px] text-zinc-400 mt-0.5">{resultados.galonesNecesarios.toFixed(1)} galones · {resultados.combustiblePct.toFixed(0)}% del total</p>
+              <p className="text-[10px] text-zinc-500 mt-0.5">{resultados.galonesNecesarios.toFixed(1)} galones · {resultados.combustiblePct.toFixed(0)}% del total</p>
             </div>
 
             {resultados.totalPeajes > 0 && (
               <div>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="font-bold text-zinc-700">Peajes</span>
-                  <span className="font-bold text-zinc-800">S/ {resultados.totalPeajes.toFixed(2)}</span>
+                  <span className="font-bold text-zinc-300">Peajes</span>
+                  <span className="font-bold text-zinc-200">S/ {resultados.totalPeajes.toFixed(2)}</span>
                 </div>
-                <div className="h-3 bg-zinc-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${resultados.barraPeajes}%` }} />
+                <div className="h-3 bg-zinc-900/5 rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-600/100 rounded-full transition-all duration-500" style={{ width: `${resultados.barraPeajes}%` }} />
                 </div>
-                <p className="text-[10px] text-zinc-400 mt-0.5">{peajes.length} peaje(s) · {resultados.peajesPct.toFixed(0)}% del total</p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">{peajes.length} peaje(s) · {resultados.peajesPct.toFixed(0)}% del total</p>
               </div>
             )}
           </div>
 
           {/* Por persona */}
           {parseInt(pasajeros) > 1 && (
-            <div className="bg-auto-50 rounded-2xl p-3 text-center">
-              <p className="text-xs text-zinc-500">Por persona ({pasajeros} pasajeros)</p>
-              <p className="text-xl font-black text-auto-700">
+            <div className="bg-auto-600/10 rounded-2xl p-3 text-center">
+              <p className="text-xs text-zinc-400">Por persona ({pasajeros} pasajeros)</p>
+              <p className="text-xl font-black text-auto-400">
                 S/ {resultados.costoPorPersona.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
               </p>
             </div>
@@ -258,43 +258,32 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
 
           {/* Info adicional */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-zinc-50 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-zinc-400">Distancia</p>
-              <p className="text-sm font-bold text-zinc-800">{parseFloat(distancia).toLocaleString("es-PE")} km</p>
+            <div className="bg-zinc-900/5 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-zinc-500">Distancia</p>
+              <p className="text-sm font-bold text-zinc-200">{parseFloat(distancia).toLocaleString("es-PE")} km</p>
             </div>
-            <div className="bg-zinc-50 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-zinc-400">Combustible</p>
-              <p className="text-sm font-bold text-zinc-800">{resultados.galonesNecesarios.toFixed(1)} gal</p>
+            <div className="bg-zinc-900/5 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-zinc-500">Combustible</p>
+              <p className="text-sm font-bold text-zinc-200">{resultados.galonesNecesarios.toFixed(1)} gal</p>
             </div>
-            <div className="bg-zinc-50 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-zinc-400">Rendimiento</p>
-              <p className="text-sm font-bold text-zinc-800">{parseFloat(rendimiento)} km/gal</p>
+            <div className="bg-zinc-900/5 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-zinc-500">Rendimiento</p>
+              <p className="text-sm font-bold text-zinc-200">{parseFloat(rendimiento)} km/gal</p>
             </div>
-            <div className="bg-zinc-50 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-zinc-400">S/ por km</p>
-              <p className="text-sm font-bold text-zinc-800">
+            <div className="bg-zinc-900/5 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-zinc-500">S/ por km</p>
+              <p className="text-sm font-bold text-zinc-200">
                 S/ {(resultados.costoCombustible / parseFloat(distancia)).toFixed(2)}
               </p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="card-soft rounded-2xl p-6 text-center">
-          <p className="text-sm text-zinc-400">Completa los campos para ver el presupuesto</p>
-          <p className="text-xs text-zinc-300 mt-1">Ingresa al menos distancia, rendimiento y precio por galón</p>
+        <div className="card-auto-dark rounded-2xl p-6 text-center">
+          <p className="text-sm text-zinc-500">Completa los campos para ver el presupuesto</p>
+          <p className="text-xs text-zinc-500 mt-1">Ingresa al menos distancia, rendimiento y precio por galón</p>
         </div>
       )}
-
-      {/* Fórmula */}
-      <details className="card-soft rounded-2xl p-4">
-        <summary className="text-xs font-bold text-zinc-500 cursor-pointer">Ver fórmulas utilizadas</summary>
-        <div className="mt-3 space-y-2 text-xs text-zinc-600 bg-zinc-50 rounded-xl p-3">
-          <p><code className="text-auto-600 font-bold">Costo Combustible</code> = (Distancia / Rendimiento) × Precio por Galón</p>
-          <p><code className="text-auto-600 font-bold">Costo Total</code> = Costo Combustible + Σ Peajes</p>
-          <p><code className="text-auto-600 font-bold">Costo por Persona</code> = Costo Total / N° de Pasajeros</p>
-          <p><code className="text-auto-600 font-bold">Galones necesarios</code> = Distancia / Rendimiento</p>
-        </div>
-      </details>
     </div>
   );
 }

@@ -26,12 +26,12 @@ export default function ListingDetailClient({ listing }: Props) {
 
   return (
     <div className="space-y-4">
-      <Link href="/auto/app/marketplace" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-600 hover:text-auto-700 transition-colors">
+      <Link href="/auto/app/marketplace" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-400 hover:text-auto-400 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Marketplace
       </Link>
 
       {/* Galería */}
-      <div className="rounded-2xl overflow-hidden bg-zinc-100">
+      <div className="rounded-2xl overflow-hidden bg-white/5">
         {listing.fotos?.[0] ? (
           <img src={listing.fotos[0]} alt={listing.titulo} className="w-full h-64 object-cover" />
         ) : (
@@ -42,64 +42,64 @@ export default function ListingDetailClient({ listing }: Props) {
       {/* Info principal */}
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-3">
-          <h1 className="text-xl font-extrabold text-zinc-800 flex-1">{listing.titulo}</h1>
-          <p className="text-2xl font-black text-auto-600 shrink-0">
+          <h1 className="text-xl font-extrabold text-zinc-200 flex-1">{listing.titulo}</h1>
+          <p className="text-2xl font-black text-auto-400 shrink-0">
             {listing.precio === 0 ? "Gratis" : `S/ ${listing.precio.toLocaleString("es-PE")}`}
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-            listing.estado_item === "nuevo" ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-500"
+            listing.estado_item === "nuevo" ? "bg-emerald-100 text-emerald-700" : "bg-white/5 text-zinc-400"
           }`}>
             {listing.estado_item === "nuevo" ? "Nuevo" : "Usado"}
           </span>
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-auto-100 text-auto-700">
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-auto-600/15 text-auto-400">
             {categoryLabels[listing.categoria] || listing.categoria}
           </span>
           {listing.marca && (
-            <span className="text-xs text-zinc-500">{listing.marca}{listing.modelo ? ` ${listing.modelo}` : ""}</span>
+            <span className="text-xs text-zinc-400">{listing.marca}{listing.modelo ? ` ${listing.modelo}` : ""}</span>
           )}
         </div>
       </div>
 
       {/* Descripción */}
       {listing.descripcion && (
-        <div className="card-soft rounded-2xl p-4">
-          <h3 className="text-xs font-extrabold text-zinc-700 mb-2">Descripción</h3>
-          <p className="text-sm text-zinc-600 leading-relaxed whitespace-pre-wrap">{listing.descripcion}</p>
+        <div className="card-auto-dark rounded-2xl p-4">
+          <h3 className="text-xs font-extrabold text-zinc-300 mb-2">Descripción</h3>
+          <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap">{listing.descripcion}</p>
         </div>
       )}
 
       {/* Detalles */}
-      <div className="card-soft rounded-2xl p-4 grid grid-cols-2 gap-3">
+      <div className="card-auto-dark rounded-2xl p-4 grid grid-cols-2 gap-3">
         {listing.ciudad && (
           <div>
-            <p className="text-[10px] text-zinc-400">Ubicación</p>
-            <p className="text-sm font-bold text-zinc-800 flex items-center gap-1">
+            <p className="text-[10px] text-zinc-500">Ubicación</p>
+            <p className="text-sm font-bold text-zinc-200 flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5" /> {listing.ciudad}
             </p>
           </div>
         )}
         {listing.marca && (
           <div>
-            <p className="text-[10px] text-zinc-400">Marca</p>
-            <p className="text-sm font-bold text-zinc-800">{listing.marca}</p>
+            <p className="text-[10px] text-zinc-500">Marca</p>
+            <p className="text-sm font-bold text-zinc-200">{listing.marca}</p>
           </div>
         )}
         {listing.modelo && (
           <div>
-            <p className="text-[10px] text-zinc-400">Modelo</p>
-            <p className="text-sm font-bold text-zinc-800">{listing.modelo}</p>
+            <p className="text-[10px] text-zinc-500">Modelo</p>
+            <p className="text-sm font-bold text-zinc-200">{listing.modelo}</p>
           </div>
         )}
         <div>
-          <p className="text-[10px] text-zinc-400">Vendedor</p>
-          <p className="text-sm font-bold text-zinc-800">{sellerName}</p>
+          <p className="text-[10px] text-zinc-500">Vendedor</p>
+          <p className="text-sm font-bold text-zinc-200">{sellerName}</p>
         </div>
         <div>
-          <p className="text-[10px] text-zinc-400">Publicado</p>
-          <p className="text-sm font-bold text-zinc-800">
+          <p className="text-[10px] text-zinc-500">Publicado</p>
+          <p className="text-sm font-bold text-zinc-200">
             {new Date(listing.created_at).toLocaleDateString("es-PE", { day: "numeric", month: "short" })}
           </p>
         </div>
@@ -117,7 +117,7 @@ export default function ListingDetailClient({ listing }: Props) {
           Contactar por WhatsApp
         </a>
       ) : (
-        <div className="w-full py-3.5 rounded-2xl bg-zinc-100 text-zinc-400 text-sm font-bold text-center">
+        <div className="w-full py-3.5 rounded-2xl bg-white/5 text-zinc-500 text-sm font-bold text-center">
           WhatsApp no disponible
         </div>
       )}

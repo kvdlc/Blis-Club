@@ -15,14 +15,14 @@ const actions = [
     key: "gasto-express",
     icon: Receipt,
     label: "Gasto express",
-    color: "bg-zinc-100 text-zinc-700",
+    color: "bg-white/5 text-zinc-300",
     href: "/auto/app/bitacora?add=expense",
   },
   {
     key: "mantenimiento",
     icon: Wrench,
     label: "Mantenimiento",
-    color: "bg-zinc-100 text-zinc-700",
+    color: "bg-white/5 text-zinc-300",
     href: "/auto/app/bitacora?add=maint",
   },
   {
@@ -42,7 +42,7 @@ export function QuickActions() {
           key={action.key}
           href={action.href}
           className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl transition-all active:scale-95 ${action.color} ${
-            action.color.includes("zinc") ? "border border-zinc-200 shadow-sm hover:shadow-md" : "shadow-md"
+            action.color.includes("zinc") ? "border border-white/10 shadow-sm hover:shadow-md" : "shadow-md"
           }`}
         >
           <action.icon className="w-5 h-5" strokeWidth={2} />

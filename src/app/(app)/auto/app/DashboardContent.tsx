@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { Vehicle, FuelLog, VehicleDocument } from "@/types/database";
+import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs } from "@/types/database";
 import { HeroCard } from "./HeroCard";
 import { QuickActions } from "./QuickActions";
 import { DashboardWidgets } from "./DashboardWidgets";
@@ -11,9 +11,12 @@ interface Props {
   fuelLogs: FuelLog[];
   ecoScore: number;
   nextDocExpiry: VehicleDocument | null;
+  maintenances: MaintenanceLog[];
+  specs: VehicleSpecs | null;
+  badges?: string[];
 }
 
-export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocExpiry }: Props) {
+export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocExpiry, maintenances, specs, badges = [] }: Props) {
   const router = useRouter();
 
   if (!vehicle) {
@@ -23,8 +26,8 @@ export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocE
           <span className="text-4xl">🚗</span>
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-zinc-800">¡Bienvenido a Auto!</h2>
-          <p className="text-zinc-500 mt-2 max-w-sm text-sm leading-relaxed">
+          <h2 className="text-2xl font-bold text-zinc-200">¡Bienvenido a Auto!</h2>
+          <p className="text-zinc-400 mt-2 max-w-sm text-sm leading-relaxed">
             Registra tu primer vehículo para comenzar a usar todas las herramientas.
           </p>
         </div>
@@ -42,7 +45,7 @@ export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocE
     <div className="space-y-4">
       <HeroCard vehicle={vehicle} fuelLogs={fuelLogs} ecoScore={ecoScore} />
       <QuickActions />
-      <DashboardWidgets vehicle={vehicle} ecoScore={ecoScore} nextDocExpiry={nextDocExpiry} fuelLogs={fuelLogs} />
+      <DashboardWidgets vehicle={vehicle} ecoScore={ecoScore} nextDocExpiry={nextDocExpiry} fuelLogs={fuelLogs} maintenances={maintenances} specs={specs} badges={badges} />
     </div>
   );
 }

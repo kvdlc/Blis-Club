@@ -6,8 +6,10 @@ import { createClient } from "@/lib/supabase/client";
 import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade } from "@/types/database";
 import {
   ChevronDown, Gauge, Droplets, Wrench, ShoppingBag, Shield, FileDown,
-  Plus, Trash2, Save, X, RotateCw, TrendingDown, TrendingUp,
+  Plus, Trash2, Save, X, RotateCw, TrendingDown, TrendingUp, BarChart3,
 } from "lucide-react";
+import { DatePicker } from "@/components/DatePicker";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
 
 /* ═══════════════════════════ Tipos y datos ═══════════════════════ */
 type TimelineItem = { type: "fuel"; data: FuelLog } | { type: "maintenance"; data: MaintenanceLog };
@@ -43,7 +45,7 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
   if (!vehicle) {
     return (
       <div className="text-center py-12">
-        <p className="text-zinc-500">Registra un vehículo primero.</p>
+        <p className="text-zinc-400">Registra un vehículo primero.</p>
         <button onClick={() => router.push("/auto/app/perfil/vehiculo/nuevo")}
           className="mt-3 px-4 py-2 rounded-xl bg-auto-600 text-white text-sm font-bold">
           Agregar vehículo
@@ -55,12 +57,12 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-auto-100 flex items-center justify-center text-lg">
-          <Gauge className="w-5 h-5 text-auto-600" />
+        <div className="w-10 h-10 rounded-xl bg-auto-600/15 flex items-center justify-center text-lg">
+          <Gauge className="w-5 h-5 text-auto-400" />
         </div>
         <div>
-          <h1 className="text-xl font-extrabold text-zinc-800">Bitácora</h1>
-          <p className="text-xs text-zinc-500">{vehicle.marca} {vehicle.modelo} · {vehicle.kilometraje.toLocaleString("es-PE")} km</p>
+          <h1 className="text-xl font-extrabold text-zinc-200">Bitácora</h1>
+          <p className="text-xs text-zinc-400">{vehicle.marca} {vehicle.modelo} · {vehicle.kilometraje.toLocaleString("es-PE")} km</p>
         </div>
       </div>
 
@@ -93,27 +95,27 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
   ].sort((a, b) => new Date(b.data.fecha).getTime() - new Date(a.data.fecha).getTime());
 
   return (
-    <div className="card-soft rounded-2xl overflow-hidden">
+    <div className="card-auto-dark rounded-2xl overflow-hidden">
       <button onClick={() => setOpen(!open)} className="w-full p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-xl">📜</span>
           <div>
-            <p className="text-sm font-bold text-zinc-800">Línea de Tiempo</p>
-            <p className="text-[10px] text-zinc-400">{timeline.length} eventos registrados</p>
+            <p className="text-sm font-bold text-zinc-200">Línea de Tiempo</p>
+            <p className="text-[10px] text-zinc-500">{timeline.length} eventos registrados</p>
           </div>
         </div>
-        <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-5 h-5 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
         <div className="px-4 pb-4 space-y-2">
           {/* Botones de agregar */}
           <div className="flex gap-2 mb-2">
-          <button onClick={() => { setAddingFuel(false); setAddingMaint(false); }} className="flex-1 py-2 rounded-xl border-2 border-dashed border-zinc-200 text-[10px] font-bold text-zinc-400 hover:border-auto-300 hover:text-auto-500 flex items-center justify-center gap-1">
+          <button onClick={() => { setAddingFuel(!addingFuel); setAddingMaint(false); }} className="flex-1 py-2 rounded-xl border-2 border-dashed border-white/10 text-[10px] font-bold text-zinc-500 hover:border-auto-300 hover:text-auto-500 flex items-center justify-center gap-1">
             <Plus className="w-3 h-3" /> Carga combustible
           </button>
           <button onClick={() => { setAddingMaint(!addingMaint); setAddingFuel(false); }}
-              className="flex-1 py-2 rounded-xl border-2 border-dashed border-zinc-200 text-[10px] font-bold text-zinc-400 hover:border-auto-300 hover:text-auto-500 flex items-center justify-center gap-1">
+              className="flex-1 py-2 rounded-xl border-2 border-dashed border-white/10 text-[10px] font-bold text-zinc-500 hover:border-auto-300 hover:text-auto-500 flex items-center justify-center gap-1">
               <Plus className="w-3 h-3" /> Mantenimiento
             </button>
           </div>
@@ -126,33 +128,33 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
 
           {/* Timeline items */}
           {timeline.length === 0 ? (
-            <p className="text-xs text-zinc-400 text-center py-4">Sin eventos registrados. Agrega tu primera carga o mantenimiento.</p>
+            <p className="text-xs text-zinc-500 text-center py-4">Sin eventos registrados. Agrega tu primera carga o mantenimiento.</p>
           ) : (
             <div className="relative pl-6 space-y-3">
-              <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-zinc-200 rounded" />
+              <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-white/10 rounded" />
               {timeline.slice(0, 20).map((item, i) => (
                 <div key={`${item.type}-${item.data.id}`} className="relative">
                   <div className={`absolute left-[-18px] top-1.5 w-3 h-3 rounded-full border-2 ${
                     item.type === "fuel" ? "bg-amber-100 border-amber-400" : "bg-blue-100 border-blue-400"
                   }`} />
-                  <div className="bg-zinc-50 rounded-xl p-2.5">
+                  <div className="bg-white/5 rounded-xl p-2.5">
                     <div className="flex items-start justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-zinc-800">
+                        <p className="text-xs font-bold text-zinc-200">
                           {item.type === "fuel" ? (
                             <>⛽ {(item.data as FuelLog).litros} L · S/ {(item.data as FuelLog).precio_por_galon}/gal</>
                           ) : (
                             <>{maintTypes.find((t) => t.value === (item.data as MaintenanceLog).tipo)?.icon} {(item.data as MaintenanceLog).titulo}</>
                           )}
                         </p>
-                        <p className="text-[10px] text-zinc-400">
+                        <p className="text-[10px] text-zinc-500">
                           {new Date(item.data.fecha + "T12:00:00").toLocaleDateString("es-PE")}
                           {item.type === "fuel" && ` · ${(item.data as FuelLog).odometro.toLocaleString("es-PE")} km`}
                           {item.type === "maintenance" && (item.data as MaintenanceLog).taller && ` · ${(item.data as MaintenanceLog).taller}`}
                         </p>
                       </div>
                       {(item.type === "fuel" ? (item.data as FuelLog).precio_por_galon * ((item.data as FuelLog).litros / 3.78541) : (item.data as MaintenanceLog).costo) ? (
-                        <span className="text-[10px] font-bold text-zinc-600 shrink-0 ml-2">
+                        <span className="text-[10px] font-bold text-zinc-400 shrink-0 ml-2">
                           S/ {Math.round(
                             item.type === "fuel"
                               ? (item.data as FuelLog).precio_por_galon * ((item.data as FuelLog).litros / 3.78541)
@@ -196,12 +198,12 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
   };
 
   return (
-    <div className="bg-amber-50 rounded-xl p-3 space-y-2">
+    <div className="bg-amber-600/10 rounded-xl p-3 space-y-2">
       <div className="grid grid-cols-4 gap-1.5">
-        <input type="number" step="0.1" value={form.litros} onChange={(e) => setForm({ ...form, litros: e.target.value })} placeholder="Litros" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
-        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder="S/ gal" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
-        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
-        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white">
+        <input type="number" step="0.1" value={form.litros} onChange={(e) => setForm({ ...form, litros: e.target.value })} placeholder="Litros" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder="S/ gal" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs bg-white">
           <option value="regular">Regular</option>
           <option value="premium">Premium</option>
           <option value="diesel">Diésel</option>
@@ -209,10 +211,10 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
           <option value="gnv">GNV</option>
         </select>
       </div>
-      <input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} className="w-full px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
+      <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
         <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : "Guardar"}</button>
-        <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-zinc-200 text-zinc-600 text-xs"><X className="w-3.5 h-3.5" /></button>
+        <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-white/10 text-zinc-400 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );
@@ -241,97 +243,254 @@ function AddMaintForm({ vehicleId, onDone }: { vehicleId: string; onDone: (m: Ma
   };
 
   return (
-    <div className="bg-blue-50 rounded-xl p-3 space-y-2">
-      <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
+    <div className="bg-blue-600/10 rounded-xl p-3 space-y-2">
+      <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
       <div className="grid grid-cols-2 gap-1.5">
-        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white">
+        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white">
           {maintTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
-        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
+        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
       </div>
       <div className="grid grid-cols-2 gap-1.5">
-        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
-        <input value={form.taller} onChange={(e) => setForm({ ...form, taller: e.target.value })} placeholder="Taller" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
+        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
+        <input value={form.taller} onChange={(e) => setForm({ ...form, taller: e.target.value })} placeholder="Taller" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
       </div>
-      <input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} className="w-full px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
+      <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
         <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">Guardar</button>
-        <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-zinc-200 text-zinc-600 text-xs"><X className="w-3.5 h-3.5" /></button>
+        <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-white/10 text-zinc-400 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );
 }
 
 /* ═══════════════════════════ 2. Gráficos Financieros ═══════════════════════ */
+const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
 function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[]; maintenances: MaintenanceLog[] }) {
   const [open, setOpen] = useState(false);
+  const [showRendimiento, setShowRendimiento] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showProyeccion, setShowProyeccion] = useState(false);
 
-  // Calcular gastos últimos 12 meses
-  const ahora = Date.now();
-  const doceMeses = 12 * 30 * 24 * 60 * 60 * 1000;
+  // ── A1: Datos mensuales para barras ──
+  const monthlyData = (() => {
+    const ahora = new Date();
+    const months: { key: string; label: string; combustible: number; mantenimiento: number }[] = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
+      months.push({
+        key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+        label: MESES_CORTOS[d.getMonth()],
+        combustible: 0,
+        mantenimiento: 0,
+      });
+    }
 
-  const gastoCombustible = fuelLogs
-    .filter((f) => new Date(f.fecha).getTime() > ahora - doceMeses)
-    .reduce((sum, f) => sum + f.precio_por_galon * (f.litros / 3.78541), 0);
+    fuelLogs.forEach((f) => {
+      const m = `${new Date(f.fecha).getFullYear()}-${String(new Date(f.fecha).getMonth() + 1).padStart(2, "0")}`;
+      const entry = months.find((x) => x.key === m);
+      if (entry) entry.combustible += Math.round(f.precio_por_galon * (f.litros / 3.78541));
+    });
+    maintenances.forEach((m) => {
+      const key = `${new Date(m.fecha).getFullYear()}-${String(new Date(m.fecha).getMonth() + 1).padStart(2, "0")}`;
+      const entry = months.find((x) => x.key === key);
+      if (entry) entry.mantenimiento += Math.round(m.costo || 0);
+    });
+    return months;
+  })();
 
-  const gastoMantenimiento = maintenances
-    .filter((m) => new Date(m.fecha).getTime() > ahora - doceMeses)
-    .reduce((sum, m) => sum + (m.costo || 0), 0);
+  const gastoTotal = monthlyData.reduce((s, m) => s + m.combustible + m.mantenimiento, 0);
 
-  const gastoTotal = gastoCombustible + gastoMantenimiento;
-  const maxGasto = Math.max(gastoCombustible, gastoMantenimiento, 1);
+  // ── A2: Rendimiento en el tiempo ──
+  const rendimientoData = (() => {
+    if (fuelLogs.length < 2) return [];
+    const sorted = [...fuelLogs].sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+    const puntos: { fecha: string; kmgal: number; odometro: number }[] = [];
+    for (let i = 1; i < sorted.length; i++) {
+      const km = sorted[i].odometro - sorted[i - 1].odometro;
+      const gal = sorted[i - 1].litros / 3.78541;
+      if (km > 0 && gal > 0) {
+        puntos.push({
+          fecha: new Date(sorted[i].fecha).toLocaleDateString("es-PE", { day: "numeric", month: "short" }),
+          kmgal: Math.round(km / gal),
+          odometro: sorted[i].odometro,
+        });
+      }
+    }
+    return puntos;
+  })();
+
+  // ── A3: Heatmap de gasto anual ──
+  const heatmapData = (() => {
+    const ahora = new Date();
+    const yearStart = new Date(ahora.getFullYear(), 0, 1);
+    const cells: { date: Date; gasto: number; level: number }[] = [];
+    const gastosPorFecha: Record<string, number> = {};
+
+    fuelLogs.forEach((f) => {
+      const key = f.fecha;
+      gastosPorFecha[key] = (gastosPorFecha[key] || 0) + Math.round(f.precio_por_galon * (f.litros / 3.78541));
+    });
+    maintenances.forEach((m) => {
+      const key = m.fecha;
+      gastosPorFecha[key] = (gastosPorFecha[key] || 0) + Math.round(m.costo || 0);
+    });
+
+    const startDay = yearStart.getDay();
+    const mondayStart = startDay === 0 ? 6 : startDay - 1;
+    for (let d = -mondayStart; d < 365; d++) {
+      const date = new Date(ahora.getFullYear(), 0, d + 1);
+      const key = date.toISOString().split("T")[0];
+      const gasto = gastosPorFecha[key] || 0;
+      cells.push({
+        date,
+        gasto,
+        level: gasto === 0 ? 0 : gasto < 50 ? 1 : gasto < 150 ? 2 : gasto < 300 ? 3 : 4,
+      });
+    }
+    return cells;
+  })();
+
+  // ── A4: Proyección anual ──
+  const proyeccionAnual = (() => {
+    if (monthlyData.length === 0) return 0;
+    const recent = monthlyData.slice(-3);
+    const avg = recent.reduce((s, m) => s + m.combustible + m.mantenimiento, 0) / recent.length;
+    return Math.round(avg * 12);
+  })();
 
   return (
-    <div className="card-soft rounded-2xl overflow-hidden">
+    <div className="card-auto-dark rounded-2xl overflow-hidden">
       <button onClick={() => setOpen(!open)} className="w-full p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-xl">📈</span>
           <div>
-            <p className="text-sm font-bold text-zinc-800">Gráficos Financieros</p>
-            <p className="text-[10px] text-zinc-400">Últimos 12 meses</p>
+            <p className="text-sm font-bold text-zinc-200">Gráficos Financieros</p>
+            <p className="text-[10px] text-zinc-500">{gastoTotal > 0 ? `S/ ${gastoTotal.toLocaleString("es-PE")} en 12 meses` : "Últimos 12 meses"}</p>
           </div>
         </div>
-        <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-5 h-5 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-4 space-y-3">
           {gastoTotal === 0 ? (
-            <p className="text-xs text-zinc-400 text-center py-4">Sin datos de gastos. Registra cargas y mantenimientos.</p>
+            <p className="text-xs text-zinc-500 text-center py-4">Sin datos de gastos. Registra cargas y mantenimientos.</p>
           ) : (
-            <div className="space-y-3">
-              <div className="text-center">
-                <p className="text-xs text-zinc-400">Gasto total 12 meses</p>
-                <p className="text-3xl font-black text-auto-600">S/ {Math.round(gastoTotal).toLocaleString("es-PE")}</p>
-                <p className="text-[10px] text-zinc-400">S/ {Math.round(gastoTotal / 12).toLocaleString("es-PE")}/mes promedio</p>
-              </div>
-
-              <div className="space-y-2">
-                <div>
-                  <div className="flex justify-between text-[10px] mb-1">
-                    <span className="font-bold text-zinc-700">Combustible</span>
-                    <span className="font-bold text-zinc-800">S/ {Math.round(gastoCombustible).toLocaleString("es-PE")}</span>
-                  </div>
-                  <div className="h-4 bg-zinc-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-500 rounded-full" style={{ width: `${(gastoCombustible / maxGasto) * 100}%` }} />
-                  </div>
-                  <p className="text-[10px] text-zinc-400 mt-0.5">{gastoTotal > 0 ? Math.round((gastoCombustible / gastoTotal) * 100) : 0}% del total</p>
+            <>
+              {/* ── A1: Barras mensuales ── */}
+              <div>
+                <p className="text-[10px] font-extrabold text-zinc-400 mb-2">Gasto mensual (12 meses)</p>
+                <div className="h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={monthlyData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" />
+                      <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#a1a1aa" }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 9, fill: "#a1a1aa" }} axisLine={false} tickLine={false} />
+                      <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e4e4e7", fontSize: 11 }} />
+                      <Bar dataKey="combustible" stackId="a" fill="#be0b3c" radius={[0, 0, 0, 0]} name="Combustible" />
+                      <Bar dataKey="mantenimiento" stackId="a" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Mantenimiento" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
-
-                {gastoMantenimiento > 0 && (
-                  <div>
-                    <div className="flex justify-between text-[10px] mb-1">
-                      <span className="font-bold text-zinc-700">Mantenimiento</span>
-                      <span className="font-bold text-zinc-800">S/ {Math.round(gastoMantenimiento).toLocaleString("es-PE")}</span>
-                    </div>
-                    <div className="h-4 bg-zinc-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(gastoMantenimiento / maxGasto) * 100}%` }} />
-                    </div>
-                    <p className="text-[10px] text-zinc-400 mt-0.5">{gastoTotal > 0 ? Math.round((gastoMantenimiento / gastoTotal) * 100) : 0}% del total</p>
-                  </div>
-                )}
               </div>
-            </div>
+
+              {/* ── A2: Línea de rendimiento ── */}
+              <button onClick={() => setShowRendimiento(!showRendimiento)} className="w-full text-left">
+                <p className="text-[10px] font-extrabold text-zinc-400 flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" /> Rendimiento histórico {rendimientoData.length > 0 ? `(${rendimientoData.length} puntos)` : ""}
+                  <span className="ml-auto text-[9px] text-zinc-500">{showRendimiento ? "▲" : "▼"}</span>
+                </p>
+              </button>
+              {showRendimiento && rendimientoData.length > 0 && (
+                <div className="h-40">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={rendimientoData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" />
+                      <XAxis dataKey="fecha" tick={{ fontSize: 8, fill: "#a1a1aa" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                      <YAxis tick={{ fontSize: 9, fill: "#a1a1aa" }} axisLine={false} tickLine={false} domain={["auto", "auto"]} />
+                      <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e4e4e7", fontSize: 11 }}
+                        formatter={(v: number) => [`${v} km/gal`, "Rendimiento"]} />
+                      <Line type="monotone" dataKey="kmgal" stroke="#be0b3c" strokeWidth={2} dot={{ r: 2, fill: "#be0b3c" }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+              {showRendimiento && rendimientoData.length === 0 && (
+                <p className="text-[10px] text-zinc-500 text-center py-2">Necesitas 2+ cargas para ver rendimiento histórico.</p>
+              )}
+
+              {/* ── A3: Heatmap ── */}
+              <button onClick={() => setShowHeatmap(!showHeatmap)} className="w-full text-left">
+                <p className="text-[10px] font-extrabold text-zinc-400 flex items-center gap-1">
+                  🔥 Mapa de gasto anual <span className="ml-auto text-[9px] text-zinc-500">{showHeatmap ? "▲" : "▼"}</span>
+                </p>
+              </button>
+              {showHeatmap && (
+                <div>
+                  <div className="flex gap-0.5 mb-1">
+                    {["L", "M", "X", "J", "V", "S", "D"].map((d, i) => (
+                      <span key={i} className="text-[8px] text-zinc-500 w-3.5 text-center">{d}</span>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-[repeat(53,1fr)] gap-[1px]">
+                    {heatmapData.map((cell, i) => (
+                      <div
+                        key={i}
+                        title={`${cell.date.toLocaleDateString("es-PE")}: S/ ${cell.gasto}`}
+                        className={`aspect-square rounded-[1px] ${
+                          cell.level === 0 ? "bg-white/5" :
+                          cell.level === 1 ? "bg-auto-200" :
+                          cell.level === 2 ? "bg-auto-400" :
+                          cell.level === 3 ? "bg-auto-600/100" :
+                          "bg-auto-700"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 justify-center">
+                    <span className="text-[8px] text-zinc-500">Menos</span>
+                    {[0, 1, 2, 3, 4].map((l) => (
+                      <div key={l} className={`w-2.5 h-2.5 rounded-sm ${
+                        l === 0 ? "bg-white/5" : l === 1 ? "bg-auto-200" : l === 2 ? "bg-auto-400" : l === 3 ? "bg-auto-600/100" : "bg-auto-700"
+                      }`} />
+                    ))}
+                    <span className="text-[8px] text-zinc-500">Más</span>
+                  </div>
+                </div>
+              )}
+
+              {/* ── A4: Proyección anual ── */}
+              <button onClick={() => setShowProyeccion(!showProyeccion)} className="w-full text-left">
+                <p className="text-[10px] font-extrabold text-zinc-400 flex items-center gap-1">
+                  📊 Proyección anual <span className="ml-auto text-[9px] text-zinc-500">{showProyeccion ? "▲" : "▼"}</span>
+                </p>
+              </button>
+              {showProyeccion && (
+                <div className="bg-auto-600/10 rounded-2xl p-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="text-center">
+                      <p className="text-[10px] text-zinc-500">Gasto estimado</p>
+                      <p className="text-lg font-black text-auto-400">S/ {proyeccionAnual.toLocaleString("es-PE")}</p>
+                      <p className="text-[9px] text-zinc-500">próximos 12 meses</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[10px] text-zinc-500">Por mes</p>
+                      <p className="text-lg font-black text-zinc-200">S/ {Math.round(proyeccionAnual / 12).toLocaleString("es-PE")}</p>
+                      <p className="text-[9px] text-zinc-500">promedio proyectado</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[10px] text-zinc-500">Tendencia</p>
+                      <p className={`text-lg font-black ${proyeccionAnual > 0 ? "text-amber-600" : "text-zinc-500"}`}>
+                        {proyeccionAnual > 0 ? "→" : "—"}
+                      </p>
+                      <p className="text-[9px] text-zinc-500">basado en 3 meses</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -353,42 +512,42 @@ function WarrantySection({ vehicle, maintenances }: { vehicle: Vehicle; maintena
   const enConcesionaria = maintenances.filter((m) => m.tipo === "preventivo" && m.taller).length;
 
   return (
-    <div className="card-soft rounded-2xl overflow-hidden">
+    <div className="card-auto-dark rounded-2xl overflow-hidden">
       <button onClick={() => setOpen(!open)} className="w-full p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-xl">🛡️</span>
           <div>
-            <p className="text-sm font-bold text-zinc-800">Control de Garantía</p>
-            <p className="text-[10px] text-zinc-400">{kmRestantes.toLocaleString("es-PE")} km restantes</p>
+            <p className="text-sm font-bold text-zinc-200">Control de Garantía</p>
+            <p className="text-[10px] text-zinc-500">{kmRestantes.toLocaleString("es-PE")} km restantes</p>
           </div>
         </div>
-        <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-5 h-5 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
         <div className="px-4 pb-4 space-y-3">
           <div>
             <div className="flex justify-between text-[10px] mb-1">
-              <span className="font-bold text-zinc-600">Garantía: {garantiaKm.toLocaleString("es-PE")} km</span>
-              <span className="font-bold text-zinc-600">{vehicle.kilometraje.toLocaleString("es-PE")} km actual</span>
+              <span className="font-bold text-zinc-400">Garantía: {garantiaKm.toLocaleString("es-PE")} km</span>
+              <span className="font-bold text-zinc-400">{vehicle.kilometraje.toLocaleString("es-PE")} km actual</span>
             </div>
-            <div className="h-4 bg-zinc-100 rounded-full overflow-hidden">
-              <div className={`h-full rounded-full ${kmPct > 90 ? "bg-red-500" : kmPct > 70 ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${kmPct}%` }} />
+            <div className="h-4 bg-white/5 rounded-full overflow-hidden">
+              <div className={`h-full rounded-full ${kmPct > 90 ? "bg-red-600/100" : kmPct > 70 ? "bg-amber-600/100" : "bg-emerald-600/100"}`} style={{ width: `${kmPct}%` }} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-zinc-50 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-zinc-400">Km restantes</p>
-              <p className="text-sm font-bold text-zinc-800">{kmRestantes.toLocaleString("es-PE")}</p>
+            <div className="bg-white/5 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-zinc-500">Km restantes</p>
+              <p className="text-sm font-bold text-zinc-200">{kmRestantes.toLocaleString("es-PE")}</p>
             </div>
-            <div className="bg-zinc-50 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-zinc-400">En concesionaria</p>
-              <p className="text-sm font-bold text-zinc-800">{enConcesionaria} visitas</p>
+            <div className="bg-white/5 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-zinc-500">En concesionaria</p>
+              <p className="text-sm font-bold text-zinc-200">{enConcesionaria} visitas</p>
             </div>
           </div>
 
-          <p className="text-[10px] text-zinc-400 text-center">
+          <p className="text-[10px] text-zinc-500 text-center">
             {kmPct > 90 ? "⚠️ La garantía está por vencer por kilometraje." :
              kmPct > 70 ? "🟡 Acercándote al límite de garantía." :
              "✅ Aún dentro del período de garantía."}
@@ -426,16 +585,16 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
   };
 
   return (
-    <div className="card-soft rounded-2xl overflow-hidden">
+    <div className="card-auto-dark rounded-2xl overflow-hidden">
       <button onClick={() => setOpen(!open)} className="w-full p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-xl">✨</span>
           <div>
-            <p className="text-sm font-bold text-zinc-800">Upgrades y Accesorios</p>
-            <p className="text-[10px] text-zinc-400">{upgrades.length} mejoras · S/ {Math.round(totalUpgrades).toLocaleString("es-PE")}</p>
+            <p className="text-sm font-bold text-zinc-200">Upgrades y Accesorios</p>
+            <p className="text-[10px] text-zinc-500">{upgrades.length} mejoras · S/ {Math.round(totalUpgrades).toLocaleString("es-PE")}</p>
           </div>
         </div>
-        <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-5 h-5 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
@@ -443,32 +602,32 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
           {upgrades.map((u) => {
             const cat = upgradeCats.find((c) => c.value === u.categoria);
             return (
-              <div key={u.id} className="flex items-center justify-between bg-zinc-50 rounded-xl p-2.5">
+              <div key={u.id} className="flex items-center justify-between bg-white/5 rounded-xl p-2.5">
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-zinc-800">{cat?.icon} {u.nombre}</p>
-                  <p className="text-[10px] text-zinc-400">{cat?.label}{u.costo ? ` · S/ ${u.costo.toLocaleString("es-PE")}` : ""}</p>
+                  <p className="text-xs font-bold text-zinc-200">{cat?.icon} {u.nombre}</p>
+                  <p className="text-[10px] text-zinc-500">{cat?.label}{u.costo ? ` · S/ ${u.costo.toLocaleString("es-PE")}` : ""}</p>
                 </div>
-                <button onClick={() => handleDelete(u.id)} className="text-zinc-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                <button onClick={() => handleDelete(u.id)} className="text-zinc-500 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
               </div>
             );
           })}
 
           {adding ? (
-            <div className="bg-auto-50 rounded-xl p-3 space-y-2">
-              <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre de la mejora" className="w-full px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
+            <div className="bg-auto-600/10 rounded-xl p-3 space-y-2">
+              <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre de la mejora" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
               <div className="grid grid-cols-2 gap-1.5">
-                <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white">
+                <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white">
                   {upgradeCats.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
-                <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-white" />
+                <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white" />
               </div>
               <div className="flex gap-1.5">
                 <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">Guardar</button>
-                <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-zinc-200 text-zinc-600 text-xs"><X className="w-3.5 h-3.5" /></button>
+                <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-white/10 text-zinc-400 text-xs"><X className="w-3.5 h-3.5" /></button>
               </div>
             </div>
           ) : (
-            <button onClick={() => setAdding(true)} className="w-full py-2 rounded-xl border-2 border-dashed border-zinc-200 text-[10px] font-bold text-zinc-400 hover:border-auto-300 hover:text-auto-500 flex items-center justify-center gap-1">
+            <button onClick={() => setAdding(true)} className="w-full py-2 rounded-xl border-2 border-dashed border-white/10 text-[10px] font-bold text-zinc-500 hover:border-auto-300 hover:text-auto-500 flex items-center justify-center gap-1">
               <Plus className="w-3 h-3" /> Agregar mejora
             </button>
           )}
@@ -508,55 +667,48 @@ function TireRotationSection() {
     localStorage.setItem("blis_tire_positions", JSON.stringify(initial));
   };
 
-  const posLabels: { key: Position; label: string; top: string; left: string }[] = [
-    { key: "DI", label: "Del. Izq.", top: "10%", left: "20%" },
-    { key: "DD", label: "Del. Der.", top: "10%", left: "60%" },
-    { key: "TI", label: "Tras. Izq.", top: "65%", left: "20%" },
-    { key: "TD", label: "Tras. Der.", top: "65%", left: "60%" },
-  ];
-
   return (
-    <div className="card-soft rounded-2xl overflow-hidden">
+    <div className="card-auto-dark rounded-2xl overflow-hidden">
       <button onClick={() => setOpen(!open)} className="w-full p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-xl">🔄</span>
           <div>
-            <p className="text-sm font-bold text-zinc-800">Rotación de Neumáticos</p>
-            <p className="text-[10px] text-zinc-400">Distribución actual del chasis</p>
+            <p className="text-sm font-bold text-zinc-200">Rotación de Neumáticos</p>
+            <p className="text-[10px] text-zinc-500">Distribución actual del chasis</p>
           </div>
         </div>
-        <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-5 h-5 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
         <div className="px-4 pb-4 space-y-3">
-          {/* Chasis visual */}
-          <div className="relative w-full max-w-[240px] mx-auto aspect-[2/3] bg-zinc-100 rounded-2xl border-2 border-zinc-200">
-            {/* Silueta de auto */}
-            <div className="absolute inset-4 border-2 border-zinc-300 rounded-xl" />
-            {posLabels.map((pos) => (
-              <div
-                key={pos.key}
-                className="absolute -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white border-2 border-zinc-300 flex items-center justify-center shadow-sm"
-                style={{ top: pos.top, left: pos.left }}
-              >
-                <div>
-                  <p className="text-lg font-black text-auto-600">{tires[pos.key]}</p>
-                  <p className="text-[8px] text-zinc-400 -mt-1">{pos.label.split(".")[0]}</p>
-                </div>
+          {/* Chasis visual — grid 2x2 */}
+          <div className="bg-white/5 rounded-2xl p-3">
+            <div className="aspect-[3/2] rounded-xl border-2 border-white/10 bg-white/5 relative flex flex-col">
+              {/* Fila delantera */}
+              <div className="flex-1 flex items-center justify-around px-2">
+                <TireCircle label={tires.DI} name="Del. Izq." color="bg-auto-600/15 text-auto-400 border-auto-300" />
+                <TireCircle label={tires.DD} name="Del. Der." color="bg-auto-600/15 text-auto-400 border-auto-300" />
               </div>
-            ))}
+              {/* Separador visual */}
+              <div className="h-px mx-8 bg-white/10" />
+              {/* Fila trasera */}
+              <div className="flex-1 flex items-center justify-around px-2">
+                <TireCircle label={tires.TI} name="Tras. Izq." color="bg-white/10 text-zinc-400 border-white/15" />
+                <TireCircle label={tires.TD} name="Tras. Der." color="bg-white/10 text-zinc-400 border-white/15" />
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-2">
             <button onClick={rotate} className="flex-1 py-2.5 rounded-xl bg-auto-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-auto-700 transition-colors">
               <RotateCw className="w-3.5 h-3.5" /> Rotar (cruzado)
             </button>
-            <button onClick={reset} className="px-4 py-2.5 rounded-xl bg-zinc-100 text-zinc-500 text-xs font-medium hover:bg-zinc-200 transition-colors">
+            <button onClick={reset} className="px-4 py-2.5 rounded-xl bg-white/5 text-zinc-400 text-xs font-medium hover:bg-white/10 transition-colors">
               Reiniciar
             </button>
           </div>
-          <p className="text-[10px] text-zinc-400 text-center">Patrón: DI → TD → DD → TI → DI</p>
+          <p className="text-[10px] text-zinc-500 text-center">Patrón: TI → DI → DD → TD → TI</p>
         </div>
       )}
     </div>
@@ -572,36 +724,36 @@ function CarfaxExportSection({ vehicle, fuelLogs, maintenances, upgrades }: {
   const totalEvents = fuelLogs.length + maintenances.length;
 
   return (
-    <div className="card-soft rounded-2xl overflow-hidden">
+    <div className="card-auto-dark rounded-2xl overflow-hidden">
       <button onClick={() => setOpen(!open)} className="w-full p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-xl">📄</span>
           <div>
-            <p className="text-sm font-bold text-zinc-800">Reporte Carfax</p>
-            <p className="text-[10px] text-zinc-400">{totalEvents} eventos exportables</p>
+            <p className="text-sm font-bold text-zinc-200">Reporte Carfax</p>
+            <p className="text-[10px] text-zinc-500">{totalEvents} eventos exportables</p>
           </div>
         </div>
-        <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-5 h-5 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
         <div className="px-4 pb-4 space-y-3">
-          <p className="text-xs text-zinc-600">
+          <p className="text-xs text-zinc-400">
             Genera un reporte PDF con todo el historial de mantenimientos, cargas de combustible y mejoras para presentar a futuros compradores o para tu control personal.
           </p>
 
           <div className="grid grid-cols-3 gap-2 mb-2">
-            <div className="bg-zinc-50 rounded-xl p-2 text-center">
+            <div className="bg-white/5 rounded-xl p-2 text-center">
               <p className="text-lg font-black text-amber-600">{fuelLogs.length}</p>
-              <p className="text-[9px] text-zinc-400">Cargas</p>
+              <p className="text-[9px] text-zinc-500">Cargas</p>
             </div>
-            <div className="bg-zinc-50 rounded-xl p-2 text-center">
+            <div className="bg-white/5 rounded-xl p-2 text-center">
               <p className="text-lg font-black text-blue-600">{maintenances.length}</p>
-              <p className="text-[9px] text-zinc-400">Mantenimientos</p>
+              <p className="text-[9px] text-zinc-500">Mantenimientos</p>
             </div>
-            <div className="bg-zinc-50 rounded-xl p-2 text-center">
+            <div className="bg-white/5 rounded-xl p-2 text-center">
               <p className="text-lg font-black text-violet-600">{upgrades.length}</p>
-              <p className="text-[9px] text-zinc-400">Mejoras</p>
+              <p className="text-[9px] text-zinc-500">Mejoras</p>
             </div>
           </div>
 
@@ -612,9 +764,20 @@ function CarfaxExportSection({ vehicle, fuelLogs, maintenances, upgrades }: {
             <FileDown className="w-4 h-4" />
             Exportar reporte PDF
           </button>
-          <p className="text-[10px] text-zinc-400 text-center">Se abrirá en una nueva pestaña. Usa Ctrl+P para guardar como PDF.</p>
+          <p className="text-[10px] text-zinc-500 text-center">Se abrirá en una nueva pestaña. Usa Ctrl+P para guardar como PDF.</p>
         </div>
       )}
+    </div>
+  );
+}
+
+function TireCircle({ label, name, color }: { label: string; name: string; color: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center shadow-sm ${color}`}>
+        <span className="text-base font-black">{label}</span>
+      </div>
+      <span className="text-[9px] text-zinc-400">{name}</span>
     </div>
   );
 }
