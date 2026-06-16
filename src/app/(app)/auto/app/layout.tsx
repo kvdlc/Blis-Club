@@ -1,3 +1,4 @@
+import type { Viewport } from "next";
 import { redirect } from "next/navigation";
 import AutoNav from "@/components/AutoNav";
 import { CarProvider, CarSwitcher } from "@/components/CarSwitcher";
@@ -8,6 +9,11 @@ import ReferralTracker from "@/components/ReferralTracker";
 import { Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
+
+export const viewport: Viewport = {
+  themeColor: "#10b981",
+  colorScheme: "dark",
+};
 
 export default async function AutoAppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();

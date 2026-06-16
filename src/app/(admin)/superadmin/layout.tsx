@@ -1,6 +1,12 @@
+import type { Viewport } from "next";
 import { redirect } from "next/navigation";
 import AdminNav from "@/components/admin/AdminNav";
 import { createClient } from "@/lib/supabase/server";
+
+export const viewport: Viewport = {
+  themeColor: "#5956e9",
+  colorScheme: "only light",
+};
 
 export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();

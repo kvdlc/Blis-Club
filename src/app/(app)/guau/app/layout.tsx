@@ -1,3 +1,4 @@
+import type { Viewport } from "next";
 import { redirect } from "next/navigation";
 import AppNav from "@/components/AppNav";
 import { DogProvider, DogSwitcher } from "@/components/DogSwitcher";
@@ -11,6 +12,11 @@ import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { cookies } from "next/headers";
 import { getCachedDog, getCachedMetabolicProfile, getCachedMealSlots, getCachedRecipes, getCachedWalks, getCachedWeightLatest, getCachedMealSchedule } from "@/lib/data-cache";
+
+export const viewport: Viewport = {
+  themeColor: "#5956e9",
+  colorScheme: "only light",
+};
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
