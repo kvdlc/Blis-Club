@@ -314,7 +314,7 @@ export function AutoWebLandingClient({ plans }: Props) {
   /* ─── Renders ─── */
   const renderStars = (n: number) =>
     [...Array(5)].map((_, i) => (
-      <Star key={i} className={`w-4 h-4 ${i < n ? "text-emerald-400 fill-emerald-400" : "text-zinc-600"}`} />
+      <Star key={i} className={`w-4 h-4 ${i < n ? "text-emerald-600 fill-emerald-600" : "text-zinc-400"}`} />
     ));
 
   return (
@@ -527,66 +527,69 @@ export function AutoWebLandingClient({ plans }: Props) {
         </motion.div>
       </section>
 
-      {/* ═══ PAIN POINTS ═══ */}
-      <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">El problema</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 mt-2">
-            ¿Te suena familiar?
-          </h2>
-          <p className="text-sm text-zinc-400 mt-2 max-w-lg mx-auto">
-            Millones de conductores enfrentan los mismos problemas. No es tu culpa, es falta de herramientas.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {PAIN_POINTS.map((p, i) => {
-            const Icon = p.icon;
-            return (
-              <div key={i} className="card-auto-dark rounded-2xl p-5 hover:border-white/10 transition-all duration-300">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 shrink-0 flex items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                    <Icon className="w-6 h-6 text-emerald-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-extrabold text-zinc-100 mb-1">{p.title}</h3>
-                    <p className="text-xs text-zinc-400 leading-relaxed">{p.desc}</p>
+      {/* ═══ LIGHT SECTION: PAIN POINTS + SOLUTION PILLARS ═══ */}
+      <div className="bg-zinc-50 relative">
+        {/* ═══ PAIN POINTS ═══ */}
+        <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">El problema</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
+              ¿Te suena familiar?
+            </h2>
+            <p className="text-sm text-zinc-500 mt-2 max-w-lg mx-auto">
+              Millones de conductores enfrentan los mismos problemas. No es tu culpa, es falta de herramientas.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {PAIN_POINTS.map((p, i) => {
+              const Icon = p.icon;
+              return (
+                <div key={i} className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 hover:border-zinc-300 transition-all duration-300">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 shrink-0 flex items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
+                      <Icon className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-extrabold text-zinc-900 mb-1">{p.title}</h3>
+                      <p className="text-xs text-zinc-500 leading-relaxed">{p.desc}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+              );
+            })}
+          </div>
+        </section>
 
-      {/* ═══ SOLUTION PILLARS ═══ */}
-      <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">La solución</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 mt-2">
-            Blis es todo lo que necesitas
-          </h2>
-          <p className="text-sm text-zinc-400 mt-2 max-w-lg mx-auto">
-            Tres pilares que trabajan juntos para que tu auto dure más, valga más y te cueste menos.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {SOLUTION_PILLARS.map((s, i) => {
-            const Icon = s.icon;
-            return (
-              <div key={i} className="relative group">
-                <div className={`absolute -inset-0.5 bg-gradient-to-r ${s.color} rounded-[1.5rem] blur opacity-10 group-hover:opacity-25 transition-opacity`} />
-                <div className="relative card-auto-dark rounded-[1.5rem] p-6 h-full text-center">
-                  <div className="w-14 h-14 mb-4 mx-auto flex items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                    <Icon className="w-7 h-7 text-emerald-400" />
+        {/* ═══ SOLUTION PILLARS ═══ */}
+        <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">La solución</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
+              Blis es todo lo que necesitas
+            </h2>
+            <p className="text-sm text-zinc-500 mt-2 max-w-lg mx-auto">
+              Tres pilares que trabajan juntos para que tu auto dure más, valga más y te cueste menos.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {SOLUTION_PILLARS.map((s, i) => {
+              const Icon = s.icon;
+              return (
+                <div key={i} className="relative group">
+                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${s.color} rounded-[1.5rem] blur opacity-10 group-hover:opacity-25 transition-opacity`} />
+                  <div className="relative bg-white rounded-[1.5rem] border border-zinc-200 shadow-sm p-6 h-full text-center">
+                    <div className="w-14 h-14 mb-4 mx-auto flex items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
+                      <Icon className="w-7 h-7 text-emerald-600" />
+                    </div>
+                    <h3 className="text-base font-extrabold text-zinc-900 mb-2">{s.title}</h3>
+                    <p className="text-xs text-zinc-500 leading-relaxed">{s.desc}</p>
                   </div>
-                  <h3 className="text-base font-extrabold text-zinc-100 mb-2">{s.title}</h3>
-                  <p className="text-xs text-zinc-400 leading-relaxed">{s.desc}</p>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+              );
+            })}
+          </div>
+        </section>
+      </div>
 
       {/* ═══ APP MOCKUPS ═══ */}
       <section id="app" className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
@@ -673,64 +676,67 @@ export function AutoWebLandingClient({ plans }: Props) {
         </div>
       </section>
 
-      {/* ═══ TESTIMONIALS ═══ */}
-      <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Historias reales</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 mt-2">
-            Lo que dicen los conductores
-          </h2>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
-          {TESTIMONIALS.map((t, i) => (
-            <div
-              key={i}
-              className="snap-start shrink-0 w-[280px] card-auto-dark rounded-2xl p-5 border border-white/6"
-            >
-              <div className="flex gap-0.5 mb-3">{renderStars(t.stars)}</div>
-              <p className="text-sm text-zinc-300 mb-4 leading-relaxed">"{t.text}"</p>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-zinc-100">{t.name}</p>
-                  <p className="text-[10px] text-zinc-500">{t.car}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-extrabold text-emerald-400">{t.metric}</p>
-                  <p className="text-[9px] text-zinc-500">{t.metricLabel}</p>
+      {/* ═══ LIGHT SECTION: TESTIMONIALS + TRUST ═══ */}
+      <div className="bg-zinc-50 relative">
+        {/* ═══ TESTIMONIALS ═══ */}
+        <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Historias reales</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
+              Lo que dicen los conductores
+            </h2>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
+            {TESTIMONIALS.map((t, i) => (
+              <div
+                key={i}
+                className="snap-start shrink-0 w-[280px] bg-white rounded-2xl border border-zinc-200 shadow-sm p-5"
+              >
+                <div className="flex gap-0.5 mb-3">{renderStars(t.stars)}</div>
+                <p className="text-sm text-zinc-700 mb-4 leading-relaxed">"{t.text}"</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-zinc-900">{t.name}</p>
+                    <p className="text-[10px] text-zinc-500">{t.car}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-extrabold text-emerald-600">{t.metric}</p>
+                    <p className="text-[9px] text-zinc-500">{t.metricLabel}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
 
-      {/* ═══ TRUST / GUARANTEE ═══ */}
-      <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Compra con confianza</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 mt-2">
-            Te respaldamos en cada paso
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { icon: ShieldCheck, title: "Garantía 14 días", desc: "No te convence? Te devolvemos el 100% de tu dinero sin una sola pregunta. Así de seguros estamos de que Blis cambiará la forma de cuidar tu auto." },
-            { icon: Lock, title: "Pago seguro", desc: "Utilizamos una pasarela de pago segura y privada certificada. Tu información financiera está cifrada y nunca la almacenamos en nuestros servidores." },
-            { icon: MessageCircle, title: "Soporte 24/7", desc: "Nuestro equipo responde en menos de 24 horas. No bots, no respuestas genéricas: gente real que entiende de autos y tecnología." },
-          ].map((t, i) => {
-            const Icon = t.icon;
-            return (
-              <div key={i} className="text-center p-6 rounded-2xl card-auto-dark border border-white/6">
-                <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                  <Icon className="w-8 h-8 text-emerald-400" />
+        {/* ═══ TRUST / GUARANTEE ═══ */}
+        <section className="relative z-10 px-4 py-16 max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Compra con confianza</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-2">
+              Te respaldamos en cada paso
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { icon: ShieldCheck, title: "Garantía 14 días", desc: "No te convence? Te devolvemos el 100% de tu dinero sin una sola pregunta. Así de seguros estamos de que Blis cambiará la forma de cuidar tu auto." },
+              { icon: Lock, title: "Pago seguro", desc: "Utilizamos una pasarela de pago segura y privada certificada. Tu información financiera está cifrada y nunca la almacenamos en nuestros servidores." },
+              { icon: MessageCircle, title: "Soporte 24/7", desc: "Nuestro equipo responde en menos de 24 horas. No bots, no respuestas genéricas: gente real que entiende de autos y tecnología." },
+            ].map((t, i) => {
+              const Icon = t.icon;
+              return (
+                <div key={i} className="text-center p-6 rounded-2xl bg-white border border-zinc-200 shadow-sm">
+                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
+                    <Icon className="w-8 h-8 text-emerald-600" />
+                  </div>
+                  <h3 className="text-base font-extrabold text-zinc-900 mb-2">{t.title}</h3>
+                  <p className="text-xs text-zinc-500 leading-relaxed">{t.desc}</p>
                 </div>
-                <h3 className="text-base font-extrabold text-zinc-100 mb-2">{t.title}</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">{t.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+              );
+            })}
+          </div>
+        </section>
+      </div>
 
       {/* ═══ PRICING ═══ */}
       <section id="pricing" className="relative z-10 px-4 py-16 max-w-5xl mx-auto">

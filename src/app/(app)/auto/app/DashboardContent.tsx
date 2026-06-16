@@ -20,10 +20,15 @@ interface Props {
 export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocExpiry, maintenances, specs, badges = [] }: Props) {
   const router = useRouter();
 
+  const bgLayer = (
+    <div className="absolute -inset-x-4 -top-14 bottom-0 bg-auto-gradient z-0 pointer-events-none" />
+  );
+
   if (!vehicle) {
     return (
-      <div className="-mx-4 -mt-3 px-4 pt-3 min-h-[calc(100vh-7rem)] bg-auto-gradient text-zinc-200">
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
+      <div className="relative -mx-4 -mt-3 px-4 pt-3 min-h-[calc(100vh-7rem)] text-zinc-200">
+        {bgLayer}
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
           <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-lg">
             <Car className="w-10 h-10 text-zinc-400" />
           </div>
@@ -45,8 +50,9 @@ export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocE
   }
 
   return (
-    <div className="-mx-4 -mt-3 px-4 pt-3 min-h-[calc(100vh-7rem)] bg-auto-gradient text-zinc-200">
-      <div className="space-y-4">
+    <div className="relative -mx-4 -mt-3 px-4 pt-3 min-h-[calc(100vh-7rem)] text-zinc-200">
+      {bgLayer}
+      <div className="relative z-10 space-y-4">
         <HeroCard vehicle={vehicle} fuelLogs={fuelLogs} ecoScore={ecoScore} />
         <QuickActions />
         <DashboardWidgets vehicle={vehicle} ecoScore={ecoScore} nextDocExpiry={nextDocExpiry} fuelLogs={fuelLogs} maintenances={maintenances} specs={specs} badges={badges} />

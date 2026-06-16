@@ -83,7 +83,7 @@ export default function AutoNav() {
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-4 left-4 right-4 z-40">
-        <div className="bg-white/95 backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] border border-zinc-200/80 px-3 py-2 flex items-center justify-around h-16">
+        <div className="bg-zinc-950/95 backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.7)] border border-white/8 px-3 py-2 flex items-center justify-around h-16">
           {mobileTabs.map((tab) => {
             const active = isActive(tab.key);
             if (tab.center) {
@@ -93,7 +93,7 @@ export default function AutoNav() {
                   onClick={() => goToTab("inicio")}
                   className="relative -mt-8 flex flex-col items-center justify-center"
                 >
-                  <div className="w-16 h-16 rounded-full bg-auto-600 text-white flex items-center justify-center shadow-auto-glow border-4 border-zinc-50 transition-transform active:scale-95">
+                  <div className="w-16 h-16 rounded-full bg-auto-600 text-white flex items-center justify-center shadow-auto-glow border-4 border-zinc-950 transition-transform active:scale-95">
                     <tab.icon className="w-7 h-7" strokeWidth={2.2} />
                   </div>
                 </button>
@@ -105,7 +105,7 @@ export default function AutoNav() {
                 onClick={() => goToTab(tab.key)}
                 aria-label={tab.label}
                 className={`flex items-center justify-center rounded-2xl p-3 transition-colors ${
-                  active ? "text-auto-500" : "text-zinc-500 hover:text-zinc-700"
+                  active ? "text-auto-500" : "text-zinc-500 hover:text-zinc-300"
                 }`}
               >
                 <tab.icon className="w-6 h-6" strokeWidth={active ? 2.2 : 1.6} />

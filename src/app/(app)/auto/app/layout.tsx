@@ -1,14 +1,12 @@
 import type { Viewport } from "next";
 import { redirect } from "next/navigation";
 import AutoNav from "@/components/AutoNav";
-import { CarProvider, CarSwitcher } from "@/components/CarSwitcher";
-import { UserPill } from "@/components/UserPill";
-import { SearchOverlay } from "@/components/SearchOverlay";
+import { CarProvider } from "@/components/CarSwitcher";
 import TrialWarningToast from "@/components/TrialWarningToast";
 import ReferralTracker from "@/components/ReferralTracker";
-import { Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
+import { AutoAppHeader } from "./AutoAppHeader";
 
 export const viewport: Viewport = {
   themeColor: "#10b981",
@@ -29,17 +27,8 @@ export default async function AutoAppLayout({ children }: { children: React.Reac
       <CarProvider>
         <ReferralTracker />
         <AutoNav />
-        <main className="pb-28 md:pb-8 px-4 pt-3 max-w-3xl mx-auto">
-          <div className="flex items-center justify-between mb-4 h-10 relative z-20">
-            <CarSwitcher />
-            <div className="flex items-center gap-2">
-              <SearchOverlay />
-              <button className="w-9 h-9 rounded-full bg-white border border-zinc-200 shadow-sm flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:border-zinc-300 transition-all hover:scale-105 active:scale-95">
-                <Bell className="w-4 h-4" />
-              </button>
-              <UserPill appSlug="auto" />
-            </div>
-          </div>
+        <main className="relative pb-28 md:pb-8 px-4 pt-3 max-w-3xl mx-auto">
+          <AutoAppHeader />
           {trial.isWarning && (
             <TrialWarningToast daysLeft={trial.daysLeft} appSlug="auto" />
           )}

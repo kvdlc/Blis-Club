@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Search, X, ChefHat, UtensilsCrossed, Activity, GraduationCap, Loader2, Stethoscope, Syringe, Footprints, Zap } from "lucide-react";
 import type { NutritionRecipe, Lesson } from "@/types/database";
 
-export function SearchOverlay() {
+export function SearchOverlay({ variant = "light" }: { variant?: "dark" | "light" }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<{ label: string; desc: string; href: string; icon: any }[]>([]);
@@ -88,7 +88,7 @@ export function SearchOverlay() {
     <>
       <button
         onClick={() => setOpen(!open)}
-        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 ${ open ? "bg-primary-500 text-white shadow-md" : "bg-white/80 backdrop-blur-sm border border-zinc-100 text-zinc-600" }`}
+        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 ${ open ? "bg-primary-500 text-white shadow-md" : variant === "dark" ? "bg-white/5 border border-white/10 text-zinc-400" : "bg-white/80 backdrop-blur-sm border border-zinc-100 text-zinc-600" }`}
       >
         <Search className="w-4 h-4" />
       </button>
