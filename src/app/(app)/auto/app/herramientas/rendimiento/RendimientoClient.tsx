@@ -94,8 +94,8 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
       {/* Combustible A */}
       <div className="card-auto-dark rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
-            <Fuel className="w-3.5 h-3.5 text-amber-400" />
+          <div className="w-7 h-7 rounded-lg bg-auto-600/10 flex items-center justify-center">
+            <Fuel className="w-3.5 h-3.5 text-auto-500" />
           </div>
           <input
             type="text" value={nombres.a} onChange={(e) => setNombres({ ...nombres, a: e.target.value })}
@@ -136,8 +136,8 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
       {/* Combustible B */}
       <div className="card-auto-dark rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-violet-500/10 flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-violet-400" />
+          <div className="w-7 h-7 rounded-lg bg-auto-600/10 flex items-center justify-center">
+            <Zap className="w-3.5 h-3.5 text-auto-500" />
           </div>
           <input
             type="text" value={nombres.b} onChange={(e) => setNombres({ ...nombres, b: e.target.value })}
@@ -153,7 +153,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
                 onChange={(e) => setPrecioB(e.target.value)} placeholder="S/"
                 className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               {defaults.ultimosPrecios?.premium && (
-                <button onClick={() => usarPrecio("premium", "b")} className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-violet-500/10 hover:text-violet-400 transition-colors">
+                <button onClick={() => usarPrecio("premium", "b")} className="px-2 py-2 rounded-lg bg-zinc-900/5 text-[10px] font-bold text-zinc-400 hover:bg-auto-600/10 hover:text-auto-500 transition-colors">
                   S/{defaults.ultimosPrecios.premium}
                 </button>
               )}
@@ -193,12 +193,12 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
       {resultados ? (
         <div className="space-y-3">
           {/* Ganador */}
-          <div className={`rounded-2xl p-4 text-center border-2 ${resultados.mejor === "a" ? "bg-amber-600/10 border-amber-500/20" : "bg-violet-50 border-violet-500/20"}`}>
+          <div className={`rounded-2xl p-4 text-center border-2 ${resultados.mejor === "a" ? "bg-auto-600/10 border-auto-600/20" : "bg-auto-900/20 border-auto-600/20"}`}>
             <p className="text-xs text-zinc-400 mb-1">Más económico</p>
             <p className="text-lg font-black text-zinc-200">
               {resultados.mejor === "a" ? nombres.a : nombres.b}
             </p>
-            <p className="text-sm font-bold text-emerald-400 mt-1">
+            <p className="text-sm font-bold text-auto-500 mt-1">
               {resultados.ventajaPct.toFixed(1)}% más barato por km
             </p>
           </div>
@@ -216,7 +216,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
                 <span className="font-bold text-zinc-200">S/ {resultados.costoPorKm.a.toFixed(4)}</span>
               </div>
               <div className="h-4 bg-zinc-900/5 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-600/100 rounded-full flex items-center justify-end pr-2 transition-all duration-500" style={{ width: `${Math.max(resultados.barraA, 5)}%` }}>
+                <div className="h-full bg-auto-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500" style={{ width: `${Math.max(resultados.barraA, 5)}%` }}>
                   {resultados.barraA > 25 && <span className="text-[8px] font-bold text-white">S/ {resultados.costoPorKm.a.toFixed(2)}</span>}
                 </div>
               </div>
@@ -229,7 +229,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
                 <span className="font-bold text-zinc-200">S/ {resultados.costoPorKm.b.toFixed(4)}</span>
               </div>
               <div className="h-4 bg-zinc-900/5 rounded-full overflow-hidden">
-                <div className="h-full bg-violet-500 rounded-full flex items-center justify-end pr-2 transition-all duration-500" style={{ width: `${Math.max(resultados.barraB, 5)}%` }}>
+                <div className="h-full bg-auto-500 rounded-full flex items-center justify-end pr-2 transition-all duration-500" style={{ width: `${Math.max(resultados.barraB, 5)}%` }}>
                   {resultados.barraB > 25 && <span className="text-[8px] font-bold text-white">S/ {resultados.costoPorKm.b.toFixed(2)}</span>}
                 </div>
               </div>
@@ -243,7 +243,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
               <p className="text-base font-black text-zinc-200">
                 {resultados.mejor === "a" ? "Ahorras" : "Ahorras"}
               </p>
-              <p className="text-xs font-bold text-emerald-400">
+              <p className="text-xs font-bold text-auto-500">
                 S/ {resultados.diferenciaPorTanque.toFixed(2)}
               </p>
             </div>
@@ -252,7 +252,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
               <p className="text-base font-black text-zinc-200">
                 S/ {resultados.ahorroAnual.toLocaleString("es-PE", { maximumFractionDigits: 0 })}
               </p>
-              <p className="text-xs font-bold text-emerald-400">
+              <p className="text-xs font-bold text-auto-500">
                 con {resultados.mejor === "a" ? nombres.a : nombres.b}
               </p>
             </div>

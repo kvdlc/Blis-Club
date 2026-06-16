@@ -116,9 +116,9 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
           <div className="card-auto-dark rounded-2xl p-4 space-y-2">
             <h3 className="text-xs font-extrabold text-zinc-300">Desglose por km</h3>
             {[
-              { label: "Combustible", value: resultados.combustiblePorKm, barra: resultados.barraComb, color: "bg-amber-600/100" },
-              { label: "Mantenimiento", value: resultados.mantenimientoPorKm, barra: resultados.barraMant, color: "bg-blue-600/100" },
-              { label: "Depreciación", value: resultados.depreciacionPorKm, barra: resultados.barraDepr, color: "bg-violet-500" },
+              { label: "Combustible", value: resultados.combustiblePorKm, barra: resultados.barraComb, color: "bg-auto-600" },
+              { label: "Mantenimiento", value: resultados.mantenimientoPorKm, barra: resultados.barraMant, color: "bg-auto-600" },
+              { label: "Depreciación", value: resultados.depreciacionPorKm, barra: resultados.barraDepr, color: "bg-auto-500" },
             ].map((d) => (
               <div key={d.label}>
                 <div className="flex justify-between text-[10px] mb-1">

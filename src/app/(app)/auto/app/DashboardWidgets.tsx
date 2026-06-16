@@ -54,18 +54,17 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
     return totalGal > 0 ? Math.round(totalKm / totalGal) : null;
   })();
 
-  // Eco-score color
-  const ecoColor = ecoScore >= 70 ? "text-emerald-400" : ecoScore >= 40 ? "text-amber-400" : "text-red-400";
-  const ecoBg = ecoScore >= 70 ? "bg-emerald-600/100" : ecoScore >= 40 ? "bg-amber-600/100" : "bg-red-600/100";
+  // Eco-score color - uniform emerald
+  const ecoColor = "text-auto-500";
   const ecoDashOffset = 97.4 - (97.4 * ecoScore) / 100;
 
   return (
     <div className="space-y-3">
       {/* Próximos trámites */}
-      <div className="card-auto-dark rounded-2xl p-4">
+        <div className="card-auto-dark rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-            <Calendar className="w-4 h-4 text-amber-400" />
+          <div className="w-8 h-8 rounded-xl bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
+            <Calendar className="w-4 h-4 text-auto-500" />
           </div>
           <h3 className="text-sm font-bold text-zinc-100">Trámites por vencer</h3>
         </div>
@@ -75,18 +74,18 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
             const dias = daysUntil(nextDocExpiry.fecha_vencimiento);
             return (
               <div className={`rounded-xl p-3 flex items-center justify-between border ${
-                dias <= 7 ? "bg-red-500/10 border-red-500/20" :
-                dias <= 15 ? "bg-amber-500/10 border-amber-500/20" :
-                "bg-emerald-500/10 border-emerald-500/20"
+                dias <= 7 ? "bg-auto-900/30 border-auto-700/20" :
+                dias <= 15 ? "bg-auto-700/10 border-auto-600/20" :
+                "bg-auto-600/10 border-auto-600/20"
               }`}>
                 <div>
                   <p className="text-sm font-bold text-zinc-100">{documentLabels[nextDocExpiry.tipo] || nextDocExpiry.tipo}</p>
                   <p className="text-xs text-zinc-500">Vence: {new Date(nextDocExpiry.fecha_vencimiento + "T12:00:00").toLocaleDateString("es-PE", { day: "numeric", month: "short", year: "numeric" })}</p>
                 </div>
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
-                  dias <= 7 ? "bg-red-500/10 text-red-400 border-red-500/20" :
-                  dias <= 15 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-                  "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                  dias <= 7 ? "bg-auto-900/30 text-auto-400 border-auto-700/20" :
+                  dias <= 15 ? "bg-auto-700/10 text-auto-500 border-auto-600/20" :
+                  "bg-auto-600/10 text-auto-500 border-auto-600/20"
                 }`}>
                   {dias <= 0 ? "Vencido" : `${dias} días`}
                 </span>
@@ -105,8 +104,8 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
         {/* Eco-Score */}
         <div className="card-auto-dark rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="w-7 h-7 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
+              <TrendingUp className="w-3.5 h-3.5 text-auto-500" />
             </div>
             <h3 className="text-xs font-bold text-zinc-300">Eco-Score</h3>
           </div>
@@ -137,9 +136,9 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
           </div>
           <div className="flex items-center justify-center py-1">
             <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
-              vehicle.estado === "activo" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-              vehicle.estado === "en venta" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-              "bg-red-500/10 text-red-400 border-red-500/20"
+              vehicle.estado === "activo" ? "bg-auto-600/10 text-auto-500 border-auto-600/20" :
+              vehicle.estado === "en venta" ? "bg-auto-700/10 text-auto-500 border-auto-600/20" :
+              "bg-auto-900/30 text-auto-400 border-auto-700/20"
             }`}>
               {vehicle.estado === "activo" ? "Todo al día" :
                vehicle.estado === "en venta" ? "En venta" :
@@ -154,8 +153,8 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
         {/* Gasto mensual */}
         <div className="card-auto-dark rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-              <DollarSign className="w-3.5 h-3.5 text-blue-400" />
+            <div className="w-7 h-7 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
+              <DollarSign className="w-3.5 h-3.5 text-auto-500" />
             </div>
             <h3 className="text-xs font-bold text-zinc-300">Gasto 30d</h3>
           </div>
@@ -172,8 +171,8 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
         {/* Rendimiento promedio */}
         <div className="card-auto-dark rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
-              <Droplets className="w-3.5 h-3.5 text-violet-400" />
+            <div className="w-7 h-7 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
+              <Droplets className="w-3.5 h-3.5 text-auto-500" />
             </div>
             <h3 className="text-xs font-bold text-zinc-300">Rendimiento</h3>
           </div>

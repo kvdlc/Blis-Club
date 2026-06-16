@@ -126,7 +126,7 @@ export default function DepreciacionClient() {
               onClick={() => setTasaAnual(t.tasa.toString())}
               className={`text-[9px] font-medium px-2 py-1 rounded-full transition-colors ${
                 tasaAnual === t.tasa.toString()
-                  ? "bg-auto-600/100 text-white"
+                  ? "bg-auto-600 text-white"
                   : "bg-zinc-900/5 text-zinc-400 hover:bg-auto-600/15 hover:text-auto-500"
               }`}
             >
@@ -165,7 +165,7 @@ export default function DepreciacionClient() {
                 <span className="font-bold text-zinc-200">S/ {Math.round(resultados.valorActualLineal).toLocaleString("es-PE")}</span>
               </div>
               <div className="h-4 bg-zinc-900/5 rounded-full overflow-hidden">
-                <div className="h-full bg-auto-600/100 rounded-full flex items-center px-2 transition-all duration-500" style={{ width: `${resultados.barraLineal}%` }}>
+                <div className="h-full bg-auto-600 rounded-full flex items-center px-2 transition-all duration-500" style={{ width: `${resultados.barraLineal}%` }}>
                   <span className="text-[8px] font-bold text-white">{resultados.pctRestanteLineal.toFixed(0)}%</span>
                 </div>
               </div>
@@ -177,7 +177,7 @@ export default function DepreciacionClient() {
                 <span className="font-bold text-zinc-200">S/ {Math.round(resultados.valorActualCompuesto).toLocaleString("es-PE")}</span>
               </div>
               <div className="h-4 bg-zinc-900/5 rounded-full overflow-hidden">
-                <div className="h-full bg-violet-500 rounded-full flex items-center px-2 transition-all duration-500" style={{ width: `${resultados.barraCompuesto}%` }}>
+                <div className="h-full bg-auto-500 rounded-full flex items-center px-2 transition-all duration-500" style={{ width: `${resultados.barraCompuesto}%` }}>
                   <span className="text-[8px] font-bold text-white">{resultados.pctRestanteCompuesto.toFixed(0)}%</span>
                 </div>
               </div>
@@ -194,7 +194,7 @@ export default function DepreciacionClient() {
                   <div className="flex-1 h-5 bg-zinc-900/5 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full flex items-center px-2 transition-all duration-500 ${
-                        p.anio <= parseFloat(anios) ? "bg-auto-600/100" : "bg-zinc-900/10"
+                        p.anio <= parseFloat(anios) ? "bg-auto-600" : "bg-zinc-900/10"
                       }`}
                       style={{ width: `${(p.valor / parseFloat(valorCompra)) * 100}%` }}
                     >
@@ -204,7 +204,7 @@ export default function DepreciacionClient() {
                     </div>
                   </div>
                   {p.anio > 0 && (
-                    <span className="text-[9px] text-red-500 w-14 text-right">
+                    <span className="text-[9px] text-auto-400 w-14 text-right">
                       -S/ {Math.round(p.perdida).toLocaleString("es-PE")}
                     </span>
                   )}
@@ -217,13 +217,13 @@ export default function DepreciacionClient() {
           <div className="grid grid-cols-3 gap-2">
             <div className="card-auto-dark rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Pérdida mensual</p>
-              <p className="text-sm font-bold text-red-400">
+              <p className="text-sm font-bold text-auto-400">
                 S/ {Math.round(resultados.perdidaMensualLineal).toLocaleString("es-PE")}
               </p>
             </div>
             <div className="card-auto-dark rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Pérdida diaria</p>
-              <p className="text-sm font-bold text-red-400">
+              <p className="text-sm font-bold text-auto-400">
                 S/ {Math.round(resultados.perdidaDiariaLineal).toLocaleString("es-PE")}
               </p>
             </div>

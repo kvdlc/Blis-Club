@@ -160,24 +160,24 @@ export default function ConsumoAceiteClient() {
 
           {/* Diagnóstico */}
           <div className={`rounded-2xl p-4 border-2 ${
-            resultados.diagnostico.color === "emerald" ? "bg-emerald-600/10 border-emerald-500/20" :
-            resultados.diagnostico.color === "blue" ? "bg-blue-600/10 border-blue-500/20" :
-            resultados.diagnostico.color === "amber" ? "bg-amber-600/10 border-amber-500/20" :
-            "bg-red-600/10 border-red-500/20"
+            resultados.diagnostico.color === "emerald" ? "bg-auto-600/10 border-auto-600/20" :
+            resultados.diagnostico.color === "blue" ? "bg-auto-600/10 border-auto-600/20" :
+            resultados.diagnostico.color === "amber" ? "bg-auto-600/10 border-auto-600/20" :
+            "bg-auto-900/20 border-auto-700/20"
           }`}>
             <div className="flex items-center gap-3">
               <resultados.diagnostico.icon className={`w-8 h-8 shrink-0 ${
-                resultados.diagnostico.color === "emerald" ? "text-emerald-400" :
-                resultados.diagnostico.color === "blue" ? "text-blue-400" :
-                resultados.diagnostico.color === "amber" ? "text-amber-400" :
-                "text-red-400"
+                resultados.diagnostico.color === "emerald" ? "text-auto-500" :
+                resultados.diagnostico.color === "blue" ? "text-auto-500" :
+                resultados.diagnostico.color === "amber" ? "text-auto-500" :
+                "text-auto-400"
               }`} />
               <div>
                 <p className={`text-lg font-black ${
-                  resultados.diagnostico.color === "emerald" ? "text-emerald-400" :
-                  resultados.diagnostico.color === "blue" ? "text-blue-400" :
-                  resultados.diagnostico.color === "amber" ? "text-amber-400" :
-                  "text-red-400"
+                  resultados.diagnostico.color === "emerald" ? "text-auto-500" :
+                  resultados.diagnostico.color === "blue" ? "text-auto-500" :
+                  resultados.diagnostico.color === "amber" ? "text-auto-500" :
+                  "text-auto-400"
                 }`}>
                   {resultados.diagnostico.nivel}
                 </p>

@@ -78,7 +78,7 @@ export default function AutonomiaClient({ defaults }: { defaults: Defaults }) {
             </span>
             {rendimientoPromedio && (
               <button onClick={() => { setUsarPromedio(!usarPromedio); if (!usarPromedio) setRendimiento(rendimientoPromedio.toString()); }}
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${usarPromedio ? "bg-auto-600/100 text-white" : "bg-auto-600/10 text-auto-500"}`}>
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${usarPromedio ? "bg-auto-600 text-white" : "bg-auto-600/10 text-auto-500"}`}>
                 {usarPromedio ? `${rendimientoPromedio} km/gal` : `Usar ${rendimientoPromedio} km/gal`}
               </button>
             )}
@@ -93,7 +93,7 @@ export default function AutonomiaClient({ defaults }: { defaults: Defaults }) {
 
       {resultados ? (
         <div className="space-y-3">
-          <div className="rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-800 p-5 text-white text-center shadow-lg shadow-emerald-600/20">
+          <div className="rounded-2xl bg-gradient-to-br from-auto-500 to-auto-800 p-5 text-white text-center shadow-lg shadow-auto-600/20">
             <p className="text-xs text-white/70 mb-1">Autonomía máxima</p>
             <p className="text-4xl font-black">{resultados.autonomia.toLocaleString("es-PE")} km</p>
             <p className="text-xs text-white/60 mt-1">{resultados.cap} gal × {resultados.ren} km/gal</p>
@@ -109,9 +109,9 @@ export default function AutonomiaClient({ defaults }: { defaults: Defaults }) {
                   <div key={v.nombre} className="flex items-center gap-2">
                     <span className="text-[10px] text-zinc-400 w-32 truncate">{v.nombre}</span>
                     <div className="flex-1 h-4 bg-white/5 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${alcanza ? "bg-emerald-500" : "bg-amber-500"}`} style={{ width: `${pct}%` }} />
+                      <div className={`h-full rounded-full ${alcanza ? "bg-auto-500" : "bg-auto-500"}`} style={{ width: `${pct}%` }} />
                     </div>
-                    <span className="text-[10px] font-bold w-12 text-right flex items-center justify-end">{alcanza ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : `${v.km} km`}</span>
+                    <span className="text-[10px] font-bold w-12 text-right flex items-center justify-end">{alcanza ? <Check className="w-3.5 h-3.5 text-auto-500" /> : `${v.km} km`}</span>
                   </div>
                 );
               })}

@@ -138,8 +138,8 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
         {/* Altitudes */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Mountain className="w-3.5 h-3.5 text-blue-400" />
+            <div className="w-7 h-7 rounded-lg bg-auto-600/10 flex items-center justify-center">
+              <Mountain className="w-3.5 h-3.5 text-auto-500" />
             </div>
             <h3 className="text-xs font-bold text-zinc-300">Altitudes del viaje</h3>
           </div>
@@ -190,16 +190,16 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
         <div className="space-y-3">
           {/* Dirección y ajuste */}
           <div className={`rounded-2xl p-4 text-center border-2 ${
-            resultados.excesivo ? "bg-red-600/10 border-red-500/20" : "bg-blue-600/10 border-blue-500/20"
+            resultados.excesivo ? "bg-auto-900/20 border-auto-700/20" : "bg-auto-600/10 border-auto-600/20"
           }`}>
             <div className="flex items-center justify-center gap-3 mb-2">
               <span className="text-xs font-bold text-zinc-400">
                 {Math.abs(resultados.deltaAltitud).toLocaleString("es-PE")} m
               </span>
               {resultados.esAscenso ? (
-                <ArrowUp className="w-6 h-6 text-emerald-400" />
+                <ArrowUp className="w-6 h-6 text-auto-500" />
               ) : (
-                <ArrowDown className="w-6 h-6 text-amber-400" />
+                <ArrowDown className="w-6 h-6 text-auto-500" />
               )}
               <span className="text-xs font-bold text-zinc-400">
                 {resultados.esAscenso ? "Ascenso" : "Descenso"}
@@ -207,7 +207,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
             </div>
 
             <p className={`text-lg font-black ${
-              resultados.excesivo ? "text-red-400" : "text-zinc-200"
+              resultados.excesivo ? "text-auto-400" : "text-zinc-200"
             }`}>
               {resultados.deltaPis > 0 ? "+" : ""}{resultados.deltaPis.toFixed(1)} PSI
             </p>
@@ -217,7 +217,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
                 : "Resta 0.5 PSI por cada 300m de descenso"}
             </p>
             {resultados.excesivo && (
-              <p className="text-xs font-bold text-red-400 mt-1 flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> Ajuste mayor a 10 PSI. Verifica las altitudes.</p>
+              <p className="text-xs font-bold text-auto-400 mt-1 flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> Ajuste mayor a 10 PSI. Verifica las altitudes.</p>
             )}
           </div>
 
@@ -247,7 +247,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
           {/* Recomendación */}
           <div className="card-auto-dark rounded-2xl p-4">
             <div className="flex items-start gap-2">
-              <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+              <Info className="w-4 h-4 text-auto-500 shrink-0 mt-0.5" />
               <div>
                 <p className="text-xs font-bold text-zinc-300">Recomendación</p>
                 <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed">

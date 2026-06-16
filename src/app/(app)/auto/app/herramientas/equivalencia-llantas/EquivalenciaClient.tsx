@@ -154,19 +154,19 @@ export default function EquivalenciaClient() {
           {/* Estado de seguridad */}
           <div className={`rounded-2xl p-4 text-center border-2 ${
             resultados.estado === "seguro"
-              ? "bg-emerald-600/10 border-emerald-500/20"
+              ? "bg-auto-600/10 border-auto-600/20"
               : resultados.estado === "precaucion"
-                ? "bg-amber-600/10 border-amber-500/20"
-                : "bg-red-600/10 border-red-500/20"
+                ? "bg-auto-600/10 border-auto-600/20"
+                : "bg-auto-900/20 border-auto-700/20"
           }`}>
             <resultados.estadoIcon className={`w-8 h-8 mx-auto mb-2 ${
-              resultados.estado === "seguro" ? "text-emerald-400" : resultados.estado === "precaucion" ? "text-amber-400" : "text-red-400"
+              resultados.estado === "seguro" ? "text-auto-500" : resultados.estado === "precaucion" ? "text-auto-500" : "text-auto-400"
             }`} />
             <p className={`text-lg font-black ${
-              resultados.estado === "seguro" ? "text-emerald-400" : resultados.estado === "precaucion" ? "text-amber-400" : "text-red-400"
+              resultados.estado === "seguro" ? "text-auto-500" : resultados.estado === "precaucion" ? "text-auto-500" : "text-auto-400"
             }`}>{resultados.estadoLabel}</p>
             <p className={`text-sm font-bold ${
-              resultados.estado === "seguro" ? "text-emerald-400" : resultados.estado === "precaucion" ? "text-amber-400" : "text-red-400"
+              resultados.estado === "seguro" ? "text-auto-500" : resultados.estado === "precaucion" ? "text-auto-500" : "text-auto-400"
             } mt-1`}>
               Diferencia: {resultados.diferenciaPct > 0 ? "+" : ""}{resultados.diferenciaPct.toFixed(2)}%
             </p>
@@ -245,7 +245,7 @@ export default function EquivalenciaClient() {
             <div className="bg-zinc-900/5 rounded-xl p-3">
               <p className="text-xs text-zinc-400">
                 La altura de la carrocería cambia{" "}
-                <strong className={resultados.cambioAltura > 0 ? "text-auto-500" : "text-amber-400"}>
+                <strong className={resultados.cambioAltura > 0 ? "text-auto-500" : "text-auto-500"}>
                   {resultados.cambioAltura > 0 ? "+" : ""}{resultados.cambioAltura.toFixed(1)} mm
                 </strong>
               </p>

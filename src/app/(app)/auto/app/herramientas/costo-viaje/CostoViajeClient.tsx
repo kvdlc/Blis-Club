@@ -164,7 +164,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
             <div key={p.id} className="flex items-center gap-2 bg-zinc-900/5 rounded-xl px-3 py-2">
               <span className="text-xs font-medium text-zinc-300 flex-1">{p.nombre}</span>
               <span className="text-xs font-bold text-zinc-200">S/ {p.costo.toFixed(2)}</span>
-              <button onClick={() => eliminarPeaje(p.id)} className="text-zinc-500 hover:text-red-500 transition-colors">
+              <button onClick={() => eliminarPeaje(p.id)} className="text-zinc-500 hover:text-auto-400 transition-colors">
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -227,7 +227,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
                 <span className="font-bold text-zinc-200">S/ {resultados.costoCombustible.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</span>
               </div>
               <div className="h-3 bg-zinc-900/5 rounded-full overflow-hidden">
-                <div className="h-full bg-auto-600/100 rounded-full transition-all duration-500" style={{ width: `${Math.max(resultados.barraCombustible, 5)}%` }} />
+                <div className="h-full bg-auto-600 rounded-full transition-all duration-500" style={{ width: `${Math.max(resultados.barraCombustible, 5)}%` }} />
               </div>
               <p className="text-[10px] text-zinc-500 mt-0.5">{resultados.galonesNecesarios.toFixed(1)} galones · {resultados.combustiblePct.toFixed(0)}% del total</p>
             </div>
@@ -239,7 +239,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
                   <span className="font-bold text-zinc-200">S/ {resultados.totalPeajes.toFixed(2)}</span>
                 </div>
                 <div className="h-3 bg-zinc-900/5 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-600/100 rounded-full transition-all duration-500" style={{ width: `${resultados.barraPeajes}%` }} />
+                  <div className="h-full bg-auto-600 rounded-full transition-all duration-500" style={{ width: `${resultados.barraPeajes}%` }} />
                 </div>
                 <p className="text-[10px] text-zinc-500 mt-0.5">{peajes.length} peaje(s) · {resultados.peajesPct.toFixed(0)}% del total</p>
               </div>

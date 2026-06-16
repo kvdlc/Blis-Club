@@ -75,7 +75,7 @@ export default function FinanciamientoClient() {
             </div>
             <div className="card-auto-dark rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Intereses</p>
-              <p className="text-sm font-bold text-red-400">S/ {Math.round(resultados.intereses).toLocaleString("es-PE")}</p>
+              <p className="text-sm font-bold text-auto-400">S/ {Math.round(resultados.intereses).toLocaleString("es-PE")}</p>
             </div>
             <div className="card-auto-dark rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Tasa mensual</p>
@@ -101,8 +101,8 @@ export default function FinanciamientoClient() {
                     <tr key={r.mes} className="border-b border-white/5">
                       <td className="py-1 px-1 font-bold">{r.mes}</td>
                       <td className="py-1 px-1">S/ {Math.round(r.cuota).toLocaleString("es-PE")}</td>
-                      <td className="py-1 px-1 text-red-500">S/ {Math.round(r.interes).toLocaleString("es-PE")}</td>
-                      <td className="py-1 px-1 text-emerald-400">S/ {Math.round(r.capital).toLocaleString("es-PE")}</td>
+                      <td className="py-1 px-1 text-auto-400">S/ {Math.round(r.interes).toLocaleString("es-PE")}</td>
+                      <td className="py-1 px-1 text-auto-500">S/ {Math.round(r.capital).toLocaleString("es-PE")}</td>
                       <td className="py-1 px-1 text-right">S/ {Math.round(r.saldo).toLocaleString("es-PE")}</td>
                     </tr>
                   ))}

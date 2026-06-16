@@ -54,10 +54,10 @@ const checklistData: ChecklistItem[] = [
 ];
 
 const categories = [
-  { key: "fluidos", label: "Fluidos", icon: Droplets, color: "bg-blue-500/10 text-blue-400" },
-  { key: "neumaticos", label: "Neumáticos", icon: Car, color: "bg-amber-500/10 text-amber-400" },
-  { key: "luces", label: "Luces", icon: Lightbulb, color: "bg-violet-500/10 text-violet-400" },
-  { key: "seguridad", label: "Seguridad", icon: Shield, color: "bg-emerald-500/10 text-emerald-400" },
+  { key: "fluidos", label: "Fluidos", icon: Droplets, color: "bg-auto-600/10 text-auto-500" },
+  { key: "neumaticos", label: "Neumáticos", icon: Car, color: "bg-auto-600/10 text-auto-500" },
+  { key: "luces", label: "Luces", icon: Lightbulb, color: "bg-auto-600/10 text-auto-500" },
+  { key: "seguridad", label: "Seguridad", icon: Shield, color: "bg-auto-600/10 text-auto-500" },
   { key: "documentos", label: "Documentos", icon: CheckCircle2, color: "bg-zinc-900/5 text-zinc-300" },
 ];
 
@@ -135,7 +135,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
             <span className="text-xs font-bold text-zinc-400">{checkedCount}/{totalCount}</span>
             <button
               onClick={resetAll}
-              className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 hover:text-red-500 transition-colors"
+              className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 hover:text-auto-400 transition-colors"
             >
               <RotateCcw className="w-3 h-3" /> Reiniciar
             </button>
@@ -145,17 +145,17 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
         <div className="relative h-3 bg-zinc-900/5 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
-              progressPct >= 90 ? "bg-emerald-600/100" : progressPct >= 50 ? "bg-amber-600/100" : "bg-auto-600/100"
+              progressPct >= 90 ? "bg-auto-600" : progressPct >= 50 ? "bg-auto-600" : "bg-auto-600"
             }`}
             style={{ width: `${progressPct}%` }}
           />
         </div>
         <p className="text-[10px] text-zinc-500 mt-1.5 flex items-center gap-1">
           {progressPct >= 95
-            ? <><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> ¡Todo listo para viajar!</>
+            ? <><CheckCircle2 className="w-3.5 h-3.5 text-auto-500" /> ¡Todo listo para viajar!</>
             : progressPct >= 70
-            ? <><Circle className="w-3.5 h-3.5 text-amber-400" /> Casi listo, revisa los pendientes</>
-            : <><Circle className="w-3.5 h-3.5 text-red-400" /> Completa el checklist antes de salir</>}
+            ? <><Circle className="w-3.5 h-3.5 text-auto-500" /> Casi listo, revisa los pendientes</>
+            : <><Circle className="w-3.5 h-3.5 text-auto-400" /> Completa el checklist antes de salir</>}
         </p>
       </div>
 
@@ -177,12 +177,12 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
                 </div>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                   cat.catChecked === cat.catTotal
-                    ? "bg-emerald-500/10 text-emerald-400"
+                    ? "bg-auto-600/10 text-auto-500"
                     : cat.catChecked >= cat.catTotal / 2
-                      ? "bg-amber-500/10 text-amber-400"
+                      ? "bg-auto-600/10 text-auto-500"
                       : "bg-zinc-900/5 text-zinc-400"
                 }`}>
-                  {cat.catChecked === cat.catTotal ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : `${cat.catChecked}/${cat.catTotal}`}
+                  {cat.catChecked === cat.catTotal ? <Check className="w-3.5 h-3.5 text-auto-500" /> : `${cat.catChecked}/${cat.catTotal}`}
                 </span>
               </div>
 
@@ -193,19 +193,19 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
                     onClick={() => toggle(item.id)}
                     className={`w-full flex items-start gap-3 py-2.5 px-3 rounded-xl text-left transition-colors ${
                       checks[item.id]
-                        ? "bg-emerald-600/10"
+                        ? "bg-auto-600/10"
                         : "bg-zinc-900/5 hover:bg-zinc-900/10"
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                       checks[item.id]
-                        ? "bg-emerald-600/100 border-emerald-500"
+                        ? "bg-auto-600 border-auto-500"
                         : "border-white/15"
                     }`}>
                       {checks[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                     </div>
                     <div className="min-w-0">
-                      <p className={`text-xs font-bold ${checks[item.id] ? "text-emerald-800 line-through" : "text-zinc-300"}`}>
+                      <p className={`text-xs font-bold ${checks[item.id] ? "text-auto-800 line-through" : "text-zinc-300"}`}>
                         {item.label}{getPressureNote(item.id)}
                       </p>
                       {item.detail && (
@@ -222,18 +222,18 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
 
       {/* Resumen final */}
       {progressPct >= 95 && (
-        <div className="rounded-2xl bg-emerald-600/10 border-2 border-emerald-500/20 p-4 text-center">
-          <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-          <p className="text-lg font-black text-emerald-400">¡Listo para el viaje!</p>
-          <p className="text-xs text-emerald-400 mt-1">Todos los puntos del checklist están verificados. Buen viaje.</p>
+        <div className="rounded-2xl bg-auto-600/10 border-2 border-auto-600/20 p-4 text-center">
+          <CheckCircle2 className="w-8 h-8 text-auto-500 mx-auto mb-2" />
+          <p className="text-lg font-black text-auto-500">¡Listo para el viaje!</p>
+          <p className="text-xs text-auto-500 mt-1">Todos los puntos del checklist están verificados. Buen viaje.</p>
         </div>
       )}
 
       {progressPct > 0 && progressPct < 95 && (
-        <div className="rounded-2xl bg-amber-600/10 border-2 border-amber-500/20 p-4 text-center">
-          <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
-          <p className="text-lg font-black text-amber-400">Aún hay pendientes</p>
-          <p className="text-xs text-amber-400 mt-1">{totalCount - checkedCount} puntos sin verificar. No salgas sin revisarlos.</p>
+        <div className="rounded-2xl bg-auto-600/10 border-2 border-auto-600/20 p-4 text-center">
+          <AlertTriangle className="w-8 h-8 text-auto-500 mx-auto mb-2" />
+          <p className="text-lg font-black text-auto-500">Aún hay pendientes</p>
+          <p className="text-xs text-auto-500 mt-1">{totalCount - checkedCount} puntos sin verificar. No salgas sin revisarlos.</p>
         </div>
       )}
     </div>

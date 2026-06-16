@@ -6,12 +6,12 @@ const tools = [
   { slug: "costo-viaje", icon: Route, label: "Costo de viaje", desc: "Estima combustible + peajes para una ruta", size: "large", color: "bg-auto-600/10 border-auto-600/20 text-auto-500" },
   { slug: "rendimiento", icon: Gauge, label: "Comparador de combustible", desc: "Qué octanaje rinde más por tu dinero", size: "large", color: "bg-auto-600/10 border-auto-600/20 text-auto-500" },
   // Row 2: One wide card + two small
-  { slug: "autonomia", icon: Fuel, label: "Autonomía del tanque", desc: "Cuántos km recorres con tanque lleno", size: "wide", color: "bg-amber-500/10 border-amber-500/20 text-amber-400" },
-  { slug: "presion-altitud", icon: Mountain, label: "Presión por altitud", desc: "Ajusta PSI al viajar", size: "small", color: "bg-blue-500/10 border-blue-500/20 text-blue-400" },
-  { slug: "consumo-aceite", icon: Droplets, label: "Consumo de aceite", desc: "Desgaste interno del motor", size: "small", color: "bg-violet-500/10 border-violet-500/20 text-violet-400" },
+  { slug: "autonomia", icon: Fuel, label: "Autonomía del tanque", desc: "Cuántos km recorres con tanque lleno", size: "wide", color: "bg-auto-600/10 border-auto-600/20 text-auto-500" },
+  { slug: "presion-altitud", icon: Mountain, label: "Presión por altitud", desc: "Ajusta PSI al viajar", size: "small", color: "bg-auto-600/10 border-auto-600/20 text-auto-500" },
+  { slug: "consumo-aceite", icon: Droplets, label: "Consumo de aceite", desc: "Desgaste interno del motor", size: "small", color: "bg-auto-600/10 border-auto-600/20 text-auto-500" },
   // Row 3: Two medium + one small
-  { slug: "depreciacion", icon: Scale, label: "Depreciación", desc: "Proyecta el valor actual de tu vehículo", size: "medium", color: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" },
-  { slug: "equivalencia-llantas", icon: DollarSign, label: "Equivalencia de llantas", desc: "Verifica si el cambio de aros es seguro", size: "medium", color: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" },
+  { slug: "depreciacion", icon: Scale, label: "Depreciación", desc: "Proyecta el valor actual de tu vehículo", size: "medium", color: "bg-auto-600/10 border-auto-600/20 text-auto-500" },
+  { slug: "equivalencia-llantas", icon: DollarSign, label: "Equivalencia de llantas", desc: "Verifica si el cambio de aros es seguro", size: "medium", color: "bg-auto-600/10 border-auto-600/20 text-auto-500" },
   { slug: "checklist-previaje", icon: ClipboardCheck, label: "Checklist", desc: "Verifica fluidos, llantas y extintor", size: "small", color: "bg-auto-600/10 border-auto-600/20 text-auto-500" },
   // Row 4: One wide + one small
   { slug: "costo-km-real", icon: Car, label: "Costo por kilómetro real", desc: "Combustible + mantenimiento + depreciación", size: "wide", color: "bg-auto-600/10 border-auto-600/20 text-auto-500" },
