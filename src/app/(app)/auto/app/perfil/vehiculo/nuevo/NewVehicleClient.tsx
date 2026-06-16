@@ -80,37 +80,37 @@ export default function NewVehicleClient({ userId }: Props) {
       </Link>
 
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-200">Nuevo Vehículo</h1>
-        <p className="text-xs text-zinc-400 mt-1">Registra los datos de tu auto</p>
+        <h1 className="text-xl font-extrabold text-zinc-800">Nuevo Vehículo</h1>
+        <p className="text-xs text-zinc-500 mt-1">Registra los datos de tu auto</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <span className="text-xs font-bold text-zinc-400">Marca *</span>
+            <span className="text-xs font-bold text-zinc-500">Marca *</span>
             <input
               required
               value={form.marca}
               onChange={(e) => setForm({ ...form, marca: e.target.value })}
               placeholder="Ej: Toyota"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-zinc-400">Modelo *</span>
+            <span className="text-xs font-bold text-zinc-500">Modelo *</span>
             <input
               required
               value={form.modelo}
               onChange={(e) => setForm({ ...form, modelo: e.target.value })}
               placeholder="Ej: Corolla"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <span className="text-xs font-bold text-zinc-400">Año *</span>
+            <span className="text-xs font-bold text-zinc-500">Año *</span>
             <input
               required
               type="number"
@@ -118,66 +118,66 @@ export default function NewVehicleClient({ userId }: Props) {
               max={new Date().getFullYear() + 1}
               value={form.año}
               onChange={(e) => setForm({ ...form, año: parseInt(e.target.value) || 0 })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-zinc-400">Placa *</span>
+            <span className="text-xs font-bold text-zinc-500">Placa *</span>
             <input
               required
               value={form.placa}
               onChange={(e) => setForm({ ...form, placa: e.target.value.toUpperCase() })}
               placeholder="ABC-123"
               maxLength={10}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
         </div>
 
         <label className="block">
-          <span className="text-xs font-bold text-zinc-400">Kilometraje</span>
+          <span className="text-xs font-bold text-zinc-500">Kilometraje</span>
           <input
             type="number"
             min={0}
             value={form.kilometraje}
             onChange={(e) => setForm({ ...form, kilometraje: parseInt(e.target.value) || 0 })}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </label>
 
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <span className="text-xs font-bold text-zinc-400">Color</span>
+            <span className="text-xs font-bold text-zinc-500">Color</span>
             <input
               value={form.color}
               onChange={(e) => setForm({ ...form, color: e.target.value })}
               placeholder="Ej: Rojo"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-zinc-400">VIN / Chasis</span>
+            <span className="text-xs font-bold text-zinc-500">VIN / Chasis</span>
             <input
               value={form.vin}
               onChange={(e) => setForm({ ...form, vin: e.target.value.toUpperCase() })}
               placeholder="Opcional"
               maxLength={17}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
         </div>
 
         <label className="block">
-          <span className="text-xs font-bold text-zinc-400">Foto del vehículo</span>
+          <span className="text-xs font-bold text-zinc-500">Foto del vehículo</span>
           <div className="flex items-center gap-2 mt-1">
-            <label className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm cursor-pointer hover:bg-white/5 transition-colors">
+            <label className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm cursor-pointer hover:bg-zinc-100 transition-colors">
               <Upload className="w-4 h-4 text-zinc-500" />
-              <span className="text-zinc-400">{uploadingPhoto ? "Subiendo..." : form.foto_url ? <>Foto cargada <Check className="w-3.5 h-3.5 inline text-emerald-400" /></> : "Seleccionar archivo"}</span>
+              <span className="text-zinc-500">{uploadingPhoto ? "Subiendo..." : form.foto_url ? <>Foto cargada <Check className="w-3.5 h-3.5 inline text-emerald-400" /></> : "Seleccionar archivo"}</span>
               <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" disabled={uploadingPhoto} />
             </label>
           </div>
           {form.foto_url && (
-            <div className="h-32 mt-1 rounded-xl bg-white/5 overflow-hidden">
+            <div className="h-32 mt-1 rounded-xl bg-zinc-100 overflow-hidden">
               <img src={form.foto_url} alt="" className="w-full h-full object-cover" />
             </div>
           )}

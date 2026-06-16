@@ -26,7 +26,7 @@ export default function HerramientasPage() {
           <Wrench className="w-5 h-5 text-auto-500" />
         </div>
         <div>
-          <h1 className="text-xl font-extrabold text-zinc-100">Herramientas</h1>
+          <h1 className="text-xl font-extrabold text-zinc-900">Herramientas</h1>
           <p className="text-xs text-zinc-500">Calculadoras y utilidades automotrices</p>
         </div>
       </div>
@@ -48,16 +48,16 @@ export default function HerramientasPage() {
             <Link
               key={tool.slug}
               href={`/auto/app/herramientas/${tool.slug}`}
-              className={`${colSpan} ${height} ${padding} ${tool.color} card-auto-dark rounded-2xl flex flex-col justify-between hover:bg-white/5 transition-all active:scale-[0.98] group`}
+              className={`${colSpan} ${height} ${padding} ${tool.color} bg-white border border-zinc-200 shadow-sm rounded-2xl flex flex-col justify-between hover:bg-zinc-100 transition-all active:scale-[0.98] group`}
             >
               <div className="flex items-start justify-between">
                 <div className={`w-10 h-10 rounded-xl ${tool.color} flex items-center justify-center shrink-0`}>
                   <tool.icon className={`${iconSize}`} />
                 </div>
-                <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+                <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-500 transition-colors" />
               </div>
               <div>
-                <p className={`${labelSize} font-bold text-zinc-100 group-hover:text-auto-500 transition-colors`}>{tool.label}</p>
+                <p className={`${labelSize} font-bold text-zinc-900 group-hover:text-auto-500 transition-colors`}>{tool.label}</p>
                 <p className="text-[10px] text-zinc-500 mt-0.5 line-clamp-2">{tool.desc}</p>
               </div>
             </Link>

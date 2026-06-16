@@ -75,26 +75,26 @@ export default function DepreciacionClient() {
       </Link>
 
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-200">Depreciación</h1>
-        <p className="text-xs text-zinc-400 mt-1">Proyecta el valor de reventa actual de tu vehículo.</p>
+        <h1 className="text-xl font-extrabold text-zinc-800">Depreciación</h1>
+        <p className="text-xs text-zinc-500 mt-1">Proyecta el valor de reventa actual de tu vehículo.</p>
       </div>
 
       {/* Inputs */}
-      <div className="card-auto-dark rounded-2xl p-4 space-y-3">
+      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-3">
         <label className="block">
-          <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5">
+          <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
             <DollarSign className="w-3.5 h-3.5 text-auto-500" /> Valor de compra (S/)
           </span>
           <input
             type="number" min="1" step="1000"
             value={valorCompra} onChange={(e) => setValorCompra(e.target.value)}
             placeholder="Ej: 65000"
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </label>
 
         <label className="block">
-          <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5">
+          <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-auto-500" /> Años de antigüedad
           </span>
           <div className="flex items-center gap-3 mt-1">
@@ -108,13 +108,13 @@ export default function DepreciacionClient() {
         </label>
 
         <label className="block">
-          <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5">
+          <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
             <TrendingDown className="w-3.5 h-3.5 text-auto-500" /> Depreciación anual (%)
           </span>
           <input
             type="number" min="1" max="30" step="0.5"
             value={tasaAnual} onChange={(e) => setTasaAnual(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </label>
 
@@ -127,7 +127,7 @@ export default function DepreciacionClient() {
               className={`text-[9px] font-medium px-2 py-1 rounded-full transition-colors ${
                 tasaAnual === t.tasa.toString()
                   ? "bg-auto-600 text-white"
-                  : "bg-zinc-900/5 text-zinc-400 hover:bg-auto-600/15 hover:text-auto-500"
+                  : "bg-zinc-100 text-zinc-500 hover:bg-auto-600/15 hover:text-auto-500"
               }`}
             >
               {t.label} {t.tasa}%
@@ -154,17 +154,17 @@ export default function DepreciacionClient() {
           </div>
 
           {/* Barras de métodos */}
-          <div className="card-auto-dark rounded-2xl p-4 space-y-3">
-            <h3 className="text-xs font-extrabold text-zinc-300 flex items-center gap-1.5">
+          <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-3">
+            <h3 className="text-xs font-extrabold text-zinc-700 flex items-center gap-1.5">
               <BarChart3 className="w-3.5 h-3.5 text-auto-500" /> Comparación de métodos
             </h3>
 
             <div>
               <div className="flex justify-between text-[10px] mb-1">
-                <span className="font-bold text-zinc-300">Lineal</span>
-                <span className="font-bold text-zinc-200">S/ {Math.round(resultados.valorActualLineal).toLocaleString("es-PE")}</span>
+                <span className="font-bold text-zinc-700">Lineal</span>
+                <span className="font-bold text-zinc-800">S/ {Math.round(resultados.valorActualLineal).toLocaleString("es-PE")}</span>
               </div>
-              <div className="h-4 bg-zinc-900/5 rounded-full overflow-hidden">
+              <div className="h-4 bg-zinc-100 rounded-full overflow-hidden">
                 <div className="h-full bg-auto-600 rounded-full flex items-center px-2 transition-all duration-500" style={{ width: `${resultados.barraLineal}%` }}>
                   <span className="text-[8px] font-bold text-white">{resultados.pctRestanteLineal.toFixed(0)}%</span>
                 </div>
@@ -173,10 +173,10 @@ export default function DepreciacionClient() {
 
             <div>
               <div className="flex justify-between text-[10px] mb-1">
-                <span className="font-bold text-zinc-300">Compuesto</span>
-                <span className="font-bold text-zinc-200">S/ {Math.round(resultados.valorActualCompuesto).toLocaleString("es-PE")}</span>
+                <span className="font-bold text-zinc-700">Compuesto</span>
+                <span className="font-bold text-zinc-800">S/ {Math.round(resultados.valorActualCompuesto).toLocaleString("es-PE")}</span>
               </div>
-              <div className="h-4 bg-zinc-900/5 rounded-full overflow-hidden">
+              <div className="h-4 bg-zinc-100 rounded-full overflow-hidden">
                 <div className="h-full bg-auto-500 rounded-full flex items-center px-2 transition-all duration-500" style={{ width: `${resultados.barraCompuesto}%` }}>
                   <span className="text-[8px] font-bold text-white">{resultados.pctRestanteCompuesto.toFixed(0)}%</span>
                 </div>
@@ -185,16 +185,16 @@ export default function DepreciacionClient() {
           </div>
 
           {/* Proyección temporal */}
-          <div className="card-auto-dark rounded-2xl p-4">
-            <h3 className="text-xs font-extrabold text-zinc-300 mb-3">Proyección año por año (lineal)</h3>
+          <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4">
+            <h3 className="text-xs font-extrabold text-zinc-700 mb-3">Proyección año por año (lineal)</h3>
             <div className="space-y-1">
               {resultados.proyeccion.map((p) => (
                 <div key={p.anio} className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-zinc-400 w-6 text-right">Año {p.anio}</span>
-                  <div className="flex-1 h-5 bg-zinc-900/5 rounded-full overflow-hidden">
+                  <span className="text-[10px] font-bold text-zinc-500 w-6 text-right">Año {p.anio}</span>
+                  <div className="flex-1 h-5 bg-zinc-100 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full flex items-center px-2 transition-all duration-500 ${
-                        p.anio <= parseFloat(anios) ? "bg-auto-600" : "bg-zinc-900/10"
+                        p.anio <= parseFloat(anios) ? "bg-auto-600" : "bg-zinc-100"
                       }`}
                       style={{ width: `${(p.valor / parseFloat(valorCompra)) * 100}%` }}
                     >
@@ -215,28 +215,28 @@ export default function DepreciacionClient() {
 
           {/* Datos adicionales */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="card-auto-dark rounded-xl p-3 text-center">
+            <div className="bg-white border border-zinc-200 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Pérdida mensual</p>
               <p className="text-sm font-bold text-auto-400">
                 S/ {Math.round(resultados.perdidaMensualLineal).toLocaleString("es-PE")}
               </p>
             </div>
-            <div className="card-auto-dark rounded-xl p-3 text-center">
+            <div className="bg-white border border-zinc-200 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Pérdida diaria</p>
               <p className="text-sm font-bold text-auto-400">
                 S/ {Math.round(resultados.perdidaDiariaLineal).toLocaleString("es-PE")}
               </p>
             </div>
-            <div className="card-auto-dark rounded-xl p-3 text-center">
+            <div className="bg-white border border-zinc-200 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Valor residual</p>
-              <p className="text-sm font-bold text-zinc-200">
+              <p className="text-sm font-bold text-zinc-800">
                 {resultados.pctRestanteLineal.toFixed(0)}%
               </p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="card-auto-dark rounded-2xl p-6 text-center">
+        <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-6 text-center">
           <p className="text-sm text-zinc-500">Ingresa los datos para ver la proyección</p>
           <p className="text-xs text-zinc-500 mt-1">Valor de compra, años de antigüedad y tasa de depreciación</p>
         </div>

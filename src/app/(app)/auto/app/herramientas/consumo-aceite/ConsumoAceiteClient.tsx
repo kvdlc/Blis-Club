@@ -71,27 +71,27 @@ export default function ConsumoAceiteClient() {
       </Link>
 
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-200">Consumo de Aceite</h1>
-        <p className="text-xs text-zinc-400 mt-1">Mide el desgaste interno del motor cuantificando el consumo de aceite.</p>
+        <h1 className="text-xl font-extrabold text-zinc-800">Consumo de Aceite</h1>
+        <p className="text-xs text-zinc-500 mt-1">Mide el desgaste interno del motor cuantificando el consumo de aceite.</p>
       </div>
 
       {/* Inputs */}
-      <div className="card-auto-dark rounded-2xl p-4 space-y-3">
+      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-auto-600/15 flex items-center justify-center">
             <Droplets className="w-3.5 h-3.5 text-auto-500" />
           </div>
-          <h3 className="text-xs font-bold text-zinc-300">Datos de la última recarga</h3>
+          <h3 className="text-xs font-bold text-zinc-700">Datos de la última recarga</h3>
         </div>
 
         <label className="block">
-          <span className="text-[10px] font-bold text-zinc-400">Aceite rellenado (ml)</span>
+          <span className="text-[10px] font-bold text-zinc-500">Aceite rellenado (ml)</span>
           <div className="relative mt-0.5">
             <input
               type="number" min="1" step="10"
               value={mlRellenados} onChange={(e) => setMlRellenados(e.target.value)}
               placeholder="Ej: 500"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">ml</span>
           </div>
@@ -99,13 +99,13 @@ export default function ConsumoAceiteClient() {
         </label>
 
         <label className="block">
-          <span className="text-[10px] font-bold text-zinc-400">Kilómetros recorridos desde el último cambio</span>
+          <span className="text-[10px] font-bold text-zinc-500">Kilómetros recorridos desde el último cambio</span>
           <div className="relative mt-0.5">
             <input
               type="number" min="1" step="100"
               value={kmRecorridos} onChange={(e) => setKmRecorridos(e.target.value)}
               placeholder="Ej: 5000"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">km</span>
           </div>
@@ -116,8 +116,8 @@ export default function ConsumoAceiteClient() {
       {resultados ? (
         <div className="space-y-3">
           {/* Medidor visual */}
-          <div className="card-auto-dark rounded-2xl p-4">
-            <h3 className="text-xs font-extrabold text-zinc-300 text-center mb-3">Medidor de desgaste</h3>
+          <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4">
+            <h3 className="text-xs font-extrabold text-zinc-700 text-center mb-3">Medidor de desgaste</h3>
 
             <div className="flex justify-center">
               <div className="relative w-48 h-28 overflow-hidden">
@@ -142,7 +142,7 @@ export default function ConsumoAceiteClient() {
 
                 {/* Valor central */}
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-center">
-                  <p className="text-2xl font-black text-zinc-200">{resultados.consumo1000.toFixed(0)}</p>
+                  <p className="text-2xl font-black text-zinc-800">{resultados.consumo1000.toFixed(0)}</p>
                   <p className="text-[10px] text-zinc-500">ml / 1000 km</p>
                 </div>
               </div>
@@ -181,33 +181,33 @@ export default function ConsumoAceiteClient() {
                 }`}>
                   {resultados.diagnostico.nivel}
                 </p>
-                <p className="text-xs text-zinc-400 mt-0.5">{resultados.diagnostico.descripcion}</p>
+                <p className="text-xs text-zinc-500 mt-0.5">{resultados.diagnostico.descripcion}</p>
               </div>
             </div>
-            <div className="mt-3 bg-white/5 rounded-xl p-3">
-              <p className="text-xs font-bold text-zinc-300">Qué hacer</p>
-              <p className="text-xs text-zinc-400 mt-0.5">{resultados.diagnostico.recomendacion}</p>
+            <div className="mt-3 bg-zinc-100 rounded-xl p-3">
+              <p className="text-xs font-bold text-zinc-700">Qué hacer</p>
+              <p className="text-xs text-zinc-500 mt-0.5">{resultados.diagnostico.recomendacion}</p>
             </div>
           </div>
 
           {/* Datos numéricos */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="card-auto-dark rounded-xl p-3 text-center">
+            <div className="bg-white border border-zinc-200 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Rellenado</p>
-              <p className="text-sm font-bold text-zinc-200">{parseFloat(mlRellenados).toLocaleString("es-PE")} ml</p>
+              <p className="text-sm font-bold text-zinc-800">{parseFloat(mlRellenados).toLocaleString("es-PE")} ml</p>
             </div>
-            <div className="card-auto-dark rounded-xl p-3 text-center">
+            <div className="bg-white border border-zinc-200 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Recorrido</p>
-              <p className="text-sm font-bold text-zinc-200">{parseFloat(kmRecorridos).toLocaleString("es-PE")} km</p>
+              <p className="text-sm font-bold text-zinc-800">{parseFloat(kmRecorridos).toLocaleString("es-PE")} km</p>
             </div>
-            <div className="card-auto-dark rounded-xl p-3 text-center">
+            <div className="bg-white border border-zinc-200 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Cada 10k km</p>
-              <p className="text-sm font-bold text-zinc-200">{resultados.consumo10000.toFixed(1)} L</p>
+              <p className="text-sm font-bold text-zinc-800">{resultados.consumo10000.toFixed(1)} L</p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="card-auto-dark rounded-2xl p-6 text-center">
+        <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-6 text-center">
           <p className="text-sm text-zinc-500">Completa los campos para ver el diagnóstico</p>
           <p className="text-xs text-zinc-500 mt-1">Mililitros rellenados y kilómetros recorridos desde el último cambio</p>
         </div>

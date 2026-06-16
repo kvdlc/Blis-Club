@@ -58,7 +58,7 @@ const categories = [
   { key: "neumaticos", label: "Neumáticos", icon: Car, color: "bg-auto-600/10 text-auto-500" },
   { key: "luces", label: "Luces", icon: Lightbulb, color: "bg-auto-600/10 text-auto-500" },
   { key: "seguridad", label: "Seguridad", icon: Shield, color: "bg-auto-600/10 text-auto-500" },
-  { key: "documentos", label: "Documentos", icon: CheckCircle2, color: "bg-zinc-900/5 text-zinc-300" },
+  { key: "documentos", label: "Documentos", icon: CheckCircle2, color: "bg-zinc-100 text-zinc-700" },
 ];
 
 export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
@@ -123,16 +123,16 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
       </Link>
 
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-200">Checklist Pre-Viaje</h1>
-        <p className="text-xs text-zinc-400 mt-1">Formulario de verificación antes de salir a carretera.</p>
+        <h1 className="text-xl font-extrabold text-zinc-800">Checklist Pre-Viaje</h1>
+        <p className="text-xs text-zinc-500 mt-1">Formulario de verificación antes de salir a carretera.</p>
       </div>
 
       {/* Barra de progreso */}
-      <div className="card-auto-dark rounded-2xl p-4">
+      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-extrabold text-zinc-300">Progreso</h3>
+          <h3 className="text-xs font-extrabold text-zinc-700">Progreso</h3>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-zinc-400">{checkedCount}/{totalCount}</span>
+            <span className="text-xs font-bold text-zinc-500">{checkedCount}/{totalCount}</span>
             <button
               onClick={resetAll}
               className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 hover:text-auto-400 transition-colors"
@@ -142,7 +142,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
           </div>
         </div>
 
-        <div className="relative h-3 bg-zinc-900/5 rounded-full overflow-hidden">
+        <div className="relative h-3 bg-zinc-100 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
               progressPct >= 90 ? "bg-auto-600" : progressPct >= 50 ? "bg-auto-600" : "bg-auto-600"
@@ -164,14 +164,14 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
         {grouped.map((cat) => {
           const CatIcon = cat.icon;
           return (
-            <div key={cat.key} className="card-auto-dark rounded-2xl overflow-hidden">
+            <div key={cat.key} className="bg-white border border-zinc-200 shadow-sm rounded-2xl overflow-hidden">
               <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className={`w-8 h-8 rounded-xl ${cat.color} flex items-center justify-center`}>
                     <CatIcon className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-zinc-200">{cat.label}</p>
+                    <p className="text-sm font-bold text-zinc-800">{cat.label}</p>
                     <p className="text-[10px] text-zinc-500">{cat.catChecked}/{cat.catTotal} verificados</p>
                   </div>
                 </div>
@@ -180,7 +180,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
                     ? "bg-auto-600/10 text-auto-500"
                     : cat.catChecked >= cat.catTotal / 2
                       ? "bg-auto-600/10 text-auto-500"
-                      : "bg-zinc-900/5 text-zinc-400"
+                      : "bg-zinc-100 text-zinc-500"
                 }`}>
                   {cat.catChecked === cat.catTotal ? <Check className="w-3.5 h-3.5 text-auto-500" /> : `${cat.catChecked}/${cat.catTotal}`}
                 </span>
@@ -194,18 +194,18 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
                     className={`w-full flex items-start gap-3 py-2.5 px-3 rounded-xl text-left transition-colors ${
                       checks[item.id]
                         ? "bg-auto-600/10"
-                        : "bg-zinc-900/5 hover:bg-zinc-900/10"
+                        : "bg-zinc-100 hover:bg-zinc-100"
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                       checks[item.id]
                         ? "bg-auto-600 border-auto-500"
-                        : "border-white/15"
+                        : "border-zinc-200"
                     }`}>
                       {checks[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                     </div>
                     <div className="min-w-0">
-                      <p className={`text-xs font-bold ${checks[item.id] ? "text-auto-800 line-through" : "text-zinc-300"}`}>
+                      <p className={`text-xs font-bold ${checks[item.id] ? "text-auto-800 line-through" : "text-zinc-700"}`}>
                         {item.label}{getPressureNote(item.id)}
                       </p>
                       {item.detail && (

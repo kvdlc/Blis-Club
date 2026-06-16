@@ -39,8 +39,8 @@ const warningLights = [
   { icon: Circle, name: "ABS (Antibloqueo)", severity: "medio", color: "text-amber-400", bg: "bg-amber-500/10", desc: "Falla en el sistema de frenos antibloqueo.", action: "Los frenos normales operan, pero el ABS no asistirá." },
   { icon: RotateCw, name: "Control de Tracción", severity: "bajo", color: "text-blue-400", bg: "bg-blue-500/10", desc: "Sistema de control de tracción activo o con falla.", action: "Si parpadea, está funcionando. Si queda fijo, requiere revisión." },
   { icon: Circle, name: "Airbag / SRS", severity: "alto", color: "text-red-400", bg: "bg-red-500/10", desc: "Falla en el sistema de bolsas de aire.", action: "Requiere revisión urgente. Los airbags podrían no activarse." },
-  { icon: Lock, name: "Inmovilizador / Seguridad", severity: "bajo", color: "text-zinc-400", bg: "bg-white/5", desc: "Sistema antirrobo activo o llave no reconocida.", action: "Usa la llave original." },
-  { icon: Cog, name: "Filtro de Partículas (DPF)", severity: "medio", color: "text-zinc-400", bg: "bg-white/5", desc: "Filtro de partículas diésel obstruido.", action: "Conduce a velocidad constante en carretera para regenerar." },
+  { icon: Lock, name: "Inmovilizador / Seguridad", severity: "bajo", color: "text-zinc-500", bg: "bg-zinc-100", desc: "Sistema antirrobo activo o llave no reconocida.", action: "Usa la llave original." },
+  { icon: Cog, name: "Filtro de Partículas (DPF)", severity: "medio", color: "text-zinc-500", bg: "bg-zinc-100", desc: "Filtro de partículas diésel obstruido.", action: "Conduce a velocidad constante en carretera para regenerar." },
   { icon: Sun, name: "Luces de Cruce", severity: "bajo", color: "text-blue-300", bg: "bg-blue-500/10", desc: "Las luces bajas están encendidas.", action: "Informativo." },
 ];
 
@@ -59,7 +59,7 @@ export default function GuanteraClient({ userId, vehicle, documents: initialDocs
   if (!vehicle) {
     return (
       <div className="text-center py-12">
-        <p className="text-zinc-400">Registra un vehículo primero.</p>
+        <p className="text-zinc-500">Registra un vehículo primero.</p>
         <button onClick={() => router.push("/auto/app/perfil/vehiculo/nuevo")}
           className="mt-3 px-4 py-2 rounded-xl bg-auto-600 text-white text-sm font-bold">
           Agregar vehículo
@@ -75,7 +75,7 @@ export default function GuanteraClient({ userId, vehicle, documents: initialDocs
           <FileText className="w-5 h-5 text-auto-500" />
         </div>
         <div>
-          <h1 className="text-xl font-extrabold text-zinc-100">Guantera</h1>
+          <h1 className="text-xl font-extrabold text-zinc-900">Guantera</h1>
           <p className="text-xs text-zinc-500">{vehicle.marca} {vehicle.modelo} · {vehicle.placa}</p>
         </div>
       </div>
@@ -135,7 +135,7 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+        <h2 className="text-sm font-bold text-zinc-700 flex items-center gap-2">
           <BadgeCheck className="w-4 h-4 text-auto-500" /> Documentos Digitales
         </h2>
         <button onClick={() => setAdding(!adding)} className="w-8 h-8 rounded-full bg-auto-600/10 border border-auto-600/20 flex items-center justify-center text-auto-500 hover:bg-auto-600/20 transition-colors">
@@ -144,22 +144,22 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
       </div>
 
       {adding && (
-        <div className="card-auto-dark rounded-2xl p-4 space-y-2">
+        <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-              className="px-2.5 py-2 rounded-lg border border-white/10 text-xs font-medium bg-white/5 text-zinc-200">
+              className="px-2.5 py-2 rounded-lg border border-zinc-200 text-xs font-medium bg-zinc-100 text-zinc-800">
               {documentTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
             <input type="date" value={form.fecha_emision} onChange={(e) => setForm({ ...form, fecha_emision: e.target.value })}
-              className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" placeholder="Emisión" />
+              className="px-2.5 py-2 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" placeholder="Emisión" />
           </div>
           <input type="date" value={form.fecha_vencimiento} onChange={(e) => setForm({ ...form, fecha_vencimiento: e.target.value })}
-            required className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            required className="w-full px-2.5 py-2 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
           <div className="flex gap-1.5">
             <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">
               {saving ? "Guardando..." : "Guardar"}
             </button>
-            <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-white/10 text-zinc-400 text-xs">
+            <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-zinc-100 text-zinc-500 text-xs">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -175,10 +175,10 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
           const style = getUrgencyStyle(dias);
           const dt = documentTypes.find((t) => t.value === doc.tipo);
           return (
-            <div key={doc.id} className={`card-auto-dark rounded-2xl p-4 border ${style.border} flex items-center gap-3`}>
+            <div key={doc.id} className={`bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 border ${style.border} flex items-center gap-3`}>
               <DocIcon tipo={doc.tipo} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-zinc-100">{dt?.label || doc.tipo}</p>
+                <p className="text-sm font-bold text-zinc-900">{dt?.label || doc.tipo}</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <Calendar className="w-3 h-3 text-zinc-500" />
                   <p className="text-[10px] text-zinc-500">Vence: {new Date(doc.fecha_vencimiento + "T12:00:00").toLocaleDateString("es-PE")}</p>
@@ -230,7 +230,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+        <h2 className="text-sm font-bold text-zinc-700 flex items-center gap-2">
           <Phone className="w-4 h-4 text-auto-500" /> Directorio de Talleres
         </h2>
         <button onClick={() => setAdding(!adding)} className="w-8 h-8 rounded-full bg-auto-600/10 border border-auto-600/20 flex items-center justify-center text-auto-500 hover:bg-auto-600/20 transition-colors">
@@ -239,22 +239,22 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
       </div>
 
       {adding && (
-        <div className="card-auto-dark rounded-2xl p-4 space-y-2">
+        <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-2">
           <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            placeholder="Nombre del contacto *" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            placeholder="Nombre del contacto *" className="w-full px-2.5 py-2 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
           <div className="grid grid-cols-2 gap-2">
             <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-              className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200">
+              className="px-2.5 py-2 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800">
               {contactTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
             <input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-              placeholder="Teléfono" className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+              placeholder="Teléfono" className="px-2.5 py-2 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
           </div>
           <div className="flex gap-1.5">
             <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">
               {saving ? "Guardando..." : "Guardar"}
             </button>
-            <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-white/10 text-zinc-400 text-xs">
+            <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-zinc-100 text-zinc-500 text-xs">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -269,13 +269,13 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
           const tipo = contactTypes.find((t) => t.value === c.tipo);
           const Icon = tipo?.icon || Phone;
           return (
-            <div key={c.id} className="card-auto-dark rounded-2xl p-3 flex flex-col gap-2">
+            <div key={c.id} className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-3 flex flex-col gap-2">
               <div className="flex items-start gap-2">
                 <div className="w-8 h-8 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center shrink-0">
                   <Icon className="w-4 h-4 text-auto-500" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-zinc-100 truncate">{c.nombre}</p>
+                  <p className="text-xs font-bold text-zinc-900 truncate">{c.nombre}</p>
                   <p className="text-[10px] text-zinc-500">{tipo?.label}</p>
                 </div>
               </div>
@@ -360,7 +360,7 @@ function SpecsSection({ vehicleId, initialSpecs }: { vehicleId: string; initialS
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+        <h2 className="text-sm font-bold text-zinc-700 flex items-center gap-2">
           <Settings className="w-4 h-4 text-auto-500" /> ADN del Vehículo
         </h2>
         <button onClick={() => setEditing(!editing)} className="text-xs font-bold text-auto-500 hover:text-auto-500 transition-colors">
@@ -369,60 +369,60 @@ function SpecsSection({ vehicleId, initialSpecs }: { vehicleId: string; initialS
       </div>
 
       {editing ? (
-        <div className="card-auto-dark rounded-2xl p-4 space-y-2">
+        <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-2">
           <div className="grid grid-cols-2 gap-2">
-            <label className="block"><span className="text-[10px] font-bold text-zinc-400">Tipo de aceite</span>
-              <input value={form.tipo_aceite} onChange={(e) => setForm({ ...form, tipo_aceite: e.target.value })} placeholder="Ej: Sintético" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Tipo de aceite</span>
+              <input value={form.tipo_aceite} onChange={(e) => setForm({ ...form, tipo_aceite: e.target.value })} placeholder="Ej: Sintético" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
             </label>
-            <label className="block"><span className="text-[10px] font-bold text-zinc-400">Viscosidad</span>
-              <input value={form.viscosidad_aceite} onChange={(e) => setForm({ ...form, viscosidad_aceite: e.target.value })} placeholder="Ej: 5W-30" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Viscosidad</span>
+              <input value={form.viscosidad_aceite} onChange={(e) => setForm({ ...form, viscosidad_aceite: e.target.value })} placeholder="Ej: 5W-30" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
             </label>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <label className="block"><span className="text-[10px] font-bold text-zinc-400">Cap. aceite (L)</span>
-              <input type="number" step="0.1" value={form.capacidad_aceite_litros} onChange={(e) => setForm({ ...form, capacidad_aceite_litros: e.target.value })} placeholder="4.5" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Cap. aceite (L)</span>
+              <input type="number" step="0.1" value={form.capacidad_aceite_litros} onChange={(e) => setForm({ ...form, capacidad_aceite_litros: e.target.value })} placeholder="4.5" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
             </label>
-            <label className="block"><span className="text-[10px] font-bold text-zinc-400">Refrigerante</span>
-              <input value={form.tipo_refrigerante} onChange={(e) => setForm({ ...form, tipo_refrigerante: e.target.value })} placeholder="Ej: Etilenglicol" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Refrigerante</span>
+              <input value={form.tipo_refrigerante} onChange={(e) => setForm({ ...form, tipo_refrigerante: e.target.value })} placeholder="Ej: Etilenglicol" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
             </label>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <label className="block"><span className="text-[10px] font-bold text-zinc-400">PSI delante</span>
-              <input type="number" value={form.presion_neumaticos_delante} onChange={(e) => setForm({ ...form, presion_neumaticos_delante: e.target.value })} placeholder="32" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">PSI delante</span>
+              <input type="number" value={form.presion_neumaticos_delante} onChange={(e) => setForm({ ...form, presion_neumaticos_delante: e.target.value })} placeholder="32" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
             </label>
-            <label className="block"><span className="text-[10px] font-bold text-zinc-400">PSI atrás</span>
-              <input type="number" value={form.presion_neumaticos_atras} onChange={(e) => setForm({ ...form, presion_neumaticos_atras: e.target.value })} placeholder="32" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">PSI atrás</span>
+              <input type="number" value={form.presion_neumaticos_atras} onChange={(e) => setForm({ ...form, presion_neumaticos_atras: e.target.value })} placeholder="32" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
             </label>
-            <label className="block"><span className="text-[10px] font-bold text-zinc-400">PSI repuesto</span>
-              <input type="number" value={form.presion_neumaticos_repuesto} onChange={(e) => setForm({ ...form, presion_neumaticos_repuesto: e.target.value })} placeholder="60" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">PSI repuesto</span>
+              <input type="number" value={form.presion_neumaticos_repuesto} onChange={(e) => setForm({ ...form, presion_neumaticos_repuesto: e.target.value })} placeholder="60" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
             </label>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <label className="block"><span className="text-[10px] font-bold text-zinc-400">Tanque (gal)</span>
-              <input type="number" step="0.1" value={form.capacidad_tanque_galones} onChange={(e) => setForm({ ...form, capacidad_tanque_galones: e.target.value })} placeholder="14" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Tanque (gal)</span>
+              <input type="number" step="0.1" value={form.capacidad_tanque_galones} onChange={(e) => setForm({ ...form, capacidad_tanque_galones: e.target.value })} placeholder="14" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
             </label>
-            <label className="block"><span className="text-[10px] font-bold text-zinc-400">Cap. refrig. (L)</span>
-              <input type="number" step="0.1" value={form.capacidad_refrigerante_litros} onChange={(e) => setForm({ ...form, capacidad_refrigerante_litros: e.target.value })} placeholder="5.0" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Cap. refrig. (L)</span>
+              <input type="number" step="0.1" value={form.capacidad_refrigerante_litros} onChange={(e) => setForm({ ...form, capacidad_refrigerante_litros: e.target.value })} placeholder="5.0" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
             </label>
-            <label className="block"><span className="text-[10px] font-bold text-zinc-400">Líq. frenos</span>
-              <input value={form.tipo_freno} onChange={(e) => setForm({ ...form, tipo_freno: e.target.value })} placeholder="DOT 4" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Líq. frenos</span>
+              <input value={form.tipo_freno} onChange={(e) => setForm({ ...form, tipo_freno: e.target.value })} placeholder="DOT 4" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
             </label>
           </div>
-          <label className="block"><span className="text-[10px] font-bold text-zinc-400">Octanaje</span>
-            <input value={form.octanaje_recomendado} onChange={(e) => setForm({ ...form, octanaje_recomendado: e.target.value })} placeholder="Ej: 95 RON" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+          <label className="block"><span className="text-[10px] font-bold text-zinc-500">Octanaje</span>
+            <input value={form.octanaje_recomendado} onChange={(e) => setForm({ ...form, octanaje_recomendado: e.target.value })} placeholder="Ej: 95 RON" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
           </label>
           <div className="flex gap-1.5">
             <button onClick={handleSave} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "Guardando..." : "Guardar"}</button>
-            <button onClick={() => setEditing(false)} className="px-3 py-1.5 rounded-lg bg-white/10 text-zinc-400 text-xs"><X className="w-3.5 h-3.5" /></button>
+            <button onClick={() => setEditing(false)} className="px-3 py-1.5 rounded-lg bg-zinc-100 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-2">
           {specsCards.map((card) => (
-            <div key={card.label} className="card-auto-dark rounded-2xl p-3 flex flex-col items-center text-center gap-1.5">
+            <div key={card.label} className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-3 flex flex-col items-center text-center gap-1.5">
               <card.icon className="w-4 h-4 text-auto-500" />
               <p className="text-[10px] text-zinc-500">{card.label}</p>
-              <p className="text-xs font-bold text-zinc-100">{card.value}</p>
+              <p className="text-xs font-bold text-zinc-900">{card.value}</p>
               {card.detail && <p className="text-[9px] text-zinc-500">{card.detail}</p>}
             </div>
           ))}
@@ -438,7 +438,7 @@ function WarningLightsSection() {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+      <h2 className="text-sm font-bold text-zinc-700 flex items-center gap-2">
         <AlertTriangle className="w-4 h-4 text-amber-400" /> Luces del Tablero
       </h2>
       <div className="grid grid-cols-2 gap-2">
@@ -448,21 +448,21 @@ function WarningLightsSection() {
             <div key={i}>
               <button
                 onClick={() => setSelected(selected === i ? null : i)}
-                className={`w-full card-auto-dark rounded-2xl p-3 flex items-center gap-2 text-left transition-all ${selected === i ? "border border-auto-600/20" : ""}`}
+                className={`w-full bg-white border border-zinc-200 shadow-sm rounded-2xl p-3 flex items-center gap-2 text-left transition-all ${selected === i ? "border border-auto-600/20" : ""}`}
               >
                 <div className={`w-8 h-8 rounded-lg ${light.bg} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-4 h-4 ${light.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-zinc-100 truncate">{light.name}</p>
+                  <p className="text-xs font-bold text-zinc-900 truncate">{light.name}</p>
                   <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${light.bg} ${light.color}`}>
                     {light.severity}
                   </span>
                 </div>
               </button>
               {selected === i && (
-                <div className="card-auto-dark rounded-2xl p-3 mt-1 border border-auto-600/20">
-                  <p className="text-xs text-zinc-300">{light.desc}</p>
+                <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-3 mt-1 border border-auto-600/20">
+                  <p className="text-xs text-zinc-700">{light.desc}</p>
                   <p className="text-[10px] text-auto-500 font-bold mt-1.5">Qué hacer: {light.action}</p>
                 </div>
               )}

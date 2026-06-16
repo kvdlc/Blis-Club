@@ -22,31 +22,35 @@ export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocE
 
   if (!vehicle) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
-        <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-lg">
-          <Car className="w-10 h-10 text-zinc-400" />
+      <div className="-mx-4 -mt-3 px-4 pt-3 min-h-[calc(100vh-7rem)] bg-auto-gradient text-zinc-200">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
+          <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-lg">
+            <Car className="w-10 h-10 text-zinc-400" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-zinc-100">¡Bienvenido a Auto!</h2>
+            <p className="text-zinc-500 mt-2 max-w-sm text-sm leading-relaxed">
+              Registra tu primer vehículo para comenzar a usar todas las herramientas.
+            </p>
+          </div>
+          <button
+            onClick={() => router.push("/auto/app/perfil/vehiculo/nuevo")}
+            className="px-6 py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-500 transition-colors active:scale-95 shadow-auto-glow"
+          >
+            Agregar vehículo
+          </button>
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-zinc-100">¡Bienvenido a Auto!</h2>
-          <p className="text-zinc-500 mt-2 max-w-sm text-sm leading-relaxed">
-            Registra tu primer vehículo para comenzar a usar todas las herramientas.
-          </p>
-        </div>
-        <button
-          onClick={() => router.push("/auto/app/perfil/vehiculo/nuevo")}
-          className="px-6 py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-500 transition-colors active:scale-95 shadow-auto-glow"
-        >
-          Agregar vehículo
-        </button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <HeroCard vehicle={vehicle} fuelLogs={fuelLogs} ecoScore={ecoScore} />
-      <QuickActions />
-      <DashboardWidgets vehicle={vehicle} ecoScore={ecoScore} nextDocExpiry={nextDocExpiry} fuelLogs={fuelLogs} maintenances={maintenances} specs={specs} badges={badges} />
+    <div className="-mx-4 -mt-3 px-4 pt-3 min-h-[calc(100vh-7rem)] bg-auto-gradient text-zinc-200">
+      <div className="space-y-4">
+        <HeroCard vehicle={vehicle} fuelLogs={fuelLogs} ecoScore={ecoScore} />
+        <QuickActions />
+        <DashboardWidgets vehicle={vehicle} ecoScore={ecoScore} nextDocExpiry={nextDocExpiry} fuelLogs={fuelLogs} maintenances={maintenances} specs={specs} badges={badges} />
+      </div>
     </div>
   );
 }

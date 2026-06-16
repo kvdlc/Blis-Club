@@ -25,7 +25,7 @@ export default async function AutoAppLayout({ children }: { children: React.Reac
   if (trial.isExpired) redirect("/auto/app/suscripcion");
 
   return (
-    <div className="min-h-screen md:pl-60 bg-auto-gradient text-zinc-200">
+    <div className="min-h-screen md:pl-60 bg-zinc-50 text-zinc-900">
       <CarProvider>
         <ReferralTracker />
         <AutoNav />
@@ -34,7 +34,7 @@ export default async function AutoAppLayout({ children }: { children: React.Reac
             <CarSwitcher />
             <div className="flex items-center gap-2">
               <SearchOverlay />
-              <button className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center text-zinc-400 hover:text-zinc-100 hover:bg-white/10 hover:border-white/20 transition-all hover:scale-105 active:scale-95">
+              <button className="w-9 h-9 rounded-full bg-white border border-zinc-200 shadow-sm flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:border-zinc-300 transition-all hover:scale-105 active:scale-95">
                 <Bell className="w-4 h-4" />
               </button>
               <UserPill appSlug="auto" />

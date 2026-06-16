@@ -31,7 +31,7 @@ export default function ListingDetailClient({ listing }: Props) {
       </Link>
 
       {/* Galería */}
-      <div className="rounded-2xl overflow-hidden bg-white/5">
+      <div className="rounded-2xl overflow-hidden bg-zinc-100">
         {listing.fotos?.[0] ? (
           <img src={listing.fotos[0]} alt={listing.titulo} className="w-full h-64 object-cover" />
         ) : (
@@ -42,7 +42,7 @@ export default function ListingDetailClient({ listing }: Props) {
       {/* Info principal */}
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-3">
-          <h1 className="text-xl font-extrabold text-zinc-200 flex-1">{listing.titulo}</h1>
+          <h1 className="text-xl font-extrabold text-zinc-800 flex-1">{listing.titulo}</h1>
           <p className="text-2xl font-black text-auto-500 shrink-0">
             {listing.precio === 0 ? "Gratis" : `S/ ${listing.precio.toLocaleString("es-PE")}`}
           </p>
@@ -50,7 +50,7 @@ export default function ListingDetailClient({ listing }: Props) {
 
         <div className="flex items-center gap-2 flex-wrap">
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-            listing.estado_item === "nuevo" ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-zinc-400"
+            listing.estado_item === "nuevo" ? "bg-emerald-500/10 text-emerald-400" : "bg-zinc-100 text-zinc-500"
           }`}>
             {listing.estado_item === "nuevo" ? "Nuevo" : "Usado"}
           </span>
@@ -58,25 +58,25 @@ export default function ListingDetailClient({ listing }: Props) {
             {categoryLabels[listing.categoria] || listing.categoria}
           </span>
           {listing.marca && (
-            <span className="text-xs text-zinc-400">{listing.marca}{listing.modelo ? ` ${listing.modelo}` : ""}</span>
+            <span className="text-xs text-zinc-500">{listing.marca}{listing.modelo ? ` ${listing.modelo}` : ""}</span>
           )}
         </div>
       </div>
 
       {/* Descripción */}
       {listing.descripcion && (
-        <div className="card-auto-dark rounded-2xl p-4">
-          <h3 className="text-xs font-extrabold text-zinc-300 mb-2">Descripción</h3>
-          <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap">{listing.descripcion}</p>
+        <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4">
+          <h3 className="text-xs font-extrabold text-zinc-700 mb-2">Descripción</h3>
+          <p className="text-sm text-zinc-500 leading-relaxed whitespace-pre-wrap">{listing.descripcion}</p>
         </div>
       )}
 
       {/* Detalles */}
-      <div className="card-auto-dark rounded-2xl p-4 grid grid-cols-2 gap-3">
+      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 grid grid-cols-2 gap-3">
         {listing.ciudad && (
           <div>
             <p className="text-[10px] text-zinc-500">Ubicación</p>
-            <p className="text-sm font-bold text-zinc-200 flex items-center gap-1">
+            <p className="text-sm font-bold text-zinc-800 flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5" /> {listing.ciudad}
             </p>
           </div>
@@ -84,22 +84,22 @@ export default function ListingDetailClient({ listing }: Props) {
         {listing.marca && (
           <div>
             <p className="text-[10px] text-zinc-500">Marca</p>
-            <p className="text-sm font-bold text-zinc-200">{listing.marca}</p>
+            <p className="text-sm font-bold text-zinc-800">{listing.marca}</p>
           </div>
         )}
         {listing.modelo && (
           <div>
             <p className="text-[10px] text-zinc-500">Modelo</p>
-            <p className="text-sm font-bold text-zinc-200">{listing.modelo}</p>
+            <p className="text-sm font-bold text-zinc-800">{listing.modelo}</p>
           </div>
         )}
         <div>
           <p className="text-[10px] text-zinc-500">Vendedor</p>
-          <p className="text-sm font-bold text-zinc-200">{sellerName}</p>
+          <p className="text-sm font-bold text-zinc-800">{sellerName}</p>
         </div>
         <div>
           <p className="text-[10px] text-zinc-500">Publicado</p>
-          <p className="text-sm font-bold text-zinc-200">
+          <p className="text-sm font-bold text-zinc-800">
             {new Date(listing.created_at).toLocaleDateString("es-PE", { day: "numeric", month: "short" })}
           </p>
         </div>
@@ -117,7 +117,7 @@ export default function ListingDetailClient({ listing }: Props) {
           Contactar por WhatsApp
         </a>
       ) : (
-        <div className="w-full py-3.5 rounded-2xl bg-white/5 text-zinc-500 text-sm font-bold text-center">
+        <div className="w-full py-3.5 rounded-2xl bg-zinc-100 text-zinc-500 text-sm font-bold text-center">
           WhatsApp no disponible
         </div>
       )}

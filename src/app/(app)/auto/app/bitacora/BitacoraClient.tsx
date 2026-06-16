@@ -27,7 +27,7 @@ const maintIconMap: Record<string, React.ReactNode> = {
   "🛠️": <Wrench className="w-3.5 h-3.5 text-amber-400" />,
   "🧽": <Droplets className="w-3.5 h-3.5 text-blue-400" />,
   "🔍": <Gauge className="w-3.5 h-3.5 text-violet-400" />,
-  "📌": <Pin className="w-3.5 h-3.5 text-zinc-400" />,
+  "📌": <Pin className="w-3.5 h-3.5 text-zinc-500" />,
 };
 
 const upgradeCats = [
@@ -45,7 +45,7 @@ const upgradeIconMap: Record<string, React.ReactNode> = {
   "⚡": <Zap className="w-3.5 h-3.5 inline text-amber-400" />,
   "🛡️": <Shield className="w-3.5 h-3.5 inline text-emerald-400" />,
   "🛋️": <Armchair className="w-3.5 h-3.5 inline text-orange-400" />,
-  "📌": <Pin className="w-3.5 h-3.5 inline text-zinc-400" />,
+  "📌": <Pin className="w-3.5 h-3.5 inline text-zinc-500" />,
 };
 
 type TimelineItem = { type: "fuel"; data: FuelLog } | { type: "maintenance"; data: MaintenanceLog };
@@ -64,7 +64,7 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
   if (!vehicle) {
     return (
       <div className="text-center py-12">
-        <p className="text-zinc-400">Registra un vehículo primero.</p>
+        <p className="text-zinc-500">Registra un vehículo primero.</p>
         <button onClick={() => router.push("/auto/app/perfil/vehiculo/nuevo")}
           className="mt-3 px-4 py-2 rounded-xl bg-auto-600 text-white text-sm font-bold">
           Agregar vehículo
@@ -80,7 +80,7 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
           <Gauge className="w-5 h-5 text-auto-500" />
         </div>
         <div>
-          <h1 className="text-xl font-extrabold text-zinc-100">Bitácora</h1>
+          <h1 className="text-xl font-extrabold text-zinc-900">Bitácora</h1>
           <p className="text-xs text-zinc-500">{vehicle.marca} {vehicle.modelo} · {vehicle.kilometraje.toLocaleString("es-PE")} km</p>
         </div>
       </div>
@@ -112,7 +112,7 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+        <h2 className="text-sm font-bold text-zinc-700 flex items-center gap-2">
           <ScrollText className="w-4 h-4 text-auto-500" /> Línea de Tiempo
         </h2>
         <div className="flex gap-1.5">
@@ -134,12 +134,12 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
           <p className="text-xs text-zinc-500 text-center py-4">Sin eventos registrados. Agrega tu primera carga o mantenimiento.</p>
         ) : (
           timeline.slice(0, 10).map((item) => (
-            <div key={`${item.type}-${item.data.id}`} className={`card-auto-dark rounded-2xl p-3 flex items-center gap-3 border-l-2 ${item.type === "fuel" ? "border-l-amber-500" : "border-l-blue-500"}`}>
+            <div key={`${item.type}-${item.data.id}`} className={`bg-white border border-zinc-200 shadow-sm rounded-2xl p-3 flex items-center gap-3 border-l-2 ${item.type === "fuel" ? "border-l-amber-500" : "border-l-blue-500"}`}>
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.type === "fuel" ? "bg-amber-500/10 border border-amber-500/20" : "bg-blue-500/10 border border-blue-500/20"}`}>
                 {item.type === "fuel" ? <Fuel className="w-5 h-5 text-amber-400" /> : <Wrench className="w-5 h-5 text-blue-400" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-zinc-100">
+                <p className="text-xs font-bold text-zinc-900">
                   {item.type === "fuel" ? (
                     <>{(item.data as FuelLog).litros} L · S/ {(item.data as FuelLog).precio_por_galon}/gal</>
                   ) : (
@@ -152,7 +152,7 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
                   {item.type === "fuel" && ` · ${(item.data as FuelLog).odometro.toLocaleString("es-PE")} km`}
                 </p>
               </div>
-              <span className="text-xs font-bold text-zinc-300 shrink-0">
+              <span className="text-xs font-bold text-zinc-700 shrink-0">
                 S/ {Math.round(
                   item.type === "fuel"
                     ? (item.data as FuelLog).precio_por_galon * ((item.data as FuelLog).litros / 3.78541)
@@ -190,12 +190,12 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
   };
 
   return (
-    <div className="card-auto-dark rounded-2xl p-4 space-y-2 border border-amber-500/20">
+    <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-2 border border-amber-500/20">
       <div className="grid grid-cols-4 gap-1.5">
-        <input type="number" step="0.1" value={form.litros} onChange={(e) => setForm({ ...form, litros: e.target.value })} placeholder="Litros" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
-        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder="S/ gal" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
-        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
-        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200">
+        <input type="number" step="0.1" value={form.litros} onChange={(e) => setForm({ ...form, litros: e.target.value })} placeholder="Litros" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
+        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder="S/ gal" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
+        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
+        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800">
           <option value="regular">Regular</option>
           <option value="premium">Premium</option>
           <option value="diesel">Diésel</option>
@@ -206,7 +206,7 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
       <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
         <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : "Guardar"}</button>
-        <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-white/10 text-zinc-400 text-xs"><X className="w-3.5 h-3.5" /></button>
+        <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-zinc-100 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );
@@ -234,22 +234,22 @@ function AddMaintForm({ vehicleId, onDone }: { vehicleId: string; onDone: (m: Ma
   };
 
   return (
-    <div className="card-auto-dark rounded-2xl p-4 space-y-2 border border-blue-500/20">
-      <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+    <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-2 border border-blue-500/20">
+      <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
       <div className="grid grid-cols-2 gap-1.5">
-        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200">
+        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800">
           {maintTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
-        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
       </div>
       <div className="grid grid-cols-2 gap-1.5">
-        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
-        <input value={form.taller} onChange={(e) => setForm({ ...form, taller: e.target.value })} placeholder="Taller" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
+        <input value={form.taller} onChange={(e) => setForm({ ...form, taller: e.target.value })} placeholder="Taller" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
       </div>
       <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
         <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">Guardar</button>
-        <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-white/10 text-zinc-400 text-xs"><X className="w-3.5 h-3.5" /></button>
+        <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-zinc-100 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );
@@ -326,16 +326,16 @@ function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[];
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+      <h2 className="text-sm font-bold text-zinc-700 flex items-center gap-2">
         <BarChart3 className="w-4 h-4 text-auto-500" /> Gráficos Financieros
       </h2>
-      <div className="card-auto-dark rounded-2xl p-4 space-y-4">
+      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-4">
         {gastoTotal === 0 ? (
           <p className="text-xs text-zinc-500 text-center py-4">Sin datos de gastos. Registra cargas y mantenimientos.</p>
         ) : (
           <>
             <div>
-              <p className="text-[10px] font-extrabold text-zinc-400 mb-2">Gasto mensual (12 meses)</p>
+              <p className="text-[10px] font-extrabold text-zinc-500 mb-2">Gasto mensual (12 meses)</p>
               <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
@@ -350,8 +350,8 @@ function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[];
               </div>
             </div>
 
-            <button onClick={() => setShowRendimiento(!showRendimiento)} className="w-full text-left py-2 border-t border-white/5">
-              <p className="text-[10px] font-extrabold text-zinc-400 flex items-center gap-1">
+            <button onClick={() => setShowRendimiento(!showRendimiento)} className="w-full text-left py-2 border-t border-zinc-100">
+              <p className="text-[10px] font-extrabold text-zinc-500 flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" /> Rendimiento histórico {rendimientoData.length > 0 ? `(${rendimientoData.length} puntos)` : ""}
                 <span className="ml-auto text-[9px] text-zinc-500">{showRendimiento ? "▲" : "▼"}</span>
               </p>
@@ -370,8 +370,8 @@ function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[];
               </div>
             )}
 
-            <button onClick={() => setShowHeatmap(!showHeatmap)} className="w-full text-left py-2 border-t border-white/5">
-              <p className="text-[10px] font-extrabold text-zinc-400 flex items-center gap-1">
+            <button onClick={() => setShowHeatmap(!showHeatmap)} className="w-full text-left py-2 border-t border-zinc-100">
+              <p className="text-[10px] font-extrabold text-zinc-500 flex items-center gap-1">
                 <BarChart3 className="w-3 h-3" /> Mapa de gasto anual <span className="ml-auto text-[9px] text-zinc-500">{showHeatmap ? "▲" : "▼"}</span>
               </p>
             </button>
@@ -386,22 +386,22 @@ function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[];
                   {heatmapData.map((cell, i) => (
                     <div key={i} title={`${cell.date.toLocaleDateString("es-PE")}: S/ ${cell.gasto}`}
                       className={`aspect-square rounded-[1px] ${
-                        cell.level === 0 ? "bg-white/5" : cell.level === 1 ? "bg-auto-200" : cell.level === 2 ? "bg-auto-500" : cell.level === 3 ? "bg-auto-600" : "bg-auto-700"
+                        cell.level === 0 ? "bg-zinc-100" : cell.level === 1 ? "bg-auto-200" : cell.level === 2 ? "bg-auto-500" : cell.level === 3 ? "bg-auto-600" : "bg-auto-700"
                       }`} />
                   ))}
                 </div>
                 <div className="flex items-center gap-2 mt-2 justify-center">
                   <span className="text-[8px] text-zinc-500">Menos</span>
                   {[0, 1, 2, 3, 4].map((l) => (
-                    <div key={l} className={`w-2.5 h-2.5 rounded-sm ${l === 0 ? "bg-white/5" : l === 1 ? "bg-auto-200" : l === 2 ? "bg-auto-500" : l === 3 ? "bg-auto-600" : "bg-auto-700"}`} />
+                    <div key={l} className={`w-2.5 h-2.5 rounded-sm ${l === 0 ? "bg-zinc-100" : l === 1 ? "bg-auto-200" : l === 2 ? "bg-auto-500" : l === 3 ? "bg-auto-600" : "bg-auto-700"}`} />
                   ))}
                   <span className="text-[8px] text-zinc-500">Más</span>
                 </div>
               </div>
             )}
 
-            <button onClick={() => setShowProyeccion(!showProyeccion)} className="w-full text-left py-2 border-t border-white/5">
-              <p className="text-[10px] font-extrabold text-zinc-400 flex items-center gap-1">
+            <button onClick={() => setShowProyeccion(!showProyeccion)} className="w-full text-left py-2 border-t border-zinc-100">
+              <p className="text-[10px] font-extrabold text-zinc-500 flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" /> Proyección anual <span className="ml-auto text-[9px] text-zinc-500">{showProyeccion ? "▲" : "▼"}</span>
               </p>
             </button>
@@ -415,7 +415,7 @@ function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[];
                   </div>
                   <div className="text-center">
                     <p className="text-[10px] text-zinc-500">Por mes</p>
-                    <p className="text-lg font-black text-zinc-100">S/ {Math.round(proyeccionAnual / 12).toLocaleString("es-PE")}</p>
+                    <p className="text-lg font-black text-zinc-900">S/ {Math.round(proyeccionAnual / 12).toLocaleString("es-PE")}</p>
                     <p className="text-[9px] text-zinc-500">promedio proyectado</p>
                   </div>
                   <div className="text-center">
@@ -442,27 +442,27 @@ function WarrantySection({ vehicle, maintenances }: { vehicle: Vehicle; maintena
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+      <h2 className="text-sm font-bold text-zinc-700 flex items-center gap-2">
         <Shield className="w-4 h-4 text-auto-500" /> Control de Garantía
       </h2>
-      <div className="card-auto-dark rounded-2xl p-4 space-y-3">
+      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-3">
         <div>
           <div className="flex justify-between text-[10px] mb-1">
-            <span className="font-bold text-zinc-400">Garantía: {garantiaKm.toLocaleString("es-PE")} km</span>
-            <span className="font-bold text-zinc-400">{vehicle.kilometraje.toLocaleString("es-PE")} km actual</span>
+            <span className="font-bold text-zinc-500">Garantía: {garantiaKm.toLocaleString("es-PE")} km</span>
+            <span className="font-bold text-zinc-500">{vehicle.kilometraje.toLocaleString("es-PE")} km actual</span>
           </div>
-          <div className="h-4 bg-white/5 rounded-full overflow-hidden">
+          <div className="h-4 bg-zinc-100 rounded-full overflow-hidden">
             <div className={`h-full rounded-full ${kmPct > 90 ? "bg-red-500" : kmPct > 70 ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${kmPct}%` }} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-white/5 rounded-xl p-3 text-center">
+          <div className="bg-zinc-100 rounded-xl p-3 text-center">
             <p className="text-[10px] text-zinc-500">Km restantes</p>
-            <p className="text-sm font-bold text-zinc-100">{kmRestantes.toLocaleString("es-PE")}</p>
+            <p className="text-sm font-bold text-zinc-900">{kmRestantes.toLocaleString("es-PE")}</p>
           </div>
-          <div className="bg-white/5 rounded-xl p-3 text-center">
+          <div className="bg-zinc-100 rounded-xl p-3 text-center">
             <p className="text-[10px] text-zinc-500">En concesionaria</p>
-            <p className="text-sm font-bold text-zinc-100">{enConcesionaria} visitas</p>
+            <p className="text-sm font-bold text-zinc-900">{enConcesionaria} visitas</p>
           </div>
         </div>
         <p className="text-[10px] text-zinc-500 text-center">
@@ -503,7 +503,7 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+        <h2 className="text-sm font-bold text-zinc-700 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-auto-500" /> Upgrades y Accesorios
         </h2>
         <button onClick={() => setAdding(!adding)} className="w-8 h-8 rounded-full bg-auto-600/10 border border-auto-600/20 flex items-center justify-center text-auto-500 hover:bg-auto-600/20 transition-colors">
@@ -512,17 +512,17 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
       </div>
 
       {adding && (
-        <div className="card-auto-dark rounded-2xl p-4 space-y-2">
-          <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre de la mejora" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+        <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-2">
+          <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre de la mejora" className="w-full px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
           <div className="grid grid-cols-2 gap-1.5">
-            <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200">
+            <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800">
               {upgradeCats.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
-            <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-white/5 text-zinc-200" />
+            <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-100 text-zinc-800" />
           </div>
           <div className="flex gap-1.5">
             <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">Guardar</button>
-            <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-white/10 text-zinc-400 text-xs"><X className="w-3.5 h-3.5" /></button>
+            <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-zinc-100 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
           </div>
         </div>
       )}
@@ -534,13 +534,13 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
         {upgrades.map((u) => {
           const cat = upgradeCats.find((c) => c.value === u.categoria);
           return (
-            <div key={u.id} className="card-auto-dark rounded-2xl p-3 flex flex-col gap-1.5">
+            <div key={u.id} className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-3 flex flex-col gap-1.5">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
                   {upgradeIconMap[cat?.icon || "📌"]}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-zinc-100 truncate">{u.nombre}</p>
+                  <p className="text-xs font-bold text-zinc-900 truncate">{u.nombre}</p>
                   <p className="text-[10px] text-zinc-500">{cat?.label}</p>
                 </div>
               </div>
@@ -579,20 +579,20 @@ function TireRotationSection() {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+      <h2 className="text-sm font-bold text-zinc-700 flex items-center gap-2">
         <RotateCw className="w-4 h-4 text-auto-500" /> Rotación de Neumáticos
       </h2>
-      <div className="card-auto-dark rounded-2xl p-4 space-y-3">
-        <div className="bg-white/5 rounded-2xl p-3">
-          <div className="aspect-[3/2] rounded-xl border-2 border-white/10 bg-white/5 relative flex flex-col">
+      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-3">
+        <div className="bg-zinc-100 rounded-2xl p-3">
+          <div className="aspect-[3/2] rounded-xl border-2 border-zinc-200 bg-zinc-100 relative flex flex-col">
             <div className="flex-1 flex items-center justify-around px-2">
               <TireCircle label={tires.DI} name="Del. Izq." color="bg-auto-600/10 text-auto-500 border-auto-300" />
               <TireCircle label={tires.DD} name="Del. Der." color="bg-auto-600/10 text-auto-500 border-auto-300" />
             </div>
-            <div className="h-px mx-8 bg-white/10" />
+            <div className="h-px mx-8 bg-zinc-100" />
             <div className="flex-1 flex items-center justify-around px-2">
-              <TireCircle label={tires.TI} name="Tras. Izq." color="bg-white/10 text-zinc-400 border-white/15" />
-              <TireCircle label={tires.TD} name="Tras. Der." color="bg-white/10 text-zinc-400 border-white/15" />
+              <TireCircle label={tires.TI} name="Tras. Izq." color="bg-zinc-100 text-zinc-500 border-zinc-200" />
+              <TireCircle label={tires.TD} name="Tras. Der." color="bg-zinc-100 text-zinc-500 border-zinc-200" />
             </div>
           </div>
         </div>
@@ -600,7 +600,7 @@ function TireRotationSection() {
           <button onClick={rotate} className="flex-1 py-2.5 rounded-xl bg-auto-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-auto-500 transition-colors">
             <RotateCw className="w-3.5 h-3.5" /> Rotar (cruzado)
           </button>
-          <button onClick={reset} className="px-4 py-2.5 rounded-xl bg-white/5 text-zinc-400 text-xs font-medium hover:bg-white/10 transition-colors">
+          <button onClick={reset} className="px-4 py-2.5 rounded-xl bg-zinc-100 text-zinc-500 text-xs font-medium hover:bg-zinc-100 transition-colors">
             Reiniciar
           </button>
         </div>
@@ -616,7 +616,7 @@ function TireCircle({ label, name, color }: { label: string; name: string; color
       <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center shadow-sm ${color}`}>
         <span className="text-base font-black">{label}</span>
       </div>
-      <span className="text-[9px] text-zinc-400">{name}</span>
+      <span className="text-[9px] text-zinc-500">{name}</span>
     </div>
   );
 }
@@ -629,23 +629,23 @@ function CarfaxExportSection({ vehicle, fuelLogs, maintenances, upgrades }: {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+      <h2 className="text-sm font-bold text-zinc-700 flex items-center gap-2">
         <FileDown className="w-4 h-4 text-auto-500" /> Reporte Carfax
       </h2>
-      <div className="card-auto-dark rounded-2xl p-4 space-y-3">
-        <p className="text-xs text-zinc-400">
+      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-3">
+        <p className="text-xs text-zinc-500">
           Genera un reporte PDF con todo el historial de mantenimientos, cargas de combustible y mejoras.
         </p>
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white/5 rounded-xl p-2 text-center">
+          <div className="bg-zinc-100 rounded-xl p-2 text-center">
             <p className="text-lg font-black text-amber-400">{fuelLogs.length}</p>
             <p className="text-[9px] text-zinc-500">Cargas</p>
           </div>
-          <div className="bg-white/5 rounded-xl p-2 text-center">
+          <div className="bg-zinc-100 rounded-xl p-2 text-center">
             <p className="text-lg font-black text-blue-400">{maintenances.length}</p>
             <p className="text-[9px] text-zinc-500">Mantenimientos</p>
           </div>
-          <div className="bg-white/5 rounded-xl p-2 text-center">
+          <div className="bg-zinc-100 rounded-xl p-2 text-center">
             <p className="text-lg font-black text-violet-400">{upgrades.length}</p>
             <p className="text-[9px] text-zinc-500">Mejoras</p>
           </div>

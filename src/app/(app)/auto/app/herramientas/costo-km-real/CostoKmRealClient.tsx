@@ -72,35 +72,35 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
         <ArrowLeft className="w-4 h-4" /> Herramientas
       </Link>
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-200">Costo por Kilómetro Real</h1>
-        <p className="text-xs text-zinc-400 mt-1">El verdadero costo de usar tu vehículo, incluyendo depreciación.</p>
+        <h1 className="text-xl font-extrabold text-zinc-800">Costo por Kilómetro Real</h1>
+        <p className="text-xs text-zinc-500 mt-1">El verdadero costo de usar tu vehículo, incluyendo depreciación.</p>
       </div>
 
-      <div className="card-auto-dark rounded-2xl p-4 space-y-3">
+      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-3">
         <label className="block">
-          <span className="text-xs font-bold text-zinc-400">Valor de compra (S/)</span>
+          <span className="text-xs font-bold text-zinc-500">Valor de compra (S/)</span>
           <input type="number" min="1" step="1000" value={valorCompra}
             onChange={(e) => setValorCompra(e.target.value)} placeholder="Ej: 65000"
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
         <div className="grid grid-cols-3 gap-2">
           <label className="block">
-            <span className="text-[10px] font-bold text-zinc-400">Deprec. anual %</span>
+            <span className="text-[10px] font-bold text-zinc-500">Deprec. anual %</span>
             <input type="number" min="1" max="30" value={tasaDepreciacion}
               onChange={(e) => setTasaDepreciacion(e.target.value)}
-              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
-            <span className="text-[10px] font-bold text-zinc-400">Años</span>
+            <span className="text-[10px] font-bold text-zinc-500">Años</span>
             <input type="number" min="0.5" step="0.5" value={anios}
               onChange={(e) => setAnios(e.target.value)}
-              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
-            <span className="text-[10px] font-bold text-zinc-400">Km/año</span>
+            <span className="text-[10px] font-bold text-zinc-500">Km/año</span>
             <input type="number" min="100" step="1000" value={kmAnuales}
               onChange={(e) => setKmAnuales(e.target.value)}
-              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-zinc-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
       </div>
@@ -113,8 +113,8 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
             <p className="text-xs text-white/60 mt-1">S/ {Math.round(resultados.costoMensual).toLocaleString("es-PE")}/mes · S/ {Math.round(resultados.costoDiario).toLocaleString("es-PE")}/día</p>
           </div>
 
-          <div className="card-auto-dark rounded-2xl p-4 space-y-2">
-            <h3 className="text-xs font-extrabold text-zinc-300">Desglose por km</h3>
+          <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4 space-y-2">
+            <h3 className="text-xs font-extrabold text-zinc-700">Desglose por km</h3>
             {[
               { label: "Combustible", value: resultados.combustiblePorKm, barra: resultados.barraComb, color: "bg-auto-600" },
               { label: "Mantenimiento", value: resultados.mantenimientoPorKm, barra: resultados.barraMant, color: "bg-auto-600" },
@@ -122,10 +122,10 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
             ].map((d) => (
               <div key={d.label}>
                 <div className="flex justify-between text-[10px] mb-1">
-                  <span className="font-bold text-zinc-300">{d.label}</span>
-                  <span className="font-bold text-zinc-200">S/ {d.value.toFixed(2)}</span>
+                  <span className="font-bold text-zinc-700">{d.label}</span>
+                  <span className="font-bold text-zinc-800">S/ {d.value.toFixed(2)}</span>
                 </div>
-                <div className="h-3 bg-zinc-900/5 rounded-full overflow-hidden">
+                <div className="h-3 bg-zinc-100 rounded-full overflow-hidden">
                   <div className={`h-full ${d.color} rounded-full`} style={{ width: `${d.barra}%` }} />
                 </div>
               </div>
@@ -133,7 +133,7 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
           </div>
         </div>
       ) : (
-        <div className="card-auto-dark rounded-2xl p-6 text-center">
+        <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-6 text-center">
           <p className="text-sm text-zinc-500">Ingresa los datos para ver el costo por km</p>
           <p className="text-xs text-zinc-500 mt-1">El valor de compra y km/año son necesarios</p>
         </div>

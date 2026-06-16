@@ -52,7 +52,7 @@ export default function AutoCheckoutPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <Loader2 className="w-8 h-8 text-auto-500 animate-spin" />
-        <p className="text-sm text-zinc-400">Preparando tu pago seguro...</p>
+        <p className="text-sm text-zinc-500">Preparando tu pago seguro...</p>
       </div>
     );
   }
@@ -73,7 +73,7 @@ export default function AutoCheckoutPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-bold text-zinc-100">Checkout</h1>
+      <h1 className="text-lg font-bold text-zinc-900">Checkout</h1>
 
       <IzipayCheckout
         formToken={formToken}
