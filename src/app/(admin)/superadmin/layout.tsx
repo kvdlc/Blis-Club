@@ -4,8 +4,8 @@ import AdminNav from "@/components/admin/AdminNav";
 import { createClient } from "@/lib/supabase/server";
 
 export const viewport: Viewport = {
-  themeColor: "#5956e9",
-  colorScheme: "only light",
+  themeColor: "#18181b",
+  colorScheme: "dark",
 };
 
 export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
