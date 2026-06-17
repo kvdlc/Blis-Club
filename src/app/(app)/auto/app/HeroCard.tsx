@@ -32,7 +32,7 @@ export function HeroCard({ vehicle, fuelLogs, ecoScore }: Props) {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] card-auto-dark-elevated p-5 text-zinc-100">
+    <div className="relative overflow-hidden rounded-[2rem] bg-white/[0.08] border border-white/10 p-5 text-zinc-100">
       {/* Decorative glows */}
       <div className="absolute -top-10 -right-10 w-36 h-36 bg-auto-600/10 rounded-full blur-3xl" />
       <div className="absolute -bottom-8 -left-8 w-28 h-28 bg-auto-600/5 rounded-full blur-3xl" />

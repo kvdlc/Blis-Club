@@ -8,7 +8,7 @@ import { Bell } from "lucide-react";
 
 export function AutoAppHeader() {
   const pathname = usePathname();
-  const isHome = pathname === "/auto/app";
+  const isHome = pathname === "/auto/app" || pathname === "/auto/app/";
 
   return (
     <div className={`flex items-center justify-between mb-4 h-10 relative z-20 ${isHome ? "text-zinc-200" : "text-zinc-900"}`}>

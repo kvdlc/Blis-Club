@@ -61,7 +61,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
   return (
     <div className="space-y-3">
       {/* Próximos trámites */}
-        <div className="card-auto-dark rounded-2xl p-4">
+        <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-8 h-8 rounded-xl bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
             <Calendar className="w-4 h-4 text-auto-500" />
@@ -102,7 +102,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
       {/* Grid inferior: Eco-Score, Estado, Gasto, Rendimiento */}
       <div className="grid grid-cols-2 gap-3">
         {/* Eco-Score */}
-        <div className="card-auto-dark rounded-2xl p-4">
+        <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-7 h-7 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
               <TrendingUp className="w-3.5 h-3.5 text-auto-500" />
@@ -127,7 +127,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
         </div>
 
         {/* Estado del vehículo */}
-        <div className="card-auto-dark rounded-2xl p-4">
+        <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-7 h-7 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
               <ShieldCheck className="w-3.5 h-3.5 text-auto-500" />
@@ -151,7 +151,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
         </div>
 
         {/* Gasto mensual */}
-        <div className="card-auto-dark rounded-2xl p-4">
+        <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-7 h-7 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
               <DollarSign className="w-3.5 h-3.5 text-auto-500" />
@@ -169,7 +169,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
         </div>
 
         {/* Rendimiento promedio */}
-        <div className="card-auto-dark rounded-2xl p-4">
+        <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-7 h-7 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
               <Droplets className="w-3.5 h-3.5 text-auto-500" />
@@ -189,7 +189,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
       </div>
 
       {badges.length > 0 && (
-        <div className="card-auto-dark rounded-2xl p-4">
+        <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
           <h3 className="text-xs font-extrabold text-zinc-300 mb-2 flex items-center gap-1.5"><Trophy className="w-3.5 h-3.5 text-amber-400" /> Logros ({badges.length})</h3>
           <div className="flex flex-wrap gap-1.5">
             {badges.map((key) => (
@@ -227,7 +227,7 @@ function MaintenanceWidget({ maintenances, currentKm }: { maintenances: Maintena
   const intervalKm = 5000; // km entre servicios preventivos
   if (!lastPreventivo?.odometro) {
     return (
-      <div className="card-auto-dark rounded-2xl p-4">
+      <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
             <Wrench className="w-3.5 h-3.5 text-violet-400" />
@@ -244,7 +244,7 @@ function MaintenanceWidget({ maintenances, currentKm }: { maintenances: Maintena
   const pct = Math.min(100, (kmDesdeUltimo / intervalKm) * 100);
 
   return (
-    <div className="card-auto-dark rounded-2xl p-4">
+    <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
           <Wrench className="w-3.5 h-3.5 text-violet-400" />
@@ -290,7 +290,7 @@ function CompareMonthWidget({ fuelLogs, maintenances }: { fuelLogs: FuelLog[]; m
   const subio = diff > 0;
 
   return (
-    <div className="card-auto-dark rounded-2xl p-4">
+    <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
           <DollarSign className="w-3.5 h-3.5 text-cyan-400" />
@@ -325,7 +325,7 @@ function AutonomiaWidget({ fuelLogs, specs }: { fuelLogs: FuelLog[]; specs: Vehi
   const autonomia = rendimientoPromedio ? Math.round(capacidad * rendimientoPromedio) : null;
 
   return (
-    <div className="card-auto-dark rounded-2xl p-4">
+    <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
           <Gauge className="w-3.5 h-3.5 text-emerald-400" />
@@ -352,7 +352,7 @@ function LastFuelWidget({ fuelLogs }: { fuelLogs: FuelLog[] }) {
     : null;
 
   return (
-    <div className="card-auto-dark rounded-2xl p-4">
+    <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
           <Clock className="w-3.5 h-3.5 text-amber-400" />

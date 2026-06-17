@@ -15,14 +15,14 @@ const actions = [
     key: "gasto-express",
     icon: Receipt,
     label: "Gasto express",
-    color: "bg-white/5 text-zinc-300 border border-white/10",
+    color: "bg-white/[0.08] text-zinc-300 border border-white/10",
     href: "/auto/app/bitacora?add=expense",
   },
   {
     key: "mantenimiento",
     icon: Wrench,
     label: "Mantenimiento",
-    color: "bg-white/5 text-zinc-300 border border-white/10",
+    color: "bg-white/[0.08] text-zinc-300 border border-white/10",
     href: "/auto/app/bitacora?add=maint",
   },
   {
