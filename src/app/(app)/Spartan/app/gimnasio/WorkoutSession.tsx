@@ -61,6 +61,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const [saveError, setSaveError] = useState("");
   const [timerExpired, setTimerExpired] = useState(false);
   const [seriesTimerExpired, setSeriesTimerExpired] = useState(false);
+  const [seriesRestElapsed, setSeriesRestElapsed] = useState(0); // counts up from 0
   const [showGif, setShowGif] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const restTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -87,7 +88,22 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   useEffect(() => { if (!started) return; try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ routineId, started: true, currentExerciseIndex, completedExercises: Array.from(completedExercises), allSeriesData, elapsedTime, workoutStartTime: workoutStartTime?.toISOString() })); } catch {} }, [started, routineId, currentExerciseIndex, completedExercises, allSeriesData, elapsedTime]);
   useEffect(() => { if (!started) return; timerRef.current = setInterval(() => setElapsedTime(p => p + 1), 1000); return () => { if (timerRef.current) clearInterval(timerRef.current); if (restTimerRef.current) clearInterval(restTimerRef.current); if (seriesRestRef.current) clearInterval(seriesRestRef.current); }; }, [started]);
   useEffect(() => { if (restTimer === null) { if (restTimerRef.current) clearInterval(restTimerRef.current); return; } if (restTimer <= 0) { if (!timerExpired) { setTimerExpired(true); beep(); } if (restTimerRef.current) clearInterval(restTimerRef.current); return; } restTimerRef.current = setInterval(() => setRestTimer(p => p !== null ? p - 1 : null), 1000); return () => { if (restTimerRef.current) clearInterval(restTimerRef.current); }; }, [restTimer, timerExpired]);
-  useEffect(() => { if (seriesRestTimer === null) { if (seriesRestRef.current) clearInterval(seriesRestRef.current); return; } if (seriesRestTimer <= 0) { if (!seriesTimerExpired) { setSeriesTimerExpired(true); beep(); } if (seriesRestRef.current) clearInterval(seriesRestRef.current); return; } seriesRestRef.current = setInterval(() => setSeriesRestTimer(p => p !== null ? p - 1 : null), 1000); return () => { if (seriesRestRef.current) clearInterval(seriesRestRef.current); }; }, [seriesRestTimer, seriesTimerExpired]);
+  // Series rest timer: counts up from 0
+  useEffect(() => {
+    if (seriesRestTimer === null) { setSeriesRestElapsed(0); if (seriesRestRef.current) clearInterval(seriesRestRef.current); return; }
+    setSeriesRestElapsed(0); setSeriesTimerExpired(false);
+    seriesRestRef.current = setInterval(() => {
+      setSeriesRestElapsed(p => {
+        const next = p + 1;
+        if (!seriesTimerExpired && next >= BETWEEN_SERIES_REST) {
+          setSeriesTimerExpired(true);
+          beep();
+        }
+        return next;
+      });
+    }, 1000);
+    return () => { if (seriesRestRef.current) clearInterval(seriesRestRef.current); };
+  }, [seriesRestTimer]);
 
   const handleStartWorkout = () => { setStarted(true); setWorkoutStartTime(new Date()); };
   const currentExercise = exercises[currentExerciseIndex];
@@ -95,7 +111,8 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const prevWeights = lastWeights[currentExerciseIndex] ?? [];
 
   const updateSeriesField = (si: number, f: "weight"|"reps", v: number|null) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; s[si] = {...s[si], [f]: v}; n[currentExerciseIndex] = {...c, series: s}; return n; });
-  const toggleSeriesComplete = (si: number) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; const wasDone = s[si].completed; s[si] = {...s[si], completed: !wasDone}; if (!wasDone && seriesRestStart) { const ar = Math.round((Date.now()-seriesRestStart)/1000); n[currentExerciseIndex] = {...c, series: s, actualBetweenSeriesRest: ar}; setSeriesRestStart(null); setSeriesRestTimer(null); setSeriesTimerExpired(false); } else if (wasDone) { setSeriesRestTimer(BETWEEN_SERIES_REST); setSeriesRestStart(Date.now()); setSeriesTimerExpired(false); n[currentExerciseIndex] = {...c, series: s}; return n; } n[currentExerciseIndex] = {...c, series: s}; return n; });
+  const toggleSeriesComplete = (si: number) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; const wasDone = s[si].completed; s[si] = {...s[si], completed: !wasDone};     if (!wasDone && seriesRestStart) { const ar = Math.round((Date.now()-seriesRestStart)/1000); n[currentExerciseIndex] = {...c, series: s, actualBetweenSeriesRest: ar}; setSeriesRestStart(null); setSeriesRestTimer(null); setSeriesTimerExpired(false); setSeriesRestElapsed(0); }
+    else if (wasDone) { setSeriesRestTimer(BETWEEN_SERIES_REST); setSeriesRestStart(Date.now()); setSeriesTimerExpired(false); setSeriesRestElapsed(0); n[currentExerciseIndex] = {...c, series: s}; return n; } n[currentExerciseIndex] = {...c, series: s}; return n; });
   const addSeries = () => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; n[currentExerciseIndex] = {...c, series: [...c.series, { weight: null, reps: currentExercise.reps, completed: false }]}; return n; });
   const removeSeries = (si: number) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c || c.series.length <= 1) return n; n[currentExerciseIndex] = {...c, series: c.series.filter((_, i) => i !== si)}; return n; });
   const allSeriesCompleted = currentData.series.length > 0 && currentData.series.every(s => s.completed);
@@ -125,7 +142,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
   const goToExercise = (idx: number) => { setCurrentExerciseIndex(idx); setRestTimer(null); setTimerExpired(false); setRestStartTime(null); setSeriesRestTimer(null); setSeriesTimerExpired(false); };
   const isExerciseRest = restTimer !== null && restTimer <= 0 && timerExpired;
-  const isSeriesRest = seriesRestTimer !== null && seriesRestTimer <= 0 && seriesTimerExpired;
+  const isSeriesRest = seriesRestTimer !== null && seriesTimerExpired;
   const isResting = (restTimer !== null && restTimer > 0) || isExerciseRest;
 
   // ── PRE-START ──
@@ -224,11 +241,35 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
         )}
 
         {/* Series rest */}
-        {seriesRestTimer !== null && seriesRestTimer > 0 && (<div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10"><Timer className="w-5 h-5 text-amber-400 shrink-0" /><div className="flex-1"><p className="text-xs font-bold text-amber-400">Descanso entre series</p><p className="text-lg font-extrabold text-amber-300 monospace">{formatTimeShort(seriesRestTimer)}</p></div></div>)}
-        {isSeriesRest && (<motion.div animate={{scale:[1,1.02,1]}} transition={{repeat:Infinity,duration:.8}} className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center"><Volume2 className="w-6 h-6 text-amber-400 mx-auto mb-1" /><p className="text-sm font-extrabold text-amber-400">¡Descanso terminado!</p><button onClick={()=>{setSeriesRestTimer(null);setSeriesTimerExpired(false);}} className="mt-3 px-4 py-2 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/30 active:scale-[0.97]">Entendido</button></motion.div>)}
+        {seriesRestTimer !== null && !seriesTimerExpired && (
+          <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs font-bold text-amber-400 flex items-center gap-1.5"><Timer className="w-3.5 h-3.5" />Descanso entre series</p>
+              <button onClick={() => { setSeriesRestTimer(null); setSeriesRestElapsed(0); setSeriesTimerExpired(false); }} className="text-[10px] font-bold text-amber-500 hover:text-amber-400 transition-colors">Saltar</button>
+            </div>
+            <p className="text-2xl font-extrabold text-amber-300 monospace">{formatTimeShort(BETWEEN_SERIES_REST - seriesRestElapsed)}</p>
+            <div className="h-1.5 bg-amber-500/10 rounded-full mt-2 overflow-hidden">
+              <div className="h-full bg-amber-500/40 rounded-full transition-all duration-1000 ease-linear" style={{ width: `${Math.min(100, (seriesRestElapsed / BETWEEN_SERIES_REST) * 100)}%` }} />
+            </div>
+          </div>
+        )}
+
+        {isSeriesRest && (
+          <motion.div animate={{scale:[1,1.02,1]}} transition={{repeat:Infinity,duration:.8}} className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <Volume2 className="w-4 h-4 text-amber-400" />
+                <p className="text-xs font-bold text-amber-400">¡Descanso terminado!</p>
+              </div>
+              <button onClick={() => { setSeriesRestTimer(null); setSeriesRestElapsed(0); setSeriesTimerExpired(false); }} className="text-[10px] font-bold text-amber-500 hover:text-amber-400 transition-colors">Entendido</button>
+            </div>
+            <p className="text-lg font-extrabold text-amber-500">+{formatTimeShort(seriesRestElapsed - BETWEEN_SERIES_REST)} excedido</p>
+            <p className="text-[10px] text-amber-500/60 mt-1">El tiempo sigue corriendo hasta que continues</p>
+          </motion.div>
+        )}
 
         {/* Series inputs — only when not resting */}
-        {!isResting && seriesRestTimer === null && !isSeriesRest && (
+        {!isResting && seriesRestTimer === null && (
           <div className="space-y-2">
             <div className="flex items-center justify-between"><p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Series</p><button onClick={addSeries} className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-bold hover:bg-white/10 active:scale-[0.97]"><Plus className="w-3 h-3" /> Añadir</button></div>
             {currentData.series.map((entry, si) => {
@@ -252,7 +293,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
                   <div className="flex items-center gap-1 shrink-0">
                     {!isDone && currentData.series.length>1 && <button onClick={()=>removeSeries(si)} className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center hover:bg-red-500/20 active:scale-[0.95]"><MinusIcon /></button>}
-                    <button onClick={()=>{toggleSeriesComplete(si);if(!entry.completed){setSeriesRestTimer(BETWEEN_SERIES_REST);setSeriesRestStart(Date.now());setSeriesTimerExpired(false);}}} className={`w-8 h-8 rounded-full flex items-center justify-center active:scale-[0.95] ${isDone?"bg-emerald-500 border-2 border-emerald-400":"bg-emerald-500/10 border-2 border-emerald-500/30 hover:bg-emerald-500/20"}`}><Check className={`w-4 h-4 ${isDone?"text-white":"text-emerald-500"}`} /></button>
+                    <button onClick={()=>{toggleSeriesComplete(si);if(!entry.completed){setSeriesRestTimer(BETWEEN_SERIES_REST);setSeriesRestStart(Date.now());setSeriesTimerExpired(false);setSeriesRestElapsed(0);}}} className={`w-8 h-8 rounded-full flex items-center justify-center active:scale-[0.95] ${isDone?"bg-emerald-500 border-2 border-emerald-400":"bg-emerald-500/10 border-2 border-emerald-500/30 hover:bg-emerald-500/20"}`}><Check className={`w-4 h-4 ${isDone?"text-white":"text-emerald-500"}`} /></button>
                   </div>
                 </div>
               );

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Tu ecosistema de apps inteligentes: mascotas, autos, eventos y más. Todo en un solo lugar.",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.svg",
     apple: "/icons/icon-192.png",
   },
   appleWebApp: { capable: true, title: "Blis Club", statusBarStyle: "default" },
