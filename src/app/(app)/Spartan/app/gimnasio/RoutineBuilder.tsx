@@ -71,6 +71,7 @@ export default function RoutineBuilder({ userId, onClose, onSave, editingRoutine
   const [expandedMuscles, setExpandedMuscles] = useState<Set<string>>(new Set(editingRoutine?.muscle_group ? editingRoutine.muscle_group.split(" + ") : []));
   const [expandedSelected, setExpandedSelected] = useState<Set<number>>(new Set());
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
 
@@ -213,36 +214,45 @@ export default function RoutineBuilder({ userId, onClose, onSave, editingRoutine
   const handleSave = async () => {
     if (!routineName.trim() || selected.length === 0) return;
     setSaving(true);
+    setSaveError("");
     const supabase = createClient();
 
     let routineId = editingRoutine?.id;
 
-    if (editingRoutine) {
-      await supabase.from("spartan_workout_routines").update({ name: routineName.trim(), muscle_group: muscleTargets.join(" + ") || null }).eq("id", editingRoutine.id);
-      await supabase.from("spartan_workout_exercises").delete().eq("routine_id", editingRoutine.id);
-    } else {
-      const { data: routine } = await supabase.from("spartan_workout_routines").insert({ user_id: userId, name: routineName.trim(), muscle_group: muscleTargets.join(" + ") || null, is_active: true }).select("id").single();
-      if (routine) routineId = routine.id;
-    }
+    try {
+      if (editingRoutine) {
+        await supabase.from("spartan_workout_routines").update({ name: routineName.trim(), muscle_group: muscleTargets.join(" + ") || null }).eq("id", editingRoutine.id);
+        await supabase.from("spartan_workout_exercises").delete().eq("routine_id", editingRoutine.id);
+        routineId = editingRoutine.id;
+      } else {
+        const { data: routine, error: rErr } = await supabase.from("spartan_workout_routines").insert({ user_id: userId, name: routineName.trim(), muscle_group: muscleTargets.join(" + ") || null, is_active: true }).select("id").single();
+        if (rErr) throw new Error(rErr.message);
+        if (routine) routineId = routine.id;
+      }
 
-    if (routineId) {
-      await supabase.from("spartan_workout_exercises").insert(
-        selected.map((s, i) => ({
-          routine_id: routineId,
-          exercise_library_id: s.exercise.id,
-          name: s.exercise.name,
-          muscle_group: s.exercise.muscle_group,
-          gif_url: s.exercise.gif_url,
-          sets: s.config.sets,
-          reps: s.config.reps,
-          weight_kg: s.config.weight,
-          rest_seconds: s.config.rest,
-          sort_order: i,
-        }))
-      );
+      if (routineId) {
+        const { error: exErr } = await supabase.from("spartan_workout_exercises").insert(
+          selected.map((s, i) => ({
+            routine_id: routineId,
+            name: s.exercise.name,
+            muscle_group: s.exercise.muscle_group,
+            gif_url: s.exercise.gif_url,
+            sets: s.config.sets,
+            reps: s.config.reps,
+            weight_kg: s.config.weight,
+            rest_seconds: s.config.rest,
+            sort_order: i,
+          }))
+        );
+        if (exErr) throw new Error(exErr.message);
+      }
+
+      setSaving(false);
+      onSave();
+    } catch (err: any) {
+      setSaveError(err.message || "Error al guardar");
+      setSaving(false);
     }
-    setSaving(false);
-    onSave();
   };
 
   return (
@@ -263,6 +273,10 @@ export default function RoutineBuilder({ userId, onClose, onSave, editingRoutine
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-4">
         <input type="text" value={routineName} onChange={(e) => setRoutineName(e.target.value)} placeholder="Nombre de la rutina" className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-bold text-sm placeholder:text-zinc-600 focus:outline-none focus:border-spartan-500/50" />
+
+        {saveError && (
+          <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-2.5">{saveError}</p>
+        )}
 
         <div>
           <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Grupos musculares</p>
