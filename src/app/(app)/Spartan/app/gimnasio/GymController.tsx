@@ -162,7 +162,7 @@ export default function GymController({ userId }: { userId: string }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-6 h-6 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-spartan-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -173,11 +173,11 @@ export default function GymController({ userId }: { userId: string }) {
       {view === "main" && (
         <>
           {/* Hero stats card */}
-          <div className="rounded-3xl bg-gradient-to-br from-red-950 to-zinc-950 border border-white/[0.06] p-5 overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl" />
+          <div className="rounded-3xl bg-gradient-to-br from-spartan-950 to-zinc-950 border border-white/[0.06] p-5 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-spartan-600/10 rounded-full blur-3xl" />
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-red-600/20 flex items-center justify-center">
-                <Dumbbell className="w-5 h-5 text-red-400" />
+              <div className="w-10 h-10 rounded-xl bg-spartan-600/20 flex items-center justify-center">
+                <Dumbbell className="w-5 h-5 text-spartan-400" />
               </div>
               <div>
                 <h1 className="text-xl font-extrabold text-white">Gimnasio</h1>
@@ -218,7 +218,7 @@ export default function GymController({ userId }: { userId: string }) {
               <h2 className="text-sm font-bold text-zinc-200">Mis rutinas</h2>
               <button
                 onClick={() => setView("builder")}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-600/10 border border-red-500/20 text-red-400 text-[10px] font-bold hover:bg-red-600/20 transition-colors active:scale-[0.97]"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-spartan-600/10 border border-spartan-500/20 text-spartan-400 text-[10px] font-bold hover:bg-spartan-600/20 transition-colors active:scale-[0.97]"
               >
                 <Plus className="w-3 h-3" />
                 Nueva
@@ -234,7 +234,7 @@ export default function GymController({ userId }: { userId: string }) {
                 </p>
                 <button
                   onClick={() => setView("builder")}
-                  className="mt-4 px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold hover:from-red-500 hover:to-red-600 transition-all active:scale-[0.97] shadow-[0_0_20px_rgba(220,38,38,0.3)]"
+                  className="mt-4 px-5 py-2.5 rounded-xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-[0.97] shadow-[0_0_20px_rgba(190,11,60,0.3)]"
                 >
                   Crear rutina
                 </button>
@@ -244,13 +244,13 @@ export default function GymController({ userId }: { userId: string }) {
                 {routines.map((routine) => (
                   <div
                     key={routine.id}
-                    className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-4 hover:border-red-500/20 transition-colors"
+                    className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-4 hover:border-spartan-500/20 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="text-sm font-bold text-white">{routine.name}</h3>
                         {routine.muscle_group && (
-                          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 mt-1 inline-block">
+                          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-spartan-500/10 text-spartan-400 border border-spartan-500/20 mt-1 inline-block">
                             {routine.muscle_group}
                           </span>
                         )}
@@ -261,7 +261,7 @@ export default function GymController({ userId }: { userId: string }) {
                     </div>
                     <button
                       onClick={() => handleStartRoutine(routine)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold hover:from-red-500 hover:to-red-600 transition-all active:scale-[0.97] shadow-[0_0_20px_rgba(220,38,38,0.3)]"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-[0.97] shadow-[0_0_20px_rgba(190,11,60,0.3)]"
                     >
                       <Timer className="w-4 h-4" />
                       Iniciar

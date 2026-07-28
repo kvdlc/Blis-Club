@@ -8,7 +8,7 @@ import { checkTrialServer } from "@/lib/trial";
 import { SpartanAppHeader } from "./SpartanAppHeader";
 
 export const viewport: Viewport = {
-  themeColor: "#dc2626",
+  themeColor: "#be0b3c",
   colorScheme: "dark",
 };
 

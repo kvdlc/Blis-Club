@@ -16,16 +16,16 @@ export default function DashboardContent() {
   const quote = quotes[Math.floor(Math.random() * quotes.length)];
 
   return (
-    <div className="relative -mx-4 -mt-14 px-4 pt-14 min-h-screen bg-gradient-to-b from-red-950 via-zinc-950 to-zinc-950 text-zinc-200">
+    <div className="relative -mx-4 -mt-14 px-4 pt-14 min-h-screen bg-gradient-to-b from-spartan-950 via-zinc-950 to-zinc-950 text-zinc-200">
       <div className="space-y-5 pt-4 pb-8">
         {/* Quote of the day */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center shrink-0 mt-0.5">
-              <Flame className="w-4 h-4 text-red-400" />
+            <div className="w-8 h-8 rounded-lg bg-spartan-600/20 flex items-center justify-center shrink-0 mt-0.5">
+              <Flame className="w-4 h-4 text-spartan-400" />
             </div>
             <div>
-              <p className="text-xs font-medium text-red-400 uppercase tracking-wider mb-1">Frase del día</p>
+              <p className="text-xs font-medium text-spartan-400 uppercase tracking-wider mb-1">Frase del día</p>
               <p className="text-sm text-zinc-300 leading-relaxed italic">{quote}</p>
             </div>
           </div>
@@ -35,8 +35,8 @@ export default function DashboardContent() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
-                <CheckSquare className="w-4 h-4 text-red-400" />
+              <div className="w-8 h-8 rounded-lg bg-spartan-600/20 flex items-center justify-center">
+                <CheckSquare className="w-4 h-4 text-spartan-400" />
               </div>
               <p className="text-xs font-medium text-zinc-500">Hábitos hoy</p>
             </div>
@@ -44,8 +44,8 @@ export default function DashboardContent() {
           </div>
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
-                <Dumbbell className="w-4 h-4 text-red-400" />
+              <div className="w-8 h-8 rounded-lg bg-spartan-600/20 flex items-center justify-center">
+                <Dumbbell className="w-4 h-4 text-spartan-400" />
               </div>
               <p className="text-xs font-medium text-zinc-500">Entrenamientos</p>
             </div>
@@ -70,8 +70,8 @@ export default function DashboardContent() {
           </Link>
 
           <Link href="/Spartan/app/gimnasio" className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all group">
-            <div className="w-10 h-10 rounded-xl bg-red-600/20 flex items-center justify-center">
-              <Dumbbell className="w-5 h-5 text-red-400" />
+            <div className="w-10 h-10 rounded-xl bg-spartan-600/20 flex items-center justify-center">
+              <Dumbbell className="w-5 h-5 text-spartan-400" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-zinc-100">Gimnasio</p>

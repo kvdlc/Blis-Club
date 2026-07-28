@@ -46,7 +46,7 @@ export default async function HabitosPage() {
           <CheckSquare className="w-12 h-12 text-zinc-700 mb-3" />
           <h2 className="text-lg font-bold text-zinc-300">Sin hábitos configurados</h2>
           <p className="text-sm text-zinc-500 mt-1 max-w-xs">Agrega hábitos como ingesta de agua, ingresos y gastos.</p>
-          <button className="mt-5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold hover:from-red-500 hover:to-red-600 transition-all active:scale-95 shadow-[0_0_20px_rgba(220,38,38,0.3)]">Agregar hábito</button>
+          <button className="mt-5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-95 shadow-[0_0_20px_rgba(190,11,60,0.3)]">Agregar hábito</button>
         </div>
       ) : (
         <>
@@ -72,12 +72,12 @@ export default async function HabitosPage() {
                   const isIncome = habit.type === "currency_income";
                   return (
                     <div key={habit.id} className={`flex items-center gap-3 p-4 rounded-2xl border ${entry?.completed ? "bg-emerald-500/5 border-emerald-500/20" : "bg-white/[0.03] border-white/[0.06]"}`}>
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${isIncome ? "bg-emerald-500/10 border-emerald-500/20" : "bg-red-500/10 border-red-500/20"}`}>
-                        {isIncome ? <TrendingUp className="w-5 h-5 text-emerald-400" /> : <TrendingDown className="w-5 h-5 text-red-400" />}
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${isIncome ? "bg-emerald-500/10 border-emerald-500/20" : "bg-spartan-500/10 border-spartan-500/20"}`}>
+                        {isIncome ? <TrendingUp className="w-5 h-5 text-emerald-400" /> : <TrendingDown className="w-5 h-5 text-spartan-400" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-zinc-200">{habit.name}</p>
-                        {entry && <p className={`text-lg font-extrabold mt-0.5 ${isIncome ? "text-emerald-400" : "text-red-400"}`}>{isIncome ? "+" : "-"}${Number(entry.value).toLocaleString("es-ES")}</p>}
+                        {entry && <p className={`text-lg font-extrabold mt-0.5 ${isIncome ? "text-emerald-400" : "text-spartan-400"}`}>{isIncome ? "+" : "-"}${Number(entry.value).toLocaleString("es-ES")}</p>}
                       </div>
                       <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 ${entry?.completed ? "bg-emerald-500 border-emerald-500" : "border-zinc-700"}`}>
                         {entry?.completed && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}

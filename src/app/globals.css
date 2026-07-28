@@ -108,6 +108,20 @@ body {
   --color-auto-900: #064e3b;
   --color-auto-950: #022c22;
 
+  /* ── Spartan (Crecimiento Personal) Palette ── Crimson #be0b3c ── */
+  --color-spartan-50: #fdf2f5;
+  --color-spartan-100: #fce7ec;
+  --color-spartan-200: #f9c5d3;
+  --color-spartan-300: #f293a8;
+  --color-spartan-400: #e85d7a;
+  --color-spartan-500: #d42a45;
+  --color-spartan-600: #be0b3c;
+  --color-spartan-700: #9e0931;
+  --color-spartan-800: #7d0727;
+  --color-spartan-900: #5f061d;
+  --color-spartan-950: #3d0412;
+  --shadow-spartan-glow: 0 0 30px rgba(190, 11, 60, 0.3);
+
   /* Accordion animation keyframes */
   --animate-accordion-down: accordion-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --animate-accordion-up: accordion-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);

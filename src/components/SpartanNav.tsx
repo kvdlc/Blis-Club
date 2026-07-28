@@ -55,7 +55,7 @@ export default function SpartanNav() {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-60 bg-zinc-950/95 backdrop-blur-2xl border-r border-white/5 p-6 z-40">
         <button onClick={() => goToTab("inicio")} className="flex items-center gap-2.5 px-2 py-2 mb-10">
-          <div className="w-9 h-9 rounded-xl bg-red-600 flex items-center justify-center shadow-[0_0_16px_rgba(220,38,38,0.4)]">
+          <div className="w-9 h-9 rounded-xl bg-spartan-600 flex items-center justify-center shadow-[0_0_16px_rgba(190,11,60,0.4)]">
             <Shield className="w-5 h-5 text-white" strokeWidth={2.5} />
           </div>
           <span className="text-xl font-bold text-zinc-100 tracking-tight">Spartan</span>
@@ -70,7 +70,7 @@ export default function SpartanNav() {
                 aria-current={active ? "page" : undefined}
                 aria-label={tab.label}
                 className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-left w-full ${
-                  active ? "bg-red-600/10 text-red-500 border border-red-600/20" : "text-zinc-500 hover:bg-white/5 hover:text-zinc-300"
+                  active ? "bg-spartan-600/10 text-spartan-500 border border-spartan-600/20" : "text-zinc-500 hover:bg-white/5 hover:text-zinc-300"
                 }`}
               >
                 <tab.icon className="w-5 h-5" strokeWidth={active ? 2.5 : 1.8} />
@@ -93,7 +93,7 @@ export default function SpartanNav() {
                   onClick={() => goToTab("inicio")}
                   className="relative -mt-8 flex flex-col items-center justify-center"
                 >
-                  <div className="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.5)] border-4 border-zinc-950 transition-transform active:scale-95">
+                  <div className="w-16 h-16 rounded-full bg-spartan-600 text-white flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.5)] border-4 border-zinc-950 transition-transform active:scale-95">
                     <tab.icon className="w-7 h-7" strokeWidth={2.2} />
                   </div>
                 </button>
@@ -105,7 +105,7 @@ export default function SpartanNav() {
                 onClick={() => goToTab(tab.key)}
                 aria-label={tab.label}
                 className={`flex items-center justify-center rounded-2xl p-3 transition-colors ${
-                  active ? "text-red-500" : "text-zinc-500 hover:text-zinc-300"
+                  active ? "text-spartan-500" : "text-zinc-500 hover:text-zinc-300"
                 }`}
               >
                 <tab.icon className="w-6 h-6" strokeWidth={active ? 2.2 : 1.6} />

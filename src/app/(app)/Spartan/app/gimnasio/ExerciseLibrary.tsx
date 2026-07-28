@@ -105,7 +105,7 @@ export default function ExerciseLibrary({ onSelectMuscle }: ExerciseLibraryProps
             variants={cardVariants}
             onClick={() => onSelectMuscle(p.muscle)}
             whileTap={{ scale: 0.97 }}
-            className="group aspect-square bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-2xl overflow-hidden hover:border-red-500/30 hover:shadow-[0_0_20px_rgba(220,38,38,0.1)] transition-all text-left relative"
+            className="group aspect-square bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-2xl overflow-hidden hover:border-spartan-500/30 hover:shadow-[0_0_20px_rgba(190,11,60,0.1)] transition-all text-left relative"
           >
             <div className="absolute inset-0 bg-zinc-900">
               {p.gif_url ? (

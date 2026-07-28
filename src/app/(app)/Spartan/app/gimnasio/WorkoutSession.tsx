@@ -70,7 +70,7 @@ function TimerRing({ total, remaining }: { total: number; remaining: number }) {
         />
         <defs>
           <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#dc2626" />
+            <stop offset="0%" stopColor="#be0b3c" />
             <stop offset="100%" stopColor="#f97316" />
           </linearGradient>
         </defs>
@@ -86,7 +86,7 @@ function TimerRing({ total, remaining }: { total: number; remaining: number }) {
 }
 
 function Confetti() {
-  const colors = ["#dc2626", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#a855f7"];
+  const colors = ["#be0b3c", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#a855f7"];
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
       {Array.from({ length: 30 }).map((_, i) => (
@@ -271,7 +271,7 @@ export default function WorkoutSession({
           initial={{ scale: 0, rotate: -10 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: "spring", stiffness: 200, damping: 15 }}
-          className="w-20 h-20 rounded-full bg-gradient-to-r from-red-600 to-red-700 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(220,38,38,0.4)]"
+          className="w-20 h-20 rounded-full bg-gradient-to-r from-spartan-600 to-spartan-700 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(190,11,60,0.4)]"
         >
           <Trophy className="w-10 h-10 text-white" />
         </motion.div>
@@ -313,7 +313,7 @@ export default function WorkoutSession({
           transition={{ delay: 0.7 }}
           onClick={onClose}
           disabled={saving}
-          className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold hover:from-red-500 hover:to-red-600 transition-all active:scale-[0.97] shadow-[0_0_30px_rgba(220,38,38,0.3)] disabled:opacity-50"
+          className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-[0.97] shadow-[0_0_30px_rgba(190,11,60,0.3)] disabled:opacity-50"
         >
           Volver al inicio
         </motion.button>
@@ -381,7 +381,7 @@ export default function WorkoutSession({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="aspect-square bg-black rounded-3xl overflow-hidden border-2 border-red-500/20 shadow-[0_0_30px_rgba(220,38,38,0.3)]"
+          className="aspect-square bg-black rounded-3xl overflow-hidden border-2 border-spartan-500/20 shadow-[0_0_30px_rgba(190,11,60,0.3)]"
         >
           <img
             src={currentExercise.gif_url}
@@ -396,7 +396,7 @@ export default function WorkoutSession({
             {currentExercise.name}
           </h2>
           <div className="flex items-center gap-2 mt-1">
-            <span className="bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold px-2.5 py-1 rounded-full">
+            <span className="bg-spartan-500/10 text-spartan-400 border border-spartan-500/20 text-[10px] font-bold px-2.5 py-1 rounded-full">
               {currentExercise.muscle_group}
             </span>
             <span className="text-[10px] font-medium text-zinc-500">
@@ -442,7 +442,7 @@ export default function WorkoutSession({
                     }}
                     placeholder="kg"
                     disabled={isDone}
-                    className="flex-1 bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-2 rounded-lg focus:outline-none focus:border-red-500/50 disabled:opacity-30 placeholder:text-zinc-600"
+                    className="flex-1 bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-2 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30 placeholder:text-zinc-600"
                   />
                   <button
                     onClick={() => {
@@ -517,7 +517,7 @@ export default function WorkoutSession({
               disabled={
                 currentExercise.sets > 0 && !allSeriesCompleted
               }
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold hover:from-red-500 hover:to-red-600 transition-all active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 shadow-[0_0_20px_rgba(220,38,38,0.3)]"
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 shadow-[0_0_20px_rgba(190,11,60,0.3)]"
             >
               <Check className="w-4 h-4" />
               Terminar ejercicio

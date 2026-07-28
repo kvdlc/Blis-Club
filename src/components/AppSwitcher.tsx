@@ -48,9 +48,9 @@ const APP_REGISTRY: Record<string, AppInfo> = {
     description: "Forja tu mejor versión",
     tagline: "Hábitos, gimnasio y disciplina",
     icon: <Shield className="w-10 h-10" />,
-    gradient: "from-red-600 via-red-500 to-orange-600",
-    bgGradient: "from-red-50 via-white to-orange-50",
-    accentColor: "bg-red-600",
+    gradient: "from-spartan-600 via-spartan-500 to-orange-600",
+    bgGradient: "from-spartan-50 via-white to-orange-50",
+    accentColor: "bg-spartan-600",
   },
 };
 

@@ -3,7 +3,7 @@ DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM applications WHERE slug = 'Spartan') THEN
     INSERT INTO applications (name, slug, description, is_active, theme_color, icon_url)
-    VALUES ('Spartan', 'Spartan', 'App de crecimiento personal para hombres: hábitos, gimnasio, motivación y disciplina.', true, '#dc2626', '/icons/spartan.png');
+    VALUES ('Spartan', 'Spartan', 'App de crecimiento personal para hombres: hábitos, gimnasio, motivación y disciplina.', true, '#be0b3c', '/icons/spartan.png');
   END IF;
 END $$;
 
@@ -202,7 +202,7 @@ CREATE TABLE IF NOT EXISTS spartan_habits (
   type TEXT NOT NULL DEFAULT 'check' CHECK (type IN ('check', 'counter', 'currency_income', 'currency_expense', 'measure')),
   unit TEXT,
   target_value NUMERIC(10,2),
-  color TEXT DEFAULT '#dc2626',
+  color TEXT DEFAULT '#be0b3c',
   icon TEXT DEFAULT 'CheckSquare',
   is_active BOOLEAN DEFAULT true,
   sort_order INTEGER DEFAULT 0,

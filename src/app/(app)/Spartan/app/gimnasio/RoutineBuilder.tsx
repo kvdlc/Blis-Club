@@ -238,7 +238,7 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
         <button
           onClick={handleSave}
           disabled={!routineName.trim() || selected.length === 0 || saving}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-bold hover:from-red-500 hover:to-red-600 transition-all active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 shadow-[0_0_20px_rgba(220,38,38,0.3)]"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-xs font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 shadow-[0_0_20px_rgba(190,11,60,0.3)]"
         >
           <Save className="w-3.5 h-3.5" />
           {saving ? "Guardando..." : "Guardar"}
@@ -253,12 +253,12 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
             value={routineName}
             onChange={(e) => setRoutineName(e.target.value)}
             placeholder="Nombre de la rutina"
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-bold text-sm placeholder:text-zinc-600 focus:outline-none focus:border-red-500/50"
+            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-bold text-sm placeholder:text-zinc-600 focus:outline-none focus:border-spartan-500/50"
           />
           <select
             value={muscleTarget}
             onChange={(e) => setMuscleTarget(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm font-medium focus:outline-none focus:border-red-500/50"
+            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm font-medium focus:outline-none focus:border-spartan-500/50"
           >
             <option value="" className="bg-zinc-900">
               Grupo muscular objetivo (opcional)
@@ -277,7 +277,7 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
             onClick={() => setTab("favorites")}
             className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
               tab === "favorites"
-                ? "bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)]"
+                ? "bg-spartan-600 text-white shadow-[0_0_15px_rgba(190,11,60,0.4)]"
                 : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
@@ -287,7 +287,7 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
             onClick={() => setTab("all")}
             className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
               tab === "all"
-                ? "bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)]"
+                ? "bg-spartan-600 text-white shadow-[0_0_15px_rgba(190,11,60,0.4)]"
                 : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
@@ -297,7 +297,7 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-spartan-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <>
@@ -339,7 +339,7 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
                           <button
                             onClick={() => addExercise(fav.exercise, fav.config)}
                             disabled={!!selected.find((s) => s.exercise.id === fav.exercise.id)}
-                            className="w-full flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-red-600/10 border border-red-500/20 text-red-400 text-[10px] font-bold hover:bg-red-600/20 transition-colors active:scale-[0.97] disabled:opacity-30 disabled:active:scale-100"
+                            className="w-full flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-spartan-600/10 border border-spartan-500/20 text-spartan-400 text-[10px] font-bold hover:bg-spartan-600/20 transition-colors active:scale-[0.97] disabled:opacity-30 disabled:active:scale-100"
                           >
                             <Plus className="w-3 h-3" />
                             Agregar
@@ -409,7 +409,7 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
                                     disabled={
                                       !!selected.find((s) => s.exercise.id === ex.id)
                                     }
-                                    className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-600/10 border border-red-500/20 text-red-400 text-[10px] font-bold hover:bg-red-600/20 transition-colors active:scale-[0.97] disabled:opacity-30 disabled:active:scale-100 shrink-0"
+                                    className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-spartan-600/10 border border-spartan-500/20 text-spartan-400 text-[10px] font-bold hover:bg-spartan-600/20 transition-colors active:scale-[0.97] disabled:opacity-30 disabled:active:scale-100 shrink-0"
                                   >
                                     <Plus className="w-3 h-3" />
                                     Agregar
@@ -439,7 +439,7 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
             <button
               onClick={handleSave}
               disabled={!routineName.trim() || saving}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-bold hover:from-red-500 hover:to-red-600 transition-all active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 shadow-[0_0_20px_rgba(220,38,38,0.3)]"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-xs font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 shadow-[0_0_20px_rgba(190,11,60,0.3)]"
             >
               <Save className="w-3 h-3" />
               {saving ? "..." : "Guardar rutina"}
@@ -510,7 +510,7 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
                           e.stopPropagation();
                           removeExercise(idx);
                         }}
-                        className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-red-500/20 hover:border-red-500/30 transition-colors shrink-0"
+                        className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-spartan-500/20 hover:border-spartan-500/30 transition-colors shrink-0"
                       >
                         <X className="w-3 h-3 text-zinc-500" />
                       </button>

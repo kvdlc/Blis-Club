@@ -35,7 +35,7 @@ interface Props {
 const difficultyColor: Record<string, string> = {
   principiante: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   intermedio: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  avanzado: "bg-red-500/10 text-red-400 border-red-500/20",
+  avanzado: "bg-spartan-500/10 text-spartan-400 border-spartan-500/20",
 };
 
 export default function ExerciseDetailModal({ exercise, isOpen, onClose, userId, onFavoriteToggle }: Props) {
@@ -130,7 +130,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, userId,
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 100, opacity: 0 }}
             transition={{ type: "spring", damping: 25 }}
-            className="relative w-full h-full md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-3xl bg-zinc-900/95 backdrop-blur-xl border-l md:border border-white/[0.06] overflow-y-auto shadow-2xl shadow-red-600/10"
+            className="relative w-full h-full md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-3xl bg-zinc-900/95 backdrop-blur-xl border-l md:border border-white/[0.06] overflow-y-auto shadow-2xl shadow-spartan-600/10"
           >
             {/* Header */}
             <div className="sticky top-0 z-10 bg-zinc-900/80 backdrop-blur-xl px-5 py-4 flex items-center justify-between border-b border-white/[0.04]">
@@ -233,7 +233,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, userId,
                       type="text"
                       value={config.machine_name ?? ""}
                       onChange={(e) => setConfig({ ...config, machine_name: e.target.value || null })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500/50"
+                      className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-spartan-500/50"
                       placeholder="Ej: Prensa inclinada Life Fitness"
                     />
                   </div>
@@ -242,7 +242,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, userId,
                   <button
                     onClick={saveConfig}
                     disabled={saving}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold hover:from-red-500 hover:to-red-600 transition-all active:scale-[0.98] disabled:opacity-50 shadow-[0_0_30px_rgba(220,38,38,0.3)]"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-[0.98] disabled:opacity-50 shadow-[0_0_30px_rgba(190,11,60,0.3)]"
                   >
                     <Save className="w-4 h-4" />
                     {saving ? "Guardando..." : "Guardar configuración"}

@@ -26,7 +26,7 @@ export default async function MotivacionPage() {
     motivacion: "bg-orange-500/10 text-orange-400 border-orange-500/20",
     seduccion: "bg-pink-500/10 text-pink-400 border-pink-500/20",
     negocios: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    disciplina: "bg-red-500/10 text-red-400 border-red-500/20",
+    disciplina: "bg-spartan-500/10 text-spartan-400 border-spartan-500/20",
     otro: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
   };
 
@@ -53,7 +53,7 @@ export default async function MotivacionPage() {
           <Flame className="w-12 h-12 text-zinc-700 mb-3" />
           <h2 className="text-lg font-bold text-zinc-300">Tu biblioteca está vacía</h2>
           <p className="text-sm text-zinc-500 mt-1 max-w-xs">Agrega libros, videos y películas que te motiven a crecer.</p>
-          <button className="mt-5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold hover:from-red-500 hover:to-red-600 transition-all active:scale-95 shadow-[0_0_20px_rgba(220,38,38,0.3)]">Agregar recurso</button>
+          <button className="mt-5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-95 shadow-[0_0_20px_rgba(190,11,60,0.3)]">Agregar recurso</button>
         </div>
       ) : (
         <>
