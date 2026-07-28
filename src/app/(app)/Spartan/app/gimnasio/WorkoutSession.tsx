@@ -89,7 +89,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   useEffect(() => { if (restTimer === null) { if (restTimerRef.current) clearInterval(restTimerRef.current); return; } if (restTimer <= 0) { if (!timerExpired) { setTimerExpired(true); beep(); } if (restTimerRef.current) clearInterval(restTimerRef.current); return; } restTimerRef.current = setInterval(() => setRestTimer(p => p !== null ? p - 1 : null), 1000); return () => { if (restTimerRef.current) clearInterval(restTimerRef.current); }; }, [restTimer, timerExpired]);
   useEffect(() => { if (seriesRestTimer === null) { if (seriesRestRef.current) clearInterval(seriesRestRef.current); return; } if (seriesRestTimer <= 0) { if (!seriesTimerExpired) { setSeriesTimerExpired(true); beep(); } if (seriesRestRef.current) clearInterval(seriesRestRef.current); return; } seriesRestRef.current = setInterval(() => setSeriesRestTimer(p => p !== null ? p - 1 : null), 1000); return () => { if (seriesRestRef.current) clearInterval(seriesRestRef.current); }; }, [seriesRestTimer, seriesTimerExpired]);
 
-  const handleStartWorkout = () => { setStarted(true); setWorkoutStartTime(new Date()); setRestTimer(0); setTimerExpired(true); };
+  const handleStartWorkout = () => { setStarted(true); setWorkoutStartTime(new Date()); };
   const currentExercise = exercises[currentExerciseIndex];
   const currentData = allSeriesData[currentExerciseIndex] ?? { series: [], actualRestSeconds: null, actualBetweenSeriesRest: null, actualTransitionTime: null };
   const prevWeights = lastWeights[currentExerciseIndex] ?? [];
@@ -236,17 +236,24 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
               const gw = prevWeights[si];
               const hasValue = entry.weight != null;
               return (
-                <div key={si} className={`w-full flex items-center gap-2 p-3 rounded-2xl border ${isDone?"bg-emerald-500/5 border-emerald-500/20":"bg-white/[0.03] border-white/[0.06]"}`}>
-                  <span className={`text-xs font-bold w-14 shrink-0 ${isDone?"text-emerald-400 line-through":"text-zinc-300"}`}>Serie {si+1}</span>
-                  <div className="relative flex-1 min-w-0">
-                    <input type="number" min={0} step={0.5} value={entry.weight??""} onChange={e=>updateSeriesField(si,"weight",e.target.value?parseFloat(e.target.value):null)} placeholder="kg" disabled={isDone} className="w-full bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-2 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30 placeholder:text-zinc-600" />
-                    {!isDone && !hasValue && gw && <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-zinc-600 pointer-events-none">{gw}</span>}
+                <div key={si} className={`w-full flex items-center gap-1.5 p-3 rounded-2xl border ${isDone?"bg-emerald-500/5 border-emerald-500/20":"bg-white/[0.03] border-white/[0.06]"}`}>
+                  <span className={`text-[11px] font-bold w-12 shrink-0 ${isDone?"text-emerald-400 line-through":"text-zinc-300"}`}>S{si+1}</span>
+
+                  {/* Prev weight ghost label ABOVE the input */}
+                  <div className="flex-1 flex flex-col items-center gap-0.5">
+                    {!isDone && !hasValue && gw != null && (
+                      <span className="text-[10px] font-medium text-zinc-600">Última: {gw}kg</span>
+                    )}
+                    <input type="number" min={0} step={0.5} value={entry.weight??""} onChange={e=>updateSeriesField(si,"weight",e.target.value?parseFloat(e.target.value):null)} placeholder="kg" disabled={isDone} className="w-full bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-1.5 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30 placeholder:text-zinc-600" />
                   </div>
-                  <span className="text-[10px] text-zinc-600">×</span>
-                  <input type="number" min={1} max={99} value={entry.reps} onChange={e=>updateSeriesField(si,"reps",parseInt(e.target.value)||1)} disabled={isDone} className="w-16 bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-2 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30" />
-                  <span className="text-[10px] text-zinc-600">r</span>
-                  {!isDone && currentData.series.length>1 && <button onClick={()=>removeSeries(si)} className="w-9 h-9 rounded-full bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center hover:bg-red-500/20 active:scale-[0.95] shrink-0"><MinusIcon /></button>}
-                  <button onClick={()=>{toggleSeriesComplete(si);if(!entry.completed){setSeriesRestTimer(BETWEEN_SERIES_REST);setSeriesRestStart(Date.now());setSeriesTimerExpired(false);}}} className={`w-9 h-9 rounded-full flex items-center justify-center active:scale-[0.95] shrink-0 ${isDone?"bg-emerald-500 border-2 border-emerald-400":"bg-emerald-500/10 border-2 border-emerald-500/30 hover:bg-emerald-500/20"}`}><Check className={`w-4 h-4 ${isDone?"text-white":"text-emerald-500"}`} /></button>
+
+                  <span className="text-[10px] text-zinc-600 shrink-0">×</span>
+                  <input type="number" min={1} max={99} value={entry.reps} onChange={e=>updateSeriesField(si,"reps",parseInt(e.target.value)||1)} disabled={isDone} className="w-12 bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-1.5 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30" />
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    {!isDone && currentData.series.length>1 && <button onClick={()=>removeSeries(si)} className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center hover:bg-red-500/20 active:scale-[0.95]"><MinusIcon /></button>}
+                    <button onClick={()=>{toggleSeriesComplete(si);if(!entry.completed){setSeriesRestTimer(BETWEEN_SERIES_REST);setSeriesRestStart(Date.now());setSeriesTimerExpired(false);}}} className={`w-8 h-8 rounded-full flex items-center justify-center active:scale-[0.95] ${isDone?"bg-emerald-500 border-2 border-emerald-400":"bg-emerald-500/10 border-2 border-emerald-500/30 hover:bg-emerald-500/20"}`}><Check className={`w-4 h-4 ${isDone?"text-white":"text-emerald-500"}`} /></button>
+                  </div>
                 </div>
               );
             })}
