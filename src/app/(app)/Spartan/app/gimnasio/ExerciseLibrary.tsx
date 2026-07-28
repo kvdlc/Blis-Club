@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
-import { Dumbbell } from "lucide-react";
+import { Dumbbell, Star } from "lucide-react";
 
 interface ExerciseLibraryProps {
   onSelectMuscle: (muscle: string) => void;
@@ -13,6 +13,7 @@ interface MusclePreview {
   muscle: string;
   gif_url: string | null;
   count: number;
+  favCount: number;
 }
 
 const ALL_MUSCLE_GROUPS = [
@@ -37,24 +38,42 @@ export default function ExerciseLibrary({ onSelectMuscle }: ExerciseLibraryProps
   useEffect(() => {
     const loadPreviews = async () => {
       const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
 
+      // Fetch all exercises
       const { data: allEx } = await supabase
         .from("spartan_exercise_library")
         .select("muscle_group, gif_url")
         .eq("is_active", true);
 
-      // Start with all muscle groups at 0
+      // Fetch user favorites
+      let favByMuscle: Map<string, number> = new Map();
+      if (user) {
+        const { data: favs } = await supabase
+          .from("spartan_exercise_favorites")
+          .select("exercise_id, spartan_exercise_library!inner(muscle_group)")
+          .eq("user_id", user.id);
+
+        if (favs) {
+          for (const f of favs) {
+            const mg = (f as any).spartan_exercise_library?.muscle_group;
+            if (mg) {
+              const key = mg.charAt(0).toUpperCase() + mg.slice(1).toLowerCase();
+              favByMuscle.set(key, (favByMuscle.get(key) || 0) + 1);
+            }
+          }
+        }
+      }
+
+      // Build muscle group map
       const map = new Map<string, { gif: string | null; count: number }>();
       for (const muscle of ALL_MUSCLE_GROUPS) {
         map.set(muscle, { gif: null, count: 0 });
       }
 
-      // Fill counts and previews from DB
       if (allEx) {
         for (const ex of allEx) {
-          const mg = ex.muscle_group;
-          // Map DB names to our capital names
-          const key = mg.charAt(0).toUpperCase() + mg.slice(1).toLowerCase();
+          const key = ex.muscle_group.charAt(0).toUpperCase() + ex.muscle_group.slice(1).toLowerCase();
           const entry = map.get(key);
           if (entry) {
             entry.count++;
@@ -64,7 +83,12 @@ export default function ExerciseLibrary({ onSelectMuscle }: ExerciseLibraryProps
       }
 
       const results = Array.from(map.entries())
-        .map(([muscle, data]) => ({ muscle, gif_url: data.gif, count: data.count }));
+        .map(([muscle, data]) => ({
+          muscle,
+          gif_url: data.gif,
+          count: data.count,
+          favCount: favByMuscle.get(muscle) || 0,
+        }));
 
       setPreviews(results);
       setLoading(false);
@@ -119,7 +143,12 @@ export default function ExerciseLibrary({ onSelectMuscle }: ExerciseLibraryProps
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-3">
               <p className="text-sm font-extrabold text-white uppercase tracking-wide">{p.muscle}</p>
-              <p className="text-[10px] font-medium text-zinc-400 mt-0.5">{p.count} ejerc.</p>
+              <p className="text-[10px] font-medium text-zinc-400 mt-0.5">
+                {p.count} ejerc.
+                {p.favCount > 0 && (
+                  <span className="text-amber-400 ml-1">· ⭐ {p.favCount}</span>
+                )}
+              </p>
             </div>
           </motion.button>
         ))}
