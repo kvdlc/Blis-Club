@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Dumbbell, Plus, Clock, TrendingUp, Camera, Scale, Timer } from "lucide-react";
+import ExerciseLibrary from "./ExerciseLibrary";
 
 export const dynamic = "force-dynamic";
 
@@ -163,6 +164,8 @@ export default async function GimnasioPage() {
           </div>
         </section>
       )}
+
+      <ExerciseLibrary />
     </div>
   );
 }
