@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Mail, Lock, CheckCircle, KeyRound, Link2, UserPlus, User } from "lucide-react";
+import { Mail, Lock, CheckCircle, KeyRound, Link2, UserPlus, User, Loader2 } from "lucide-react";
 import { getUserApps, createTrial } from "@/lib/trial";
 
 export function LoginForm() {
@@ -15,8 +15,41 @@ export function LoginForm() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const apps = await getUserApps(user.id);
+        if (apps.length >= 2) {
+          setIsLoggedIn(true);
+        } else if (apps.length === 1) {
+          router.push(`/${apps[0].app_slug}/app`);
+          return;
+        } else {
+          await createTrial(user.id, "guau");
+          router.push("/guau/app");
+          return;
+        }
+      }
+      setCheckingAuth(false);
+    };
+    checkAuth();
+  }, []);
+
+  if (checkingAuth) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-5 h-5 text-zinc-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (isLoggedIn) return null;
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();

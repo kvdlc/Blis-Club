@@ -2,16 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Dog, Car, Loader2, ArrowRight, BadgeCheck, Clock, AlertTriangle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { checkTrial } from "@/lib/trial";
+import { Dog, Car, Shield, Loader2, ArrowRight, BadgeCheck, Clock, LogOut, User, ChevronRight } from "lucide-react";
 
 interface AppInfo {
   app_slug: string;
   status: string;
   name: string;
+  description: string;
   icon: React.ReactNode;
-  color: string;
+  gradient: string;
+  bgGradient: string;
+  accentColor: string;
+  tagline: string;
 }
 
 const APP_REGISTRY: Record<string, AppInfo> = {
@@ -19,15 +23,34 @@ const APP_REGISTRY: Record<string, AppInfo> = {
     app_slug: "guau",
     status: "active",
     name: "Guau",
-    icon: <Dog className="w-8 h-8" />,
-    color: "from-primary-500 to-primary-700",
+    description: "El mejor cuidado para tu perro",
+    tagline: "Nutrición, salud y entrenamiento",
+    icon: <Dog className="w-10 h-10" />,
+    gradient: "from-blue-600 via-blue-500 to-violet-600",
+    bgGradient: "from-blue-50 via-white to-violet-50",
+    accentColor: "bg-blue-600",
   },
   auto: {
     app_slug: "auto",
     status: "active",
     name: "Auto",
-    icon: <Car className="w-8 h-8" />,
-    color: "from-auto-500 to-auto-700",
+    description: "Gestión inteligente de tu vehículo",
+    tagline: "Bitácora, mantenimiento y más",
+    icon: <Car className="w-10 h-10" />,
+    gradient: "from-emerald-500 via-emerald-400 to-teal-500",
+    bgGradient: "from-emerald-50 via-white to-teal-50",
+    accentColor: "bg-emerald-600",
+  },
+  Spartan: {
+    app_slug: "Spartan",
+    status: "active",
+    name: "Spartan",
+    description: "Forja tu mejor versión",
+    tagline: "Hábitos, gimnasio y disciplina",
+    icon: <Shield className="w-10 h-10" />,
+    gradient: "from-red-600 via-red-500 to-orange-600",
+    bgGradient: "from-red-50 via-white to-orange-50",
+    accentColor: "bg-red-600",
   },
 };
 
@@ -35,6 +58,8 @@ export default function AppSwitcher() {
   const router = useRouter();
   const [apps, setApps] = useState<AppInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<{ first_name?: string; avatar_url?: string } | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -42,21 +67,18 @@ export default function AppSwitcher() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
 
-      const { data: userApps } = await supabase
-        .from("user_apps")
-        .select("*")
-        .eq("user_id", user.id);
+      const [profileRes, userAppsRes] = await Promise.all([
+        supabase.from("profiles").select("first_name, avatar_url").eq("id", user.id).single(),
+        supabase.from("user_apps").select("*").eq("user_id", user.id),
+      ]);
 
-      const mapped = (userApps ?? []).map((ua: any) => {
-        const info = APP_REGISTRY[ua.app_slug] || {
-          app_slug: ua.app_slug,
-          status: ua.status,
-          name: ua.app_slug.charAt(0).toUpperCase() + ua.app_slug.slice(1),
-          icon: <Dog className="w-8 h-8" />,
-          color: "from-zinc-500 to-zinc-700",
-        };
+      setProfile(profileRes.data);
+
+      const mapped = ((userAppsRes.data ?? []) as any[]).map((ua: any) => {
+        const info = APP_REGISTRY[ua.app_slug];
+        if (!info) return null;
         return { ...info, status: ua.status };
-      });
+      }).filter(Boolean) as AppInfo[];
 
       setApps(mapped);
       setLoading(false);
@@ -73,48 +95,122 @@ export default function AppSwitcher() {
     }
   };
 
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await createClient().auth.signOut();
+    router.refresh();
+  };
+
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
-        <p className="text-sm text-zinc-500">Cargando tus aplicaciones...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950">
+        <Loader2 className="w-8 h-8 text-zinc-500 animate-spin" />
+        <p className="text-sm text-zinc-600 mt-3">Cargando tus aplicaciones...</p>
       </div>
     );
   }
 
+  if (apps.length === 0) return null;
+
+  const name = profile?.first_name || "Usuario";
+
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-extrabold text-zinc-900">Tus aplicaciones</h2>
-        <p className="text-sm text-zinc-500">Elige a cuál quieres entrar</p>
-      </div>
+    <div className="min-h-screen bg-zinc-950 flex flex-col">
+      {/* Header */}
+      <header className="px-6 pt-12 pb-6">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-600 flex items-center justify-center ring-2 ring-white/10">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <User className="w-5 h-5 text-zinc-300" />
+              )}
+            </div>
+            <div>
+              <p className="text-sm text-zinc-500">Bienvenido de vuelta</p>
+              <h1 className="text-xl font-extrabold text-white">Hola, {name}</h1>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-zinc-400 text-xs font-medium hover:bg-white/10 hover:text-zinc-300 transition-all"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            {loggingOut ? "..." : "Salir"}
+          </button>
+        </div>
+      </header>
 
-      <div className="grid gap-3 max-w-sm mx-auto">
-        {apps.map((app) => {
-          const StatusIcon = app.status === "active" ? BadgeCheck : app.status === "trialing" ? Clock : AlertTriangle;
-          const statusLabel = app.status === "active" ? "Activo" : app.status === "trialing" ? "Prueba" : "Expirado";
-          const statusColor = app.status === "active" ? "text-emerald-600 bg-emerald-50" : app.status === "trialing" ? "text-primary-600 bg-primary-50" : "text-danger-600 bg-danger-50";
+      {/* App Cards */}
+      <div className="flex-1 px-6 pb-12">
+        <div className="max-w-lg mx-auto space-y-6">
+          <div>
+            <p className="text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-4">Tus aplicaciones</p>
+          </div>
 
-          return (
-            <button
-              key={app.app_slug}
-              onClick={() => handleEnter(app.app_slug)}
-              className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-zinc-100 shadow-sm hover:shadow-md transition-all active:scale-[0.98] text-left"
-            >
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center text-white shadow-lg shrink-0`}>
-                {app.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-extrabold text-zinc-800">{app.name}</p>
-                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 ${statusColor}`}>
-                  <StatusIcon className="w-3 h-3" />
-                  {statusLabel}
-                </span>
-              </div>
-              <ArrowRight className="w-5 h-5 text-zinc-400" />
-            </button>
-          );
-        })}
+          <div className="space-y-4">
+            {apps.map((app, i) => {
+              const isActive = app.status === "active";
+              const isTrialing = app.status === "trialing";
+
+              return (
+                <button
+                  key={app.app_slug}
+                  onClick={() => handleEnter(app.app_slug)}
+                  className="w-full group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-sm hover:bg-white/[0.06] transition-all duration-300 active:scale-[0.98] text-left"
+                  style={{ animationDelay: `${i * 100}ms` }}
+                >
+                  {/* Subtle gradient bar at top */}
+                  <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${app.gradient}`} />
+
+                  <div className="p-5">
+                    <div className="flex items-start gap-4">
+                      {/* Icon */}
+                      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${app.gradient} flex items-center justify-center text-white shadow-lg shrink-0 ring-4 ring-white/5`}>
+                        {app.icon}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 pt-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-lg font-extrabold text-white">{app.name}</h3>
+                          {isActive && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              <BadgeCheck className="w-3 h-3" />
+                              Activo
+                            </span>
+                          )}
+                          {isTrialing && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                              <Clock className="w-3 h-3" />
+                              Prueba
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-zinc-400 leading-relaxed">{app.description}</p>
+                        <p className="text-xs text-zinc-600 mt-1">{app.tagline}</p>
+                      </div>
+
+                      {/* Arrow */}
+                      <div className="shrink-0 pt-3">
+                        <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 group-hover:border-white/20 transition-all">
+                          <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Footer */}
+          <p className="text-center text-xs text-zinc-700 pt-4">
+            Blis Club &middot; {apps.length} {apps.length === 1 ? "aplicación" : "aplicaciones"} disponibles
+          </p>
+        </div>
       </div>
     </div>
   );

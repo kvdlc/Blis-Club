@@ -9,6 +9,8 @@ export default function LoginPage() {
       <div className="absolute bottom-20 right-10 w-40 h-40 bg-zinc-300/30 rounded-full blur-3xl" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-zinc-200/20 rounded-full blur-3xl" />
 
+      <AppSwitcherWrapper />
+
       <div className="w-full max-w-sm space-y-8 relative z-10">
         <div className="text-center space-y-3">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-zinc-900 flex items-center justify-center shadow-lg shadow-zinc-900/20">
@@ -24,7 +26,6 @@ export default function LoginPage() {
             Mascotas, autos, eventos y más. Todo en un solo lugar.
           </p>
         </div>
-        <AppSwitcherWrapper />
         <LoginForm />
         <p className="text-center text-xs text-zinc-400">
           Al ingresar aceptas nuestros términos y política de privacidad

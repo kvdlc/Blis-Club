@@ -68,7 +68,7 @@ export async function middleware(request: NextRequest) {
   const ua = request.headers.get("user-agent") || "";
 
   const isAuthCallback = path.startsWith("/auth/callback");
-  const isAppRoute = path.startsWith("/guau/app") || path.startsWith("/auto/app");
+  const isAppRoute = path.startsWith("/guau/app") || path.startsWith("/auto/app") || path.startsWith("/Spartan/app");
   const isAdminRoute = path.startsWith("/superadmin");
   const isAdminApi = path.startsWith("/api/admin/");
   const isProtected = isAppRoute || isAdminRoute || isAdminApi;
