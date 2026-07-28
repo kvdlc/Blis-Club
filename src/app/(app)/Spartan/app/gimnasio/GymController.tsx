@@ -69,6 +69,7 @@ export default function GymController({ userId }: { userId: string }) {
   const [stats, setStats] = useState({ streak: 0, sessionsThisWeek: 0, totalVolume: 0 });
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [savedSession, setSavedSession] = useState<{ routineId: string; routineName: string } | null>(null);
 
   const loadData = useCallback(async () => {
     const supabase = createClient();
@@ -147,6 +148,34 @@ export default function GymController({ userId }: { userId: string }) {
   useEffect(() => {
     loadData();
   }, [loadData, refreshKey]);
+
+  // Check for saved workout session on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("spartan_workout_session");
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.started && data.routineId) {
+          const supabase = createClient();
+          supabase.from("spartan_workout_routines").select("name").eq("id", data.routineId).eq("user_id", userId).single().then(({ data: r }) => {
+            setSavedSession({ routineId: data.routineId, routineName: r?.name || "Entrenamiento en curso" });
+          });
+        }
+      }
+    } catch {}
+  }, [userId]);
+
+  const handleResumeSession = async () => {
+    if (!savedSession) return;
+    const supabase = createClient();
+    const { data: exercises } = await supabase.from("spartan_workout_exercises").select("*").eq("routine_id", savedSession.routineId).order("sort_order");
+    const exs: WorkoutExercise[] = (exercises ?? []).map((ex: any) => ({
+      id: ex.id, name: ex.name, gif_url: ex.gif_url ?? "", muscle_group: ex.muscle_group,
+      sets: ex.sets ?? 3, reps: ex.reps ?? 10, weight_kg: ex.weight_kg, rest_seconds: ex.rest_seconds ?? 60,
+    }));
+    setSelectedRoutine({ id: savedSession.routineId, name: savedSession.routineName, exercises: exs });
+    setView("session");
+  };
 
   const handleStartRoutine = async (routine: Routine) => {
     const supabase = createClient();
@@ -252,6 +281,22 @@ export default function GymController({ userId }: { userId: string }) {
               </div>
             </div>
           </div>
+
+          {/* Saved session resume card */}
+          {savedSession && (
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/20 p-4 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0 animate-pulse">
+                <Timer className="w-5 h-5 text-amber-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-amber-400">Entrenamiento en pausa</p>
+                <p className="text-sm font-extrabold text-white truncate">{savedSession.routineName}</p>
+              </div>
+              <button onClick={handleResumeSession} className="px-4 py-2 rounded-xl bg-amber-500 text-black text-xs font-extrabold hover:bg-amber-400 transition-colors active:scale-[0.97] shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+                Reanudar
+              </button>
+            </motion.div>
+          )}
 
           {/* Mis rutinas */}
           <section>
