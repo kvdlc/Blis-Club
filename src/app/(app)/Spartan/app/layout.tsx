@@ -22,7 +22,7 @@ export default async function SpartanAppLayout({ children }: { children: React.R
   if (trial.isExpired) redirect("/Spartan/app/suscripcion");
 
   return (
-    <div className="min-h-screen md:pl-60 bg-zinc-50 text-zinc-900">
+    <div className="min-h-screen md:pl-60 bg-zinc-950 text-zinc-200">
       <ReferralTracker />
       <SpartanNav />
       <main className="relative z-10 pb-28 md:pb-8 px-4 pt-3 max-w-3xl mx-auto">
