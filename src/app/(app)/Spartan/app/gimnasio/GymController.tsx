@@ -45,7 +45,17 @@ interface EditingRoutine {
   id: string;
   name: string;
   muscle_group: string | null;
-  exercises: WorkoutExercise[];
+  exercises: Array<{
+    id: string;
+    name: string;
+    gif_url: string;
+    muscle_group: string;
+    sets: number;
+    reps: number;
+    weight_kg: number | null;
+    rest_seconds: number;
+    exercise_library_id?: string | null;
+  }>;
 }
 
 type ViewState = "main" | "muscle" | "builder" | "session";
@@ -175,7 +185,7 @@ export default function GymController({ userId }: { userId: string }) {
       .eq("routine_id", routine.id)
       .order("sort_order");
 
-    const exs: WorkoutExercise[] = (exercises ?? []).map((ex: any) => ({
+    const exs = (exercises ?? []).map((ex: any) => ({
       id: ex.id,
       name: ex.name,
       gif_url: ex.gif_url ?? "",
@@ -184,6 +194,7 @@ export default function GymController({ userId }: { userId: string }) {
       reps: ex.reps ?? 10,
       weight_kg: ex.weight_kg,
       rest_seconds: ex.rest_seconds ?? 60,
+      exercise_library_id: ex.exercise_library_id ?? null,
     }));
 
     setEditingRoutine({
