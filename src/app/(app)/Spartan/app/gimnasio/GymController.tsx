@@ -9,7 +9,7 @@ import {
   TrendingUp,
   Plus,
   Timer,
-  ChevronRight,
+  Pencil,
 } from "lucide-react";
 import ExerciseLibrary from "./ExerciseLibrary";
 import MuscleGroupView from "./MuscleGroupView";
@@ -41,12 +41,20 @@ interface SelectedRoutine {
   exercises: WorkoutExercise[];
 }
 
+interface EditingRoutine {
+  id: string;
+  name: string;
+  muscle_group: string | null;
+  exercises: WorkoutExercise[];
+}
+
 type ViewState = "main" | "muscle" | "builder" | "session";
 
 export default function GymController({ userId }: { userId: string }) {
   const [view, setView] = useState<ViewState>("main");
   const [selectedMuscle, setSelectedMuscle] = useState<string>("");
   const [selectedRoutine, setSelectedRoutine] = useState<SelectedRoutine | null>(null);
+  const [editingRoutine, setEditingRoutine] = useState<EditingRoutine | null>(null);
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [stats, setStats] = useState({ streak: 0, sessionsThisWeek: 0, totalVolume: 0 });
   const [loading, setLoading] = useState(true);
@@ -159,6 +167,34 @@ export default function GymController({ userId }: { userId: string }) {
     setView("session");
   };
 
+  const handleEditRoutine = async (routine: Routine) => {
+    const supabase = createClient();
+    const { data: exercises } = await supabase
+      .from("spartan_workout_exercises")
+      .select("*")
+      .eq("routine_id", routine.id)
+      .order("sort_order");
+
+    const exs: WorkoutExercise[] = (exercises ?? []).map((ex: any) => ({
+      id: ex.id,
+      name: ex.name,
+      gif_url: ex.gif_url ?? "",
+      muscle_group: ex.muscle_group,
+      sets: ex.sets ?? 3,
+      reps: ex.reps ?? 10,
+      weight_kg: ex.weight_kg,
+      rest_seconds: ex.rest_seconds ?? 60,
+    }));
+
+    setEditingRoutine({
+      id: routine.id,
+      name: routine.name,
+      muscle_group: routine.muscle_group,
+      exercises: exs,
+    });
+    setView("builder");
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -259,13 +295,22 @@ export default function GymController({ userId }: { userId: string }) {
                         {routine.exercise_count} ejerc.
                       </span>
                     </div>
-                    <button
-                      onClick={() => handleStartRoutine(routine)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-[0.97] shadow-[0_0_20px_rgba(190,11,60,0.3)]"
-                    >
-                      <Timer className="w-4 h-4" />
-                      Iniciar
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditRoutine(routine)}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs font-bold hover:bg-white/10 transition-all active:scale-[0.97]"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleStartRoutine(routine)}
+                        className="flex-[2] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 hover:to-spartan-600 transition-all active:scale-[0.97] shadow-[0_0_20px_rgba(190,11,60,0.3)]"
+                      >
+                        <Timer className="w-4 h-4" />
+                        Iniciar
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -298,9 +343,14 @@ export default function GymController({ userId }: { userId: string }) {
         {view === "builder" && (
           <RoutineBuilder
             userId={userId}
-            onClose={() => setView("main")}
+            editingRoutine={editingRoutine}
+            onClose={() => {
+              setView("main");
+              setEditingRoutine(null);
+            }}
             onSave={() => {
               setView("main");
+              setEditingRoutine(null);
               setRefreshKey((k) => k + 1);
             }}
           />

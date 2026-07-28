@@ -33,23 +33,40 @@ interface SelectedExercise {
   config: { sets: number; reps: number; weight: number | null; rest: number };
 }
 
+interface EditingRoutineData {
+  id: string;
+  name: string;
+  muscle_group: string | null;
+  exercises: Array<{
+    id: string;
+    name: string;
+    gif_url: string;
+    muscle_group: string;
+    sets: number;
+    reps: number;
+    weight_kg: number | null;
+    rest_seconds: number;
+  }>;
+}
+
 interface RoutineBuilderProps {
   userId: string;
   onClose: () => void;
   onSave: () => void;
+  editingRoutine?: EditingRoutineData | null;
 }
 
 const MUSCLE_GROUPS = ["Pecho", "Espalda", "Hombros", "Biceps", "Triceps", "Piernas", "Abdomen", "Antebrazo", "Trapecio"];
 
-export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuilderProps) {
-  const [routineName, setRoutineName] = useState("");
-  const [muscleTargets, setMuscleTargets] = useState<string[]>([]);
+export default function RoutineBuilder({ userId, onClose, onSave, editingRoutine }: RoutineBuilderProps) {
+  const [routineName, setRoutineName] = useState(editingRoutine?.name || "");
+  const [muscleTargets, setMuscleTargets] = useState<string[]>(editingRoutine?.muscle_group ? editingRoutine.muscle_group.split(" + ") : []);
   const [tab, setTab] = useState<"favorites" | "all">("favorites");
   const [favorites, setFavorites] = useState<FavoriteWithConfig[]>([]);
   const [allExercises, setAllExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<SelectedExercise[]>([]);
-  const [expandedMuscles, setExpandedMuscles] = useState<Set<string>>(new Set());
+  const [expandedMuscles, setExpandedMuscles] = useState<Set<string>>(new Set(editingRoutine?.muscle_group ? editingRoutine.muscle_group.split(" + ") : []));
   const [expandedSelected, setExpandedSelected] = useState<Set<number>>(new Set());
   const [saving, setSaving] = useState(false);
 
@@ -89,6 +106,20 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
 
       setFavorites(favData);
       setAllExercises(allExercisesData as Exercise[]);
+
+      // Pre-fill selected exercises if editing
+      if (editingRoutine) {
+        const preSelected: SelectedExercise[] = [];
+        for (const ex of editingRoutine.exercises) {
+          const libraryEx = allExercisesData.find((lib: any) => lib.name === ex.name && lib.muscle_group === ex.muscle_group);
+          preSelected.push({
+            exercise: (libraryEx || { id: ex.id, name: ex.name, gif_url: ex.gif_url, muscle_group: ex.muscle_group, equipment: "", difficulty: "intermedio" }) as Exercise,
+            config: { sets: ex.sets, reps: ex.reps, weight: ex.weight_kg, rest: ex.rest_seconds },
+          });
+        }
+        setSelected(preSelected);
+      }
+
       setLoading(false);
     };
     load();
@@ -169,16 +200,32 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
     setSaving(true);
     const supabase = createClient();
 
-    const { data: routine } = await supabase
-      .from("spartan_workout_routines")
-      .insert({ user_id: userId, name: routineName.trim(), muscle_group: muscleTargets.join(" + ") || null, is_active: true })
-      .select("id")
-      .single();
+    let routineId = editingRoutine?.id;
 
-    if (routine) {
+    if (editingRoutine) {
+      // Update existing routine
+      await supabase
+        .from("spartan_workout_routines")
+        .update({ name: routineName.trim(), muscle_group: muscleTargets.join(" + ") || null })
+        .eq("id", editingRoutine.id);
+
+      // Delete old exercises and re-insert
+      await supabase.from("spartan_workout_exercises").delete().eq("routine_id", editingRoutine.id);
+    } else {
+      // Create new routine
+      const { data: routine } = await supabase
+        .from("spartan_workout_routines")
+        .insert({ user_id: userId, name: routineName.trim(), muscle_group: muscleTargets.join(" + ") || null, is_active: true })
+        .select("id")
+        .single();
+
+      if (routine) routineId = routine.id;
+    }
+
+    if (routineId) {
       await supabase.from("spartan_workout_exercises").insert(
         selected.map((s, i) => ({
-          routine_id: routine.id,
+          routine_id: routineId,
           exercise_id: s.exercise.id,
           name: s.exercise.name,
           muscle_group: s.exercise.muscle_group,
@@ -202,7 +249,7 @@ export default function RoutineBuilder({ userId, onClose, onSave }: RoutineBuild
         <button onClick={onClose} className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
           <ArrowLeft className="w-4 h-4 text-zinc-400" />
         </button>
-        <h1 className="text-lg font-extrabold text-white flex-1">Nueva rutina</h1>
+        <h1 className="text-lg font-extrabold text-white flex-1">{editingRoutine ? "Editar rutina" : "Nueva rutina"}</h1>
         <button
           onClick={handleSave}
           disabled={!routineName.trim() || selected.length === 0 || saving}
