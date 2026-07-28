@@ -3,8 +3,17 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Check, Circle, ChevronRight, Plus, Trophy, X, Play, Flag, Timer, Volume2, Dumbbell, Share2, Trash2, Eye, EyeOff, Quote } from "lucide-react";
+import { ArrowLeft, Clock, Check, Circle, ChevronRight, Plus, Trophy, X, Play, Flag, Timer, Volume2, Dumbbell, Share2, Trash2, Eye, EyeOff, Quote, ChevronLeft } from "lucide-react";
 import { GYM_QUOTES } from "./gym-quotes";
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 interface WorkoutExercise { id: string; name: string; gif_url: string; muscle_group: string; sets: number; reps: number; weight_kg: number | null; rest_seconds: number; }
 interface SeriesEntry { weight: number | null; reps: number; completed: boolean; }
@@ -64,8 +73,11 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const [seriesTimerExpired, setSeriesTimerExpired] = useState(false);
   const [seriesRestElapsed, setSeriesRestElapsed] = useState(0); // counts up from 0
   const [showGif, setShowGif] = useState(true);
-  const [quoteIdx, setQuoteIdx] = useState(Math.floor(Math.random() * GYM_QUOTES.length));
+  const [shuffledQuotes] = useState(() => shuffleArray(GYM_QUOTES));
+  const [quoteIdx, setQuoteIdx] = useState(0);
+  const [swipeDir, setSwipeDir] = useState<"left" | "right" | null>(null);
   const quoteTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStartX = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const restTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const seriesRestRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -112,10 +124,15 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   useEffect(() => {
     const resting = (restTimer !== null && restTimer > 0) || (restTimer !== null && restTimer <= 0 && timerExpired);
     if (!showGif && started && !resting) {
-      quoteTimerRef.current = setInterval(() => setQuoteIdx(p => (p + 1) % GYM_QUOTES.length), 15000);
+      quoteTimerRef.current = setInterval(() => {
+        setQuoteIdx(p => (p + 1) % shuffledQuotes.length);
+      }, 20000);
     }
     return () => { if (quoteTimerRef.current) clearInterval(quoteTimerRef.current); };
-  }, [showGif, started, restTimer, timerExpired]);
+  }, [showGif, started, restTimer, timerExpired, shuffledQuotes]);
+
+  const nextQuote = () => { setSwipeDir("left"); setQuoteIdx(p => (p + 1) % shuffledQuotes.length); };
+  const prevQuote = () => { setSwipeDir("right"); setQuoteIdx(p => (p - 1 + shuffledQuotes.length) % shuffledQuotes.length); };
 
   const handleStartWorkout = () => { setStarted(true); setWorkoutStartTime(new Date()); };
   const currentExercise = exercises[currentExerciseIndex];
@@ -246,20 +263,43 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
         {!isResting && !showGif && (
           <motion.div
             key={quoteIdx}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.5 }}
-            className="aspect-square bg-gradient-to-br from-zinc-900 via-zinc-900/80 to-spartan-950/50 rounded-3xl border border-spartan-500/10 flex flex-col items-center justify-center p-6 text-center relative overflow-hidden"
+            initial={swipeDir === "left" ? { opacity: 0, x: 40 } : swipeDir === "right" ? { opacity: 0, x: -40 } : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ duration: 0.35 }}
+            onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+            onTouchEnd={e => {
+              const diff = touchStartX.current - e.changedTouches[0].clientX;
+              if (Math.abs(diff) > 50) { diff > 0 ? nextQuote() : prevQuote(); }
+            }}
+            className="aspect-square bg-gradient-to-br from-zinc-900 via-zinc-900/90 to-spartan-950/40 rounded-3xl border border-spartan-500/10 flex flex-col items-center justify-between p-4 relative overflow-hidden select-none"
           >
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-spartan-500/30 to-transparent" />
-            <Quote className="w-5 h-5 text-spartan-500/40 mb-3" />
-            <p className="text-sm font-bold text-zinc-300 leading-relaxed italic max-w-xs" style={{ fontFamily: "var(--font-nunito)" }}>
-              &ldquo;{GYM_QUOTES[quoteIdx]}&rdquo;
-            </p>
-            <button onClick={() => setShowGif(true)} className="mt-4 text-[10px] font-medium text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-1">
-              <Eye className="w-3 h-3" /> Mostrar GIF
-            </button>
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-spartan-500/20 to-transparent" />
+
+            {/* Nav arrows */}
+            <div className="flex items-center justify-between w-full shrink-0 opacity-40">
+              <button onClick={prevQuote} className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:opacity-100 transition-all">
+                <ChevronLeft className="w-3.5 h-3.5 text-zinc-400" />
+              </button>
+              <span className="text-[9px] font-medium text-zinc-600">{quoteIdx + 1}/{shuffledQuotes.length}</span>
+              <button onClick={nextQuote} className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:opacity-100 transition-all">
+                <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+              </button>
+            </div>
+
+            {/* Quote text */}
+            <div className="flex-1 flex items-center justify-center px-2">
+              <p className="text-base sm:text-lg font-bold text-zinc-200 leading-relaxed text-center max-w-full" style={{ fontFamily: "var(--font-nunito)" }}>
+                &ldquo;{shuffledQuotes[quoteIdx]}&rdquo;
+              </p>
+            </div>
+
+            {/* Quote icon + show GIF */}
+            <div className="flex items-center gap-4 shrink-0">
+              <Quote className="w-4 h-4 text-spartan-500/30" />
+              <button onClick={() => setShowGif(true)} className="text-[10px] font-medium text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-1">
+                <Eye className="w-3 h-3" /> Ver GIF
+              </button>
+            </div>
           </motion.div>
         )}
 
