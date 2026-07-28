@@ -15,6 +15,11 @@ interface MusclePreview {
   count: number;
 }
 
+const ALL_MUSCLE_GROUPS = [
+  "Pecho", "Espalda", "Hombros", "Biceps", "Triceps",
+  "Piernas", "Abdomen", "Antebrazo", "Trapecio",
+];
+
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06 } },
@@ -33,31 +38,33 @@ export default function ExerciseLibrary({ onSelectMuscle }: ExerciseLibraryProps
     const loadPreviews = async () => {
       const supabase = createClient();
 
-      // Get all exercises to dynamically determine muscle groups
       const { data: allEx } = await supabase
         .from("spartan_exercise_library")
         .select("muscle_group, gif_url")
         .eq("is_active", true);
 
-      if (!allEx || allEx.length === 0) {
-        setLoading(false);
-        return;
+      // Start with all muscle groups at 0
+      const map = new Map<string, { gif: string | null; count: number }>();
+      for (const muscle of ALL_MUSCLE_GROUPS) {
+        map.set(muscle, { gif: null, count: 0 });
       }
 
-      // Group by muscle
-      const map = new Map<string, { gif: string | null; count: number }>();
-      for (const ex of allEx) {
-        const entry = map.get(ex.muscle_group);
-        if (entry) {
-          entry.count++;
-        } else {
-          map.set(ex.muscle_group, { gif: ex.gif_url || null, count: 1 });
+      // Fill counts and previews from DB
+      if (allEx) {
+        for (const ex of allEx) {
+          const mg = ex.muscle_group;
+          // Map DB names to our capital names
+          const key = mg.charAt(0).toUpperCase() + mg.slice(1).toLowerCase();
+          const entry = map.get(key);
+          if (entry) {
+            entry.count++;
+            if (!entry.gif) entry.gif = ex.gif_url || null;
+          }
         }
       }
 
-      const results: MusclePreview[] = Array.from(map.entries())
-        .map(([muscle, data]) => ({ muscle, gif_url: data.gif, count: data.count }))
-        .sort((a, b) => b.count - a.count);
+      const results = Array.from(map.entries())
+        .map(([muscle, data]) => ({ muscle, gif_url: data.gif, count: data.count }));
 
       setPreviews(results);
       setLoading(false);
@@ -70,21 +77,9 @@ export default function ExerciseLibrary({ onSelectMuscle }: ExerciseLibraryProps
       <section>
         <h2 className="text-sm font-bold text-zinc-200 mb-3">Biblioteca</h2>
         <div className="grid grid-cols-2 gap-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="aspect-square bg-white/[0.03] rounded-2xl border border-white/[0.06] animate-pulse" />
+          {ALL_MUSCLE_GROUPS.map((m) => (
+            <div key={m} className="aspect-square bg-white/[0.03] rounded-2xl border border-white/[0.06] animate-pulse" />
           ))}
-        </div>
-      </section>
-    );
-  }
-
-  if (previews.length === 0) {
-    return (
-      <section>
-        <h2 className="text-sm font-bold text-zinc-200 mb-3">Biblioteca</h2>
-        <div className="flex flex-col items-center justify-center py-10 text-center bg-white/[0.03] rounded-2xl border border-white/[0.06]">
-          <Dumbbell className="w-8 h-8 text-zinc-700 mb-2" />
-          <p className="text-sm text-zinc-500">No hay ejercicios disponibles</p>
         </div>
       </section>
     );
