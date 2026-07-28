@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Check, Circle, ChevronRight, Plus, Trophy, X, Play, Flag, Timer, Volume2, Dumbbell, Share2, Trash2, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Clock, Check, Circle, ChevronRight, Plus, Trophy, X, Play, Flag, Timer, Volume2, Dumbbell, Share2, Trash2, Eye, EyeOff, Quote } from "lucide-react";
+import { GYM_QUOTES } from "./gym-quotes";
 
 interface WorkoutExercise { id: string; name: string; gif_url: string; muscle_group: string; sets: number; reps: number; weight_kg: number | null; rest_seconds: number; }
 interface SeriesEntry { weight: number | null; reps: number; completed: boolean; }
@@ -63,6 +64,8 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const [seriesTimerExpired, setSeriesTimerExpired] = useState(false);
   const [seriesRestElapsed, setSeriesRestElapsed] = useState(0); // counts up from 0
   const [showGif, setShowGif] = useState(true);
+  const [quoteIdx, setQuoteIdx] = useState(Math.floor(Math.random() * GYM_QUOTES.length));
+  const quoteTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const restTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const seriesRestRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -104,6 +107,15 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
     }, 1000);
     return () => { if (seriesRestRef.current) clearInterval(seriesRestRef.current); };
   }, [seriesRestTimer]);
+
+  // Rotate quotes when GIF is hidden
+  useEffect(() => {
+    const resting = (restTimer !== null && restTimer > 0) || (restTimer !== null && restTimer <= 0 && timerExpired);
+    if (!showGif && started && !resting) {
+      quoteTimerRef.current = setInterval(() => setQuoteIdx(p => (p + 1) % GYM_QUOTES.length), 15000);
+    }
+    return () => { if (quoteTimerRef.current) clearInterval(quoteTimerRef.current); };
+  }, [showGif, started, restTimer, timerExpired]);
 
   const handleStartWorkout = () => { setStarted(true); setWorkoutStartTime(new Date()); };
   const currentExercise = exercises[currentExerciseIndex];
@@ -232,12 +244,23 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
         )}
 
         {!isResting && !showGif && (
-          <div className="aspect-square bg-zinc-900/50 rounded-3xl border border-dashed border-zinc-800 flex items-center justify-center">
-            <button onClick={() => setShowGif(true)} className="flex flex-col items-center gap-2 text-zinc-600 hover:text-zinc-400 transition-colors">
-              <Eye className="w-8 h-8" />
-              <span className="text-[10px] font-medium">Mostrar GIF</span>
+          <motion.div
+            key={quoteIdx}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.5 }}
+            className="aspect-square bg-gradient-to-br from-zinc-900 via-zinc-900/80 to-spartan-950/50 rounded-3xl border border-spartan-500/10 flex flex-col items-center justify-center p-6 text-center relative overflow-hidden"
+          >
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-spartan-500/30 to-transparent" />
+            <Quote className="w-5 h-5 text-spartan-500/40 mb-3" />
+            <p className="text-sm font-bold text-zinc-300 leading-relaxed italic max-w-xs" style={{ fontFamily: "var(--font-nunito)" }}>
+              &ldquo;{GYM_QUOTES[quoteIdx]}&rdquo;
+            </p>
+            <button onClick={() => setShowGif(true)} className="mt-4 text-[10px] font-medium text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-1">
+              <Eye className="w-3 h-3" /> Mostrar GIF
             </button>
-          </div>
+          </motion.div>
         )}
 
         {/* Series rest */}
