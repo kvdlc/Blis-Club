@@ -72,82 +72,76 @@ export default function GymController({ userId }: { userId: string }) {
 
   const loadData = useCallback(async () => {
     const supabase = createClient();
+    try {
+      const [routinesRes, sessionsRes] = await Promise.all([
+        supabase.from("spartan_workout_routines").select("id, name, muscle_group, description").eq("user_id", userId).eq("is_active", true).order("created_at", { ascending: false }),
+        supabase.from("spartan_workout_sessions").select("started_at, duration_minutes, series_data").eq("user_id", userId).eq("completed", true).order("started_at", { ascending: false }).limit(30),
+      ]);
 
-    const [routinesRes, sessionsRes] = await Promise.all([
-      supabase
-        .from("spartan_workout_routines")
-        .select("id, name, muscle_group, description")
-        .eq("user_id", userId)
-        .eq("is_active", true)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("spartan_workout_sessions")
-        .select("started_at, duration_minutes, series_data")
-        .eq("user_id", userId)
-        .eq("completed", true)
-        .order("started_at", { ascending: false })
-        .limit(30),
-    ]);
+      const routineData = routinesRes.data ?? [];
+      const sessionData = sessionsRes.data ?? [];
 
-    const routineData = routinesRes.data ?? [];
-    const sessionData = sessionsRes.data ?? [];
-
-    // Count exercises per routine
-    const routinesWithCounts = await Promise.all(
-      routineData.map(async (r: any) => {
-        const { count } = await supabase
-          .from("spartan_workout_exercises")
-          .select("*", { count: "exact", head: true })
-          .eq("routine_id", r.id);
-        return { ...r, exercise_count: count ?? 0 };
-      })
-    );
-
-    // Calculate stats
-    const now = new Date();
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const thisWeekSessions = (sessionData as any[]).filter(
-      (s) => new Date(s.started_at) >= oneWeekAgo
-    );
-
-    let totalVolume = 0;
-    thisWeekSessions.forEach((s: any) => {
-      if (s.series_data) {
-        const data = s.series_data as Record<string, (number | null)[]>;
-        Object.values(data).forEach((weights) => {
-          weights.forEach((w) => {
-            if (w) totalVolume += w;
+      // Count exercises per routine — single query approach
+      let exerciseCounts: Record<string, number> = {};
+      if (routineData.length > 0) {
+        const routineIds = routineData.map((r: any) => r.id);
+        const { data: allExercises } = await supabase.from("spartan_workout_exercises").select("routine_id").in("routine_id", routineIds);
+        if (allExercises) {
+          allExercises.forEach((ex: any) => {
+            exerciseCounts[ex.routine_id] = (exerciseCounts[ex.routine_id] || 0) + 1;
           });
-        });
+        }
       }
-    });
 
-    // Simple streak calculation
-    let streak = 0;
-    const sortedSessions = (sessionData as any[])
-      .map((s) => new Date(s.started_at).toDateString())
-      .filter((v, i, a) => a.indexOf(v) === i);
+      const routinesWithCounts = routineData.map((r: any) => ({
+        ...r, exercise_count: exerciseCounts[r.id] || 0,
+      }));
 
-    const today = new Date().toDateString();
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString();
-    if (sortedSessions[0] === today || sortedSessions[0] === yesterday) {
-      streak = 1;
-      for (let i = 1; i < sortedSessions.length; i++) {
-        const prev = new Date(sortedSessions[i - 1]);
-        const curr = new Date(sortedSessions[i]);
-        const diff = (prev.getTime() - curr.getTime()) / (24 * 60 * 60 * 1000);
-        if (diff === 1) streak++;
-        else break;
+      // Calculate stats
+      const now = new Date();
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const thisWeekSessions = (sessionData as any[]).filter((s) => new Date(s.started_at) >= oneWeekAgo);
+
+      let totalVolume = 0;
+      thisWeekSessions.forEach((s: any) => {
+        if (!s.series_data) return;
+        const sd = s.series_data;
+        // Handle both old format (arrays of weights) and new format ({series: [...]})
+        for (const key of Object.keys(sd)) {
+          const val = sd[key];
+          if (Array.isArray(val)) {
+            // Old format: array of weights
+            val.forEach((w: any) => { if (w && typeof w === "number") totalVolume += w; });
+          } else if (val && typeof val === "object" && Array.isArray(val.series)) {
+            // New format: {series: [{weight, reps, completed}]}
+            val.series.forEach((s: any) => { if (s.completed && s.weight) totalVolume += s.weight * (s.reps||1); });
+          }
+        }
+      });
+
+      let streak = 0;
+      const sortedDates = [...new Set((sessionData as any[]).map((s) => new Date(s.started_at).toDateString()))];
+      if (sortedDates.length > 0) {
+        const today = new Date().toDateString();
+        const yesterday = new Date(now.getTime() - 86400000).toDateString();
+        if (sortedDates[0] === today || sortedDates[0] === yesterday) {
+          streak = 1;
+          for (let i = 1; i < sortedDates.length; i++) {
+            const prev = new Date(sortedDates[i - 1]).getTime();
+            const curr = new Date(sortedDates[i]).getTime();
+            if ((prev - curr) / 86400000 === 1) streak++;
+            else break;
+          }
+        }
       }
+
+      setRoutines(routinesWithCounts as Routine[]);
+      setStats({ streak, sessionsThisWeek: thisWeekSessions.length, totalVolume });
+    } catch (err) {
+      console.error("GymController loadData error:", err);
+    } finally {
+      setLoading(false);
     }
-
-    setRoutines(routinesWithCounts as Routine[]);
-    setStats({
-      streak,
-      sessionsThisWeek: thisWeekSessions.length,
-      totalVolume,
-    });
-    setLoading(false);
   }, [userId]);
 
   useEffect(() => {
