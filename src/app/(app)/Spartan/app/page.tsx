@@ -29,6 +29,26 @@ async function getDashboardData(userId: string) {
     .order("started_at", { ascending: false })
     .limit(30);
 
+  // Routines count
+  const { count: routinesCount } = await supabase
+    .from("spartan_workout_routines")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("is_active", true);
+
+  // Completed exercises total (sum of all completed exercises across sessions)
+  const { data: allExercises } = await supabase
+    .from("spartan_workout_exercises")
+    .select("routine_id, spartan_workout_routines!inner(user_id)")
+    .eq("spartan_workout_routines.user_id", userId);
+
+  // Sessions this week for metrics
+  const oneWeekAgo = new Date(today);
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const sessionsThisWeek = (sessions ?? []).filter(
+    (s: any) => new Date(s.started_at) >= oneWeekAgo
+  );
+
   // Habits for today
   const { data: habits } = await supabase
     .from("spartan_habits")
@@ -129,7 +149,9 @@ async function getDashboardData(userId: string) {
     profile,
     streak,
     sessionsCount: (sessions ?? []).length,
-    weeklyVolume: Object.entries(weeklyVolume).map(([week, vol]) => ({ week: week.slice(5), volume: Math.round(vol / 100) / 10 })),
+    sessionsThisWeek: sessionsThisWeek.length,
+    routinesCount: routinesCount ?? 0,
+    exercisesCount: (allExercises ?? []).length,
     muscleVolume: Object.entries(muscleVolume).map(([muscle, vol]) => ({ muscle, volume: Math.round(vol / 100) / 10 })),
     habits: habits ?? [],
     todayStr,

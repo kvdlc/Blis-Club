@@ -22,15 +22,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
   Legend,
 } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,7 +36,9 @@ interface Props {
     profile: { first_name?: string; avatar_url?: string } | null;
     streak: number;
     sessionsCount: number;
-    weeklyVolume: Array<{ week: string; volume: number }>;
+    sessionsThisWeek: number;
+    routinesCount: number;
+    exercisesCount: number;
     muscleVolume: Array<{ muscle: string; volume: number }>;
     habits: any[];
     todayStr: string;
@@ -146,16 +144,7 @@ export default function DashboardContent({ data, userId }: Props) {
     [data.muscleVolume]
   );
 
-  const volumeTrend = useMemo(() => {
-    if (data.weeklyVolume.length < 2) return null;
-    const vols = data.weeklyVolume;
-    const last = vols[vols.length - 1].volume;
-    const prev = vols[vols.length - 2].volume;
-    if (prev === 0) return null;
-    const diff = last - prev;
-    const pct = Math.round((diff / prev) * 100);
-    return { diff, pct, isUp: diff >= 0 };
-  }, [data.weeklyVolume]);
+  const volumeTrend = null;
 
   const getEntryForHabit = useCallback(
     (habit: any) => {
@@ -294,25 +283,17 @@ export default function DashboardContent({ data, userId }: Props) {
   };
 
   const toggleDay = (day: string) => {
-    setPlanForm((prev) => ({
-      ...prev,
-      preset: "custom",
-      custom_days: prev.custom_days.includes(day)
+    setPlanForm((prev) => {
+      const newDays = prev.custom_days.includes(day)
         ? prev.custom_days.filter((d) => d !== day)
-        : [...prev.custom_days, day].sort(
-            (a, b) => DAY_NAMES.indexOf(a) - DAY_NAMES.indexOf(b)
-          ),
-    }));
+        : [...prev.custom_days, day].sort((a, b) => DAY_NAMES.indexOf(a) - DAY_NAMES.indexOf(b));
+      return { ...prev, preset: "custom", custom_days: newDays, target_sessions: newDays.length };
+    });
   };
 
   const selectPreset = (key: string) => {
     const days = PRESET_SCHEDULES[key] ?? planForm.custom_days;
-    setPlanForm({
-      preset: key,
-      custom_days: days,
-      target_sessions:
-        key === "full" ? 7 : key === "lmxjv" ? 5 : key === "lxv" ? 3 : planForm.target_sessions,
-    });
+    setPlanForm({ preset: key, custom_days: days, target_sessions: days.length });
   };
 
   const resolvedPlan = localPlan || data.plan;
@@ -541,24 +522,9 @@ export default function DashboardContent({ data, userId }: Props) {
 
                 <div>
                   <p className="text-[10px] text-zinc-500 mb-1.5">
-                    Sesiones por semana objetivo
+                    Sesiones por semana
                   </p>
-                  <input
-                    type="number"
-                    min={1}
-                    max={7}
-                    value={planForm.target_sessions}
-                    onChange={(e) =>
-                      setPlanForm((p) => ({
-                        ...p,
-                        target_sessions: Math.max(
-                          1,
-                          Math.min(7, Number(e.target.value) || 1)
-                        ),
-                      }))
-                    }
-                    className="w-20 px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.08] text-sm font-bold text-zinc-200 text-center focus:outline-none focus:border-spartan-500/40"
-                  />
+                  <p className="text-sm font-extrabold text-white">{planForm.custom_days.length || planForm.target_sessions} {planForm.custom_days.length === 1 ? "día" : "días"}</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -588,206 +554,67 @@ export default function DashboardContent({ data, userId }: Props) {
         </AnimatePresence>
       </motion.div>
 
-      {/* ── Section 3: Volumen semanal (Line Chart) ── */}
+      {/* ── Section 3: Estadísticas ── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
         className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-4"
       >
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-spartan-400" />
-            <h3 className="text-sm font-bold text-zinc-200">
-              Volumen semanal
-            </h3>
-          </div>
-          {volumeTrend && (
-            <div
-              className={`flex items-center gap-1 text-xs font-bold ${
-                volumeTrend.isUp ? "text-emerald-400" : "text-spartan-400"
-              }`}
-            >
-              {volumeTrend.isUp ? (
-                <TrendingUp className="w-3.5 h-3.5" />
-              ) : (
-                <TrendingDown className="w-3.5 h-3.5" />
-              )}
-              {volumeTrend.pct > 0 ? "+" : ""}
-              {volumeTrend.pct}%
-            </div>
-          )}
+        <div className="flex items-center gap-2 mb-3">
+          <TrendingUp className="w-4 h-4 text-spartan-400" />
+          <h3 className="text-sm font-bold text-zinc-200">Tus números</h3>
         </div>
 
-        {data.weeklyVolume.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <TrendingUp className="w-8 h-8 text-zinc-700 mb-2" />
-            <p className="text-sm text-zinc-500">Sin datos de volumen aún</p>
-            <p className="text-xs text-zinc-600 mt-0.5">
-              Completa entrenamientos para ver tu progreso.
-            </p>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-3">
+            <p className="text-2xl font-extrabold text-white">{data.routinesCount}</p>
+            <p className="text-[10px] text-zinc-500 mt-0.5">rutinas creadas</p>
           </div>
-        ) : (
-          <div className="h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={data.weeklyVolume}
-                margin={{ top: 5, right: 10, left: -10, bottom: 5 }}
-              >
-                <defs>
-                  <linearGradient
-                    id="volumeGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="0%"
-                      stopColor="#be0b3c"
-                      stopOpacity={0.4}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor="#be0b3c"
-                      stopOpacity={0}
-                    />
-                  </linearGradient>
-                </defs>
-                <XAxis
-                  dataKey="week"
-                  tick={{ fontSize: 10, fill: "#71717a" }}
-                  axisLine={{ stroke: "rgba(255,255,255,0.06)" }}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 10, fill: "#71717a" }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v) => `${v}t`}
-                  width={40}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#18181b",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 12,
-                    fontSize: 12,
-                    color: "#e4e4e7",
-                    padding: "8px 12px",
-                  }}
-                  formatter={(value: number) => [
-                    `${value.toLocaleString("es-ES")} toneladas`,
-                    "Volumen",
-                  ]}
-                  labelStyle={{ color: "#a1a1aa", marginBottom: 4 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="volume"
-                  stroke="#be0b3c"
-                  strokeWidth={2.5}
-                  dot={{
-                    r: 3,
-                    fill: "#be0b3c",
-                    stroke: "#18181b",
-                    strokeWidth: 1.5,
-                  }}
-                  activeDot={{
-                    r: 5,
-                    fill: "#be0b3c",
-                    stroke: "#fff",
-                    strokeWidth: 2,
-                  }}
-                  fill="url(#volumeGradient)"
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-3">
+            <p className="text-2xl font-extrabold text-white">{data.sessionsThisWeek}</p>
+            <p className="text-[10px] text-zinc-500 mt-0.5">sesiones esta semana</p>
           </div>
-        )}
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-3">
+            <p className="text-2xl font-extrabold text-white">{data.exercisesCount}</p>
+            <p className="text-[10px] text-zinc-500 mt-0.5">ejercicios en rutinas</p>
+          </div>
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-3">
+            <p className="text-2xl font-extrabold text-white">{data.sessionsCount}</p>
+            <p className="text-[10px] text-zinc-500 mt-0.5">entrenos totales</p>
+          </div>
+        </div>
       </motion.div>
 
       {/* ── Section 4: Distribución muscular (Pie Chart) ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15 }}
-        className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-4"
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <Dumbbell className="w-4 h-4 text-spartan-400" />
-          <h3 className="text-sm font-bold text-zinc-200">
-            Distribución por grupo muscular
-          </h3>
-        </div>
-
-        {data.muscleVolume.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <Dumbbell className="w-8 h-8 text-zinc-700 mb-2" />
-            <p className="text-sm text-zinc-500">Sin datos de entrenamiento</p>
-            <p className="text-xs text-zinc-600 mt-0.5">
-              Los grupos musculares aparecerán aquí al entrenar.
-            </p>
+      {data.muscleVolume.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+          className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-4"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Dumbbell className="w-4 h-4 text-spartan-400" />
+            <h3 className="text-sm font-bold text-zinc-200">Músculos más trabajados</h3>
           </div>
-        ) : (
-          <div className="h-60 relative">
+
+          <div className="h-56 relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie
-                  data={data.muscleVolume}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={85}
-                  paddingAngle={3}
-                  dataKey="volume"
-                  nameKey="muscle"
-                  stroke="none"
-                >
-                  {data.muscleVolume.map((_, i) => (
-                    <Cell
-                      key={i}
-                      fill={PIE_COLORS[i % PIE_COLORS.length]}
-                    />
-                  ))}
+                <Pie data={data.muscleVolume} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="volume" nameKey="muscle" stroke="none">
+                  {data.muscleVolume.map((_, i) => (<Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />))}
                 </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#18181b",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 12,
-                    fontSize: 12,
-                    color: "#e4e4e7",
-                    padding: "8px 12px",
-                  }}
-                  formatter={(value: number, name: string) => [
-                    `${value.toLocaleString("es-ES")} toneladas`,
-                    name,
-                  ]}
+                <RechartsTooltip
+                  contentStyle={{ backgroundColor: "#18181b", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12, color: "#e4e4e7", padding: "8px 12px" }}
+                  formatter={(value: number) => [`${value} toneladas`, ""]}
                 />
-                <Legend
-                  wrapperStyle={{
-                    fontSize: 11,
-                    color: "#a1a1aa",
-                    paddingTop: 8,
-                  }}
-                  iconType="circle"
-                  iconSize={8}
-                />
+                <Legend wrapperStyle={{ fontSize: 10, color: "#a1a1aa", paddingTop: 4 }} iconType="circle" iconSize={6} />
               </PieChart>
             </ResponsiveContainer>
-
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="text-center">
-                <p className="text-2xl font-extrabold text-white">
-                  {totalTons.toFixed(1)}
-                </p>
-                <p className="text-[10px] text-zinc-500">toneladas totales</p>
-              </div>
-            </div>
           </div>
-        )}
-      </motion.div>
+        </motion.div>
+      )}
 
       {/* ── Section 5: Hábitos de hoy ── */}
       <motion.div
