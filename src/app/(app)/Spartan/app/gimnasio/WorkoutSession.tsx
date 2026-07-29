@@ -401,14 +401,14 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
           <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}} className="space-y-4 py-4">
             <p className="text-sm font-bold text-zinc-500 uppercase tracking-wider text-center">Descanso</p>
 
-            {/* Next exercise GIF */}
-            <div className="aspect-square bg-black rounded-3xl overflow-hidden border-2 border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.15)] relative">
-              <img src={currentExercise.gif_url} alt={currentExercise.name} className="w-full h-full object-contain p-4 opacity-80" />
-              <div className="absolute bottom-3 left-3 right-3 bg-black/60 backdrop-blur-sm rounded-xl p-3">
+            {/* Next exercise GIF — smaller */}
+            <div className="h-44 bg-black rounded-2xl overflow-hidden border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)] relative">
+              <img src={currentExercise.gif_url} alt={currentExercise.name} className="w-full h-full object-contain p-3 opacity-80" />
+              <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-sm rounded-xl p-2.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-bold text-amber-400">Siguiente ejercicio</p>
-                    <p className="text-sm font-extrabold text-white mt-0.5">{currentExercise.name}</p>
+                    <p className="text-[10px] font-bold text-amber-400">Siguiente ejercicio</p>
+                    <p className="text-xs font-extrabold text-white mt-0.5">{currentExercise.name}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     {currentExerciseIndex > 0 && (
@@ -439,14 +439,14 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
             <h3 className="text-xl font-extrabold text-amber-400 text-center">¡Descanso terminado!</h3>
             <p className="text-xs text-amber-500/60 text-center">El temporizador sigue corriendo</p>
 
-            {/* Next exercise GIF + nav */}
-            <div className="aspect-square bg-black rounded-3xl overflow-hidden border-2 border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.15)] relative">
-              <img src={currentExercise.gif_url} alt={currentExercise.name} className="w-full h-full object-contain p-4 opacity-80" />
-              <div className="absolute bottom-3 left-3 right-3 bg-black/60 backdrop-blur-sm rounded-xl p-3">
+            {/* Next exercise GIF + nav — smaller */}
+            <div className="h-44 bg-black rounded-2xl overflow-hidden border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)] relative">
+              <img src={currentExercise.gif_url} alt={currentExercise.name} className="w-full h-full object-contain p-3 opacity-80" />
+              <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-sm rounded-xl p-2.5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[10px] font-bold text-amber-400">Siguiente</p>
-                    <p className="text-sm font-extrabold text-white mt-0.5">{currentExercise.name}</p>
+                    <p className="text-xs font-extrabold text-white mt-0.5">{currentExercise.name}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     {currentExerciseIndex > 0 && (

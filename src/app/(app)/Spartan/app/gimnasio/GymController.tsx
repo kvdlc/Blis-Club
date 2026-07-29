@@ -387,7 +387,7 @@ export default function GymController({ userId }: { userId: string }) {
       {/* Day detail modal */}
       <AnimatePresence>
         {selectedDay && (
-          <DayDetailModal day={selectedDay} onClose={() => setSelectedDay(null)} />
+          <DayDetailModal day={selectedDay} userId={userId} onClose={() => setSelectedDay(null)} />
         )}
       </AnimatePresence>
 
