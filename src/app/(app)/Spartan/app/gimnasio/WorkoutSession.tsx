@@ -143,8 +143,17 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const prevWeights = lastWeights[currentExerciseIndex] ?? [];
 
   const updateSeriesField = (si: number, f: "weight"|"reps", v: number|null) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; s[si] = {...s[si], [f]: v}; n[currentExerciseIndex] = {...c, series: s}; return n; });
-  const toggleSeriesComplete = (si: number) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; const wasDone = s[si].completed; s[si] = {...s[si], completed: !wasDone};     if (!wasDone && seriesRestStart) { const ar = Math.round((Date.now()-seriesRestStart)/1000); n[currentExerciseIndex] = {...c, series: s, actualBetweenSeriesRest: ar}; setSeriesRestStart(null); setSeriesRestTimer(null); setSeriesTimerExpired(false); setSeriesRestElapsed(0); }
-    else if (wasDone) { setSeriesRestTimer(BETWEEN_SERIES_REST); setSeriesRestStart(Date.now()); setSeriesTimerExpired(false); setSeriesRestElapsed(0); n[currentExerciseIndex] = {...c, series: s}; return n; } n[currentExerciseIndex] = {...c, series: s}; return n; });
+  const toggleSeriesComplete = (si: number) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; const wasDone = s[si].completed; s[si] = {...s[si], completed: !wasDone};
+    if (!wasDone) { 
+      // Just completed the series → start between-series rest timer
+      setSeriesRestTimer(BETWEEN_SERIES_REST); setSeriesRestStart(Date.now()); setSeriesTimerExpired(false); setSeriesRestElapsed(0);
+      n[currentExerciseIndex] = {...c, series: s}; return n;
+    } else { 
+      // Un-completing → stop timer and save rest time
+      if (seriesRestStart) { const ar = Math.round((Date.now()-seriesRestStart)/1000); n[currentExerciseIndex] = {...c, series: s, actualBetweenSeriesRest: ar}; setSeriesRestStart(null); setSeriesRestTimer(null); setSeriesTimerExpired(false); setSeriesRestElapsed(0); }
+      else n[currentExerciseIndex] = {...c, series: s};
+      return n;
+    } });
   const addSeries = () => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; n[currentExerciseIndex] = {...c, series: [...c.series, { weight: null, reps: currentExercise.reps, completed: false }]}; return n; });
   const removeSeries = (si: number) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c || c.series.length <= 1) return n; n[currentExerciseIndex] = {...c, series: c.series.filter((_, i) => i !== si)}; return n; });
   const allSeriesCompleted = currentData.series.length > 0 && currentData.series.every(s => s.completed);
@@ -379,7 +388,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
                   <div className="flex items-center gap-1 shrink-0">
                     {!isDone && currentData.series.length>1 && <button onClick={()=>removeSeries(si)} className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center hover:bg-red-500/20 active:scale-[0.95]"><MinusIcon /></button>}
-                    <button onClick={()=>{toggleSeriesComplete(si);if(!entry.completed){setSeriesRestTimer(BETWEEN_SERIES_REST);setSeriesRestStart(Date.now());setSeriesTimerExpired(false);setSeriesRestElapsed(0);}}} className={`w-8 h-8 rounded-full flex items-center justify-center active:scale-[0.95] ${isDone?"bg-emerald-500 border-2 border-emerald-400":"bg-emerald-500/10 border-2 border-emerald-500/30 hover:bg-emerald-500/20"}`}><Check className={`w-4 h-4 ${isDone?"text-white":"text-emerald-500"}`} /></button>
+                    <button onClick={()=>toggleSeriesComplete(si)} className={`w-8 h-8 rounded-full flex items-center justify-center active:scale-[0.95] ${isDone?"bg-emerald-500 border-2 border-emerald-400":"bg-emerald-500/10 border-2 border-emerald-500/30 hover:bg-emerald-500/20"}`}><Check className={`w-4 h-4 ${isDone?"text-white":"text-emerald-500"}`} /></button>
                   </div>
                 </div>
               );
@@ -387,25 +396,75 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
           </div>
         )}
 
-        {/* Rest timer active */}
-        {restTimer !== null && restTimer > 0 && (
-          <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}} className="flex flex-col items-center py-8">
-            <p className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-4">Descanso</p>
+        {/* Rest timer active — show next exercise GIF + navigation */}
+        {(restTimer !== null && restTimer > 0) && (
+          <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}} className="space-y-4 py-4">
+            <p className="text-sm font-bold text-zinc-500 uppercase tracking-wider text-center">Descanso</p>
+
+            {/* Next exercise GIF */}
+            <div className="aspect-square bg-black rounded-3xl overflow-hidden border-2 border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.15)] relative">
+              <img src={currentExercise.gif_url} alt={currentExercise.name} className="w-full h-full object-contain p-4 opacity-80" />
+              <div className="absolute bottom-3 left-3 right-3 bg-black/60 backdrop-blur-sm rounded-xl p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-amber-400">Siguiente ejercicio</p>
+                    <p className="text-sm font-extrabold text-white mt-0.5">{currentExercise.name}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {currentExerciseIndex > 0 && (
+                      <button onClick={() => goToExercise(currentExerciseIndex - 1)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <ChevronLeft className="w-4 h-4 text-zinc-300" />
+                      </button>
+                    )}
+                    {currentExerciseIndex < exercises.length - 1 && (
+                      <button onClick={() => goToExercise(currentExerciseIndex + 1)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <ChevronRight className="w-4 h-4 text-zinc-300" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <BigTimerRing total={restTarget} remaining={restTimer} />
-            <div className="flex items-center gap-2 mt-4"><span className="text-[11px] text-zinc-600">Meta: {restTarget}s</span></div>
-            <p className="text-sm text-zinc-400 mt-3 font-medium">Siguiente: {exercises[currentExerciseIndex]?.name??"Finalizar"}</p>
-            <button onClick={startNextExercise} className="mt-4 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 text-sm font-bold hover:bg-white/10 active:scale-[0.97]">Saltar descanso</button>
+            <div className="flex items-center gap-2 justify-center"><span className="text-[11px] text-zinc-600">Meta: {restTarget}s</span></div>
+            <button onClick={startNextExercise} className="w-full px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-400 text-sm font-bold hover:bg-white/10 active:scale-[0.97]">Saltar descanso</button>
           </motion.div>
         )}
 
-        {/* Rest timer EXPIRED — big alert */}
+        {/* Rest timer EXPIRED */}
         {isExerciseRest && (
-          <motion.div animate={{scale:[1,1.03,1]}} transition={{repeat:Infinity,duration:.6}} className="flex flex-col items-center py-8">
-            <motion.div animate={{scale:[1,1.3,1]}} transition={{repeat:Infinity,duration:.8}} className="w-20 h-20 rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center mb-4"><Volume2 className="w-10 h-10 text-amber-400" /></motion.div>
-            <h3 className="text-xl font-extrabold text-amber-400">¡Descanso terminado!</h3>
-            <p className="text-sm text-zinc-400 mt-1">Siguiente: {exercises[currentExerciseIndex]?.name??"Finalizar"}</p>
-            <p className="text-xs text-amber-500/60 mt-1">El temporizador sigue corriendo</p>
-            <button onClick={startNextExercise} className="mt-6 w-full max-w-xs flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-base font-bold hover:from-spartan-500 active:scale-[0.97] shadow-[0_0_30px_rgba(190,11,60,0.3)]"><Play className="w-5 h-5" /> Comenzar ejercicio</button>
+          <motion.div animate={{scale:[1,1.03,1]}} transition={{repeat:Infinity,duration:.6}} className="space-y-4 py-4">
+            <motion.div animate={{scale:[1,1.3,1]}} transition={{repeat:Infinity,duration:.8}} className="w-20 h-20 mx-auto rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center"><Volume2 className="w-10 h-10 text-amber-400" /></motion.div>
+            <h3 className="text-xl font-extrabold text-amber-400 text-center">¡Descanso terminado!</h3>
+            <p className="text-xs text-amber-500/60 text-center">El temporizador sigue corriendo</p>
+
+            {/* Next exercise GIF + nav */}
+            <div className="aspect-square bg-black rounded-3xl overflow-hidden border-2 border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.15)] relative">
+              <img src={currentExercise.gif_url} alt={currentExercise.name} className="w-full h-full object-contain p-4 opacity-80" />
+              <div className="absolute bottom-3 left-3 right-3 bg-black/60 backdrop-blur-sm rounded-xl p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-amber-400">Siguiente</p>
+                    <p className="text-sm font-extrabold text-white mt-0.5">{currentExercise.name}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {currentExerciseIndex > 0 && (
+                      <button onClick={() => goToExercise(currentExerciseIndex - 1)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <ChevronLeft className="w-4 h-4 text-zinc-300" />
+                      </button>
+                    )}
+                    {currentExerciseIndex < exercises.length - 1 && (
+                      <button onClick={() => goToExercise(currentExerciseIndex + 1)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <ChevronRight className="w-4 h-4 text-zinc-300" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button onClick={startNextExercise} className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-base font-bold hover:from-spartan-500 active:scale-[0.97] shadow-[0_0_30px_rgba(190,11,60,0.3)]"><Play className="w-5 h-5" /> Comenzar ejercicio</button>
           </motion.div>
         )}
 

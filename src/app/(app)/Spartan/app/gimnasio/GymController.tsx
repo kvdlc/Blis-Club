@@ -301,6 +301,9 @@ export default function GymController({ userId }: { userId: string }) {
             </motion.div>
           )}
 
+          {/* Weekly Calendar */}
+          <WeeklyCalendar userId={userId} onSelectDay={setSelectedDay} />
+
           {/* Mis rutinas */}
           <section>
             <div className="flex items-center justify-between mb-3">
@@ -378,10 +381,6 @@ export default function GymController({ userId }: { userId: string }) {
             }}
           />
 
-          {/* Weekly Calendar */}
-          <div className="pt-2">
-            <WeeklyCalendar userId={userId} onSelectDay={setSelectedDay} />
-          </div>
         </>
       )}
 
