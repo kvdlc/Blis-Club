@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Check, Circle, ChevronRight, Plus, Trophy, X, Play, Flag, Timer, Volume2, Dumbbell, Share2, Trash2, Eye, EyeOff, Quote, ChevronLeft } from "lucide-react";
 import { GYM_QUOTES } from "./gym-quotes";
+import PostWorkoutScreen from "./PostWorkoutScreen";
 
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -65,6 +66,8 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const [seriesRestStart, setSeriesRestStart] = useState<number | null>(null);
   const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
   const [workoutEnded, setWorkoutEnded] = useState(false);
+  const [savedSessionId, setSavedSessionId] = useState<string | null>(null);
+  const [previousSession, setPreviousSession] = useState<any>(null);
   const [abandoning, setAbandoning] = useState(false);
   const [discarding, setDiscarding] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -161,12 +164,37 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const discardWorkout = () => { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem("spartan_workout_backup"); onClose(); };
 
   const doFinishWorkout = async () => {
-    setWorkoutEnded(true); if (timerRef.current) clearInterval(timerRef.current); if (restTimerRef.current) clearInterval(restTimerRef.current); if (seriesRestRef.current) clearInterval(seriesRestRef.current);
-    setSaving(true); setSaveError("");
-    const supabase = createClient(); const endedAt = new Date(); const start = workoutStartTime || new Date();
-    const { error } = await supabase.from("spartan_workout_sessions").insert({ user_id: userId, routine_id: routineId, started_at: start.toISOString(), ended_at: endedAt.toISOString(), duration_minutes: Math.round((endedAt.getTime()-start.getTime())/60000), series_data: allSeriesData, completed: true });
-    if (error) { setSaveError(error.message); try { localStorage.setItem("spartan_workout_backup", JSON.stringify({ routineId, started_at: start.toISOString(), ended_at: endedAt.toISOString(), allSeriesData })); } catch {} }
-    localStorage.removeItem(STORAGE_KEY); setSaving(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (restTimerRef.current) clearInterval(restTimerRef.current);
+    if (seriesRestRef.current) clearInterval(seriesRestRef.current);
+
+    setSaving(true);
+    const supabase = createClient();
+    const endedAt = new Date();
+    const start = workoutStartTime || new Date();
+    const sessionData = {
+      user_id: userId, routine_id: routineId,
+      started_at: start.toISOString(), ended_at: endedAt.toISOString(),
+      duration_minutes: Math.floor((endedAt.getTime() - start.getTime()) / 60000),
+      series_data: allSeriesData, completed: true,
+    };
+
+    const { data: saved } = await supabase.from("spartan_workout_sessions").insert(sessionData).select("id").single();
+
+    // Fetch previous session for comparison
+    const { data: prevSesh } = await supabase
+      .from("spartan_workout_sessions")
+      .select("series_data, duration_minutes")
+      .eq("user_id", userId).eq("routine_id", routineId).eq("completed", true)
+      .order("started_at", { ascending: false }).limit(2);
+
+    const prev = (prevSesh && prevSesh.length >= 2) ? prevSesh[1] : null;
+
+    localStorage.removeItem(STORAGE_KEY);
+    setSavedSessionId(saved?.id || null);
+    setPreviousSession(prev);
+    setWorkoutEnded(true);
+    setSaving(false);
   };
 
   const goToExercise = (idx: number) => { setCurrentExerciseIndex(idx); setRestTimer(null); setTimerExpired(false); setRestStartTime(null); setSeriesRestTimer(null); setSeriesTimerExpired(false); };
@@ -190,36 +218,31 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
   // ── FINISH ──
   if (workoutEnded) {
-    const totalCompleted = completedExercises.size; const totalMinutes = Math.round(elapsedTime/60);
-    let totalVolume = 0; let totalSeries = 0;
-    exercises.forEach((ex,i) => { const d = allSeriesData[i]; if(!d) return; for(const s of d.series){ if(s.completed){ totalSeries++; if(s.weight) totalVolume += s.weight*s.reps; } } });
-    const volumeTons = totalVolume / 1000;
-    const name = profile?.first_name || "Guerrero";
+    const saveWeightAndGym = async (weight: number | null, occupancy: string) => {
+      if (!savedSessionId) return;
+      const supabase = createClient();
+      await supabase.from("spartan_workout_sessions").update({
+        body_weight_kg: weight,
+        gym_occupancy: occupancy,
+      }).eq("id", savedSessionId);
+    };
+
     return (
-      <motion.div initial={{opacity:0}} animate={{opacity:1}} className="fixed inset-0 z-50 bg-zinc-950 overflow-y-auto">
-        <Confetti />
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 relative">
-          <motion.div animate={{scale:[1,1.2,1],opacity:[.3,.1,.3]}} transition={{repeat:Infinity,duration:3}} className="absolute w-64 h-64 rounded-full bg-spartan-600/10 blur-3xl" />
-          <motion.div animate={{scale:[1.2,1,1.2],opacity:[.1,.3,.1]}} transition={{repeat:Infinity,duration:4,delay:.5}} className="absolute w-48 h-48 rounded-full bg-amber-500/10 blur-3xl" />
-          <div className="relative z-10 w-full max-w-sm space-y-6 text-center">
-            <div className="flex items-center justify-center gap-4 mb-2">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-spartan-600 to-spartan-800 flex items-center justify-center ring-2 ring-spartan-500/30 shadow-[0_0_30px_rgba(190,11,60,0.4)] overflow-hidden shrink-0">
-                {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" /> : <span className="text-lg font-extrabold text-white">{name.charAt(0)}</span>}
-              </div>
-              <div className="text-left"><p className="text-xs text-zinc-500">Gran trabajo,</p><p className="text-base font-extrabold text-white">{name}</p></div>
-              <motion.div initial={{rotate:-20,scale:0}} animate={{rotate:0,scale:1}} transition={{type:"spring",delay:.2}} className="w-14 h-14 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] ml-auto"><Trophy className="w-7 h-7 text-white" /></motion.div>
-            </div>
-            <div><h1 className="text-3xl font-extrabold text-white" style={{textShadow:"0 0 40px rgba(190,11,60,0.6),0 0 10px rgba(190,11,60,0.8)"}}>Entrenamiento</h1><h1 className="text-3xl font-extrabold text-spartan-400" style={{textShadow:"0 0 30px rgba(190,11,60,0.4)"}}>Completado</h1></div>
-            <div className="grid grid-cols-2 gap-3">
-              {[{v:totalMinutes,l:"minutos",c:"spartan-500"},{v:totalCompleted,l:"ejercicios",c:"emerald-500"},{v:totalSeries,l:"series",c:"amber-500"},{v:volumeTons.toFixed(1),l:"toneladas",c:"blue-500"}].map((s,i)=>(<div key={i} className="relative rounded-2xl p-4 bg-white/[0.03] border-current/20 overflow-hidden" style={{borderColor:`rgba(${s.c==="emerald-500"?"16,185,129":s.c==="amber-500"?"245,158,11":s.c==="blue-500"?"59,130,246":"190,11,60"},0.2)`}}><div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-current to-transparent" /><p className="text-3xl font-extrabold text-white">{s.v}</p><p className="text-[10px] font-medium text-zinc-500 uppercase mt-1">{s.l}</p></div>))}
-            </div>
-            <div className="space-y-1 text-left"><p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Ejercicios</p>{exercises.map((ex,i)=>{const isDone=completedExercises.has(i);const d=allSeriesData[i];const maxW=d?.series.reduce((mx,s)=>s.weight&&s.weight>(mx||0)?s.weight:mx,0 as number|null);return(<div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isDone?"bg-emerald-500/5 border border-emerald-500/20":"bg-white/[0.02] border border-white/[0.04] opacity-40"}`}>{isDone?<Check className="w-3.5 h-3.5 text-emerald-400 shrink-0"/>:<Circle className="w-3.5 h-3.5 text-zinc-600 shrink-0"/>}<span className={`text-xs font-bold truncate flex-1 ${isDone?"text-emerald-300":"text-zinc-600"}`}>{ex.name}</span>{maxW&&<span className="text-[10px] font-bold text-amber-400 shrink-0">{maxW}kg</span>}</div>)})}</div>
-            {saveError && <div className="p-3 rounded-xl bg-red-500/5 border border-red-500/20 text-left"><p className="text-[10px] text-red-400">Error: {saveError}</p><p className="text-[9px] text-zinc-600 mt-0.5">Backup guardado en dispositivo.</p></div>}
-            <div className="space-y-2 pt-2"><button onClick={onClose} className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 active:scale-[0.97] shadow-[0_0_30px_rgba(190,11,60,0.3)]"><Dumbbell className="w-4 h-4" /> Volver al inicio</button><button className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-zinc-300 text-xs font-bold hover:bg-white/[0.06]"><Share2 className="w-3.5 h-3.5" /> Compartir</button></div>
-            <p className="text-[10px] text-zinc-700">{routineName} · {new Date().toLocaleDateString("es-ES")} · Blis Club</p>
-          </div>
-        </div>
-      </motion.div>
+      <PostWorkoutScreen
+        userId={userId}
+        routineName={routineName}
+        exercises={exercises}
+        allSeriesData={allSeriesData}
+        completedExercises={completedExercises}
+        elapsedTime={elapsedTime}
+        workoutStartTime={workoutStartTime}
+        workoutEnded={true}
+        bodyWeight={null}
+        gymOccupancy=""
+        previousSession={previousSession}
+        onClose={onClose}
+        onSaveWeightAndGym={saveWeightAndGym}
+      />
     );
   }
 

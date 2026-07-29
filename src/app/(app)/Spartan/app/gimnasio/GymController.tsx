@@ -15,6 +15,8 @@ import ExerciseLibrary from "./ExerciseLibrary";
 import MuscleGroupView from "./MuscleGroupView";
 import RoutineBuilder from "./RoutineBuilder";
 import WorkoutSession from "./WorkoutSession";
+import WeeklyCalendar from "./WeeklyCalendar";
+import DayDetailModal from "./DayDetailModal";
 
 interface WorkoutExercise {
   id: string;
@@ -70,6 +72,7 @@ export default function GymController({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
   const [savedSession, setSavedSession] = useState<{ routineId: string; routineName: string } | null>(null);
+  const [selectedDay, setSelectedDay] = useState<any>(null);
 
   const loadData = useCallback(async () => {
     const supabase = createClient();
@@ -374,8 +377,20 @@ export default function GymController({ userId }: { userId: string }) {
               setView("muscle");
             }}
           />
+
+          {/* Weekly Calendar */}
+          <div className="pt-2">
+            <WeeklyCalendar userId={userId} onSelectDay={setSelectedDay} />
+          </div>
         </>
       )}
+
+      {/* Day detail modal */}
+      <AnimatePresence>
+        {selectedDay && (
+          <DayDetailModal day={selectedDay} onClose={() => setSelectedDay(null)} />
+        )}
+      </AnimatePresence>
 
       {/* Muscle group view */}
       <AnimatePresence>
