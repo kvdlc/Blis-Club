@@ -27,6 +27,14 @@ export default async function MotivacionPage() {
     seduccion: "bg-pink-500/10 text-pink-400 border-pink-500/20",
     negocios: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     disciplina: "bg-spartan-500/10 text-spartan-400 border-spartan-500/20",
+    emprendimiento: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    habilidades_blandas: "bg-teal-500/10 text-teal-400 border-teal-500/20",
+    conocimiento: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+    vestimenta: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    mentalidad: "bg-violet-500/10 text-violet-400 border-violet-500/20",
+    relaciones: "bg-red-500/10 text-red-400 border-red-500/20",
+    finanzas_personales: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    liderazgo: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
     otro: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
   };
 
