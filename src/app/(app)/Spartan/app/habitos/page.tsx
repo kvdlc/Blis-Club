@@ -32,7 +32,19 @@ interface HabitForm {
   container_label: string;
   color: string;
   icon: string;
+  category: string;
 }
+
+const CATEGORIES = [
+  { value: "nutricion", label: "Nutrición" },
+  { value: "aprendizaje", label: "Aprendizaje" },
+  { value: "salud", label: "Salud" },
+  { value: "finanzas", label: "Finanzas" },
+  { value: "disciplina", label: "Disciplina" },
+  { value: "social", label: "Social" },
+  { value: "productividad", label: "Productividad" },
+  { value: "general", label: "General" },
+];
 
 export default function HabitosPage() {
   const [habits, setHabits] = useState<any[]>([]);
@@ -44,7 +56,7 @@ export default function HabitosPage() {
   const [editingHabit, setEditingHabit] = useState<any>(null);
   const [form, setForm] = useState<HabitForm>({
     name: "", type: "counter", unit: "", target_value: 1,
-    container_size: null, container_label: "", color: "#3b82f6", icon: "Droplets",
+    container_size: null, container_label: "", color: "#3b82f6", icon: "Droplets", category: "general",
   });
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -82,11 +94,11 @@ export default function HabitosPage() {
         target_value: habit.target_value || 1,
         container_size: habit.container_size ?? null,
         container_label: habit.container_label || "",
-        color: habit.color || "#3b82f6", icon: habit.icon || "Droplets",
+        color: habit.color || "#3b82f6", icon: habit.icon || "Droplets", category: habit.category || "general",
       });
     } else {
       setEditingHabit(null);
-      setForm({ name: "", type: "counter", unit: "", target_value: 1, container_size: null, container_label: "", color: "#3b82f6", icon: "Droplets" });
+      setForm({ name: "", type: "counter", unit: "", target_value: 1, container_size: null, container_label: "", color: "#3b82f6", icon: "Droplets", category: "general" });
     }
     setShowEditor(true);
   };
@@ -99,7 +111,7 @@ export default function HabitosPage() {
       user_id: userId, name: form.name.trim(), type: form.type,
       unit: form.unit || null, target_value: form.target_value || 1,
       container_size: form.container_size || null, container_label: form.container_label || null,
-      color: form.color, icon: form.icon,
+      color: form.color, icon: form.icon, category: form.category,
       is_active: true,
     };
     if (editingHabit) {
@@ -204,19 +216,35 @@ export default function HabitosPage() {
             </div>
           </div>
 
-          {/* Habit cards */}
-          <div className="space-y-2">
-            {habits.map((habit: any) => {
-              const entry = getEntry(habit.id);
-              const isCheck = habit.type === "check";
-              const isCurrency = habit.type === "currency_income" || habit.type === "currency_expense";
-              const isCounter = !isCheck && !isCurrency;
-              const isCompleted = entry?.completed ?? false;
-              const IconComp = getIcon(habit.icon);
-              const current = entry?.value || 0;
-              const target = habit.target_value || 1;
-              const pct = Math.min(100, (current / target) * 100);
-              const isLoading = actionLoading === habit.id;
+          {/* Habit cards grouped by category */}
+          {(() => {
+            const grouped = new Map<string, any[]>();
+            for (const h of habits) {
+              const cat = h.category || "general";
+              if (!grouped.has(cat)) grouped.set(cat, []);
+              grouped.get(cat)!.push(h);
+            }
+            const catOrder = ["nutricion", "aprendizaje", "salud", "finanzas", "disciplina", "social", "productividad", "general"];
+
+            return catOrder.map(catKey => {
+              const catHabits = grouped.get(catKey);
+              if (!catHabits || catHabits.length === 0) return null;
+              const catLabel = CATEGORIES.find(c => c.value === catKey)?.label || catKey;
+
+              return (
+                <div key={catKey} className="space-y-2">
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-1">{catLabel}</p>
+                  {catHabits.map((habit: any) => {
+                    const entry = getEntry(habit.id);
+                    const isCheck = habit.type === "check";
+                    const isCurrency = habit.type === "currency_income" || habit.type === "currency_expense";
+                    const isCounter = !isCheck && !isCurrency;
+                    const isCompleted = entry?.completed ?? false;
+                    const IconComp = getIcon(habit.icon);
+                    const current = entry?.value || 0;
+                    const target = habit.target_value || 1;
+                    const pct = Math.min(100, (current / target) * 100);
+                    const isLoading = actionLoading === habit.id;
 
               return (
                 <motion.div key={habit.id} layout className={`rounded-2xl border overflow-hidden ${isCompleted ? "bg-emerald-500/5 border-emerald-500/20" : "bg-white/[0.03] border-white/[0.06]"}`}>
@@ -312,7 +340,10 @@ export default function HabitosPage() {
                 </motion.div>
               );
             })}
-          </div>
+                </div>
+              );
+            });
+          })()}
         </>
       )}
 
@@ -328,6 +359,17 @@ export default function HabitosPage() {
               </div>
 
               <div className="p-5 space-y-4">
+                <div>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Categoría</label>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {CATEGORIES.map(cat => (
+                      <button key={cat.value} onClick={() => setForm({ ...form, category: cat.value })} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${form.category === cat.value ? "bg-spartan-600/10 border border-spartan-500/30 text-spartan-400" : "bg-white/[0.03] border border-white/[0.06] text-zinc-500 hover:bg-white/[0.05]"}`}>
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div>
                   <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Nombre</label>
                   <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ej: Agua, Lectura..." className="w-full mt-1 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm font-bold text-white placeholder:text-zinc-600 focus:outline-none focus:border-spartan-500/50" />
