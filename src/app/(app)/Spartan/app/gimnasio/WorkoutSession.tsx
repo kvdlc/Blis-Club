@@ -428,6 +428,28 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
             <BigTimerRing total={restTarget} remaining={restTimer} />
             <div className="flex items-center gap-2 justify-center"><span className="text-[11px] text-zinc-600">Meta: {restTarget}s</span></div>
+
+            {/* All exercises as pills */}
+            <div className="overflow-x-auto pb-1">
+              <div className="flex gap-1.5 min-w-max justify-center">
+                {exercises.map((ex, i) => {
+                  const done = completedExercises.has(i);
+                  const curr = i === currentExerciseIndex;
+                  return (
+                    <button key={i} onClick={() => goToExercise(i)}
+                      className={`shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all active:scale-[0.97] ${
+                        done ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" :
+                        curr ? "bg-amber-500/10 border-amber-500/20 text-amber-400 ring-1 ring-amber-500/30" :
+                        "bg-white/[0.02] border-white/[0.05] text-zinc-600"
+                      }`}
+                    >
+                      {done ? "✓" : curr ? "•" : ""} {ex.name.slice(0, 12)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <button onClick={startNextExercise} className="w-full px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-400 text-sm font-bold hover:bg-white/10 active:scale-[0.97]">Saltar descanso</button>
           </motion.div>
         )}
@@ -473,6 +495,11 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
           <div className="space-y-2 pt-2">
             <button onClick={completeCurrentExercise} disabled={!allSeriesCompleted} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-sm font-bold hover:from-spartan-500 active:scale-[0.97] disabled:opacity-40 shadow-[0_0_20px_rgba(190,11,60,0.3)]"><Check className="w-4 h-4" /> Terminar ejercicio</button>
             <button onClick={skipExercise} disabled={currentExerciseIndex>=exercises.length-1&&allSeriesCompleted} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-zinc-500 text-xs font-bold hover:bg-white/10 active:scale-[0.97] disabled:opacity-30"><ChevronRight className="w-3.5 h-3.5" /> Saltar ejercicio</button>
+            <button onClick={() => { skipExercise(); }}
+              className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl text-zinc-600 text-[11px] font-medium hover:text-zinc-400 transition-colors active:scale-[0.97]"
+            >
+              <X className="w-3 h-3" /> Equipo no disponible
+            </button>
           </div>
         )}
       </div>
