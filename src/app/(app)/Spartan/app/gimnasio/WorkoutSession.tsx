@@ -206,7 +206,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
     setSaving(false);
   };
 
-  const goToExercise = (idx: number) => { setCurrentExerciseIndex(idx); setRestTimer(null); setTimerExpired(false); setRestStartTime(null); setSeriesRestTimer(null); setSeriesTimerExpired(false); };
+  const goToExercise = (idx: number) => { setCurrentExerciseIndex(idx); setSeriesRestTimer(null); setSeriesTimerExpired(false); };
   const isExerciseRest = restTimer !== null && restTimer <= 0 && timerExpired;
   const isSeriesRest = seriesRestTimer !== null && seriesTimerExpired;
   const isResting = (restTimer !== null && restTimer > 0) || isExerciseRest;
