@@ -37,6 +37,7 @@ interface HabitForm {
 export default function HabitosPage() {
   const [habits, setHabits] = useState<any[]>([]);
   const [todayEntries, setTodayEntries] = useState<any[]>([]);
+  const [weekEntries, setWeekEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("");
   const [showEditor, setShowEditor] = useState(false);
@@ -48,6 +49,7 @@ export default function HabitosPage() {
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [todayStr, setTodayStr] = useState("");
+  const [expandedHabit, setExpandedHabit] = useState<string | null>(null);
 
   useEffect(() => { setTodayStr(new Date().toISOString().split("T")[0]); }, []);
 
@@ -57,12 +59,14 @@ export default function HabitosPage() {
     if (!user) return;
     setUserId(user.id);
     const today = new Date().toISOString().split("T")[0];
-    const [habitsRes, entriesRes] = await Promise.all([
+    const [habitsRes, entriesRes, weekRes] = await Promise.all([
       supabase.from("spartan_habits").select("*").eq("user_id", user.id).eq("is_active", true).order("sort_order", { ascending: true }),
       supabase.from("spartan_habit_entries").select("*").eq("user_id", user.id).eq("date", today),
+      supabase.from("spartan_habit_entries").select("*").eq("user_id", user.id).gte("date", new Date(Date.now()-6*86400000).toISOString().split("T")[0]).order("date"),
     ]);
     setHabits(habitsRes.data ?? []);
     setTodayEntries(entriesRes.data ?? []);
+    setWeekEntries(weekRes.data ?? []);
     setLoading(false);
   }, []);
 
@@ -99,9 +103,10 @@ export default function HabitosPage() {
       is_active: true,
     };
     if (editingHabit) {
-      await supabase.from("spartan_habits").update(data).eq("id", editingHabit.id);
+      await supabase.from("spartan_habits").update({ ...data, sort_order: editingHabit.sort_order }).eq("id", editingHabit.id);
     } else {
-      await supabase.from("spartan_habits").insert(data);
+      const { count } = await supabase.from("spartan_habits").select("*", { count: "exact", head: true }).eq("user_id", userId);
+      await supabase.from("spartan_habits").insert({ ...data, sort_order: (count || 0) });
     }
     setSaving(false); setShowEditor(false);
     await loadData();
@@ -134,6 +139,18 @@ export default function HabitosPage() {
         });
       }
     }
+    setActionLoading(null);
+    await loadData();
+  };
+
+  const setExactValue = async (habit: any, val: number) => {
+    if (val < 0) return;
+    setActionLoading(habit.id);
+    const supabase = createClient();
+    const completed = val >= (habit.target_value || 1);
+    await supabase.from("spartan_habit_entries").upsert({
+      habit_id: habit.id, user_id: userId, date: todayStr, value: val, completed,
+    });
     setActionLoading(null);
     await loadData();
   };
@@ -228,11 +245,45 @@ export default function HabitosPage() {
                               <span className="text-xs font-bold text-zinc-400">
                                 {habit.container_label && current > 0 ? `${current} × ${habit.container_label}` : current} / {target} {habit.unit || ""}
                               </span>
-                              <span className="text-[10px] text-zinc-600">{Math.round(pct)}%</span>
+                              <div className="flex items-center gap-1">
+                                <span className="text-[10px] text-zinc-600">{Math.round(pct)}%</span>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  value={current > 0 ? "" : ""}
+                                  placeholder={`${current}`}
+                                  onChange={(e) => {
+                                    const v = parseInt(e.target.value);
+                                    if (!isNaN(v)) setExactValue(habit, v);
+                                  }}
+                                  className="w-10 bg-white/5 border border-white/10 text-[10px] font-bold text-white text-center py-0.5 rounded-md focus:outline-none focus:border-spartan-500/50 placeholder:text-zinc-600"
+                                />
+                              </div>
                             </div>
                             <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
                               <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: habit.color }} />
                             </div>
+                            {/* Mini 7-day history */}
+                            {(() => {
+                              const last7 = Array.from({ length: 7 }, (_, i) => {
+                                const d = new Date(); d.setDate(d.getDate() - (6 - i));
+                                const ds = d.toISOString().split("T")[0];
+                                return weekEntries.find((we: any) => we.habit_id === habit.id && we.date === ds);
+                              });
+                              return (
+                                <div className="flex items-end gap-0.5 mt-1.5 h-8">
+                                  {last7.map((we, i) => {
+                                    const val = we ? (we.value || 0) : 0;
+                                    const h = Math.max(2, (val / Math.max(target, 1)) * 100);
+                                    return (
+                                      <div key={i} className="flex-1 flex items-end" title={`Día ${i+1}: ${val}`}>
+                                        <div className="w-full rounded-sm transition-all" style={{ height: `${Math.min(h, 100)}%`, backgroundColor: we?.completed ? habit.color : '#3f3f46' }} />
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              );
+                            })()}
                           </div>
                         )}
                       </div>
