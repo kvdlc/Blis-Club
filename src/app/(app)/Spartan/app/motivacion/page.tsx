@@ -111,6 +111,7 @@ export default function MotivacionPage() {
     <div className="space-y-6 pb-8">
       {/* Header */}
       <div className="flex items-center justify-between">
+        {view !== "frases" && (
         <div>
           {view === "detail" ? (
             <div className="flex items-center gap-2">
@@ -132,32 +133,17 @@ export default function MotivacionPage() {
             </>
           )}
         </div>
+        )}
+        {view !== "frases" && (
         <button onClick={() => openEditor()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-xs font-bold active:scale-[0.97] shadow-[0_0_15px_rgba(190,11,60,0.3)]">
           <Plus className="w-3.5 h-3.5" /> Agregar
         </button>
+        )}
       </div>
 
       {/* ── GRID VIEW: Category cards ── */}
       {view === "grid" && (
         <>
-          {/* Frases de seducción card */}
-          <button
-            onClick={() => { setView("frases"); setShowFrases(true); }}
-            className="w-full rounded-2xl border overflow-hidden hover:border-pink-500/30 hover:shadow-[0_0_30px_rgba(236,72,153,0.1)] transition-all active:scale-[0.98] relative bg-gradient-to-br from-pink-950/50 via-zinc-900 to-zinc-900 p-5 text-left"
-          >
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-pink-500/40 to-transparent" />
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-600 to-spartan-600 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(236,72,153,0.3)]">
-                <MessageCircle className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-base font-extrabold text-white">Frases de Seducción</h2>
-                <p className="text-xs text-zinc-400">220+ frases por categoría · Tutorial incluido</p>
-              </div>
-              <span className="text-pink-400 text-sm font-bold">Entrar →</span>
-            </div>
-          </button>
-
           {catCounts.length === 0 && extraCatNames.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center bg-white/[0.03] border border-white/[0.06] rounded-2xl">
               <Flame className="w-12 h-12 text-zinc-700 mb-3" />
@@ -213,6 +199,26 @@ export default function MotivacionPage() {
       {/* ── DETAIL VIEW: Items of a category ── */}
       {view === "detail" && (
         <div className="space-y-2">
+          {/* Frases button — inside Seducción */}
+          {selectedCat === "seduccion" && (
+            <button
+              onClick={() => { setShowFrases(true); setView("frases"); }}
+              className="w-full rounded-2xl border overflow-hidden hover:border-pink-500/30 hover:shadow-[0_0_30px_rgba(236,72,153,0.1)] transition-all active:scale-[0.98] relative bg-gradient-to-br from-pink-950/50 via-zinc-900 to-zinc-900 p-4 text-left"
+            >
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-pink-500/40 to-transparent" />
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-600 to-spartan-600 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(236,72,153,0.3)]">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-extrabold text-white">Frases de Seducción</h3>
+                  <p className="text-[10px] text-zinc-400">220+ frases por situación · Tutorial incluido</p>
+                </div>
+                <span className="text-pink-400 text-xs font-bold shrink-0">Entrar →</span>
+              </div>
+            </button>
+          )}
+
           {items.filter(i => i.category === selectedCat).length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <p className="text-sm text-zinc-500">No hay recursos en esta categoría</p>
@@ -261,7 +267,7 @@ export default function MotivacionPage() {
 
       {/* ── FRASES VIEW ── */}
       {showFrases && (
-        <FrasesDeSeduccion onBack={() => { setShowFrases(false); setView("grid"); }} />
+        <FrasesDeSeduccion onBack={() => { setShowFrases(false); setView("detail"); setSelectedCat("seduccion"); }} />
       )}
 
       {/* Editor Modal */}
