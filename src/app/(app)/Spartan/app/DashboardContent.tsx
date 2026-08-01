@@ -126,7 +126,7 @@ export default function DashboardContent({ data, userId }: Props) {
   }>({
     preset: data.plan ? initialPreset : "",
     custom_days: data.plan?.custom_days ?? [],
-    target_sessions: data.plan?.target_sessions ?? 4,
+    target_sessions: data.plan?.target_sessions_per_week ?? data.plan?.target_sessions ?? 4,
   });
 
   const firstName = data.profile?.first_name ?? "";
@@ -265,18 +265,19 @@ export default function DashboardContent({ data, userId }: Props) {
       const { error } = await supabase.from("spartan_training_plan").upsert({
         user_id: userId,
         custom_days: planForm.custom_days,
-        target_sessions: planForm.target_sessions,
+        target_sessions_per_week: planForm.target_sessions,
         schedule_type: planForm.preset,
       });
       if (error) throw error;
 
       setLocalPlan({
         custom_days: planForm.custom_days,
-        target_sessions: planForm.target_sessions,
+        target_sessions_per_week: planForm.target_sessions,
         schedule_type: planForm.preset,
       });
       setShowPlanEditor(false);
-    } catch {
+    } catch (err: any) {
+      console.error("Error guardando plan:", err?.message || err);
     } finally {
       setPlanSaving(false);
     }
@@ -366,7 +367,7 @@ export default function DashboardContent({ data, userId }: Props) {
                   ? getPresetFromDays(resolvedPlan.custom_days)
                   : "",
                 custom_days: resolvedPlan?.custom_days ?? [],
-                target_sessions: resolvedPlan?.target_sessions ?? 4,
+                target_sessions: resolvedPlan?.target_sessions_per_week ?? resolvedPlan?.target_sessions ?? 4,
               });
               setShowPlanEditor(!showPlanEditor);
             }}
