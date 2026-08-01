@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
 import { Search, X, Plus, Check, Star, Copy, Dices, ChevronDown, ChevronUp, Sparkles, Info, Trash2, ArrowLeft, MessageCircle, Save } from "lucide-react";
 import { PHRASE_CATEGORIES, PRINCIPLES } from "./frases-data";
 
-const FAV_KEY = "spartan_frases_favs";
-const CUSTOM_KEY = "spartan_frases_custom";
 const TUTORIAL_KEY = "spartan_frases_tutorial_done";
 
 interface Props {
@@ -24,25 +23,106 @@ export default function FrasesDeSeduccion({ onBack }: Props) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [favoriteAnim, setFavoriteAnim] = useState<string | null>(null);
   const [fraseDia, setFraseDia] = useState<{ text: string; cat: string } | null>(null);
+  const [userId, setUserId] = useState("");
+  const [loading, setLoading] = useState(true);
 
+  // Load from DB on mount
   useEffect(() => {
-    try {
-      const f = localStorage.getItem(FAV_KEY);
-      if (f) setFavorites(new Set(JSON.parse(f)));
-      const c = localStorage.getItem(CUSTOM_KEY);
-      if (c) setCustom(JSON.parse(c));
-      const tut = localStorage.getItem(TUTORIAL_KEY);
-      if (!tut) setShowTutorial(true);
-    } catch {}
+    const load = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        const { data: phrases } = await supabase
+          .from("spartan_seduction_phrases")
+          .select("text, category, is_favorite, is_custom")
+          .eq("user_id", user.id);
+
+        const favs = new Set<string>();
+        const customMap: Record<string, string[]> = {};
+        for (const p of (phrases ?? [])) {
+          if (p.is_favorite) favs.add(p.text);
+          if (p.is_custom) {
+            if (!customMap[p.category]) customMap[p.category] = [];
+            customMap[p.category].push(p.text);
+          }
+        }
+        setFavorites(favs);
+        setCustom(customMap);
+      }
+      try {
+        const tut = localStorage.getItem(TUTORIAL_KEY);
+        if (!tut) setShowTutorial(true);
+      } catch {}
+      setLoading(false);
+    };
+    load();
   }, []);
 
-  useEffect(() => {
-    try { localStorage.setItem(FAV_KEY, JSON.stringify([...favorites])); } catch {}
-  }, [favorites]);
+  const toggleFavorite = async (text: string) => {
+    const isFav = favorites.has(text);
+    const next = new Set(favorites);
+    if (isFav) next.delete(text);
+    else next.add(text);
+    setFavorites(next);
+    setFavoriteAnim(text);
+    setTimeout(() => setFavoriteAnim(null), 600);
 
-  useEffect(() => {
-    try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(custom)); } catch {}
-  }, [custom]);
+    if (!userId) return;
+    const supabase = createClient();
+    if (isFav) {
+      await supabase.from("spartan_seduction_phrases").delete().eq("user_id", userId).eq("text", text);
+    } else {
+      await supabase.from("spartan_seduction_phrases").upsert({
+        user_id: userId, text, category: "general", is_favorite: true, is_custom: false,
+      }, { onConflict: "user_id,text" });
+    }
+  };
+
+  const copyText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(text);
+      setTimeout(() => setCopiedId(null), 1500);
+      if (navigator.vibrate) navigator.vibrate(10);
+    } catch {}
+  };
+
+  const toggleCategory = (key: string) => {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const addPhrase = async () => {
+    const text = addForm.text.trim();
+    if (!text) return;
+    setCustom(prev => ({
+      ...prev,
+      [addForm.category]: [...(prev[addForm.category] || []), text],
+    }));
+    if (userId) {
+      await createClient().from("spartan_seduction_phrases").insert({
+        user_id: userId, text, category: addForm.category, is_favorite: false, is_custom: true,
+      });
+    }
+    setAddForm({ text: "", category: addForm.category });
+    setShowAdd(false);
+    setExpanded(prev => new Set(prev).add(addForm.category));
+  };
+
+  const removeCustom = async (catKey: string, phrase: string) => {
+    setCustom(prev => ({
+      ...prev,
+      [catKey]: (prev[catKey] || []).filter(p => p !== phrase),
+    }));
+    if (userId) {
+      await createClient().from("spartan_seduction_phrases").delete().eq("user_id", userId).eq("text", phrase);
+    }
+  };
 
   const allCategories = useMemo(() => {
     return PHRASE_CATEGORIES.map(cat => ({
@@ -69,54 +149,6 @@ export default function FrasesDeSeduccion({ onBack }: Props) {
 
   useEffect(() => { pickFraseDia(); }, [pickFraseDia]);
 
-  const toggleFavorite = (text: string) => {
-    setFavorites(prev => {
-      const next = new Set(prev);
-      if (next.has(text)) next.delete(text);
-      else next.add(text);
-      return next;
-    });
-    setFavoriteAnim(text);
-    setTimeout(() => setFavoriteAnim(null), 600);
-  };
-
-  const copyText = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedId(text);
-      setTimeout(() => setCopiedId(null), 1500);
-      if (navigator.vibrate) navigator.vibrate(10);
-    } catch {}
-  };
-
-  const toggleCategory = (key: string) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
-
-  const addPhrase = () => {
-    const text = addForm.text.trim();
-    if (!text) return;
-    setCustom(prev => ({
-      ...prev,
-      [addForm.category]: [...(prev[addForm.category] || []), text],
-    }));
-    setAddForm({ text: "", category: addForm.category });
-    setShowAdd(false);
-    setExpanded(prev => new Set(prev).add(addForm.category));
-  };
-
-  const removeCustom = (catKey: string, phrase: string) => {
-    setCustom(prev => ({
-      ...prev,
-      [catKey]: (prev[catKey] || []).filter(p => p !== phrase),
-    }));
-  };
-
   const totalFavs = favorites.size;
   const filteredCat = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -132,6 +164,10 @@ export default function FrasesDeSeduccion({ onBack }: Props) {
     setShowTutorial(false);
     try { localStorage.setItem(TUTORIAL_KEY, "done"); } catch {}
   };
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" /></div>;
+  }
 
   return (
     <div className="space-y-4 pb-8">
