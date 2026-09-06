@@ -1,0 +1,18 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    - cron: "0 0 */2 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping keep-alive endpoint
+        run: |
+          curl -fsS -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://www.blis.club/api/cron/keep-alive" \
+            || curl -fsS -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://blis-club.vercel.app/api/cron/keep-alive" \
+            || true
