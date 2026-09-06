@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Check, Circle, ChevronRight, Plus, Trophy, X, Play, Flag, Timer, Volume2, Dumbbell, Share2, Trash2, Eye, EyeOff, Quote, ChevronLeft } from "lucide-react";
+import { ArrowLeft, Clock, Check, Circle, ChevronRight, Plus, Trophy, X, Play, Flag, Timer, Volume2, Dumbbell, Share2, Trash2, Eye, Quote, ChevronLeft } from "lucide-react";
 import { GYM_QUOTES } from "./gym-quotes";
 import PostWorkoutScreen from "./PostWorkoutScreen";
 
@@ -57,6 +57,8 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
     return init;
   });
   const [lastWeights, setLastWeights] = useState<Record<string, (number|null)[]>>({});
+  const [lastReps, setLastReps] = useState<Record<string, (number|null)[]>>({});
+  const [lastBodyWeight, setLastBodyWeight] = useState<number | null>(null);
   const [profile, setProfile] = useState<{ first_name?: string; avatar_url?: string }>({});
   const [elapsedTime, setElapsedTime] = useState(0);
   const [restTimer, setRestTimer] = useState<number | null>(null);
@@ -75,7 +77,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const [timerExpired, setTimerExpired] = useState(false);
   const [seriesTimerExpired, setSeriesTimerExpired] = useState(false);
   const [seriesRestElapsed, setSeriesRestElapsed] = useState(0); // counts up from 0
-  const [showGif, setShowGif] = useState(true);
+  const [showGif, setShowGif] = useState(false);
   const [shuffledQuotes] = useState(() => shuffleArray(GYM_QUOTES));
   const [quoteIdx, setQuoteIdx] = useState(0);
   const [swipeDir, setSwipeDir] = useState<"left" | "right" | null>(null);
@@ -89,18 +91,20 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
   const beep = () => { try { if (!audioCtx.current) audioCtx.current = new AudioContext(); const c = audioCtx.current; const o = c.createOscillator(); const g = c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value = 800; o.type = "square"; g.gain.setValueAtTime(0.15, c.currentTime); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.2); o.start(c.currentTime); o.stop(c.currentTime + 0.2); } catch {} };
 
-  // Reset GIF visibility when exercise changes
-  useEffect(() => { if (prevIndexRef.current !== currentExerciseIndex) { setShowGif(true); prevIndexRef.current = currentExerciseIndex; } }, [currentExerciseIndex]);
+  // Reset GIF visibility when exercise changes (hidden by default → shows quotes)
+  useEffect(() => { if (prevIndexRef.current !== currentExerciseIndex) { setShowGif(false); prevIndexRef.current = currentExerciseIndex; } }, [currentExerciseIndex]);
 
   useEffect(() => { const load = async () => {
     try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) { const d = JSON.parse(saved); if (d.routineId === routineId && d.started) { setStarted(true); setCurrentExerciseIndex(d.currentExerciseIndex??0); setCompletedExercises(new Set(d.completedExercises??[])); setAllSeriesData(d.allSeriesData??{}); setElapsedTime(d.elapsedTime??0); if (d.workoutStartTime) setWorkoutStartTime(new Date(d.workoutStartTime)); } } } catch {}
     const supabase = createClient();
-    const [{ data: prof }, { data: lastSession }] = await Promise.all([
+    const [{ data: prof }, { data: lastSession }, { data: lastWeightRow }] = await Promise.all([
       supabase.from("profiles").select("first_name, avatar_url").eq("id", userId).single(),
       supabase.from("spartan_workout_sessions").select("series_data").eq("user_id", userId).eq("routine_id", routineId).eq("completed", true).order("started_at", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("spartan_workout_sessions").select("body_weight_kg").eq("user_id", userId).not("body_weight_kg", "is", null).order("started_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
     if (prof) setProfile(prof);
-    if (lastSession?.series_data) { const prev: Record<string, (number|null)[]> = {}; const sd = lastSession.series_data as any; for (const [k, v] of Object.entries(sd)) { const idx = parseInt(k); if ((v as any)?.series) { const name = (v as any)?.name; const weights = (v as any).series.map((s: any) => s.weight??null); if (name) prev[name] = weights; else prev[`idx_${idx}`] = weights; } } setLastWeights(prev); }
+    if (lastWeightRow?.body_weight_kg) setLastBodyWeight(lastWeightRow.body_weight_kg);
+    if (lastSession?.series_data) { const prev: Record<string, (number|null)[]> = {}; const prevR: Record<string, (number|null)[]> = {}; const sd = lastSession.series_data as any; for (const [k, v] of Object.entries(sd)) { const idx = parseInt(k); if ((v as any)?.series) { const name = (v as any)?.name; const weights = (v as any).series.map((s: any) => s.weight??null); const reps = (v as any).series.map((s: any) => s.reps??null); if (name) { prev[name] = weights; prevR[name] = reps; } else { prev[`idx_${idx}`] = weights; prevR[`idx_${idx}`] = reps; } } } setLastWeights(prev); setLastReps(prevR); }
   }; load(); }, []);
 
   useEffect(() => { if (!started) return; try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ routineId, started: true, currentExerciseIndex, completedExercises: Array.from(completedExercises), allSeriesData, elapsedTime, workoutStartTime: workoutStartTime?.toISOString() })); } catch {} }, [started, routineId, currentExerciseIndex, completedExercises, allSeriesData, elapsedTime]);
@@ -141,6 +145,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const currentExercise = exercises[currentExerciseIndex];
   const currentData = allSeriesData[currentExerciseIndex] ?? { series: [], actualRestSeconds: null, actualBetweenSeriesRest: null, actualTransitionTime: null };
   const prevWeights = lastWeights[currentExercise.name] ?? lastWeights[`idx_${currentExerciseIndex}`] ?? [];
+  const prevReps = lastReps[currentExercise.name] ?? lastReps[`idx_${currentExerciseIndex}`] ?? [];
 
   const updateSeriesField = (si: number, f: "weight"|"reps", v: number|null) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; s[si] = {...s[si], [f]: v}; n[currentExerciseIndex] = {...c, series: s}; return n; });
   const toggleSeriesComplete = (si: number) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; const wasDone = s[si].completed; s[si] = {...s[si], completed: !wasDone};
@@ -237,6 +242,28 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const isSeriesRest = seriesRestTimer !== null && seriesTimerExpired;
   const isResting = (restTimer !== null && restTimer > 0) || isExerciseRest;
 
+  // Beep constante mientras el descanso entre ejercicios esté expirado
+  const alertRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const alertSeriesRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    if (isExerciseRest) {
+      beep();
+      alertRef.current = setInterval(() => beep(), 2000);
+    } else {
+      if (alertRef.current) clearInterval(alertRef.current);
+    }
+    return () => { if (alertRef.current) clearInterval(alertRef.current); };
+  }, [isExerciseRest]);
+  useEffect(() => {
+    if (isSeriesRest) {
+      beep();
+      alertSeriesRef.current = setInterval(() => beep(), 2000);
+    } else {
+      if (alertSeriesRef.current) clearInterval(alertSeriesRef.current);
+    }
+    return () => { if (alertSeriesRef.current) clearInterval(alertSeriesRef.current); };
+  }, [isSeriesRest]);
+
   // ── PRE-START ──
   if (!started) {
     return (
@@ -273,6 +300,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
         workoutStartTime={workoutStartTime}
         workoutEnded={true}
         bodyWeight={null}
+        lastBodyWeight={lastBodyWeight}
         gymOccupancy=""
         previousSession={previousSession}
         onClose={onClose}
@@ -301,8 +329,8 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
         <div>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-extrabold text-white">{currentExercise.name}</h2>
-            <button onClick={() => setShowGif(!showGif)} className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors" title={showGif ? "Ocultar GIF" : "Mostrar GIF"}>
-              {showGif ? <Eye className="w-4 h-4 text-zinc-400" /> : <EyeOff className="w-4 h-4 text-zinc-600" />}
+            <button onClick={() => setShowGif(!showGif)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all active:scale-[0.95] ${showGif ? "bg-white/5 border border-white/10 hover:bg-white/10" : "bg-[#be0b3c]/20 border border-[#be0b3c]/40 hover:bg-[#be0b3c]/30"}`} title={showGif ? "Ocultar GIF" : "Ver GIF"}>
+              {showGif ? <Eye className="w-4 h-4 text-zinc-400" /> : <Eye className="w-4 h-4 text-[#be0b3c]" />}
             </button>
           </div>
           <div className="flex items-center gap-2 mt-1">
@@ -346,7 +374,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
             {/* Quote text */}
             <div className="flex-1 flex items-center justify-center px-2">
-              <p className="text-base sm:text-lg font-bold text-zinc-200 leading-relaxed text-center max-w-full" style={{ fontFamily: "var(--font-nunito)" }}>
+              <p className="text-xl sm:text-2xl font-bold text-zinc-100 leading-relaxed text-center max-w-full" style={{ fontFamily: "var(--font-nunito)" }}>
                 &ldquo;{shuffledQuotes[quoteIdx]}&rdquo;
               </p>
             </div>
@@ -407,7 +435,12 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
                   </div>
 
                   <span className="text-[10px] text-zinc-600 shrink-0">×</span>
-                  <input type="number" min={1} max={99} value={entry.reps} onChange={e=>updateSeriesField(si,"reps",parseInt(e.target.value)||1)} disabled={isDone} className="w-12 bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-1.5 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30" />
+                  <div className="flex flex-col items-center shrink-0">
+                    <input type="number" min={1} max={99} value={entry.reps} onChange={e=>updateSeriesField(si,"reps",parseInt(e.target.value)||1)} disabled={isDone} className="w-12 bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-1.5 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30" />
+                    {!isDone && prevReps[si] != null && entry.reps !== prevReps[si] && (
+                      <span className="text-[9px] font-medium text-zinc-600 mt-0.5 leading-none">últ: {prevReps[si]}</span>
+                    )}
+                  </div>
 
                   <div className="flex items-center gap-1 shrink-0">
                     {!isDone && currentData.series.length>1 && <button onClick={()=>removeSeries(si)} className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center hover:bg-red-500/20 active:scale-[0.95]"><MinusIcon /></button>}
@@ -421,7 +454,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
         {/* Rest timer active — show next exercise GIF + navigation */}
         {(restTimer !== null && restTimer > 0) && (
-          <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}} className="space-y-4 py-4">
+          <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}} className="space-y-4 py-4 flex flex-col items-center">
             <p className="text-sm font-bold text-zinc-500 uppercase tracking-wider text-center">Descanso</p>
 
             {/* Next exercise GIF — smaller */}
@@ -479,7 +512,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
         {/* Rest timer EXPIRED */}
         {isExerciseRest && (
-          <motion.div animate={{scale:[1,1.03,1]}} transition={{repeat:Infinity,duration:.6}} className="space-y-4 py-4">
+          <motion.div animate={{scale:[1,1.03,1]}} transition={{repeat:Infinity,duration:.6}} className="space-y-4 py-4 flex flex-col items-center">
             <motion.div animate={{scale:[1,1.3,1]}} transition={{repeat:Infinity,duration:.8}} className="w-20 h-20 mx-auto rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center"><Volume2 className="w-10 h-10 text-amber-400" /></motion.div>
             <h3 className="text-xl font-extrabold text-amber-400 text-center">¡Descanso terminado!</h3>
             <p className="text-xs text-amber-500/60 text-center">El temporizador sigue corriendo</p>

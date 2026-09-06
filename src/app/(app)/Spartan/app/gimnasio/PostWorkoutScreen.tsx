@@ -58,6 +58,7 @@ interface PostWorkoutScreenProps {
   workoutStartTime: Date | null;
   workoutEnded: true;
   bodyWeight: number | null;
+  lastBodyWeight?: number | null;
   gymOccupancy: string;
   previousSession: any | null;
   onClose: () => void;
@@ -221,13 +222,14 @@ export default function PostWorkoutScreen({
   workoutStartTime,
   workoutEnded,
   bodyWeight: initialWeight,
+  lastBodyWeight,
   gymOccupancy: initialOccupancy,
   previousSession,
   onClose,
   onSaveWeightAndGym,
 }: PostWorkoutScreenProps) {
   const [step, setStep] = useState<1 | 2>(1);
-  const [bodyWeight, setBodyWeight] = useState<number | null>(initialWeight);
+  const [bodyWeight, setBodyWeight] = useState<number | null>(null);
   const [gymOccupancy, setGymOccupancy] = useState(initialOccupancy || "normal");
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -439,8 +441,8 @@ export default function PostWorkoutScreen({
                     onChange={(e) =>
                       setBodyWeight(e.target.value ? parseFloat(e.target.value) : null)
                     }
-                    placeholder="78.5"
-                    className="w-full bg-white/[0.04] border border-white/[0.08] text-white text-lg font-bold text-center py-4 rounded-2xl focus:outline-none focus:border-[#be0b3c]/50 placeholder:text-zinc-700 transition-colors"
+                    placeholder={lastBodyWeight != null ? `${lastBodyWeight} kg` : "78.5"}
+                    className="w-full bg-white/[0.04] border border-white/[0.08] text-white text-lg font-bold text-center py-4 rounded-2xl focus:outline-none focus:border-[#be0b3c]/50 placeholder:text-zinc-500 transition-colors"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-500">
                     kg
