@@ -56,7 +56,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
     exercises.forEach((ex, i) => init[i] = { series: new Array(ex.sets).fill(null).map(() => ({ weight: null, reps: ex.reps, completed: false })), actualRestSeconds: null, actualBetweenSeriesRest: null, actualTransitionTime: null });
     return init;
   });
-  const [lastWeights, setLastWeights] = useState<Record<number, (number|null)[]>>({});
+  const [lastWeights, setLastWeights] = useState<Record<string, (number|null)[]>>({});
   const [profile, setProfile] = useState<{ first_name?: string; avatar_url?: string }>({});
   const [elapsedTime, setElapsedTime] = useState(0);
   const [restTimer, setRestTimer] = useState<number | null>(null);
@@ -100,7 +100,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
       supabase.from("spartan_workout_sessions").select("series_data").eq("user_id", userId).eq("routine_id", routineId).eq("completed", true).order("started_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
     if (prof) setProfile(prof);
-    if (lastSession?.series_data) { const prev: Record<number, (number|null)[]> = {}; const sd = lastSession.series_data as any; for (const [k, v] of Object.entries(sd)) { const idx = parseInt(k); if ((v as any)?.series) prev[idx] = (v as any).series.map((s: any) => s.weight??null); } setLastWeights(prev); }
+    if (lastSession?.series_data) { const prev: Record<string, (number|null)[]> = {}; const sd = lastSession.series_data as any; for (const [k, v] of Object.entries(sd)) { const idx = parseInt(k); if ((v as any)?.series) { const name = (v as any)?.name; const weights = (v as any).series.map((s: any) => s.weight??null); if (name) prev[name] = weights; else prev[`idx_${idx}`] = weights; } } setLastWeights(prev); }
   }; load(); }, []);
 
   useEffect(() => { if (!started) return; try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ routineId, started: true, currentExerciseIndex, completedExercises: Array.from(completedExercises), allSeriesData, elapsedTime, workoutStartTime: workoutStartTime?.toISOString() })); } catch {} }, [started, routineId, currentExerciseIndex, completedExercises, allSeriesData, elapsedTime]);
@@ -140,7 +140,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const handleStartWorkout = () => { setStarted(true); setWorkoutStartTime(new Date()); };
   const currentExercise = exercises[currentExerciseIndex];
   const currentData = allSeriesData[currentExerciseIndex] ?? { series: [], actualRestSeconds: null, actualBetweenSeriesRest: null, actualTransitionTime: null };
-  const prevWeights = lastWeights[currentExerciseIndex] ?? [];
+  const prevWeights = lastWeights[currentExercise.name] ?? lastWeights[`idx_${currentExerciseIndex}`] ?? [];
 
   const updateSeriesField = (si: number, f: "weight"|"reps", v: number|null) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; s[si] = {...s[si], [f]: v}; n[currentExerciseIndex] = {...c, series: s}; return n; });
   const toggleSeriesComplete = (si: number) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; const wasDone = s[si].completed; s[si] = {...s[si], completed: !wasDone};
@@ -181,11 +181,19 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
     const supabase = createClient();
     const endedAt = new Date();
     const start = workoutStartTime || new Date();
+
+    // Añadir el nombre del ejercicio a cada entrada para match robusto en futuras sesiones
+    const enrichedSeries: any = {};
+    Object.entries(allSeriesData).forEach(([idx, data]: [string, any]) => {
+      const i = parseInt(idx);
+      enrichedSeries[idx] = { ...data, name: exercises[i]?.name || `idx_${i}` };
+    });
+
     const sessionData = {
       user_id: userId, routine_id: routineId,
       started_at: start.toISOString(), ended_at: endedAt.toISOString(),
       duration_minutes: Math.floor((endedAt.getTime() - start.getTime()) / 60000),
-      series_data: allSeriesData, completed: true,
+      series_data: enrichedSeries, completed: true,
     };
 
     const { data: saved } = await supabase.from("spartan_workout_sessions").insert(sessionData).select("id").single();
