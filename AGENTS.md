@@ -37,3 +37,20 @@ Este repo (Blis Club) tiene **varios proyectos** en la misma cuenta de Supabase.
 - **Contenido**: trading, whatsapp, comunidad, email, etc.
 - ⚠️ La config MCP GLOBAL apunta a este proyecto. NO ejecutar migraciones de Blis Club ahí.
 
+## Conexiones MCP / Tokens (IMPORTANTE)
+
+Hay **dos conexiones MCP** con tokens DISTINTOS, cada uno restringido a un proyecto. No mezclarlos.
+
+| Conexión | Archivo | Proyecto al que apunta | Token (últimos 6) | Uso |
+|----------|---------|------------------------|-------------------|-----|
+| **MCP local (este repo)** | `opencode.json` en la raíz | `yauoswqvuwruufozwduu` (blis-club) | `...aed22f2` | Migraciones Spartan/Guau/Auto |
+| **MCP global** | `~/.config/opencode/opencode.jsonc` | `srjhrhiesienkofisvnv` (Blis Project) | `...1ff70a` | OTRO proyecto (no usar aquí) |
+
+**Reglas:**
+- Cuando ejecutes migraciones SQL o consultes tablas para este repo, SIEMPRE usa el MCP local (`opencode.json`), que apunta a `yauoswqvuwruufozwduu`. Si las tablas `spartan_*` no aparecen al listar, estás usando la conexión equivocada.
+- Si ves tablas como `trading_history`, `whatsapp_messages`, `comunidad_*` o `email_*`, estás en el proyecto EQUIVOCADO (`srjhrhiesienkofisvnv`) — detente.
+- El token del MCP global (`sbp_fceb...1ff70a`) NO tiene acceso a blis-club, y viceversa. Están aislados a propósito.
+- Si las herramientas de Supabase devuelven `403 Forbidden` o `You do not have permission`, es que el token no cubre ese proyecto — cambia a la conexión correcta.
+
+**Verificación rápida:** ejecutar `list_tables` en schema `public`. Si ves `spartan_*` → conexión correcta. Si ves `trading_*`/`whatsapp_*` → conexión equivocada.
+
