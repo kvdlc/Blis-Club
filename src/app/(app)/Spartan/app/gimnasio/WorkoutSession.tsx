@@ -198,6 +198,24 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
     const { data: saved } = await supabase.from("spartan_workout_sessions").insert(sessionData).select("id").single();
 
+    // Sincronizar el número de series de cada ejercicio en la rutina
+    // si el usuario añadió/quitaron series durante la sesión.
+    const seriesUpdates: Promise<void>[] = [];
+    Object.entries(allSeriesData).forEach(([idx, data]: [string, any]) => {
+      const i = parseInt(idx);
+      const ex = exercises[i];
+      if (!ex || !data?.series) return;
+      const finalSets = data.series.length;
+      const configuredSets = ex.sets ?? 0;
+      // Solo actualizar si cambió el número de series que el usuario realmente dejó
+      if (finalSets !== configuredSets) {
+        seriesUpdates.push((async () => {
+          await supabase.from("spartan_workout_exercises").update({ sets: finalSets }).eq("id", ex.id);
+        })());
+      }
+    });
+    if (seriesUpdates.length > 0) await Promise.all(seriesUpdates);
+
     // Fetch previous session for comparison
     const { data: prevSesh } = await supabase
       .from("spartan_workout_sessions")
