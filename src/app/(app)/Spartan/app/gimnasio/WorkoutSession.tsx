@@ -383,12 +383,9 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
                 <div key={si} className={`w-full flex items-center gap-1.5 p-3 rounded-2xl border ${isDone?"bg-emerald-500/5 border-emerald-500/20":"bg-white/[0.03] border-white/[0.06]"}`}>
                   <span className={`text-[11px] font-bold w-12 shrink-0 ${isDone?"text-emerald-400 line-through":"text-zinc-300"}`}>S{si+1}</span>
 
-                  {/* Prev weight ghost label ABOVE the input */}
-                  <div className="flex-1 flex flex-col items-center gap-0.5">
-                    {!isDone && !hasValue && gw != null && (
-                      <span className="text-[10px] font-medium text-zinc-600">Última: {gw}kg</span>
-                    )}
-                    <input type="number" min={0} step={0.5} value={entry.weight??""} onChange={e=>updateSeriesField(si,"weight",e.target.value?parseFloat(e.target.value):null)} placeholder="kg" disabled={isDone} className="w-full bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-1.5 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30 placeholder:text-zinc-600" />
+                  {/* Weight input — previous weight as placeholder */}
+                  <div className="flex-1">
+                    <input type="number" min={0} step={0.5} value={entry.weight ?? ""} onChange={e=>updateSeriesField(si,"weight",e.target.value?parseFloat(e.target.value):null)} placeholder={gw != null && !hasValue ? `${gw} kg` : "kg"} disabled={isDone} className="w-full bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-1.5 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30 placeholder:text-zinc-500" />
                   </div>
 
                   <span className="text-[10px] text-zinc-600 shrink-0">×</span>
