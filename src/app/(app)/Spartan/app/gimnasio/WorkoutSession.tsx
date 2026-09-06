@@ -95,7 +95,8 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   useEffect(() => { if (prevIndexRef.current !== currentExerciseIndex) { setShowGif(false); prevIndexRef.current = currentExerciseIndex; } }, [currentExerciseIndex]);
 
   useEffect(() => { const load = async () => {
-    try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) { const d = JSON.parse(saved); if (d.routineId === routineId && d.started) { setStarted(true); setCurrentExerciseIndex(d.currentExerciseIndex??0); setCompletedExercises(new Set(d.completedExercises??[])); setAllSeriesData(d.allSeriesData??{}); setElapsedTime(d.elapsedTime??0); if (d.workoutStartTime) setWorkoutStartTime(new Date(d.workoutStartTime)); } } } catch {}
+    let resumed = false;
+    try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) { const d = JSON.parse(saved); if (d.routineId === routineId && d.started) { resumed = true; setStarted(true); setCurrentExerciseIndex(d.currentExerciseIndex??0); setCompletedExercises(new Set(d.completedExercises??[])); setAllSeriesData(d.allSeriesData??{}); setElapsedTime(d.elapsedTime??0); if (d.workoutStartTime) setWorkoutStartTime(new Date(d.workoutStartTime)); } } } catch {}
     const supabase = createClient();
     const [{ data: prof }, { data: lastSession }, { data: lastWeightRow }] = await Promise.all([
       supabase.from("profiles").select("first_name, avatar_url").eq("id", userId).single(),
@@ -104,7 +105,22 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
     ]);
     if (prof) setProfile(prof);
     if (lastWeightRow?.body_weight_kg) setLastBodyWeight(lastWeightRow.body_weight_kg);
-    if (lastSession?.series_data) { const prev: Record<string, (number|null)[]> = {}; const prevR: Record<string, (number|null)[]> = {}; const sd = lastSession.series_data as any; for (const [k, v] of Object.entries(sd)) { const idx = parseInt(k); if ((v as any)?.series) { const name = (v as any)?.name; const weights = (v as any).series.map((s: any) => s.weight??null); const reps = (v as any).series.map((s: any) => s.reps??null); if (name) { prev[name] = weights; prevR[name] = reps; } else { prev[`idx_${idx}`] = weights; prevR[`idx_${idx}`] = reps; } } } setLastWeights(prev); setLastReps(prevR); }
+    if (lastSession?.series_data) { const prev: Record<string, (number|null)[]> = {}; const prevR: Record<string, (number|null)[]> = {}; const sd = lastSession.series_data as any; for (const [k, v] of Object.entries(sd)) { const idx = parseInt(k); if ((v as any)?.series) { const name = (v as any)?.name; const weights = (v as any).series.map((s: any) => s.weight??null); const reps = (v as any).series.map((s: any) => s.reps??null); if (name) { prev[name] = weights; prevR[name] = reps; } else { prev[`idx_${idx}`] = weights; prevR[`idx_${idx}`] = reps; } } } setLastWeights(prev); setLastReps(prevR);
+      // Pre-llenar reps con la última sesión si es una sesión nueva (no reanudada)
+      if (!resumed && Object.keys(prevR).length > 0) {
+        setAllSeriesData(prevData => {
+          const next = { ...prevData };
+          Object.entries(prevR).forEach(([key, reps]) => {
+            let exIdx = -1;
+            if (key.startsWith("idx_")) exIdx = parseInt(key.replace("idx_", ""));
+            else exIdx = exercises.findIndex(e => e.name === key);
+            if (exIdx === -1 || !next[exIdx]) return;
+            next[exIdx] = { ...next[exIdx], series: next[exIdx].series.map((s, si) => ({ ...s, reps: reps[si] != null ? (reps[si] as number) : s.reps })) };
+          });
+          return next;
+        });
+      }
+    }
   }; load(); }, []);
 
   useEffect(() => { if (!started) return; try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ routineId, started: true, currentExerciseIndex, completedExercises: Array.from(completedExercises), allSeriesData, elapsedTime, workoutStartTime: workoutStartTime?.toISOString() })); } catch {} }, [started, routineId, currentExerciseIndex, completedExercises, allSeriesData, elapsedTime]);
@@ -145,7 +161,6 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
   const currentExercise = exercises[currentExerciseIndex];
   const currentData = allSeriesData[currentExerciseIndex] ?? { series: [], actualRestSeconds: null, actualBetweenSeriesRest: null, actualTransitionTime: null };
   const prevWeights = lastWeights[currentExercise.name] ?? lastWeights[`idx_${currentExerciseIndex}`] ?? [];
-  const prevReps = lastReps[currentExercise.name] ?? lastReps[`idx_${currentExerciseIndex}`] ?? [];
 
   const updateSeriesField = (si: number, f: "weight"|"reps", v: number|null) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; s[si] = {...s[si], [f]: v}; n[currentExerciseIndex] = {...c, series: s}; return n; });
   const toggleSeriesComplete = (si: number) => setAllSeriesData(prev => { const n = {...prev}; const c = n[currentExerciseIndex]; if (!c) return n; const s = [...c.series]; if (!s[si]) s[si] = { weight: null, reps: currentExercise.reps, completed: false }; const wasDone = s[si].completed; s[si] = {...s[si], completed: !wasDone};
@@ -435,12 +450,7 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
                   </div>
 
                   <span className="text-[10px] text-zinc-600 shrink-0">×</span>
-                  <div className="flex flex-col items-center shrink-0">
-                    <input type="number" min={1} max={99} value={entry.reps} onChange={e=>updateSeriesField(si,"reps",parseInt(e.target.value)||1)} disabled={isDone} className="w-12 bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-1.5 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30" />
-                    {!isDone && prevReps[si] != null && entry.reps !== prevReps[si] && (
-                      <span className="text-[9px] font-medium text-zinc-600 mt-0.5 leading-none">últ: {prevReps[si]}</span>
-                    )}
-                  </div>
+                  <input type="number" min={1} max={99} value={entry.reps} onChange={e=>updateSeriesField(si,"reps",parseInt(e.target.value)||1)} disabled={isDone} className="w-12 bg-white/5 border border-white/10 text-white text-sm font-bold text-center py-1.5 rounded-lg focus:outline-none focus:border-spartan-500/50 disabled:opacity-30" />
 
                   <div className="flex items-center gap-1 shrink-0">
                     {!isDone && currentData.series.length>1 && <button onClick={()=>removeSeries(si)} className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center hover:bg-red-500/20 active:scale-[0.95]"><MinusIcon /></button>}
@@ -454,31 +464,31 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
         {/* Rest timer active — show next exercise GIF + navigation */}
         {(restTimer !== null && restTimer > 0) && (
-          <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}} className="space-y-4 py-4 flex flex-col items-center">
+          <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}} className="space-y-4 py-4 flex flex-col items-center w-full">
             <p className="text-sm font-bold text-zinc-500 uppercase tracking-wider text-center">Descanso</p>
 
-            {/* Next exercise GIF — smaller */}
-            <div className="h-44 bg-black rounded-2xl overflow-hidden border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)] relative">
-              <img src={currentExercise.gif_url} alt={currentExercise.name} className="w-full h-full object-contain p-3 opacity-80" />
-              <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-sm rounded-xl p-2.5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold text-amber-400">Siguiente ejercicio</p>
-                    <p className="text-xs font-extrabold text-white mt-0.5">{currentExercise.name}</p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {currentExerciseIndex > 0 && (
-                      <button onClick={() => goToExercise(currentExerciseIndex - 1)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                        <ChevronLeft className="w-4 h-4 text-zinc-300" />
-                      </button>
-                    )}
-                    {currentExerciseIndex < exercises.length - 1 && (
-                      <button onClick={() => goToExercise(currentExerciseIndex + 1)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                        <ChevronRight className="w-4 h-4 text-zinc-300" />
-                      </button>
-                    )}
-                  </div>
+            {/* Next exercise preview: name separated from GIF */}
+            <div className="w-full max-w-sm">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Siguiente ejercicio</p>
+                  <p className="text-base font-extrabold text-white truncate mt-0.5">{currentExercise.name}</p>
                 </div>
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                  {currentExerciseIndex > 0 && (
+                    <button onClick={() => goToExercise(currentExerciseIndex - 1)} className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center active:scale-[0.95]">
+                      <ChevronLeft className="w-4 h-4 text-zinc-300" />
+                    </button>
+                  )}
+                  {currentExerciseIndex < exercises.length - 1 && (
+                    <button onClick={() => goToExercise(currentExerciseIndex + 1)} className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center active:scale-[0.95]">
+                      <ChevronRight className="w-4 h-4 text-zinc-300" />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="w-full aspect-square max-h-[280px] bg-black rounded-2xl overflow-hidden border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                <img src={currentExercise.gif_url} alt={currentExercise.name} className="w-full h-full object-contain p-2" />
               </div>
             </div>
 
@@ -512,37 +522,37 @@ export default function WorkoutSession({ userId, routineId, routineName, exercis
 
         {/* Rest timer EXPIRED */}
         {isExerciseRest && (
-          <motion.div animate={{scale:[1,1.03,1]}} transition={{repeat:Infinity,duration:.6}} className="space-y-4 py-4 flex flex-col items-center">
+          <motion.div animate={{scale:[1,1.03,1]}} transition={{repeat:Infinity,duration:.6}} className="space-y-4 py-4 flex flex-col items-center w-full">
             <motion.div animate={{scale:[1,1.3,1]}} transition={{repeat:Infinity,duration:.8}} className="w-20 h-20 mx-auto rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center"><Volume2 className="w-10 h-10 text-amber-400" /></motion.div>
             <h3 className="text-xl font-extrabold text-amber-400 text-center">¡Descanso terminado!</h3>
             <p className="text-xs text-amber-500/60 text-center">El temporizador sigue corriendo</p>
 
-            {/* Next exercise GIF + nav — smaller */}
-            <div className="h-44 bg-black rounded-2xl overflow-hidden border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)] relative">
-              <img src={currentExercise.gif_url} alt={currentExercise.name} className="w-full h-full object-contain p-3 opacity-80" />
-              <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-sm rounded-xl p-2.5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold text-amber-400">Siguiente</p>
-                    <p className="text-xs font-extrabold text-white mt-0.5">{currentExercise.name}</p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {currentExerciseIndex > 0 && (
-                      <button onClick={() => goToExercise(currentExerciseIndex - 1)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                        <ChevronLeft className="w-4 h-4 text-zinc-300" />
-                      </button>
-                    )}
-                    {currentExerciseIndex < exercises.length - 1 && (
-                      <button onClick={() => goToExercise(currentExerciseIndex + 1)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                        <ChevronRight className="w-4 h-4 text-zinc-300" />
-                      </button>
-                    )}
-                  </div>
+            {/* Next exercise preview: name separated from GIF */}
+            <div className="w-full max-w-sm">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Siguiente</p>
+                  <p className="text-base font-extrabold text-white truncate mt-0.5">{currentExercise.name}</p>
                 </div>
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                  {currentExerciseIndex > 0 && (
+                    <button onClick={() => goToExercise(currentExerciseIndex - 1)} className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center active:scale-[0.95]">
+                      <ChevronLeft className="w-4 h-4 text-zinc-300" />
+                    </button>
+                  )}
+                  {currentExerciseIndex < exercises.length - 1 && (
+                    <button onClick={() => goToExercise(currentExerciseIndex + 1)} className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center active:scale-[0.95]">
+                      <ChevronRight className="w-4 h-4 text-zinc-300" />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="w-full aspect-square max-h-[280px] bg-black rounded-2xl overflow-hidden border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                <img src={currentExercise.gif_url} alt={currentExercise.name} className="w-full h-full object-contain p-2" />
               </div>
             </div>
 
-            <button onClick={startNextExercise} className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-base font-bold hover:from-spartan-500 active:scale-[0.97] shadow-[0_0_30px_rgba(190,11,60,0.3)]"><Play className="w-5 h-5" /> Comenzar ejercicio</button>
+            <button onClick={startNextExercise} className="w-full max-w-sm flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-spartan-600 to-spartan-700 text-white text-base font-bold hover:from-spartan-500 active:scale-[0.97] shadow-[0_0_30px_rgba(190,11,60,0.3)]"><Play className="w-5 h-5" /> Comenzar ejercicio</button>
           </motion.div>
         )}
 
