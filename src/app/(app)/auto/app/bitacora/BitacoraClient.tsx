@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getCountryConfig, getCurrentCountryCode } from "@/lib/countries";
 import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade } from "@/types/database";
@@ -62,6 +62,13 @@ interface Props {
 
 export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances, upgrades }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [addToOpen] = useState(() => searchParams.get("add") || "");
+  useEffect(() => {
+    const add = searchParams.get("add");
+    if (add) router.replace(window.location.pathname, { scroll: false });
+  }, [searchParams, router]);
 
   if (!vehicle) {
     return (
@@ -90,7 +97,7 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
       <TimelineSection fuelLogs={fuelLogs} maintenances={maintenances} vehicleId={vehicle.id} />
       <BitacoraCharts fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} />
       <WarrantySection vehicle={vehicle} maintenances={maintenances} />
-      <UpgradesSection vehicleId={vehicle.id} initialUpgrades={upgrades} />
+      <UpgradesSection vehicleId={vehicle.id} initialUpgrades={upgrades} defaultAdding={addToOpen === "upgrade"} />
       <TireRotationSection />
       <CarfaxExportSection vehicle={vehicle} fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} />
     </div>
@@ -102,6 +109,8 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
   fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; vehicleId: string;
 }) {
   const { money } = useMoney();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [addingFuel, setAddingFuel] = useState(false);
   const [addingMaint, setAddingMaint] = useState(false);
@@ -109,6 +118,17 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
   const [maintsState, setMaintsState] = useState(maintenances);
 
   useEffect(() => { getCurrentCountryCode().then((c) => setCountryCode(c)); }, []);
+
+  // Desplegar automáticamente el formulario según ?add= (desde el Home)
+  useEffect(() => {
+    const add = searchParams.get("add");
+    if (add === "fuel") setAddingFuel(true);
+    else if (add === "maint") setAddingMaint(true);
+    if (add) {
+      const url = window.location.pathname;
+      router.replace(url, { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const esGalon = getCountryConfig(countryCode).fuelUnit === "galon";
   const GAL = 3.78541;
@@ -352,10 +372,10 @@ function WarrantySection({ vehicle, maintenances }: { vehicle: Vehicle; maintena
 }
 
 /* ═══════════════════════════ 4. Upgrades ═══════════════════════ */
-function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; initialUpgrades: VehicleUpgrade[] }) {
+function UpgradesSection({ vehicleId, initialUpgrades, defaultAdding = false }: { vehicleId: string; initialUpgrades: VehicleUpgrade[]; defaultAdding?: boolean }) {
   const { money, symbol } = useMoney();
   const [upgrades, setUpgrades] = useState(initialUpgrades);
-  const [adding, setAdding] = useState(false);
+  const [adding, setAdding] = useState(defaultAdding);
   const [form, setForm] = useState({
     categoria: "estetico", nombre: "", costo: "",
     fecha: new Date().toISOString().split("T")[0],

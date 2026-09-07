@@ -9,11 +9,13 @@ interface Props {
   height?: number;
   centerLabel?: string;
   centerValue?: string;
+  formatValue?: (v: number) => string;
 }
 
-export function DonutBreakdown({ data, height = 160, centerLabel, centerValue }: Props) {
+export function DonutBreakdown({ data, height = 160, centerLabel, centerValue, formatValue }: Props) {
   const total = data.reduce((s, d) => s + d.value, 0);
   const filtered = data.filter((d) => d.value > 0);
+  const fmt = (v: number) => formatValue ? formatValue(v) : v.toLocaleString("es-PE");
 
   return (
     <div className="flex items-center gap-3">
@@ -28,7 +30,7 @@ export function DonutBreakdown({ data, height = 160, centerLabel, centerValue }:
             </Pie>
             <Tooltip
               contentStyle={{ background: "#18181b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 11 }}
-              formatter={(v: number, n: string) => [v.toLocaleString("es-PE"), n]}
+              formatter={(v: number, n: string) => [fmt(v), n]}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -43,7 +45,7 @@ export function DonutBreakdown({ data, height = 160, centerLabel, centerValue }:
           <div key={s.name} className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
             <span className="text-[10px] text-zinc-400 flex-1">{s.name}</span>
-            <span className="text-[10px] font-bold text-zinc-200">{s.value.toLocaleString("es-PE")}</span>
+            <span className="text-[10px] font-bold text-zinc-200">{fmt(s.value)}</span>
             <span className="text-[9px] text-zinc-500">{total > 0 ? Math.round((s.value / total) * 100) : 0}%</span>
           </div>
         ))}

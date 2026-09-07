@@ -8,12 +8,10 @@ import { ChartCard } from "@/components/charts/ChartCard";
 import { GaugeRing } from "@/components/charts/GaugeRing";
 import { AreaTrend } from "@/components/charts/AreaTrend";
 import { LineTrend } from "@/components/charts/LineTrend";
-import { BarCompare } from "@/components/charts/BarCompare";
-import { DonutBreakdown } from "@/components/charts/DonutBreakdown";
 import { KpiChip } from "@/components/charts/KpiChip";
 import { EmptyPrompt } from "@/components/charts/EmptyPrompt";
-import { Activity, Fuel, Wrench, ShieldCheck, Droplets, DollarSign, Trophy, Gauge } from "lucide-react";
-import { computeInsights, serieGasto, serieRendimiento, desgloseCategorias, serieMensual, rendimientoPromedio, calcEficiencia } from "@/lib/insights";
+import { Activity, Fuel, Wrench, ShieldCheck, Droplets, DollarSign, Trophy, Battery, Timer } from "lucide-react";
+import { computeInsights, serieGasto, serieRendimiento, rendimientoPromedio, calcEficiencia, serieKm } from "@/lib/insights";
 import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleUpgrade, VehicleSpecs } from "@/types/database";
 
 interface Props {
@@ -48,12 +46,43 @@ export function DashboardWidgets({ vehicle, fuelLogs, documents, maintenances, u
   // Series filtradas por rango
   const gastoSerie = useMemo(() => serieGasto(fuelLogs, range.start, range.end), [fuelLogs, range]);
   const rendSerie = useMemo(() => serieRendimiento(fuelLogs, range.start, range.end), [fuelLogs, range]);
-  const donut = useMemo(() => desgloseCategorias(fuelLogs, maintenances, upgrades, range.start, range.end), [fuelLogs, maintenances, upgrades, range]);
-  const mensual = useMemo(() => serieMensual(fuelLogs, maintenances, upgrades, range.start, range.end), [fuelLogs, maintenances, upgrades, range]);
+  const kmSerie = useMemo(() => serieKm(fuelLogs, range.start, range.end), [fuelLogs, range]);
 
   const rendKmGal = rendimientoPromedio(fuelLogs);
   const eficiencia = calcEficiencia(rendKmGal);
-  const totalDonut = donut.reduce((s, d) => s + d.value, 0);
+
+  // Vida útil de componentes (estimación visual de desgaste)
+  const lifeItems = useMemo(() => {
+    const out: { label: string; pct: number; color: string; hint: string }[] = [];
+    // Aceite / próximo servicio: usar km transcurridos desde el último service (intervalo 5000)
+    const intervalKm = 5000;
+    const lastServiceKm = maintenances.length ? Math.max(...maintenances.map((m) => m.odometro ?? 0)) : 0;
+    const kmDesdeService = lastServiceKm > 0 ? Math.max(0, vehicle.kilometraje - lastServiceKm) : null;
+    if (kmDesdeService != null) {
+      const pct = Math.min(100, Math.round((kmDesdeService / intervalKm) * 100));
+      out.push({ label: "Aceite / servicio", pct, color: CHART.violet, hint: pct < 70 ? "En regla" : "Progármalo pronto" });
+    } else {
+      out.push({ label: "Aceite / servicio", pct: 0, color: CHART.violet, hint: "Registra un service" });
+    }
+    // Batería: % según fecha de mantenimiento (2 años)
+    if (specs?.bateria_mantenimiento_fecha) {
+      const done = new Date(specs.bateria_mantenimiento_fecha + "T12:00:00").getTime();
+      const dias = Math.max(0, (Date.now() - done) / 86400000);
+      const pct = Math.min(100, Math.round((dias / 730) * 100));
+      out.push({ label: "Batería", pct, color: CHART.emerald, hint: pct < 70 ? "En regla" : "Vigila su salud" });
+    } else {
+      out.push({ label: "Batería", pct: 0, color: CHART.emerald, hint: "Registra en ADN" });
+    }
+    // Frenos / neumáticos (genérico: usar próximo servicio, intervalo ~12000)
+    if (ins.kmProximoServicio != null) {
+      const transcurridos = Math.max(0, vehicle.kilometraje - Math.min(vehicle.kilometraje, ins.kmProximoServicio));
+      const pct = Math.min(100, Math.round((transcurridos / 12000) * 100));
+      out.push({ label: "Frenos / llantas", pct, color: CHART.teal, hint: pct < 70 ? "En regla" : "Revisión pronto" });
+    } else {
+      out.push({ label: "Frenos / llantas", pct: 0, color: CHART.teal, hint: "Registra un service" });
+    }
+    return out;
+  }, [maintenances, vehicle.kilometraje, specs, ins.kmProximoServicio]);
 
   const hasData = fuelLogs.length > 0 || maintenances.length > 0 || upgrades.length > 0 || documents.length > 0;
 
@@ -89,30 +118,20 @@ export function DashboardWidgets({ vehicle, fuelLogs, documents, maintenances, u
         {rendSerie.length ? <LineTrend data={rendSerie} suffix=" km/gal" color={CHART.teal} /> : <EmptyPrompt emoji="📈" texto="Registra 2+ cargas para ver la tendencia de tu km/gal." cta="Ir a Bitácora" href="/auto/app/bitacora" />}
       </ChartCard>
 
-      {/* ── Donut de composición ── */}
-      <ChartCard title="Distribución de gasto" icon={<Gauge className="w-3.5 h-3.5" />} accent={CHART.blue}>
-        {donut.some((d) => d.value > 0) ? (
-          <DonutBreakdown data={donut} centerValue={money(totalDonut)} centerLabel="total" />
+      {/* ── Actividad · km por período ── */}
+      <ChartCard title="Actividad · km por período" icon={<Activity className="w-3.5 h-3.5" />} accent={CHART.emerald}>
+        {kmSerie.length ? (
+          <AreaTrend data={kmSerie} color={CHART.emerald} color2={CHART.teal} valueFormat={(v) => `${v.toLocaleString("es-PE")} km`} />
         ) : (
-          <EmptyPrompt emoji="🧾" texto="Agrega gastos de combustible, mantenimiento o mejoras para ver la distribución." />
+          <EmptyPrompt emoji="🛣️" texto="Registra 2+ cargas para ver los km que recorres por período." cta="Ir a Bitácora" href="/auto/app/bitacora" />
         )}
       </ChartCard>
 
-      {/* ── Comparativo mensual ── */}
-      <ChartCard title="Gasto por período" icon={<Wrench className="w-3.5 h-3.5" />} accent={CHART.violet}>
-        {mensual.length ? (
-          <BarCompare
-            data={mensual}
-            stacked
-            series={[
-              { key: "combustible", label: "Combustible", color: CHART.amber },
-              { key: "mantenimiento", label: "Mantenimiento", color: CHART.violet },
-              { key: "mejoras", label: "Mejoras", color: CHART.blue },
-            ]}
-          />
-        ) : (
-          <EmptyPrompt emoji="📊" texto="Registra gastos para comparar por período." />
-        )}
+      {/* ── Vida útil de componentes ── */}
+      <ChartCard title="Vida útil de componentes" icon={<Droplets className="w-3.5 h-3.5" />} accent={CHART.violet}>
+        <div className="space-y-2.5">
+          {lifeItems.map((item) => <LifeBar key={item.label} {...item} />)}
+        </div>
       </ChartCard>
 
       {/* ── Chips de score ── */}
@@ -170,6 +189,21 @@ function DocRow({ doc }: { doc: VehicleDocument }) {
         <p className="text-[10px] text-zinc-500">Vence {dias < 0 ? `hace ${Math.abs(dias)} días` : `en ${dias} días`}</p>
       </div>
       <span className="text-xs font-black" style={{ color }}>{dias <= 0 ? "Vencido" : `${dias} d`}</span>
+    </div>
+  );
+}
+
+function LifeBar({ label, pct, color, hint }: { label: string; pct: number; color: string; hint: string }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between text-[11px]">
+        <span className="text-zinc-400">{label}</span>
+        <span className="font-bold text-zinc-200">{pct}%</span>
+      </div>
+      <div className="mt-1 h-1.5 rounded-full bg-white/[0.07] overflow-hidden">
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: color }} />
+      </div>
+      <p className="mt-0.5 text-[9px] text-zinc-600">{hint}</p>
     </div>
   );
 }

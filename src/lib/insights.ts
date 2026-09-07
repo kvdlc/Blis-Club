@@ -212,9 +212,10 @@ const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "O
 
 function labelFor(key: string, granularity: "dia" | "semana" | "mes"): string {
   const d = new Date(key + "T12:00:00");
-  if (granularity === "dia") return `${d.getDate()}/${d.getMonth() + 1}`;
-  if (granularity === "semana") return `${d.getDate()}/${d.getMonth() + 1}`;
-  return `${MESES[d.getMonth()]}`;
+  const mes = MESES[d.getMonth()];
+  if (granularity === "dia") return `${String(d.getDate()).padStart(2, "0")} ${mes}`;
+  if (granularity === "semana") return `${String(d.getDate()).padStart(2, "0")} ${mes}`;
+  return mes;
 }
 
 /** Serie de gasto de combustible en el rango, agrupada según duración. */
@@ -246,8 +247,23 @@ export function serieRendimiento(fuelLogs: FuelLog[], start: string, end: string
   return out;
 }
 
-/** Composición de gasto por categoría en el rango. */
-export function desgloseCategorias(fuelLogs: FuelLog[], maintenances: MaintenanceLog[], upgrades: VehicleUpgrade[], start: string, end: string) {
+/** Kilómetros recorridos por bucket (uso del vehículo). */
+export function serieKm(fuelLogs: FuelLog[], start: string, end: string): SeriePoint[] {
+  const dias = Math.max(1, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000));
+  const g = granularidadPara(dias);
+  const sorted = [...fuelLogs].filter((f) => inRange(f.fecha, start, end)).sort((a, b) => a.odometro - b.odometro);
+  const map = new Map<string, number>();
+  for (let i = 1; i < sorted.length; i++) {
+    const km = sorted[i].odometro - sorted[i - 1].odometro;
+    if (km <= 0) continue;
+    const k = keyByBucket(sorted[i].fecha, g);
+    map.set(k, (map.get(k) || 0) + km);
+  }
+  return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([k, v]) => ({ label: labelFor(k, g), value: v }));
+}
+
+/** Composición de gasto por categoría en el rango. */export function desgloseCategorias(fuelLogs: FuelLog[], maintenances: MaintenanceLog[], upgrades: VehicleUpgrade[], start: string, end: string) {
   const combustible = fuelLogs.filter((f) => inRange(f.fecha, start, end))
     .reduce((s, f) => s + (f.litros / GAL) * f.precio_por_galon, 0);
   const mantenimiento = maintenances.filter((m) => inRange(m.fecha, start, end))
@@ -261,8 +277,7 @@ export function desgloseCategorias(fuelLogs: FuelLog[], maintenances: Maintenanc
   ].filter((x) => x.value >= 0) as { name: string; value: number; color: string }[];
 }
 
-/** Serie de gasto por mes (fuel+mantenimiento+mejoras) para bar chart comparativo. */
-export function serieMensual(fuelLogs: FuelLog[], maintenances: MaintenanceLog[], upgrades: VehicleUpgrade[], start: string, end: string): { label: string; combustible: number; mantenimiento: number; mejoras: number }[] {
+/** Serie de gasto por mes (fuel+mantenimiento+mejoras) para bar chart comparativo. */export function serieMensual(fuelLogs: FuelLog[], maintenances: MaintenanceLog[], upgrades: VehicleUpgrade[], start: string, end: string): { label: string; combustible: number; mantenimiento: number; mejoras: number }[] {
   const dias = Math.max(1, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000));
   const g = granularidadPara(dias);
   const map = new Map<string, { combustible: number; mantenimiento: number; mejoras: number }>();

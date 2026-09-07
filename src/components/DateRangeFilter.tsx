@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CalendarRange } from "lucide-react";
+import { DatePicker } from "@/components/DatePicker";
 
 export type PresetKey = "semana" | "mes" | "semestre" | "año" | "custom";
 
@@ -81,11 +82,13 @@ export function DateRangeFilter({ range, preset, setPreset, customStart, setCust
 
       {preset === "custom" && (
         <div className="flex items-center gap-2">
-          <input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)}
-            className="px-2 py-1.5 rounded-lg border border-white/10 bg-zinc-800 text-[11px] text-zinc-200" />
-          <span className="text-zinc-500 text-[10px]">→</span>
-          <input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)}
-            className="px-2 py-1.5 rounded-lg border border-white/10 bg-zinc-800 text-[11px] text-zinc-200" />
+          <div className="flex-1 min-w-0">
+            <DatePicker value={customStart} onChange={setCustomStart} label="Inicio" colorTheme="auto" />
+          </div>
+          <span className="text-zinc-500 text-[10px] shrink-0">→</span>
+          <div className="flex-1 min-w-0">
+            <DatePicker value={customEnd} onChange={setCustomEnd} label="Fin" colorTheme="auto" />
+          </div>
         </div>
       )}
 

@@ -12,9 +12,11 @@ interface Props {
   color2?: string;
   height?: number;
   suffix?: string;
+  valueFormat?: (v: number) => string;
 }
 
-export function AreaTrend({ data, dataKey = "value", color = CHART.emerald, color2 = CHART.teal, height = 130, suffix = "" }: Props) {
+export function AreaTrend({ data, dataKey = "value", color = CHART.emerald, color2 = CHART.teal, height = 130, suffix = "", valueFormat }: Props) {
+  const fmt = (v: number) => valueFormat ? valueFormat(v) : `${v.toLocaleString("es-PE")}${suffix}`;
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -27,10 +29,11 @@ export function AreaTrend({ data, dataKey = "value", color = CHART.emerald, colo
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} vertical={false} />
           <XAxis dataKey="label" tick={{ fontSize: 9, fill: CHART.axis }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 9, fill: CHART.axis }} axisLine={false} tickLine={false} width={36} />
+          <YAxis tick={{ fontSize: 9, fill: CHART.axis }} axisLine={false} tickLine={false} width={40}
+            tickFormatter={(v: number) => valueFormat ? valueFormat(v) : String(v)} />
           <Tooltip
             contentStyle={{ background: "#18181b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 11 }}
-            formatter={(v: number) => [`${v.toLocaleString("es-PE")}${suffix}`, ""]}
+            formatter={(v: number) => [fmt(v), ""]}
           />
           <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2}
             fill={`url(#area-${color}-${dataKey})`} />

@@ -12,19 +12,22 @@ interface Props {
   height?: number;
   stacked?: boolean;
   suffix?: string;
+  valueFormat?: (v: number) => string;
 }
 
-export function BarCompare({ data, series, height = 160, stacked = false, suffix = "" }: Props) {
+export function BarCompare({ data, series, height = 160, stacked = false, suffix = "", valueFormat }: Props) {
+  const fmt = (v: number) => valueFormat ? valueFormat(v) : `${v.toLocaleString("es-PE")}${suffix}`;
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -16 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} vertical={false} />
           <XAxis dataKey="label" tick={{ fontSize: 9, fill: CHART.axis }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 9, fill: CHART.axis }} axisLine={false} tickLine={false} width={40} />
+          <YAxis tick={{ fontSize: 9, fill: CHART.axis }} axisLine={false} tickLine={false} width={44}
+            tickFormatter={(v: number) => valueFormat ? valueFormat(v) : String(v)} />
           <Tooltip
             contentStyle={{ background: "#18181b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 11 }}
-            formatter={(v: number, n: string) => [`${v.toLocaleString("es-PE")}${suffix}`, n]}
+            formatter={(v: number, n: string) => [fmt(v), n]}
           />
           <Legend wrapperStyle={{ fontSize: 10, color: CHART.axis }} />
           {series.map((s) => (

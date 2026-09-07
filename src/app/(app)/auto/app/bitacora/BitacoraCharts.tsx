@@ -57,7 +57,7 @@ export function BitacoraCharts({ fuelLogs, maintenances, upgrades }: Props) {
       </ChartCard>
 
       <ChartCard title="Gasto por categoría" icon={<Gauge className="w-3.5 h-3.5" />} accent={CHART.blue}>
-        {donut.some((d) => d.value > 0) ? <DonutBreakdown data={donut} centerValue={money(totalDonut)} centerLabel="total" /> : <EmptyPrompt emoji="🧾" texto="Agrega gastos para ver la distribución." />}
+        {donut.some((d) => d.value > 0) ? <DonutBreakdown data={donut} centerValue={money(totalDonut)} centerLabel="total" formatValue={money} /> : <EmptyPrompt emoji="🧾" texto="Agrega gastos para ver la distribución." />}
       </ChartCard>
 
       <ChartCard title="Comparativo por período" icon={<Wrench className="w-3.5 h-3.5" />} accent={CHART.violet}>

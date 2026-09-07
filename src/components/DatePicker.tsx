@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, ChevronDown } from "lucide-react";
 
 const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const MONTHS_SHORT = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -16,8 +16,7 @@ interface Props {
   colorTheme?: "primary" | "auto";
 }
 
-export function DatePicker({ value, onChange, min, max, label, colorTheme = "primary" }: Props) {
-  const c = colorTheme === "auto" ? "auto" : "primary";
+export function DatePicker({ value, onChange, min, max, label, colorTheme = "auto" }: Props) {
   const [open, setOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState(() => {
     if (value) return new Date(value + "T00:00:00").getMonth();
@@ -27,7 +26,7 @@ export function DatePicker({ value, onChange, min, max, label, colorTheme = "pri
     if (value) return new Date(value + "T00:00:00").getFullYear();
     return new Date().getFullYear();
   });
-  const [pickerMode, setPickerMode] = useState<"days" | "years">("days");
+  const [pickerMode, setPickerMode] = useState<"days" | "months" | "years">("days");
 
   const ref = useRef<HTMLDivElement>(null);
   const selectedDate = value ? new Date(value + "T00:00:00") : null;
@@ -36,10 +35,9 @@ export function DatePicker({ value, onChange, min, max, label, colorTheme = "pri
   const formatDisplay = (date: string) => {
     if (!date) return "";
     const d = new Date(date + "T00:00:00");
-    return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+    return `${String(d.getDate()).padStart(2, "0")} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
   };
 
-  // Day grid
   const grid = useMemo(() => {
     const firstDay = new Date(viewYear, viewMonth, 1);
     const lastDay = new Date(viewYear, viewMonth + 1, 0);
@@ -78,13 +76,13 @@ export function DatePicker({ value, onChange, min, max, label, colorTheme = "pri
   }, [viewMonth, viewYear, value, min, max, today]);
 
   const navigate = (dir: number) => {
-    if (pickerMode === "days") {
+    if (pickerMode === "days" || pickerMode === "months") {
       let m = viewMonth + dir, y = viewYear;
       if (m < 0) { m = 11; y--; }
       if (m > 11) { m = 0; y++; }
       setViewMonth(m); setViewYear(y);
     } else {
-      setViewYear((y) => y + dir * 10);
+      setViewYear((y) => y + dir * 12);
     }
   };
 
@@ -104,8 +102,6 @@ export function DatePicker({ value, onChange, min, max, label, colorTheme = "pri
     setPickerMode("days");
   };
 
-  const goToYearPicker = () => setPickerMode("years");
-
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -119,80 +115,110 @@ export function DatePicker({ value, onChange, min, max, label, colorTheme = "pri
       setViewMonth(selectedDate.getMonth());
       setViewYear(selectedDate.getFullYear());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  // Year grid (show ~20 years centered on current)
   const years = useMemo(() => {
-    const start = Math.floor(viewYear / 10) * 10;
+    const start = Math.floor(viewYear / 12) * 12;
     const arr: number[] = [];
-    for (let i = -1; i <= 10; i++) arr.push(start + i);
+    for (let i = -1; i <= 12; i++) arr.push(start + i);
     return arr;
   }, [viewYear]);
+
+  const title = pickerMode === "years"
+    ? `${Math.floor(viewYear / 12) * 12} — ${Math.floor(viewYear / 12) * 12 + 11}`
+    : pickerMode === "months"
+      ? `${viewYear}`
+      : `${MONTHS[viewMonth]} ${viewYear}`;
 
   return (
     <div ref={ref} className="relative">
       <button
         type="button"
         onClick={() => { setOpen(!open); setPickerMode("days"); }}
-        className="w-full flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm text-left hover:bg-zinc-100 transition-colors"
+        className="w-full flex items-center gap-2 rounded-xl bg-zinc-800 border border-white/10 px-3 py-2 text-sm text-left hover:bg-zinc-700/70 hover:border-auto-500/30 transition-colors"
       >
-        <CalendarDays className={`w-4 h-4 shrink-0 ${c === "auto" ? "text-auto-500" : "text-primary-400"}`} />
-        <span className={`flex-1 truncate ${value ? "text-zinc-900" : "text-zinc-400"}`}>
+        <CalendarDays className="w-4 h-4 shrink-0 text-auto-400" />
+        <span className={`flex-1 truncate ${value ? "text-zinc-100" : "text-zinc-500"}`}>
           {value ? formatDisplay(value) : (label || "Seleccionar fecha")}
         </span>
+        <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 right-0 min-w-[260px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-zinc-200 shadow-2xl p-4 space-y-3 max-h-[85vh] overflow-y-auto">
+        <div className="absolute z-50 mt-1 right-0 min-w-[268px] max-w-[calc(100vw-2rem)] bg-zinc-900 rounded-2xl border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.55)] p-3 space-y-2.5">
           {/* Month/Year nav */}
           <div className="flex items-center justify-between">
-            <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors">
+            <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-zinc-400 hover:text-auto-300 hover:border-auto-500/40 transition-colors">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button onClick={goToYearPicker} className={`text-sm font-bold text-zinc-800 transition-colors px-2 ${c === "auto" ? "hover:text-auto-500" : "hover:text-primary-500"}`}>
-              {pickerMode === "years" ? `${Math.floor(viewYear / 10) * 10} - ${Math.floor(viewYear / 10) * 10 + 9}` : `${MONTHS[viewMonth]} ${viewYear}`}
+            <button onClick={() => setPickerMode(pickerMode === "days" ? "months" : pickerMode === "months" ? "years" : "days")}
+              className="text-sm font-bold text-zinc-100 transition-colors px-2 hover:text-auto-300">
+              {title}
             </button>
-            <button onClick={() => navigate(1)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors">
+            <button onClick={() => navigate(1)} className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-zinc-400 hover:text-auto-300 hover:border-auto-500/40 transition-colors">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
           {pickerMode === "days" && (
             <>
-              {/* Month picker quick-select */}
-              <div className="grid grid-cols-4 gap-1">
-                {MONTHS_SHORT.map((m, i) => (
-                  <button key={m} onClick={() => selectMonth(i)}
-                    className={`text-[10px] font-semibold rounded-lg py-1.5 transition-colors ${i === viewMonth ? (c === "auto" ? "bg-auto-600/10 text-auto-500" : "bg-primary-100 text-primary-700") : "text-zinc-500 hover:bg-zinc-100"}`}>
-                    {m}
-                  </button>
-                ))}
-              </div>
-
               {/* Day headers */}
               <div className="grid grid-cols-7 gap-1">
                 {WEEKDAYS.map((d) => (
-                  <div key={d} className="text-center text-[10px] font-semibold text-zinc-400 py-1">{d}</div>
+                  <div key={d} className="text-center text-[10px] font-semibold text-zinc-500 py-1">{d}</div>
                 ))}
               </div>
 
               {/* Day cells */}
               <div className="grid grid-cols-7 gap-1">
-                {grid.map((cell, i) => (
-                  <button key={i} type="button" onClick={() => !cell.isDisabled && selectDate(cell.date)} disabled={cell.isDisabled}
-                    className={`aspect-square rounded-xl flex items-center justify-center text-xs font-semibold transition-all ${ cell.isDisabled ? "text-zinc-300 cursor-not-allowed" : cell.isSelected ? (c === "auto" ? "bg-auto-500 text-white shadow-md" : "bg-primary-500 text-white shadow-md") : cell.isToday ? "bg-secondary-100 text-secondary-700 ring-1 ring-secondary-300" : cell.isCurrentMonth ? "text-zinc-700 hover:bg-zinc-100" : "text-zinc-300" }`}>
-                    {cell.day}
+                {grid.map((cell, i) => {
+                  const cls = cell.isDisabled
+                    ? "text-zinc-700 cursor-not-allowed"
+                    : cell.isSelected
+                      ? "bg-auto-500 text-white shadow-[0_0_14px_rgba(16,185,129,0.55)]"
+                      : cell.isToday
+                        ? "text-auto-300 ring-1 ring-auto-500/40"
+                        : cell.isCurrentMonth
+                          ? "text-zinc-300 hover:bg-white/[0.06]"
+                          : "text-zinc-600";
+                  return (
+                    <button key={i} type="button" onClick={() => !cell.isDisabled && selectDate(cell.date)} disabled={cell.isDisabled}
+                      className={`aspect-square rounded-xl flex items-center justify-center text-xs font-semibold transition-all ${cls}`}>
+                      {cell.day}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Quick list of months */}
+              <div className="grid grid-cols-4 gap-1 pt-1 border-t border-white/5">
+                {MONTHS_SHORT.map((m, i) => (
+                  <button key={m} onClick={() => selectMonth(i)}
+                    className={`text-[10px] font-semibold rounded-lg py-1.5 transition-colors ${i === viewMonth ? "bg-auto-500/15 text-auto-300" : "text-zinc-500 hover:bg-white/[0.06]"}`}>
+                    {m}
                   </button>
                 ))}
               </div>
             </>
           )}
 
+          {pickerMode === "months" && (
+            <div className="grid grid-cols-3 gap-1.5">
+              {MONTHS.map((m, i) => (
+                <button key={m} onClick={() => selectMonth(i)}
+                  className={`text-[11px] font-semibold rounded-xl py-2.5 transition-colors ${i === viewMonth ? "bg-auto-500 text-white" : "text-zinc-300 hover:bg-white/[0.06]"}`}>
+                  {m}
+                </button>
+              ))}
+            </div>
+          )}
+
           {pickerMode === "years" && (
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5">
               {years.map((y) => (
                 <button key={y} onClick={() => selectYear(y)}
-                  className={`text-xs font-semibold rounded-xl py-2.5 transition-colors ${y === viewYear ? (c === "auto" ? "bg-auto-500 text-white shadow-md" : "bg-primary-500 text-white shadow-md") : y === today.getFullYear() ? "bg-secondary-100 text-secondary-700" : "text-zinc-600 hover:bg-zinc-100"}`}>
+                  className={`text-xs font-semibold rounded-xl py-2.5 transition-colors ${y === viewYear ? "bg-auto-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.5)]" : y === today.getFullYear() ? "text-auto-300 ring-1 ring-auto-500/40" : "text-zinc-300 hover:bg-white/[0.06]"}`}>
                   {y}
                 </button>
               ))}

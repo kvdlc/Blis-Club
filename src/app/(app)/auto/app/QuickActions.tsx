@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Fuel, Receipt, Wrench, Siren } from "lucide-react";
+import { Fuel, Wrench, Sparkles, Siren } from "lucide-react";
 
 const actions = [
   {
@@ -12,18 +12,18 @@ const actions = [
     href: "/auto/app/bitacora?add=fuel",
   },
   {
-    key: "gasto-express",
-    icon: Receipt,
-    label: "Gasto express",
-    color: "bg-white/[0.08] text-zinc-300 border border-white/10",
-    href: "/auto/app/bitacora?add=expense",
-  },
-  {
     key: "mantenimiento",
     icon: Wrench,
     label: "Mantenimiento",
-    color: "bg-white/[0.08] text-zinc-300 border border-white/10",
+    color: "bg-violet-500/15 text-violet-300 border border-violet-500/25",
     href: "/auto/app/bitacora?add=maint",
+  },
+  {
+    key: "accesorios",
+    icon: Sparkles,
+    label: "Accesorios",
+    color: "bg-blue-500/15 text-blue-300 border border-blue-500/25",
+    href: "/auto/app/bitacora?add=upgrade",
   },
   {
     key: "sos",
@@ -41,7 +41,7 @@ export function QuickActions() {
         <Link
           key={action.key}
           href={action.href}
-          className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl transition-all active:scale-95 hover:bg-white/10 ${action.color}`}
+          className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl transition-all active:scale-95 hover:opacity-90 ${action.color}`}
         >
           <action.icon className="w-5 h-5" strokeWidth={2} />
           <span className="text-[10px] font-bold leading-tight text-center">
