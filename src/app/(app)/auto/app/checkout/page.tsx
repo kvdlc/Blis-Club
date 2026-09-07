@@ -73,7 +73,7 @@ export default function AutoCheckoutPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-bold text-zinc-900">Checkout</h1>
+      <h1 className="text-lg font-bold text-zinc-200">Checkout</h1>
 
       <IzipayCheckout
         formToken={formToken}

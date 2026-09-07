@@ -13,7 +13,7 @@ const estados: { value: VehicleEstado; label: string; desc: string; icon: any; c
   { value: "activo", label: "Activo", desc: "Vehículo en uso normal. Visible en tu perfil.", icon: Shield, color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
   { value: "en venta", label: "En venta", desc: "Visible públicamente en tu perfil y en Marketplace de Autos Usados.", icon: Tag, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
   { value: "robado", label: "Robado", desc: "Marca el vehículo como robado. Se mostrará una alerta en el perfil público.", icon: AlertTriangle, color: "bg-red-500/10 text-red-400 border-red-500/20" },
-  { value: "vendido", label: "Vendido", desc: "El vehículo ya no te pertenece. Se oculta de tu lista activa.", icon: EyeOff, color: "bg-zinc-100 text-zinc-500 border-zinc-200" },
+  { value: "vendido", label: "Vendido", desc: "El vehículo ya no te pertenece. Se oculta de tu lista activa.", icon: EyeOff, color: "bg-zinc-800 text-zinc-500 border-white/10" },
 ];
 
 export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
@@ -37,37 +37,37 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
       </Link>
 
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-800">Perfil público</h1>
+        <h1 className="text-xl font-extrabold text-zinc-200">Perfil público</h1>
         <p className="text-xs text-zinc-500 mt-1">{vehicle.marca} {vehicle.modelo} · {vehicle.placa}</p>
       </div>
 
       {/* Vista previa del perfil público */}
-      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4">
+      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Globe className="w-4 h-4 text-auto-500" />
-          <h3 className="text-xs font-extrabold text-zinc-700">Vista previa</h3>
+          <h3 className="text-xs font-extrabold text-zinc-300">Vista previa</h3>
           <a href={`/auto/vehiculo/${vehicle.id}`} target="_blank" rel="noopener"
             className="ml-auto text-[10px] font-bold text-auto-500 hover:underline">Ver perfil →</a>
         </div>
 
-        <div className="h-32 bg-zinc-100 rounded-xl flex items-center justify-center mb-3">
+        <div className="h-32 bg-zinc-800 rounded-xl flex items-center justify-center mb-3">
           <Car className="w-10 h-10 text-zinc-500" />
         </div>
-        <p className="text-sm font-bold text-zinc-800 text-center">{vehicle.marca} {vehicle.modelo}</p>
+        <p className="text-sm font-bold text-zinc-200 text-center">{vehicle.marca} {vehicle.modelo}</p>
         <p className="text-xs text-zinc-500 text-center">{vehicle.año} · {vehicle.kilometraje.toLocaleString("es-PE")} km</p>
         <div className="flex justify-center mt-2">
           <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
             estado === "activo" ? "bg-emerald-500/10 text-emerald-400" :
             estado === "en venta" ? "bg-amber-500/10 text-amber-400" :
             estado === "robado" ? "bg-red-500/10 text-red-400" :
-            "bg-zinc-100 text-zinc-500"
+            "bg-zinc-800 text-zinc-500"
           }`}>{estado === "en venta" ? "En venta" : estado === "robado" ? "Robado" : estado === "vendido" ? "Vendido" : "Activo"}</span>
         </div>
       </div>
 
       {/* Selector de estado */}
-      <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-4">
-        <h3 className="text-xs font-extrabold text-zinc-700 mb-3">Cambiar estado</h3>
+      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+        <h3 className="text-xs font-extrabold text-zinc-300 mb-3">Cambiar estado</h3>
         <div className="space-y-2">
           {estados.map((e) => {
             const Icon = e.icon;
@@ -77,7 +77,7 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
                 key={e.value}
                 onClick={() => setEstado(e.value)}
                 className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                  selected ? e.color : "border-transparent bg-zinc-100 hover:bg-zinc-100"
+                  selected ? e.color : "border-transparent bg-zinc-800 hover:bg-zinc-800"
                 }`}
               >
                 <Icon className={`w-5 h-5 shrink-0 mt-0.5 ${
@@ -87,7 +87,7 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
                   "text-zinc-500"
                 }`} />
                 <div>
-                  <p className="text-sm font-bold text-zinc-800">{e.label}</p>
+                  <p className="text-sm font-bold text-zinc-200">{e.label}</p>
                   <p className="text-[10px] text-zinc-500">{e.desc}</p>
                 </div>
               </button>

@@ -80,7 +80,7 @@ export default function NewVehicleClient({ userId }: Props) {
       </Link>
 
       <div>
-        <h1 className="text-xl font-extrabold text-zinc-800">Nuevo Vehículo</h1>
+        <h1 className="text-xl font-extrabold text-zinc-200">Nuevo Vehículo</h1>
         <p className="text-xs text-zinc-500 mt-1">Registra los datos de tu auto</p>
       </div>
 
@@ -93,7 +93,7 @@ export default function NewVehicleClient({ userId }: Props) {
               value={form.marca}
               onChange={(e) => setForm({ ...form, marca: e.target.value })}
               placeholder="Ej: Toyota"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
           <label className="block">
@@ -103,7 +103,7 @@ export default function NewVehicleClient({ userId }: Props) {
               value={form.modelo}
               onChange={(e) => setForm({ ...form, modelo: e.target.value })}
               placeholder="Ej: Corolla"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
         </div>
@@ -118,7 +118,7 @@ export default function NewVehicleClient({ userId }: Props) {
               max={new Date().getFullYear() + 1}
               value={form.año}
               onChange={(e) => setForm({ ...form, año: parseInt(e.target.value) || 0 })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
           <label className="block">
@@ -129,7 +129,7 @@ export default function NewVehicleClient({ userId }: Props) {
               onChange={(e) => setForm({ ...form, placa: e.target.value.toUpperCase() })}
               placeholder="ABC-123"
               maxLength={10}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
         </div>
@@ -141,7 +141,7 @@ export default function NewVehicleClient({ userId }: Props) {
             min={0}
             value={form.kilometraje}
             onChange={(e) => setForm({ ...form, kilometraje: parseInt(e.target.value) || 0 })}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </label>
 
@@ -152,7 +152,7 @@ export default function NewVehicleClient({ userId }: Props) {
               value={form.color}
               onChange={(e) => setForm({ ...form, color: e.target.value })}
               placeholder="Ej: Rojo"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
           <label className="block">
@@ -162,7 +162,7 @@ export default function NewVehicleClient({ userId }: Props) {
               onChange={(e) => setForm({ ...form, vin: e.target.value.toUpperCase() })}
               placeholder="Opcional"
               maxLength={17}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
           </label>
         </div>
@@ -170,14 +170,14 @@ export default function NewVehicleClient({ userId }: Props) {
         <label className="block">
           <span className="text-xs font-bold text-zinc-500">Foto del vehículo</span>
           <div className="flex items-center gap-2 mt-1">
-            <label className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-zinc-200 bg-zinc-100 text-sm cursor-pointer hover:bg-zinc-100 transition-colors">
+            <label className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm cursor-pointer hover:bg-zinc-800 transition-colors">
               <Upload className="w-4 h-4 text-zinc-500" />
               <span className="text-zinc-500">{uploadingPhoto ? "Subiendo..." : form.foto_url ? <>Foto cargada <Check className="w-3.5 h-3.5 inline text-emerald-400" /></> : "Seleccionar archivo"}</span>
               <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" disabled={uploadingPhoto} />
             </label>
           </div>
           {form.foto_url && (
-            <div className="h-32 mt-1 rounded-xl bg-zinc-100 overflow-hidden">
+            <div className="h-32 mt-1 rounded-xl bg-zinc-800 overflow-hidden">
               <img src={form.foto_url} alt="" className="w-full h-full object-cover" />
             </div>
           )}
