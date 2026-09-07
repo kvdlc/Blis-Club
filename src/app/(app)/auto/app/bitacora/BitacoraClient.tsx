@@ -17,6 +17,7 @@ import { useMoney } from "@/lib/money";
 
 /* ═══════════════════════════ Tipos y datos ═══════════════════════ */
 const maintTypes = [
+  { value: "cambio_aceite", label: "Cambio de aceite", icon: "🛢️" },
   { value: "preventivo", label: "Preventivo", icon: "🔧" },
   { value: "correctivo", label: "Correctivo", icon: "🛠️" },
   { value: "lavado", label: "Lavado", icon: "🧽" },
@@ -25,6 +26,7 @@ const maintTypes = [
 ];
 
 const maintIconMap: Record<string, React.ReactNode> = {
+  "🛢️": <Droplets className="w-3.5 h-3.5 text-amber-500" />,
   "🔧": <Wrench className="w-3.5 h-3.5 text-auto-500" />,
   "🛠️": <Wrench className="w-3.5 h-3.5 text-amber-400" />,
   "🧽": <Droplets className="w-3.5 h-3.5 text-blue-400" />,
@@ -278,7 +280,13 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, onEdit,
           <Calendar className="w-3 h-3" />
           {new Date(item.data.fecha + "T12:00:00").toLocaleDateString("es-PE")}
           {item.type === "fuel" && ` · ${(item.data as FuelLog).odometro.toLocaleString("es-PE")} km`}
+          {item.type === "maintenance" && (item.data as MaintenanceLog).odometro != null && ` · ${(item.data as MaintenanceLog).odometro?.toLocaleString("es-PE")} km`}
         </p>
+        {item.type === "maintenance" && (item.data as MaintenanceLog).km_proximo != null && (
+          <p className={`text-[9px] font-bold mt-0.5 ${(item.data as MaintenanceLog).km_proximo! <= ((item.data as MaintenanceLog).odometro || 0) ? "text-red-400" : "text-amber-400"}`}>
+            🛢️ Próx. cambio: {((item.data as MaintenanceLog).km_proximo as number).toLocaleString("es-PE")} km
+          </p>
+        )}
       </div>
       <span className="text-xs font-bold text-zinc-300 shrink-0">
         {money(Math.round(
@@ -409,8 +417,10 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
 
 function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; editItem?: MaintenanceLog | null; onDone: (m: MaintenanceLog | null) => void }) {
   const { symbol } = useMoney();
-  const [form, setForm] = useState({ tipo: "preventivo", titulo: "", costo: "", odometro: "", taller: "", fecha: new Date().toISOString().split("T")[0] });
+  const [form, setForm] = useState({ tipo: "preventivo", titulo: "", costo: "", odometro: "", km_proximo: "", taller: "", fecha: new Date().toISOString().split("T")[0] });
   const [saving, setSaving] = useState(false);
+
+  const esAceite = form.tipo === "cambio_aceite";
 
   useEffect(() => {
     if (editItem) {
@@ -419,20 +429,35 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
         titulo: editItem.titulo || "",
         costo: editItem.costo != null ? String(editItem.costo) : "",
         odometro: editItem.odometro != null ? String(editItem.odometro) : "",
+        km_proximo: editItem.km_proximo != null ? String(editItem.km_proximo) : "",
         taller: editItem.taller || "",
         fecha: editItem.fecha,
       });
     }
   }, [editItem]);
 
+  const handleTipo = (tipo: string) => {
+    setForm((f) => ({
+      ...f,
+      tipo,
+      // Al elegir cambio de aceite, autocompletar el título y sugerir km de vencimiento
+      titulo: tipo === "cambio_aceite" && !editItem ? "Cambio de aceite" : f.titulo,
+      ...(tipo === "cambio_aceite" && !f.km_proximo && f.odometro
+        ? { km_proximo: String(parseInt(f.odometro || "0") + 5000) }
+        : {}),
+    }));
+  };
+
   const handleSubmit = async () => {
-    if (!form.titulo) return;
+    const tituloOk = form.titulo || (esAceite ? "Cambio de aceite" : "");
+    if (!tituloOk) return;
     setSaving(true);
     const supabase = createClient();
     const payload = {
-      tipo: form.tipo, titulo: form.titulo,
+      tipo: form.tipo, titulo: tituloOk,
       costo: form.costo ? parseFloat(form.costo) : null,
       odometro: form.odometro ? parseInt(form.odometro) : null,
+      km_proximo: form.km_proximo ? parseInt(form.km_proximo) : null,
       taller: form.taller || null, fecha: form.fecha,
     };
     let data: MaintenanceLog | null = null;
@@ -452,21 +477,56 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
 
   return (
     <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2 border border-blue-500/20">
-      <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
       <div className="grid grid-cols-2 gap-1.5">
-        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
+        <select value={form.tipo} onChange={(e) => handleTipo(e.target.value)} className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
           {maintTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
-        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`${symbol} costo`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`${symbol} costo`} className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
       </div>
-      <div className="grid grid-cols-2 gap-1.5">
-        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-        <input value={form.taller} onChange={(e) => setForm({ ...form, taller: e.target.value })} placeholder="Taller" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-      </div>
-      <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
+
+      {esAceite ? (
+        <>
+          {/* Cambio de aceite: fecha, km de cambio y km de vencimiento */}
+          <div className="rounded-xl bg-zinc-800/60 border border-amber-500/20 p-2.5 space-y-2">
+            <p className="text-[10px] font-bold text-amber-400 flex items-center gap-1"><Droplets className="w-3 h-3" /> Cambio de aceite</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              <label className="block">
+                <span className="text-[9px] font-bold text-zinc-500">Fecha del cambio</span>
+                <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
+              </label>
+              <label className="block">
+                <span className="text-[9px] font-bold text-zinc-500">Km en el cambio</span>
+                <input type="number" value={form.odometro} onChange={(e) => {
+                  const od = e.target.value;
+                  setForm((f) => ({
+                    ...f, odometro: od,
+                    ...(!f.km_proximo && od ? { km_proximo: String(parseInt(od || "0") + 5000) } : {}),
+                  }));
+                }} placeholder="Ej: 45000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+              </label>
+            </div>
+            <label className="block">
+              <span className="text-[9px] font-bold text-zinc-500">Próximo cambio a los (km)</span>
+              <input type="number" value={form.km_proximo} onChange={(e) => setForm({ ...form, km_proximo: e.target.value })}
+                placeholder="Ej: 50000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            </label>
+            <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título (opcional)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          </div>
+        </>
+      ) : (
+        <>
+          <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          <div className="grid grid-cols-2 gap-1.5">
+            <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            <input value={form.taller} onChange={(e) => setForm({ ...form, taller: e.target.value })} placeholder="Taller" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          </div>
+          <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
+        </>
+      )}
+
       <div className="flex gap-1.5">
-        <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : editItem ? "Guardar cambios" : "Guardar"}</button>
-        <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
+        <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-2 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : editItem ? "Guardar cambios" : esAceite ? "Registrar cambio de aceite" : "Guardar"}</button>
+        <button type="button" onClick={() => onDone(null!)} className="px-3 py-2 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );

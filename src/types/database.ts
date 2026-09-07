@@ -140,6 +140,9 @@ export interface VehicleContact {
   whatsapp: string | null;
   pais_telefono: string | null;
   telefono_alt: string | null;
+  foto_url: string | null;
+  lat: number | null;
+  lng: number | null;
   ubicacion: string | null;
   direccion: string | null;
   notas: string | null;
@@ -174,7 +177,7 @@ export interface VehicleSpecs {
 export interface MaintenanceLog {
   id: string;
   vehicle_id: string;
-  tipo: "preventivo" | "correctivo" | "lavado" | "inspeccion" | "otro";
+  tipo: "preventivo" | "correctivo" | "lavado" | "inspeccion" | "otro" | "cambio_aceite";
   titulo: string;
   descripcion: string | null;
   fecha: string;
@@ -183,6 +186,7 @@ export interface MaintenanceLog {
   taller: string | null;
   factura_url: string | null;
   garantia: boolean;
+  km_proximo: number | null;
   created_at: string;
 }
 

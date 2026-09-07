@@ -9,8 +9,9 @@ import { ChartCard } from "@/components/charts/ChartCard";
 import { DonutBreakdown } from "@/components/charts/DonutBreakdown";
 import { KpiChip } from "@/components/charts/KpiChip";
 import { getCountryConfig, getCurrentCountryCode } from "@/lib/countries";
-import { uploadDocumentPhoto } from "@/lib/storage";
+import { uploadDocumentPhoto, uploadContactPhoto } from "@/lib/storage";
 import { DatePicker } from "@/components/DatePicker";
+import { MapLocationPicker } from "@/components/MapLocationPicker";
 import { ShieldCheck, BadgeAlert, MessageCircle } from "lucide-react";
 import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/types/database";
 import {
@@ -385,7 +386,13 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
   const [adding, setAdding] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ nombre: "", tipo: "mecanico", telefono: "", telefono_alt: "", pais: "PE", pais_alt: "PE", ubicacion: "", notas: "" });
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    nombre: "", tipo: "mecanico", telefono: "", telefono_alt: "",
+    pais: "PE", pais_alt: "PE", foto_url: "", lat: null as number | null,
+    lng: null as number | null, referencia: "", notas: "",
+  });
 
   // Prefijo por defecto = país del usuario
   useEffect(() => {
@@ -395,7 +402,8 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
   }, []);
 
   const resetContactForm = (pais: string) => {
-    setForm({ nombre: "", tipo: "mecanico", telefono: "", telefono_alt: "", pais, pais_alt: pais, ubicacion: "", notas: "" });
+    setForm({ nombre: "", tipo: "mecanico", telefono: "", telefono_alt: "", pais, pais_alt: pais, foto_url: "", lat: null, lng: null, referencia: "", notas: "" });
+    setPhotoError(null);
   };
 
   const startAddContact = () => {
@@ -415,9 +423,13 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
       telefono_alt: strip(c.telefono_alt) || strip(c.whatsapp),
       pais: c.pais_telefono || "PE",
       pais_alt: c.pais_telefono || "PE",
-      ubicacion: c.ubicacion || "",
+      foto_url: c.foto_url || "",
+      lat: c.lat ?? null,
+      lng: c.lng ?? null,
+      referencia: c.ubicacion || "",
       notas: c.notas || "",
     });
+    setPhotoError(null);
     setAdding(true);
   };
 
@@ -427,17 +439,38 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
     resetContactForm(form.pais || "PE");
   };
 
+  const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    setPhotoError(null);
+    try {
+      const url = await uploadContactPhoto(file, vehicleId);
+      if (url) setForm((f) => ({ ...f, foto_url: url }));
+      else setPhotoError("No se pudo subir la foto. Intenta con otra imagen (JPG/PNG).");
+    } catch {
+      setPhotoError("Error al procesar la imagen. Intenta con una foto más liviana.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+    e.target.value = "";
+  };
+
   const handleSaveContact = async () => {
     if (!form.nombre) return;
     setSaving(true);
     const supabase = createClient();
+    const telefonoCompleto = form.telefono ? `+${CountryPrefixOnly(form.pais)}${form.telefono.replace(/[^0-9]/g, "")}` : null;
     const payload = {
       nombre: form.nombre, tipo: form.tipo,
-      telefono: form.telefono ? `+${CountryPrefixOnly(form.pais)}${form.telefono.replace(/[^0-9]/g, "")}` : null,
+      telefono: telefonoCompleto,
       telefono_alt: form.telefono_alt ? `+${CountryPrefixOnly(form.pais_alt)}${form.telefono_alt.replace(/[^0-9]/g, "")}` : null,
-      whatsapp: form.telefono ? `+${CountryPrefixOnly(form.pais)}${form.telefono.replace(/[^0-9]/g, "")}` : null,
+      whatsapp: telefonoCompleto,
       pais_telefono: form.pais,
-      ubicacion: form.ubicacion || null,
+      foto_url: form.foto_url || null,
+      lat: (form.lat != null && !isNaN(form.lat)) ? form.lat : null,
+      lng: (form.lng != null && !isNaN(form.lng)) ? form.lng : null,
+      ubicacion: form.referencia || null,
       notas: form.notas || null,
     };
     const { data, error } = editId
@@ -461,7 +494,11 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
     const d = (full || "").replace(/[^0-9]/g, "");
     return d ? `https://wa.me/${d}` : "#";
   };
-  const mapHref = (q: string | null) => q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : "#";
+  const mapHref = (c: VehicleContact) => {
+    if (c.lat != null && c.lng != null && !isNaN(c.lat)) return `https://www.google.com/maps?q=${c.lat},${c.lng}`;
+    if (c.ubicacion) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.ubicacion)}`;
+    return "#";
+  };
 
   return (
     <div className="space-y-3">
@@ -469,16 +506,37 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
         <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
           <Phone className="w-4 h-4 text-auto-500" /> Directorio de Talleres
         </h2>
-        <button onClick={() => adding ? cancelContactForm() : startAddContact()} className="w-8 h-8 rounded-full bg-auto-600/10 border border-auto-600/20 flex items-center justify-center text-auto-500 hover:bg-auto-600/20 transition-colors">
+        <button type="button" onClick={() => adding ? cancelContactForm() : startAddContact()} className="w-8 h-8 rounded-full bg-auto-600/10 border border-auto-600/20 flex items-center justify-center text-auto-500 hover:bg-auto-600/20 transition-colors">
           {adding ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
         </button>
       </div>
 
       {adding && (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
+        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
           <p className="text-[10px] font-bold text-auto-400">{editId ? "✏️ Editando contacto" : "Nuevo contacto"}</p>
+
+          {/* Foto del taller (subida por archivo) */}
+          <div>
+            <span className="text-[10px] font-bold text-zinc-500">Foto del taller</span>
+            <div className="flex items-center gap-3 mt-1">
+              {form.foto_url ? (
+                <img src={form.foto_url} alt="" className="w-20 h-20 rounded-xl object-cover border border-white/10" />
+              ) : (
+                <div className="w-20 h-20 rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center">
+                  <Store className="w-6 h-6 text-zinc-600" />
+                </div>
+              )}
+              <label className="flex-1 flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl border border-dashed border-white/15 bg-zinc-900 cursor-pointer hover:bg-zinc-800/60 transition-colors">
+                <Upload className="w-4 h-4 text-zinc-400" />
+                <span className="text-[10px] text-zinc-400">{uploadingPhoto ? "Subiendo..." : form.foto_url ? "Cambiar foto" : "Subir foto"}</span>
+                <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" disabled={uploadingPhoto} />
+              </label>
+            </div>
+            {photoError && <p className="text-[10px] text-red-400 mt-1">{photoError}</p>}
+          </div>
+
           <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            placeholder="Nombre del contacto *" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            placeholder="Nombre del taller o contacto *" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
               className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
@@ -512,81 +570,95 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
             </div>
           </div>
 
-          {/* Ubicación Google Maps */}
+          {/* Ubicación en el mapa */}
           <div>
-            <span className="text-[10px] font-bold text-zinc-500">Ubicación (Google Maps)</span>
+            <span className="text-[10px] font-bold text-zinc-500">Ubicación en el mapa</span>
+            <div className="mt-1">
+              <MapLocationPicker
+                lat={form.lat}
+                lng={form.lng}
+                onChange={(la, ln) => setForm((f) => ({ ...f, lat: isNaN(la) ? null : la, lng: isNaN(ln) ? null : ln }))}
+              />
+            </div>
+          </div>
+
+          {/* Referencia de la ubicación */}
+          <div>
+            <span className="text-[10px] font-bold text-zinc-500">Referencia (opcional)</span>
             <div className="flex items-center gap-1.5 mt-1">
               <MapPin className="w-4 h-4 text-zinc-500 shrink-0" />
-              <input value={form.ubicacion} onChange={(e) => setForm({ ...form, ubicacion: e.target.value })}
-                placeholder="Dirección, taller o —ej. Av. Larco 345—" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+              <input value={form.referencia} onChange={(e) => setForm({ ...form, referencia: e.target.value })}
+                placeholder="Ej: frente al grifo, segunda cuadra" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
             </div>
           </div>
 
           <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })}
             placeholder="Notas" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
 
-          <div className="flex gap-1.5">
-            <button onClick={handleSaveContact} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">
-              {saving ? "Guardando..." : editId ? "Guardar cambios" : "Guardar"}
-            </button>
-            <button onClick={cancelContactForm} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <button type="button" onClick={handleSaveContact} disabled={saving}
+            className="w-full py-3 rounded-xl bg-auto-600 text-white text-sm font-bold hover:bg-auto-500 transition-colors active:scale-[0.98] disabled:opacity-50">
+            {saving ? "Guardando..." : editId ? "Guardar cambios" : "Guardar taller"}
+          </button>
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {contacts.length === 0 && !adding && (
-          <p className="text-xs text-zinc-500 text-center py-4 sm:col-span-2">No hay contactos registrados</p>
+          <p className="text-xs text-zinc-500 text-center py-4 sm:col-span-2">No hay talleres registrados</p>
         )}
         {contacts.map((c) => {
           const tipo = contactTypes.find((t) => t.value === c.tipo);
-          const Icon = tipo?.icon || Phone;
+          const Icon = tipo?.icon || Store;
           const principal = c.telefono || c.whatsapp;
           return (
-            <div key={c.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex flex-col gap-2">
-              <div className="flex items-start gap-2">
-                <div className="w-9 h-9 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-auto-500" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-zinc-100 truncate">{c.nombre}</p>
-                  <p className="text-[10px] text-zinc-500">{tipo?.label}{c.pais_telefono && ` · ${c.pais_telefono}`}</p>
-                </div>
-                <button onClick={() => startEditContact(c)} className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-auto-300 transition-colors" title="Editar">
-                  <Pencil className="w-3.5 h-3.5" />
-                </button>
-                <button onClick={() => handleDelete(c.id)} className="w-7 h-7 rounded-lg hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500 transition-colors" title="Eliminar">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+            <div key={c.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3">
+              {/* Foto a la izquierda */}
+              <div className="relative w-16 h-16 shrink-0">
+                {c.foto_url ? (
+                  <img src={c.foto_url} alt="" className="w-full h-full rounded-xl object-cover border border-white/10" />
+                ) : (
+                  <div className="w-full h-full rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center">
+                    <Icon className="w-6 h-6 text-auto-500/70" />
+                  </div>
+                )}
+                <span className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-auto-600/90 border-2 border-zinc-900 flex items-center justify-center">
+                  <Icon className="w-3 h-3 text-white" />
+                </span>
               </div>
 
-              <div className="flex items-center gap-1.5">
-                {principal && (
-                  <a href={`tel:${principal}`} className="flex-1 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-[10px] font-bold hover:bg-emerald-500/20 transition-colors">
-                    <Phone className="w-3 h-3 mr-1" /> Llamar
-                  </a>
-                )}
-                {principal && (
-                  <a href={waLink(principal)} target="_blank" rel="noopener noreferrer" className="flex-1 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 text-[10px] font-bold hover:bg-green-500/20 transition-colors">
-                    <MessageCircle className="w-3 h-3 mr-1" /> WhatsApp
-                  </a>
-                )}
+              {/* Info central */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-zinc-100 truncate leading-tight">{c.nombre}</p>
+                <p className="text-[10px] text-zinc-500 truncate">{tipo?.label}</p>
+                {principal && <p className="text-[11px] font-bold text-zinc-300 mt-0.5 tabular-nums truncate">{principal}</p>}
+                {c.ubicacion && <p className="text-[9px] text-zinc-500 truncate">{c.ubicacion}</p>}
               </div>
-              {c.telefono_alt && (
-                <button onClick={() => window.location.href = `tel:${c.telefono_alt}`}
-                  className="py-1.5 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center text-zinc-300 text-[10px] font-bold hover:bg-white/[0.08] transition-colors">
-                  <Phone className="w-3 h-3 mr-1" /> Alt: {c.telefono_alt}
-                </button>
-              )}
-              {c.ubicacion && (
-                <a href={mapHref(c.ubicacion)} target="_blank" rel="noopener noreferrer"
-                  className="py-1.5 rounded-lg bg-auto-500/10 border border-auto-500/20 flex items-center justify-center text-auto-400 text-[10px] font-bold hover:bg-auto-500/20 transition-colors">
-                  <MapPin className="w-3 h-3 mr-1" /> Ver en Google Maps
-                </a>
-              )}
-              {c.notas && <p className="text-[10px] text-zinc-500 truncate">{c.notas}</p>}
+
+              {/* Botones icono a la derecha */}
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                <div className="flex items-center gap-1.5">
+                  <a href={`tel:${principal}`} title="Llamar"
+                    className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                    <Phone className="w-4 h-4" />
+                  </a>
+                  <a href={principal ? waLink(principal) : "#"} title="WhatsApp" target="_blank" rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-xl bg-green-500/10 border border-green-500/25 flex items-center justify-center text-green-400 hover:bg-green-500/20 transition-colors">
+                    <MessageCircle className="w-4 h-4" />
+                  </a>
+                  <a href={mapHref(c)} title="Ver en mapa" target="_blank" rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-xl bg-auto-500/10 border border-auto-500/25 flex items-center justify-center text-auto-400 hover:bg-auto-500/20 transition-colors">
+                    <MapPin className="w-4 h-4" />
+                  </a>
+                </div>
+                <div className="flex items-center gap-0.5">
+                  <button type="button" onClick={() => startEditContact(c)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-auto-300" title="Editar">
+                    <Pencil className="w-3 h-3" />
+                  </button>
+                  <button type="button" onClick={() => handleDelete(c.id)} className="w-6 h-6 rounded-md hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500" title="Eliminar">
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
             </div>
           );
         })}
@@ -776,8 +848,8 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
         </label>
       </div>
       <div className="flex gap-1.5">
-        <button onClick={handleSave} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "Guardando..." : "Guardar"}</button>
-        <button onClick={() => setEditing(false)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
+        <button type="button" onClick={handleSave} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "Guardando..." : "Guardar"}</button>
+        <button type="button" onClick={() => setEditing(false)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );
@@ -790,11 +862,11 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
         </h2>
         <div className="flex items-center gap-2">
           {catalogSpecId && (
-            <button onClick={handleSyncCatalog} disabled={syncing} className="text-[10px] font-bold text-auto-500 bg-auto-600/10 border border-auto-600/20 px-2 py-1 rounded-lg hover:bg-auto-600/20 transition-colors disabled:opacity-50">
+            <button type="button" onClick={handleSyncCatalog} disabled={syncing} className="text-[10px] font-bold text-auto-500 bg-auto-600/10 border border-auto-600/20 px-2 py-1 rounded-lg hover:bg-auto-600/20 transition-colors disabled:opacity-50">
               {syncing ? "Sincronizando..." : "Sincronizar con catálogo"}
             </button>
           )}
-          <button onClick={() => setEditing(!editing)} className="text-xs font-bold text-auto-500 hover:text-auto-500 transition-colors">
+          <button type="button" onClick={() => setEditing(!editing)} className="text-xs font-bold text-auto-500 hover:text-auto-500 transition-colors">
             {editing ? "Cancelar" : "Editar"}
           </button>
         </div>

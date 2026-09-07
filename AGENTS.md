@@ -17,6 +17,12 @@
 - Use `{ scroll: false }` with `router.replace` for tab navigation
 - Read from `useSearchParams` directly instead of relying on `initialTab` prop for tab state
 
+### Fotos e imágenes (REGLAS OBLIGATORIAS)
+- **NUNCA** pedir una URL/link para cargar una imagen o foto. Siempre se sube por **archivo** desde el dispositivo.
+- Usar las funciones de subida existentes en `src/lib/storage.ts` (ej. `uploadDogPhoto`, `uploadAutoPhoto`, `uploadDocumentPhoto`, etc.) que reciben un `File` y hacen `supabase.storage.from(...).upload(...)`, o crear una análoga si se necesita un bucket/ruta distinta.
+- En los formularios usar `<input type="file" accept="image/*" />` (oculto dentro de un label) y mostrar la miniatura con `<img src={url} />` una vez subida.
+- No usar campos de texto para pegar URLs de imágenes.
+
 ## Supabase Projects
 
 Este repo (Blis Club) tiene **varios proyectos** en la misma cuenta de Supabase. El MCP local (`opencode.json`, NO commiteado) apunta al proyecto correcto de este repo. La config global (`~/.config/opencode/opencode.jsonc`) apunta a OTRO proyecto — no usarla aquí.

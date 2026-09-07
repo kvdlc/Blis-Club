@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { COUNTRIES, getCountryConfig } from "@/lib/countries";
 import type { Profile, Vehicle } from "@/types/database";
-import { User, Settings, Plus, Pencil, Trash2, Car } from "lucide-react";
+import { User, Plus, Pencil, Trash2, Car } from "lucide-react";
 
 interface Props {
   userId: string;
@@ -169,12 +169,8 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
                 </div>
                 <div className="flex items-center gap-1">
                   <Link href={`/auto/app/perfil/vehiculo/${v.id}/editar`}
-                    className="w-7 h-7 rounded-lg hover:bg-zinc-800 flex items-center justify-center text-zinc-500 hover:text-auto-500">
-                    <Pencil className="w-3.5 h-3.5" />
-                  </Link>
-                  <Link href={`/auto/app/perfil/vehiculo/${v.id}/publico`}
-                    className="w-7 h-7 rounded-lg hover:bg-zinc-800 flex items-center justify-center text-zinc-500 hover:text-auto-500">
-                    <Settings className="w-3.5 h-3.5" />
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-auto-600/10 border border-auto-600/20 text-auto-400 hover:bg-auto-600/20 text-[11px] font-bold transition-colors">
+                    <Pencil className="w-3.5 h-3.5" /> Editar
                   </Link>
                   <button onClick={() => handleDeleteVehicle(v.id)}
                     className="w-7 h-7 rounded-lg hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500">

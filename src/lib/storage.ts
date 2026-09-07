@@ -133,3 +133,31 @@ export async function uploadDocumentPhoto(file: File, vehicleId: string): Promis
   const { data: urlData } = supabase.storage.from("auto-photos").getPublicUrl(data.path);
   return urlData.publicUrl;
 }
+
+/** Foto del taller/contacto (Guantera → Directorio). Subida por archivo. */
+export async function uploadContactPhoto(file: File, vehicleId: string): Promise<string | null> {
+  const supabase = createClient();
+  let blob: Blob;
+  let contentType: string;
+  try {
+    blob = await compressImage(file);
+    contentType = blob.type || file.type || "image/jpeg";
+  } catch {
+    blob = file;
+    contentType = file.type || "image/jpeg";
+  }
+  const ext = contentType.includes("png") ? "png" : "jpg";
+  const fileName = `contactos/${vehicleId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
+
+  const { data, error } = await supabase.storage
+    .from("auto-photos")
+    .upload(fileName, blob, { upsert: true, contentType });
+
+  if (error) {
+    console.error("Upload contact photo error:", error.message);
+    return null;
+  }
+
+  const { data: urlData } = supabase.storage.from("auto-photos").getPublicUrl(data.path);
+  return urlData.publicUrl;
+}

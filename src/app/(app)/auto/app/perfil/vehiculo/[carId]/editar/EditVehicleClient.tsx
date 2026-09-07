@@ -7,12 +7,22 @@ import { createClient } from "@/lib/supabase/client";
 import { uploadAutoPhoto } from "@/lib/storage";
 import type { Vehicle, VehicleSpecs } from "@/types/database";
 import { SpecsSection } from "@/app/(app)/auto/app/guantera/GuanteraClient";
-import { ArrowLeft, Upload, Check, HelpCircle } from "lucide-react";
+import { ArrowLeft, Upload, Check, HelpCircle, Shield, Tag, AlertTriangle, EyeOff } from "lucide-react";
+
+type VehicleEstado = "activo" | "en venta" | "robado" | "vendido";
+
+const estadoOptions: { value: VehicleEstado; label: string; desc: string; icon: any; color: string }[] = [
+  { value: "activo", label: "Activo", desc: "Vehículo en uso normal. Visible en tu perfil.", icon: Shield, color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  { value: "en venta", label: "En venta", desc: "Visible en tu perfil y en Marketplace de Autos Usados.", icon: Tag, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+  { value: "robado", label: "Robado", desc: "Se mostrará una alerta en el perfil público.", icon: AlertTriangle, color: "bg-red-500/10 text-red-400 border-red-500/20" },
+  { value: "vendido", label: "Vendido", desc: "Se oculta de tu lista activa.", icon: EyeOff, color: "bg-zinc-800 text-zinc-500 border-white/10" },
+];
 
 export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { userId: string; vehicle: Vehicle; initialSpecs: VehicleSpecs | null }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [estado, setEstado] = useState<VehicleEstado>(vehicle.estado as VehicleEstado || "activo");
   const [form, setForm] = useState({
     marca: vehicle.marca,
     modelo: vehicle.modelo,
@@ -47,6 +57,7 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
       color: form.color || null,
       vin: form.vin || null,
       foto_url: form.foto_url || null,
+      estado,
     }).eq("id", vehicle.id).eq("owner_id", userId);
 
     setSaving(false);
@@ -139,6 +150,37 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
         </label>
 
         <SpecsSection vehicleId={vehicle.id} catalogSpecId={vehicle.catalog_spec_id} initialSpecs={initialSpecs} defaultEditing={!initialSpecs} />
+
+        {/* Estado del vehículo (antes separado en "Perfil público") */}
+        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
+          <h3 className="text-xs font-extrabold text-zinc-300">Estado del vehículo</h3>
+          <div className="space-y-1.5">
+            {estadoOptions.map((e) => {
+              const Icon = e.icon;
+              const selected = estado === e.value;
+              return (
+                <button
+                  key={e.value}
+                  type="button"
+                  onClick={() => setEstado(e.value)}
+                  className={`w-full flex items-start gap-2 p-2.5 rounded-xl border text-left transition-all ${
+                    selected ? e.color : "border-transparent bg-zinc-800 hover:bg-zinc-800"
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${
+                    e.value === "activo" ? "text-emerald-400" :
+                    e.value === "en venta" ? "text-amber-400" :
+                    e.value === "robado" ? "text-red-400" : "text-zinc-500"
+                  }`} />
+                  <div>
+                    <p className="text-xs font-bold text-zinc-200">{e.label}</p>
+                    <p className="text-[9px] text-zinc-500">{e.desc}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <button type="submit" disabled={saving}
           className="w-full py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-500 transition-colors active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-auto-600/20">
