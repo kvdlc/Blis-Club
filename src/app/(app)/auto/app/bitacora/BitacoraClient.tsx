@@ -13,6 +13,7 @@ import {
 import { DatePicker } from "@/components/DatePicker";
 import { BitacoraCharts } from "./BitacoraCharts";
 import { useMoney } from "@/lib/money";
+import { formatoRestante } from "@/lib/dates";
 import { PART_PRODUCTS, partProduct, PART_CATEGORIA_LABEL } from "@/lib/auto-parts";
 
 /* ═══════════════════════════ Tipos y datos ═══════════════════════ */
@@ -76,6 +77,32 @@ function itemIcon(item: TimelineItem) {
   return { icon: <ShoppingBag className="w-5 h-5 text-violet-400" />, chip: "bg-violet-500/10 border border-violet-500/20", border: "border-l-violet-500" };
 }
 
+/** Estado de vida útil de un repuesto: por km (odómetro compra + duración) y/o por fecha. Devuelve etiquetas y nivel. */
+function partLife(u: VehicleUpgrade, currentKm: number): { km: string | null; fecha: string | null; nivel: "ok" | "aviso" | "vencido" } {
+  let km: string | null = null;
+  let fecha: string | null = null;
+  let nivel: "ok" | "aviso" | "vencido" = "ok";
+
+  if (u.ciclo === "km" && u.duracion_km) {
+    const base = u.odometro ?? currentKm;
+    const limite = base + u.duracion_km;
+    const restante = limite - currentKm;
+    if (restante <= 0) { km = "vencido por km"; nivel = "vencido"; }
+    else if (restante <= 3000) { km = `${restante.toLocaleString("es-PE")} km restantes`; nivel = "aviso"; }
+    else km = `vence en ${restante.toLocaleString("es-PE")} km`;
+  }
+  if (u.fecha_vencimiento) {
+    const vencido = u.fecha_vencimiento < new Date().toISOString().slice(0, 10);
+    if (vencido) { fecha = "vencido por fecha"; nivel = "vencido"; }
+    else {
+      const dias = Math.ceil((new Date(u.fecha_vencimiento + "T12:00:00").getTime() - Date.now()) / 86400000);
+      fecha = dias <= 0 ? "vence hoy" : dias <= 15 ? `vence en ${dias} días` : `vence ${formatoRestante(u.fecha_vencimiento)}`;
+      if (nivel !== "vencido" && dias <= 30) nivel = "aviso";
+    }
+  }
+  return { km, fecha, nivel };
+}
+
 export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances, upgrades }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -110,8 +137,8 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
         </div>
       </div>
 
-      <TimelineSection fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} vehicleId={vehicle.id} />
-      <PartsSection vehicleId={vehicle.id} initialParts={upgrades} />
+      <TimelineSection fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} vehicleId={vehicle.id} currentKm={vehicle.kilometraje} />
+      <PartsSection vehicleId={vehicle.id} initialParts={upgrades} currentKm={vehicle.kilometraje} />
       <BitacoraCharts fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} />
       <WarrantySection vehicle={vehicle} maintenances={maintenances} />
       <TireRotationSection />
@@ -121,8 +148,8 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
 }
 
 /* ═══════════════════════════ 1. Línea de Tiempo ═══════════════════════ */
-function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId }: {
-  fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; upgrades: VehicleUpgrade[]; vehicleId: string;
+function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentKm }: {
+  fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; upgrades: VehicleUpgrade[]; vehicleId: string; currentKm: number;
 }) {
   const { money } = useMoney();
   const router = useRouter();
@@ -309,6 +336,7 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId }: {
                     volLabel={volLabel}
                     precioLabel={precioLabel}
                     money={money}
+                    currentKm={currentKm}
                     onEdit={() => {
                       setEditTarget(item);
                       setAddingFuel(item.type === "fuel");
@@ -337,12 +365,13 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId }: {
   );
 }
 
-function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, onEdit, onDelete }: {
+function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, currentKm, onEdit, onDelete }: {
   item: TimelineItem;
   esGalon: boolean;
   volLabel: (litros: number) => string;
   precioLabel: (p: number) => string;
   money: (n: number) => string;
+  currentKm: number;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -373,10 +402,12 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, onEdit,
     const u = item.data as VehicleUpgrade;
     const prod = partProduct(u.tipo_componente || "");
     detail = prod ? prod.emoji + " " + (PART_CATEGORIA_LABEL[u.categoria] || "") : PART_CATEGORIA_LABEL[u.categoria] || "";
-    if (u.odometro != null) detail += detail ? ` · ${u.odometro.toLocaleString("es-PE")} km` : `${u.odometro.toLocaleString("es-PE")} km`;
-    if (u.ciclo === "km" && u.duracion_km) detail += ` · dura ${u.duracion_km.toLocaleString("es-PE")} km`;
-    else if (u.fecha_vencimiento) detail += ` · vence ${new Date(u.fecha_vencimiento + "T12:00:00").toLocaleDateString("es-PE")}`;
+    if (u.odometro != null) detail += detail ? ` · compra a ${u.odometro.toLocaleString("es-PE")} km` : `compra a ${u.odometro.toLocaleString("es-PE")} km`;
   }
+
+  const part = item.type === "part" ? partLife(item.data as VehicleUpgrade, currentKm) : null;
+  const lifeColor = part?.nivel === "vencido" ? "text-red-400" : part?.nivel === "aviso" ? "text-amber-400" : "text-emerald-400";
+  const lifeText = part ? [part.km, part.fecha].filter(Boolean).join(" · ") : null;
 
   return (
     <div className={`bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3 border-l-2 ${st.border}`}>
@@ -391,6 +422,9 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, onEdit,
           {new Date(item.data.fecha + "T12:00:00").toLocaleDateString("es-PE")}
           {detail && <span className="truncate"> · {detail}</span>}
         </p>
+        {part && lifeText && (
+          <p className={`text-[9px] font-bold mt-0.5 truncate ${lifeColor}`}>⏳ {lifeText}</p>
+        )}
       </div>
       <span className="text-xs font-bold text-zinc-300 shrink-0">{money(Math.round(eventCost(item)))}</span>
       <div className="relative shrink-0" ref={menuRef}>
@@ -416,11 +450,24 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, onEdit,
 }
 
 /* ═══════════════════════════ 2. Repuestos y Accesorios ═══════════════════════ */
-function PartsSection({ vehicleId, initialParts }: { vehicleId: string; initialParts: VehicleUpgrade[] }) {
+function PartsSection({ vehicleId, initialParts, currentKm }: { vehicleId: string; initialParts: VehicleUpgrade[]; currentKm: number }) {
   const { money } = useMoney();
   const [parts, setParts] = useState(initialParts);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const refreshPart = (p: VehicleUpgrade) => setParts(parts.map((x) => (x.id === p.id ? p : x)));
+  const refreshPart = (p: VehicleUpgrade) => {
+    setParts(parts.map((x) => (x.id === p.id ? p : x)));
+    setEditingId(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Eliminar este repuesto?")) return;
+    const { error } = await createClient().from("vehicle_upgrades").delete().eq("id", id);
+    if (!error) {
+      setParts(parts.filter((x) => x.id !== id));
+      if (editingId === id) setEditingId(null);
+    }
+  };
 
   return (
     <div className="space-y-3">
@@ -434,9 +481,26 @@ function PartsSection({ vehicleId, initialParts }: { vehicleId: string; initialP
       {parts.length === 0 ? (
         <p className="text-xs text-zinc-500 text-center py-4">Registra la compra de baterías, llantas, pastillas, etc. para llevar su vida útil y gasto.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {parts.map((u) => {
             const prod = partProduct(u.tipo_componente || "");
+            const life = partLife(u, currentKm);
+            const lifeColor = life.nivel === "vencido" ? "text-red-400" : life.nivel === "aviso" ? "text-amber-400" : "text-emerald-400";
+            const lifeText = [life.km, life.fecha].filter(Boolean).join(" · ");
+            // En edición: formulario ancho ocupando toda la fila, sin tarjeta previa
+            if (editingId === u.id) {
+              return (
+                <div key={u.id} className="sm:col-span-2 bg-zinc-900 border border-auto-500/25 shadow-sm rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] font-bold text-auto-400">✏️ Editando repuesto / accesorio</p>
+                    <button type="button" onClick={() => setEditingId(null)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500" aria-label="Cancelar">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <AddPartForm vehicleId={vehicleId} editItem={u} onDone={(p) => { if (p) refreshPart(p); }} />
+                </div>
+              );
+            }
             return (
               <div key={u.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0 text-lg">
@@ -447,17 +511,25 @@ function PartsSection({ vehicleId, initialParts }: { vehicleId: string; initialP
                   <p className="text-[10px] text-zinc-500 truncate">
                     {prod ? prod.label : PART_CATEGORIA_LABEL[u.categoria] || ""}
                     {u.marca ? ` · ${u.marca}` : ""}
-                    {u.odometro != null ? ` · ${u.odometro.toLocaleString("es-PE")} km` : ""}
+                    {u.odometro != null ? ` · compra a ${u.odometro.toLocaleString("es-PE")} km` : ""}
                   </p>
                   <p className="text-[10px] text-zinc-500 truncate">
                     {new Date(u.fecha + "T12:00:00").toLocaleDateString("es-PE")}
-                    {u.ciclo === "km" && u.duracion_km ? ` · dura ${u.duracion_km.toLocaleString("es-PE")} km` : ""}
-                    {u.fecha_vencimiento ? ` · vence ${new Date(u.fecha_vencimiento + "T12:00:00").toLocaleDateString("es-PE")}` : ""}
+                    {u.duracion_km ? ` · dura ${u.duracion_km.toLocaleString("es-PE")} km` : ""}
+                    {u.fecha_vencimiento ? ` · ${formatoRestante(u.fecha_vencimiento)}` : ""}
                   </p>
+                  {lifeText && <p className={`text-[9px] font-bold mt-0.5 truncate ${lifeColor}`}>⏳ {lifeText}</p>}
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <span className="text-xs font-bold text-auto-500">{u.costo ? money(u.costo) : "—"}</span>
-                  <PartEditButton vehicleId={vehicleId} part={u} onSaved={refreshPart} />
+                  <div className="flex items-center gap-0.5">
+                    <button type="button" onClick={() => setEditingId(u.id)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-auto-300" title="Editar">
+                      <Pencil className="w-3 h-3" />
+                    </button>
+                    <button type="button" onClick={() => handleDelete(u.id)} className="w-6 h-6 rounded-md hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500" title="Eliminar">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -465,29 +537,6 @@ function PartsSection({ vehicleId, initialParts }: { vehicleId: string; initialP
         </div>
       )}
     </div>
-  );
-}
-
-function PartEditButton({ vehicleId, part, onSaved }: { vehicleId: string; part: VehicleUpgrade; onSaved: (p: VehicleUpgrade) => void }) {
-  const [open, setOpen] = useState(false);
-  if (!open) {
-    return (
-      <div className="flex items-center gap-0.5">
-        <button type="button" onClick={() => setOpen(true)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-auto-300" title="Editar">
-          <Pencil className="w-3 h-3" />
-        </button>
-        <button type="button" onClick={async () => {
-          if (!confirm("¿Eliminar este repuesto?")) return;
-          const { error } = await createClient().from("vehicle_upgrades").delete().eq("id", part.id);
-          if (!error) window.location.reload();
-        }} className="w-6 h-6 rounded-md hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500" title="Eliminar">
-          <Trash2 className="w-3 h-3" />
-        </button>
-      </div>
-    );
-  }
-  return (
-    <AddPartForm vehicleId={vehicleId} editItem={part} onDone={(p) => { setOpen(false); if (p) onSaved(p); }} />
   );
 }
 
@@ -729,7 +778,7 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
       fecha: form.fecha,
       odometro: form.odometro ? parseInt(form.odometro) : null,
       fecha_mantenimiento: null,
-      fecha_vencimiento: form.conVencimiento ? form.fecha_vencimiento || null : null,
+      fecha_vencimiento: form.conVencimiento && form.fecha_vencimiento ? form.fecha_vencimiento : null,
       ciclo: form.conKm ? "km" : (form.conVencimiento ? "tiempo" : null),
       duracion_km: form.conKm && form.duracion_km ? parseInt(form.duracion_km) : null,
       notas: form.notas || null,
@@ -792,27 +841,28 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
         });
       }} />
 
-      {/* Vida útil */}
+      {/* Vida útil: puede marcarse por km y/o por fecha (aplica lo que ocurra primero) */}
       <div className="space-y-1.5">
+        <div className="flex items-center gap-2 text-[10px] text-zinc-500">Marca el límite por kilómetros, por fecha, o ambos (se avisará lo que ocurra primero).</div>
         <div className="grid grid-cols-2 gap-1.5">
           <label className="flex items-center gap-2 cursor-pointer text-[11px] text-zinc-300">
-            <input type="checkbox" checked={form.conKm} onChange={(e) => {
-              const on = e.target.checked;
-              setForm((f) => ({ ...f, conKm: on, conVencimiento: on ? false : f.conVencimiento, fecha_vencimiento: on ? "" : f.fecha_vencimiento }));
-            }} className="accent-auto-500" /> Duración por km
+            <input type="checkbox" checked={form.conKm} onChange={(e) => setForm((f) => ({ ...f, conKm: e.target.checked }))} className="accent-auto-500" /> Duración por km
           </label>
           <label className="flex items-center gap-2 cursor-pointer text-[11px] text-zinc-300">
-            <input type="checkbox" checked={form.conVencimiento} onChange={(e) => {
-              const on = e.target.checked;
-              setForm((f) => ({ ...f, conVencimiento: on, conKm: on ? false : f.conKm, duracion_km: on ? "" : f.duracion_km }));
-            }} className="accent-auto-500" /> Vence (fecha)
+            <input type="checkbox" checked={form.conVencimiento} onChange={(e) => setForm((f) => ({ ...f, conVencimiento: e.target.checked }))} className="accent-auto-500" /> Vence (fecha)
           </label>
         </div>
         {form.conKm && (
-          <input type="number" min="0" value={form.duracion_km} onChange={(e) => setForm({ ...form, duracion_km: e.target.value })} placeholder="Duración en km (ej: 40000)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          <div>
+            <span className="text-[9px] font-bold text-zinc-500">Duración útil en km</span>
+            <input type="number" min="0" value={form.duracion_km} onChange={(e) => setForm({ ...form, duracion_km: e.target.value })} placeholder="Ej: 40000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 mt-0.5" />
+          </div>
         )}
         {form.conVencimiento && (
-          <DatePicker colorTheme="auto" value={form.fecha_vencimiento} onChange={(d) => setForm({ ...form, fecha_vencimiento: d })} />
+          <div>
+            <span className="text-[9px] font-bold text-zinc-500">Fecha de vencimiento</span>
+            <DatePicker colorTheme="auto" value={form.fecha_vencimiento} onChange={(d) => setForm({ ...form, fecha_vencimiento: d })} />
+          </div>
         )}
       </div>
 
