@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { correctionToCatalogField } from "@/lib/catalog";
-import { Database, Plus, Trash2, BadgeCheck, ShieldQuestion, Check, X } from "lucide-react";
+import { Plus, Trash2, BadgeCheck, ShieldQuestion, Check, X } from "lucide-react";
 
 interface Make {
   id: string;
   nombre: string;
   slug: string;
+  logo_url?: string | null;
   models: { id: string; nombre: string; slug: string; tipo_vehiculo: string }[];
 }
 
@@ -18,6 +19,8 @@ interface Spec {
   motor_nombre: string | null;
   tipo_combustible: string;
   capacidad_tanque_l: number | null;
+  bateria_kwh: number | null;
+  autonomia_km: number | null;
   aceite_viscosidad: string | null;
   psi_delante: number | null;
   psi_atras: number | null;
@@ -183,7 +186,14 @@ export default function CatalogoVehiculosClient({ makes, specs, corrections }: {
                 <tr key={m.id} className="border-b border-zinc-50 hover:bg-zinc-50/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Database className="w-4 h-4 text-zinc-400" />
+                      {m.logo_url ? (
+                        <img src={m.logo_url} alt={m.nombre} className="h-6 w-auto max-w-[72px] object-contain bg-white rounded px-0.5"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                      ) : (
+                        <div className="w-6 h-6 rounded bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                          {m.nombre.charAt(0)}
+                        </div>
+                      )}
                       <span className="font-bold text-zinc-800">{m.nombre}</span>
                     </div>
                   </td>
@@ -212,7 +222,7 @@ export default function CatalogoVehiculosClient({ makes, specs, corrections }: {
                 <tr className="border-b border-zinc-100 bg-zinc-50">
                   <th className="text-left px-3 py-2 text-xs font-bold text-zinc-500">Modelo</th>
                   <th className="text-left px-3 py-2 text-xs font-bold text-zinc-500">Versión</th>
-                  <th className="text-left px-3 py-2 text-xs font-bold text-zinc-500">Tanque</th>
+                  <th className="text-left px-3 py-2 text-xs font-bold text-zinc-500">Tanque/Batería</th>
                   <th className="text-left px-3 py-2 text-xs font-bold text-zinc-500">Aceite</th>
                   <th className="text-left px-3 py-2 text-xs font-bold text-zinc-500">PSI</th>
                   <th className="text-left px-3 py-2 text-xs font-bold text-zinc-500">Octanaje</th>
@@ -225,7 +235,9 @@ export default function CatalogoVehiculosClient({ makes, specs, corrections }: {
                   <tr key={s.id} className="border-b border-zinc-50 hover:bg-zinc-50/50">
                     <td className="px-3 py-2 font-bold text-zinc-800">{s.model?.nombre || "—"}</td>
                     <td className="px-3 py-2 text-xs text-zinc-600">{s.año || "—"} · {s.motor_nombre || "N/D"} · {s.tipo_combustible}</td>
-                    <td className="px-3 py-2 text-xs text-zinc-600">{s.capacidad_tanque_l ? `${s.capacidad_tanque_l} L` : "—"}</td>
+                    <td className="px-3 py-2 text-xs text-zinc-600">
+                      {s.bateria_kwh ? `${s.bateria_kwh} kWh · ${s.autonomia_km ?? "?"} km` : (s.capacidad_tanque_l ? `${s.capacidad_tanque_l} L` : "—")}
+                    </td>
                     <td className="px-3 py-2 text-xs text-zinc-600">{s.aceite_viscosidad || "—"}</td>
                     <td className="px-3 py-2 text-xs text-zinc-600">{s.psi_delante ? `${s.psi_delante}/${s.psi_atras}` : "—"}</td>
                     <td className="px-3 py-2 text-xs text-zinc-600">{s.octanaje_sugerido || "—"}</td>

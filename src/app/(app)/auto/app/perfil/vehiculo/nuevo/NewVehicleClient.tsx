@@ -21,6 +21,7 @@ const TIPO_LABELS: Record<VehicleType, string> = {
   suv: "SUV",
   pickup: "Pickup / Camioneta",
   moto: "Moto",
+  furgoneta: "Furgoneta / Utilitario",
 };
 
 export default function NewVehicleClient({ userId }: Props) {
@@ -139,9 +140,18 @@ export default function NewVehicleClient({ userId }: Props) {
       <form onSubmit={handleSubmit} className="space-y-3">
         {/* ── Selector de catálogo ── */}
         <div className="card-auto-dark rounded-2xl p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <Database className="w-4 h-4 text-auto-400" />
-            <span className="text-xs font-bold text-zinc-300">Catálogo de vehículos</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Database className="w-4 h-4 text-auto-400" />
+              <span className="text-xs font-bold text-zinc-300">Catálogo de vehículos</span>
+            </div>
+            {(() => {
+              const mk = makes.find((x) => x.id === marcaId);
+              return mk?.logo_url ? (
+                <img src={mk.logo_url} alt={mk.nombre} className="h-5 w-auto max-w-[72px] object-contain bg-white/5 rounded px-1"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              ) : null;
+            })()}
           </div>
 
           <label className="block">
@@ -224,6 +234,12 @@ export default function NewVehicleClient({ userId }: Props) {
                 <span className="text-[10px] font-bold text-zinc-300">Specs automáticas detectadas</span>
               </div>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] text-zinc-400">
+                {(selectedSpec.tipo_combustible === "electrico" || selectedSpec.tipo_combustible === "hibrido") && (
+                  <>
+                    {selectedSpec.bateria_kwh && <span>Batería: {selectedSpec.bateria_kwh} kWh</span>}
+                    {selectedSpec.autonomia_km && <span>Autonomía: {selectedSpec.autonomia_km} km</span>}
+                  </>
+                )}
                 {selectedSpec.capacidad_tanque_l && <span>Tanque: {selectedSpec.capacidad_tanque_l} L</span>}
                 {selectedSpec.aceite_viscosidad && <span>Aceite: {selectedSpec.aceite_viscosidad}</span>}
                 {selectedSpec.psi_delante && <span>PSI delante: {selectedSpec.psi_delante}</span>}

@@ -61,13 +61,13 @@ export interface Vehicle {
   color: string | null;
   vin: string | null;
   estado: "activo" | "en venta" | "robado" | "vendido";
-  tipo_vehiculo: "auto" | "suv" | "pickup" | "moto";
+  tipo_vehiculo: "auto" | "suv" | "pickup" | "moto" | "furgoneta";
   catalog_spec_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export type VehicleType = "auto" | "suv" | "pickup" | "moto";
+export type VehicleType = "auto" | "suv" | "pickup" | "moto" | "furgoneta";
 
 export interface CatalogMake {
   id: string;
@@ -102,6 +102,8 @@ export interface CatalogSpec {
   psi_atras: number | null;
   psi_repuesto: number | null;
   octanaje_sugerido: string | null;
+  bateria_kwh: number | null;
+  autonomia_km: number | null;
   fuente_url: string | null;
   verified: boolean;
 }
