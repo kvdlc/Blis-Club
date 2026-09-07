@@ -102,10 +102,18 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
   fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; vehicleId: string;
 }) {
   const { money } = useMoney();
+  const [countryCode, setCountryCode] = useState<string | null>(null);
   const [addingFuel, setAddingFuel] = useState(false);
   const [addingMaint, setAddingMaint] = useState(false);
   const [fuelLogsState, setFuelLogsState] = useState(fuelLogs);
   const [maintsState, setMaintsState] = useState(maintenances);
+
+  useEffect(() => { getCurrentCountryCode().then((c) => setCountryCode(c)); }, []);
+
+  const esGalon = getCountryConfig(countryCode).fuelUnit === "galon";
+  const GAL = 3.78541;
+  const volLabel = (litros: number) => esGalon ? `${(litros / GAL).toFixed(2)} gal` : `${litros} L`;
+  const precioLabel = (p: number) => esGalon ? money(p) : money(p / GAL);
 
   const timeline: TimelineItem[] = [
     ...fuelLogsState.map((f) => ({ type: "fuel" as const, data: f })),
@@ -118,15 +126,34 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
         <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
           <ScrollText className="w-4 h-4 text-auto-500" /> Línea de Tiempo
         </h2>
-        <div className="flex gap-1.5">
-          <button onClick={() => { setAddingFuel(!addingFuel); setAddingMaint(false); }} className="px-2.5 py-1.5 rounded-lg bg-auto-600/10 border border-auto-600/20 text-[10px] font-bold text-auto-500 hover:bg-auto-600/20 transition-colors flex items-center gap-1">
-            <Fuel className="w-3 h-3" /> Carga
-          </button>
-          <button onClick={() => { setAddingMaint(!addingMaint); setAddingFuel(false); }}
-            className="px-2.5 py-1.5 rounded-lg bg-auto-600/10 border border-auto-600/20 text-[10px] font-bold text-auto-500 hover:bg-auto-600/20 transition-colors flex items-center gap-1">
-            <Wrench className="w-3 h-3" /> Servicio
-          </button>
-        </div>
+      </div>
+
+      {/* Botones grandes de registro */}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          onClick={() => { setAddingFuel(!addingFuel); setAddingMaint(false); }}
+          className={`flex flex-col items-center gap-1.5 rounded-2xl px-4 py-4 border transition-all active:scale-[0.98] ${
+            addingFuel
+              ? "bg-amber-500/20 border-amber-500/40"
+              : "bg-amber-500/10 border-amber-500/25 hover:bg-amber-500/20"
+          }`}
+        >
+          <Fuel className="w-6 h-6 text-amber-400" />
+          <span className="text-xs font-extrabold text-zinc-100">Cargar combustible</span>
+          <span className="text-[10px] text-zinc-500">Registra una carga</span>
+        </button>
+        <button
+          onClick={() => { setAddingMaint(!addingMaint); setAddingFuel(false); }}
+          className={`flex flex-col items-center gap-1.5 rounded-2xl px-4 py-4 border transition-all active:scale-[0.98] ${
+            addingMaint
+              ? "bg-blue-500/20 border-blue-500/40"
+              : "bg-blue-500/10 border-blue-500/25 hover:bg-blue-500/20"
+          }`}
+        >
+          <Wrench className="w-6 h-6 text-blue-400" />
+          <span className="text-xs font-extrabold text-zinc-100">Registrar servicio</span>
+          <span className="text-[10px] text-zinc-500">Mantenimiento u otro</span>
+        </button>
       </div>
 
       {addingFuel && <AddFuelForm vehicleId={vehicleId} onDone={(f) => { if (f) setFuelLogsState([f, ...fuelLogsState]); setAddingFuel(false); }} />}
@@ -144,7 +171,7 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-zinc-100">
                   {item.type === "fuel" ? (
-                    <>{(item.data as FuelLog).litros} L · {money((item.data as FuelLog).precio_por_galon)}/gal</>
+                    <>{volLabel((item.data as FuelLog).litros)} · {precioLabel((item.data as FuelLog).precio_por_galon)}{esGalon ? "/gal" : "/L"}</>
                   ) : (
                     <>{(item.data as MaintenanceLog).titulo}</>
                   )}
@@ -173,7 +200,7 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
 /* ═══════════════════════════ Forms ═══════════════════════ */
 function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: FuelLog | null) => void }) {
   const [countryCode, setCountryCode] = useState<string | null>(null);
-  const [form, setForm] = useState({ litros: "", precio_por_galon: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "90" });
+  const [form, setForm] = useState({ cantidad: "", precio_por_galon: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "90" });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -185,17 +212,27 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
   }, []);
 
   const cfg = getCountryConfig(countryCode);
-  const precioUnit = cfg.fuelUnit === "galon" ? "galón" : "litro";
+  const esGalon = cfg.fuelUnit === "galon";
+  const unidadLabel = esGalon ? "galones" : "litros";
+  const unidadShort = esGalon ? "gal" : "L";
+  // El precio local es por la unidad del país (galón o litro). Canonizamos a precio por galón.
+  const precioUnit = esGalon ? "galón" : "litro";
+  const GAL = 3.78541;
 
   const handleSubmit = async () => {
-    const l = parseFloat(form.litros);
-    const p = parseFloat(form.precio_por_galon);
+    const cant = parseFloat(form.cantidad); // en unidad local (gal o L)
+    const precioLocal = parseFloat(form.precio_por_galon);
     const o = parseInt(form.odometro);
-    if (!l || !p || !o) return;
+    if (!cant || !precioLocal || !o) return;
+
+    // Canonizar a litros y precio por galón
+    const litros = esGalon ? cant * GAL : cant;
+    const precioPorGalon = esGalon ? precioLocal : precioLocal * GAL;
+
     setSaving(true);
     const supabase = createClient();
     const { data } = await supabase.from("fuel_logs").insert({
-      vehicle_id: vehicleId, litros: l, precio_por_galon: p, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo,
+      vehicle_id: vehicleId, litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo,
     }).select().single();
     if (data) {
       await supabase.from("vehicles").update({ kilometraje: o }).eq("id", vehicleId);
@@ -206,15 +243,18 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
 
   return (
     <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2 border border-amber-500/20">
+      <p className="text-[10px] font-bold text-zinc-400">
+        Unidad: {esGalon ? "Estás en un país de galones" : "Estás en un país de litros"} · ingresa en {unidadLabel}
+      </p>
       <div className="grid grid-cols-4 gap-1.5">
-        <input type="number" step="0.1" value={form.litros} onChange={(e) => setForm({ ...form, litros: e.target.value })} placeholder="Litros" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder={`${cfg.currency}/${cfg.fuelUnitShort}`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <input type="number" step="0.1" value={form.cantidad} onChange={(e) => setForm({ ...form, cantidad: e.target.value })} placeholder={unidadShort} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder={`${cfg.currency}/${unidadShort}`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
         <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
         <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
           {cfg.fuelTypes.map((ft) => <option key={ft.value} value={ft.value}>{ft.label}</option>)}
         </select>
       </div>
-      <p className="text-[9px] text-zinc-500">Precio por {precioUnit} ({cfg.currency})</p>
+      <p className="text-[9px] text-zinc-500">Cantidad en {unidadLabel} · Precio por {precioUnit} ({cfg.currency})</p>
       <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
         <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : "Guardar"}</button>
