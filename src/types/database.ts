@@ -139,6 +139,8 @@ export interface VehicleContact {
   telefono: string | null;
   whatsapp: string | null;
   pais_telefono: string | null;
+  telefono_alt: string | null;
+  ubicacion: string | null;
   direccion: string | null;
   notas: string | null;
   created_at: string;

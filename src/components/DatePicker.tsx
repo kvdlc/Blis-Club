@@ -120,7 +120,7 @@ export function DatePicker({ value, onChange, min, max, label, colorTheme = "aut
       if (m > 11) { m = 0; y++; }
       setViewMonth(m); setViewYear(y);
     } else {
-      setViewYear((y) => y + dir * 12);
+      setViewYear((y) => y + dir * 5);
     }
   };
 
@@ -194,14 +194,16 @@ export function DatePicker({ value, onChange, min, max, label, colorTheme = "aut
   }, [value]);
 
   const years = useMemo(() => {
-    const start = Math.floor(viewYear / 12) * 12;
+    // Rango contiguo centrado en viewYear, con mucho margen al futuro
+    const from = viewYear - 4;
+    const to = viewYear + 15;
     const arr: number[] = [];
-    for (let i = -1; i <= 12; i++) arr.push(start + i);
+    for (let y = from; y <= to; y++) arr.push(y);
     return arr;
   }, [viewYear]);
 
   const title = pickerMode === "years"
-    ? `${Math.floor(viewYear / 12) * 12} — ${Math.floor(viewYear / 12) * 12 + 11}`
+    ? `${years[0]} — ${years[years.length - 1]}`
     : pickerMode === "months"
       ? `${viewYear}`
       : `${MONTHS[viewMonth]} ${viewYear}`;

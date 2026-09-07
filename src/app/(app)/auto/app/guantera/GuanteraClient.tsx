@@ -14,7 +14,7 @@ import { DatePicker } from "@/components/DatePicker";
 import { ShieldCheck, BadgeAlert, MessageCircle } from "lucide-react";
 import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/types/database";
 import {
-  FileText, Phone, Wrench, AlertTriangle, Plus, Trash2, X, Upload, Eye, Pencil,
+  FileText, Phone, Wrench, AlertTriangle, Plus, Trash2, X, Upload, Eye, Pencil, MapPin,
   BadgeCheck, Settings, Circle, Droplet, Droplets, Battery, BatteryCharging, Thermometer, OctagonAlert, Fuel, RotateCw, Lock, Cog, Sun,
   Shield, ClipboardList, Anchor, Store, Building2, Pin, Zap,
   Calendar, Gauge, FlaskConical, Ruler, Layers, CircleDot, RefreshCcw, CircleOff, Lightbulb, Waves,
@@ -145,13 +145,13 @@ function GuanteraInsights({ docs, contacts }: { docs: VehicleDocument[]; contact
           <p className="text-xs text-zinc-500 text-center">Agrega SOAT, revisión técnica y póliza para vigilar su vencimiento aquí.</p>
         </div>
       ) : (
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <DonutBreakdown data={donut} centerValue={`${total}`} centerLabel="docs" height={140} />
-          <div className="flex-1 grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex-1">
             <KpiChip icon={<ShieldCheck className="w-3.5 h-3.5" />} label="Vigentes" value={`${vigentes}`} color={CHART.emerald} soft={CHART.emeraldSoft} href="/auto/app/guantera" />
             <KpiChip icon={<BadgeAlert className="w-3.5 h-3.5" />} label="Vencidos" value={`${vencidos}`} color="#ef4444" soft="rgba(239,68,68,0.15)" href="/auto/app/guantera" />
             <KpiChip icon={<Phone className="w-3.5 h-3.5" />} label="Contactos" value={`${contacts.length}`} color={CHART.teal} soft={CHART.tealSoft} href="/auto/app/guantera" />
-            <KpiChip icon={<Wrench className="w-3.5 h-3.5" />} label="Aviso" value={proximos > 0 ? `${proximos}` : "—"} color={CHART.orange} soft={CHART.orangeSoft} href="/auto/app/guantera" />
+            <KpiChip icon={<Wrench className="w-3.5 h-3.5" />} label="Por vencer" value={proximos > 0 ? `${proximos}` : "—"} color={CHART.orange} soft={CHART.orangeSoft} href="/auto/app/guantera" />
           </div>
         </div>
       )}
@@ -383,45 +383,85 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
 function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; initialContacts: VehicleContact[] }) {
   const [contacts, setContacts] = useState(initialContacts);
   const [adding, setAdding] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ nombre: "", tipo: "mecanico", telefono: "", whatsapp: "", pais: "PE", direccion: "", notas: "" });
+  const [form, setForm] = useState({ nombre: "", tipo: "mecanico", telefono: "", telefono_alt: "", pais: "PE", pais_alt: "PE", ubicacion: "", notas: "" });
 
   // Prefijo por defecto = país del usuario
   useEffect(() => {
     getCurrentCountryCode().then((code) => {
-      if (code) setForm((f) => ({ ...f, pais: code }));
+      if (code) setForm((f) => ({ ...f, pais: code, pais_alt: code }));
     });
   }, []);
 
-  const prefijoDe = (pais: string) => countryPrefixes.find((p) => p.code === pais)?.prefix || countryPrefixes[0].prefix;
+  const resetContactForm = (pais: string) => {
+    setForm({ nombre: "", tipo: "mecanico", telefono: "", telefono_alt: "", pais, pais_alt: pais, ubicacion: "", notas: "" });
+  };
 
-  const handleAdd = async () => {
+  const startAddContact = () => {
+    setEditId(null);
+    resetContactForm(form.pais || "PE");
+    setAdding(true);
+  };
+
+  const startEditContact = (c: VehicleContact) => {
+    setEditId(c.id);
+    // Quitar el prefijo guardado para mostrarlo por separado
+    const strip = (num: string | null) => num ? num.replace(/^\+\d+/, "") : "";
+    setForm({
+      nombre: c.nombre,
+      tipo: c.tipo,
+      telefono: strip(c.telefono),
+      telefono_alt: strip(c.telefono_alt) || strip(c.whatsapp),
+      pais: c.pais_telefono || "PE",
+      pais_alt: c.pais_telefono || "PE",
+      ubicacion: c.ubicacion || "",
+      notas: c.notas || "",
+    });
+    setAdding(true);
+  };
+
+  const cancelContactForm = () => {
+    setAdding(false);
+    setEditId(null);
+    resetContactForm(form.pais || "PE");
+  };
+
+  const handleSaveContact = async () => {
     if (!form.nombre) return;
     setSaving(true);
     const supabase = createClient();
-    const { data, error } = await supabase.from("vehicle_contacts").insert({
-      vehicle_id: vehicleId, nombre: form.nombre, tipo: form.tipo,
-      telefono: form.telefono ? `${prefijoDe(form.pais)}${form.telefono.replace(/[^0-9]/g, "")}` : null,
-      whatsapp: form.whatsapp ? `${prefijoDe(form.pais)}${form.whatsapp.replace(/[^0-9]/g, "")}` : null,
-      pais_telefono: form.pais, direccion: form.direccion || null, notas: form.notas || null,
-    }).select().single();
+    const payload = {
+      nombre: form.nombre, tipo: form.tipo,
+      telefono: form.telefono ? `+${CountryPrefixOnly(form.pais)}${form.telefono.replace(/[^0-9]/g, "")}` : null,
+      telefono_alt: form.telefono_alt ? `+${CountryPrefixOnly(form.pais_alt)}${form.telefono_alt.replace(/[^0-9]/g, "")}` : null,
+      whatsapp: form.telefono ? `+${CountryPrefixOnly(form.pais)}${form.telefono.replace(/[^0-9]/g, "")}` : null,
+      pais_telefono: form.pais,
+      ubicacion: form.ubicacion || null,
+      notas: form.notas || null,
+    };
+    const { data, error } = editId
+      ? await supabase.from("vehicle_contacts").update(payload).eq("id", editId).select().single()
+      : await supabase.from("vehicle_contacts").insert({ ...payload, vehicle_id: vehicleId }).select().single();
     setSaving(false);
     if (!error && data) {
-      setContacts([...contacts, data as VehicleContact]);
-      setAdding(false);
-      setForm({ nombre: "", tipo: "mecanico", telefono: "", whatsapp: "", pais: form.pais, direccion: "", notas: "" });
+      const saved = data as VehicleContact;
+      setContacts(editId ? contacts.map((c) => (c.id === saved.id ? saved : c)) : [...contacts, saved]);
+      cancelContactForm();
     }
   };
 
   const handleDelete = async (id: string) => {
+    if (!confirm("¿Eliminar este contacto?")) return;
     const { error } = await createClient().from("vehicle_contacts").delete().eq("id", id);
     if (!error) setContacts(contacts.filter((c) => c.id !== id));
   };
 
-  const waLink = (c: VehicleContact) => {
-    const full = c.whatsapp ? c.whatsapp.replace(/[^0-9]/g, "") : "";
-    return `https://wa.me/${full}`;
+  const waLink = (full: string | null) => {
+    const d = (full || "").replace(/[^0-9]/g, "");
+    return d ? `https://wa.me/${d}` : "#";
   };
+  const mapHref = (q: string | null) => q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : "#";
 
   return (
     <div className="space-y-3">
@@ -429,87 +469,136 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
         <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
           <Phone className="w-4 h-4 text-auto-500" /> Directorio de Talleres
         </h2>
-        <button onClick={() => setAdding(!adding)} className="w-8 h-8 rounded-full bg-auto-600/10 border border-auto-600/20 flex items-center justify-center text-auto-500 hover:bg-auto-600/20 transition-colors">
-          <Plus className="w-4 h-4" />
+        <button onClick={() => adding ? cancelContactForm() : startAddContact()} className="w-8 h-8 rounded-full bg-auto-600/10 border border-auto-600/20 flex items-center justify-center text-auto-500 hover:bg-auto-600/20 transition-colors">
+          {adding ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
         </button>
       </div>
 
       {adding && (
         <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
+          <p className="text-[10px] font-bold text-auto-400">{editId ? "✏️ Editando contacto" : "Nuevo contacto"}</p>
           <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })}
             placeholder="Nombre del contacto *" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
               className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
               {contactTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
-            <select value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })}
-              className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
-              {countryPrefixes.map((p) => <option key={p.code} value={p.code}>{p.flag} {p.code} ({p.prefix})</option>)}
-            </select>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-zinc-500 px-1">{prefijoDe(form.pais)}</span>
+
+          {/* Número principal (llamada y WhatsApp, el mismo) */}
+          <div>
+            <span className="text-[10px] font-bold text-zinc-500">Número principal (llamada / WhatsApp)</span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <select value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })}
+                className="shrink-0 px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
+                {countryPrefixes.map((p) => <option key={p.code} value={p.code}>{p.flag} {p.prefix}</option>)}
+              </select>
               <input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                placeholder="Teléfono" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-zinc-500 px-1">{prefijoDe(form.pais)}</span>
-              <input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
-                placeholder="WhatsApp" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+                placeholder="Ej: 987654321" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
             </div>
           </div>
+
+          {/* Número alternativo (opcional) */}
+          <div>
+            <span className="text-[10px] font-bold text-zinc-500">Número alternativo (opcional)</span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <select value={form.pais_alt} onChange={(e) => setForm({ ...form, pais_alt: e.target.value })}
+                className="shrink-0 px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
+                {countryPrefixes.map((p) => <option key={p.code} value={p.code}>{p.flag} {p.prefix}</option>)}
+              </select>
+              <input value={form.telefono_alt} onChange={(e) => setForm({ ...form, telefono_alt: e.target.value })}
+                placeholder="Número alternativo" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            </div>
+          </div>
+
+          {/* Ubicación Google Maps */}
+          <div>
+            <span className="text-[10px] font-bold text-zinc-500">Ubicación (Google Maps)</span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <MapPin className="w-4 h-4 text-zinc-500 shrink-0" />
+              <input value={form.ubicacion} onChange={(e) => setForm({ ...form, ubicacion: e.target.value })}
+                placeholder="Dirección, taller o —ej. Av. Larco 345—" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            </div>
+          </div>
+
+          <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })}
+            placeholder="Notas" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+
           <div className="flex gap-1.5">
-            <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">
-              {saving ? "Guardando..." : "Guardar"}
+            <button onClick={handleSaveContact} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">
+              {saving ? "Guardando..." : editId ? "Guardar cambios" : "Guardar"}
             </button>
-            <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs">
+            <button onClick={cancelContactForm} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {contacts.length === 0 && !adding && (
-          <p className="text-xs text-zinc-500 text-center py-4 col-span-2">No hay contactos registrados</p>
+          <p className="text-xs text-zinc-500 text-center py-4 sm:col-span-2">No hay contactos registrados</p>
         )}
         {contacts.map((c) => {
           const tipo = contactTypes.find((t) => t.value === c.tipo);
           const Icon = tipo?.icon || Phone;
+          const principal = c.telefono || c.whatsapp;
           return (
             <div key={c.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex flex-col gap-2">
               <div className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center shrink-0">
                   <Icon className="w-4 h-4 text-auto-500" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-zinc-100 truncate">{c.nombre}</p>
-                  <p className="text-[10px] text-zinc-500">{tipo?.label}</p>
+                  <p className="text-[10px] text-zinc-500">{tipo?.label}{c.pais_telefono && ` · ${c.pais_telefono}`}</p>
                 </div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                {c.telefono && (
-                  <a href={`tel:${c.telefono}`} className="flex-1 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-[10px] font-bold hover:bg-emerald-500/20 transition-colors">
-                    <Phone className="w-3 h-3 mr-1" /> Llamar
-                  </a>
-                )}
-                {c.whatsapp && (
-                  <a href={waLink(c)} target="_blank" rel="noopener noreferrer" className="flex-1 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 text-[10px] font-bold hover:bg-green-500/20 transition-colors">
-                    <MessageCircle className="w-3 h-3 mr-1" /> WhatsApp
-                  </a>
-                )}
-                <button onClick={() => handleDelete(c.id)} className="w-7 h-7 rounded-lg hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500 transition-colors">
+                <button onClick={() => startEditContact(c)} className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-auto-300 transition-colors" title="Editar">
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => handleDelete(c.id)} className="w-7 h-7 rounded-lg hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500 transition-colors" title="Eliminar">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
+
+              <div className="flex items-center gap-1.5">
+                {principal && (
+                  <a href={`tel:${principal}`} className="flex-1 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-[10px] font-bold hover:bg-emerald-500/20 transition-colors">
+                    <Phone className="w-3 h-3 mr-1" /> Llamar
+                  </a>
+                )}
+                {principal && (
+                  <a href={waLink(principal)} target="_blank" rel="noopener noreferrer" className="flex-1 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 text-[10px] font-bold hover:bg-green-500/20 transition-colors">
+                    <MessageCircle className="w-3 h-3 mr-1" /> WhatsApp
+                  </a>
+                )}
+              </div>
+              {c.telefono_alt && (
+                <button onClick={() => window.location.href = `tel:${c.telefono_alt}`}
+                  className="py-1.5 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center text-zinc-300 text-[10px] font-bold hover:bg-white/[0.08] transition-colors">
+                  <Phone className="w-3 h-3 mr-1" /> Alt: {c.telefono_alt}
+                </button>
+              )}
+              {c.ubicacion && (
+                <a href={mapHref(c.ubicacion)} target="_blank" rel="noopener noreferrer"
+                  className="py-1.5 rounded-lg bg-auto-500/10 border border-auto-500/20 flex items-center justify-center text-auto-400 text-[10px] font-bold hover:bg-auto-500/20 transition-colors">
+                  <MapPin className="w-3 h-3 mr-1" /> Ver en Google Maps
+                </a>
+              )}
+              {c.notas && <p className="text-[10px] text-zinc-500 truncate">{c.notas}</p>}
             </div>
           );
         })}
       </div>
     </div>
   );
+}
+
+/** Devuelve solo los dígitos del prefijo (sin +) */
+function CountryPrefixOnly(pais: string) {
+  const p = countryPrefixes.find((x) => x.code === pais)?.prefix || countryPrefixes[0].prefix;
+  return p.replace("+", "");
 }
 
 /* ═══════════════════════════ 3. ADN del Vehículo ═══════════════════════ */
