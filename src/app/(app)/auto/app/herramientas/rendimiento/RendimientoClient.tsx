@@ -9,6 +9,7 @@ interface Defaults {
   octanajeRecomendado: string | null;
   capacidadTanque: number | null;
   ultimosPrecios: Record<string, number> | null;
+  kmAnuales?: number | null;
 }
 
 export default function RendimientoClient({ defaults }: { defaults: Defaults }) {
@@ -17,7 +18,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
   const [precioB, setPrecioB] = useState(defaults.ultimosPrecios?.premium?.toString() || "");
   const [rendimientoA, setRendimientoA] = useState("");
   const [rendimientoB, setRendimientoB] = useState("");
-  const [kmAnuales, setKmAnuales] = useState("15000");
+  const [kmAnuales, setKmAnuales] = useState(defaults.kmAnuales != null ? String(defaults.kmAnuales) : "15000");
   const [capacidadTanque, setCapacidadTanque] = useState(defaults.capacidadTanque?.toString() || "");
   const [nombres, setNombres] = useState({
     a: defaults.octanajeRecomendado || "Regular (90)",

@@ -12,6 +12,7 @@ import { getCountryConfig, getCurrentCountryCode } from "@/lib/countries";
 import { uploadDocumentPhoto, uploadContactPhoto } from "@/lib/storage";
 import { DatePicker } from "@/components/DatePicker";
 import { MapLocationPicker } from "@/components/MapLocationPicker";
+import { formatoRestante, diasHasta } from "@/lib/dates";
 import { ShieldCheck, BadgeAlert, MessageCircle } from "lucide-react";
 import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/types/database";
 import {
@@ -255,10 +256,7 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
     if (!error) setDocs(docs.filter((d) => d.id !== id));
   };
 
-  const daysUntil = (dateStr: string) => {
-    const dias = Math.ceil((new Date(dateStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    return isNaN(dias) ? -999 : dias;
-  };
+  const daysUntil = (dateStr: string) => diasHasta(dateStr);
   const getUrgencyStyle = (dias: number) => {
     if (dias <= 0) return { border: "border-red-500/20", badge: "bg-red-500/10 text-red-400" };
     if (dias <= 15) return { border: "border-amber-500/20", badge: "bg-amber-500/10 text-amber-400" };
@@ -350,7 +348,7 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${style.badge}`}>
-                  {dias <= 0 ? "Vencido" : `${dias}d`}
+                  {dias <= 0 ? "Vencido" : formatoRestante(doc.fecha_vencimiento)}
                 </span>
                 <button onClick={() => handleDelete(doc.id)} className="w-7 h-7 rounded-lg hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500 transition-colors">
                   <Trash2 className="w-3.5 h-3.5" />
@@ -389,7 +387,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    nombre: "", tipo: "mecanico", telefono: "", telefono_alt: "",
+    nombre: "", encargado: "", tipo: "mecanico", telefono: "", telefono_alt: "",
     pais: "PE", pais_alt: "PE", foto_url: "", lat: null as number | null,
     lng: null as number | null, referencia: "", notas: "",
   });
@@ -402,7 +400,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
   }, []);
 
   const resetContactForm = (pais: string) => {
-    setForm({ nombre: "", tipo: "mecanico", telefono: "", telefono_alt: "", pais, pais_alt: pais, foto_url: "", lat: null, lng: null, referencia: "", notas: "" });
+    setForm({ nombre: "", encargado: "", tipo: "mecanico", telefono: "", telefono_alt: "", pais, pais_alt: pais, foto_url: "", lat: null, lng: null, referencia: "", notas: "" });
     setPhotoError(null);
   };
 
@@ -418,6 +416,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
     const strip = (num: string | null) => num ? num.replace(/^\+\d+/, "") : "";
     setForm({
       nombre: c.nombre,
+      encargado: c.encargado || "",
       tipo: c.tipo,
       telefono: strip(c.telefono),
       telefono_alt: strip(c.telefono_alt) || strip(c.whatsapp),
@@ -462,7 +461,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
     const supabase = createClient();
     const telefonoCompleto = form.telefono ? `+${CountryPrefixOnly(form.pais)}${form.telefono.replace(/[^0-9]/g, "")}` : null;
     const payload = {
-      nombre: form.nombre, tipo: form.tipo,
+      nombre: form.nombre, encargado: form.encargado || null, tipo: form.tipo,
       telefono: telefonoCompleto,
       telefono_alt: form.telefono_alt ? `+${CountryPrefixOnly(form.pais_alt)}${form.telefono_alt.replace(/[^0-9]/g, "")}` : null,
       whatsapp: telefonoCompleto,
@@ -535,8 +534,18 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
             {photoError && <p className="text-[10px] text-red-400 mt-1">{photoError}</p>}
           </div>
 
-          <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            placeholder="Nombre del taller o contacto *" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          <div className="grid grid-cols-1 gap-2">
+            <label className="block">
+              <span className="text-[10px] font-bold text-zinc-500">Nombre del taller / mecánica *</span>
+              <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                placeholder="Ej: Taller García" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            </label>
+            <label className="block">
+              <span className="text-[10px] font-bold text-zinc-500">Mecánico dueño / encargado (opcional)</span>
+              <input value={form.encargado} onChange={(e) => setForm({ ...form, encargado: e.target.value })}
+                placeholder="Ej: Juan García" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            </label>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
               className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
@@ -629,6 +638,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
               {/* Info central */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-zinc-100 truncate leading-tight">{c.nombre}</p>
+                {c.encargado && <p className="text-[10px] text-zinc-300 truncate leading-tight">{c.encargado}</p>}
                 <p className="text-[10px] text-zinc-500 truncate">{tipo?.label}</p>
                 {principal && <p className="text-[11px] font-bold text-zinc-300 mt-0.5 tabular-nums truncate">{principal}</p>}
                 {c.ubicacion && <p className="text-[9px] text-zinc-500 truncate">{c.ubicacion}</p>}
@@ -700,8 +710,12 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
     presion_neumaticos_delante: specs?.presion_neumaticos_delante?.toString() || "",
     presion_neumaticos_atras: specs?.presion_neumaticos_atras?.toString() || "",
     presion_neumaticos_repuesto: specs?.presion_neumaticos_repuesto?.toString() || "",
+    llanta_ancho: specs?.llanta_ancho?.toString() || "",
+    llanta_perfil: specs?.llanta_perfil?.toString() || "",
+    llanta_rin: specs?.llanta_rin?.toString() || "",
     capacidad_tanque_galones: specs?.capacidad_tanque_galones?.toString() || "",
     octanaje_recomendado: specs?.octanaje_recomendado || "",
+    km_anuales: specs?.km_anuales?.toString() || "",
   });
 
   const handleSave = async () => {
@@ -723,8 +737,12 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
       presion_neumaticos_delante: form.presion_neumaticos_delante ? parseInt(form.presion_neumaticos_delante) : null,
       presion_neumaticos_atras: form.presion_neumaticos_atras ? parseInt(form.presion_neumaticos_atras) : null,
       presion_neumaticos_repuesto: form.presion_neumaticos_repuesto ? parseInt(form.presion_neumaticos_repuesto) : null,
+      llanta_ancho: form.llanta_ancho ? parseInt(form.llanta_ancho) : null,
+      llanta_perfil: form.llanta_perfil ? parseInt(form.llanta_perfil) : null,
+      llanta_rin: form.llanta_rin ? parseInt(form.llanta_rin) : null,
       capacidad_tanque_galones: form.capacidad_tanque_galones ? parseFloat(form.capacidad_tanque_galones) : null,
       octanaje_recomendado: form.octanaje_recomendado || null,
+      km_anuales: form.km_anuales ? parseInt(form.km_anuales) : null,
       tanque_unidad: cfg.fuelUnit,
     };
 
@@ -780,76 +798,151 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
     { label: "PSI del.", value: specs?.presion_neumaticos_delante ? `${specs.presion_neumaticos_delante} PSI` : "—", icon: Gauge },
     { label: "PSI atrás", value: specs?.presion_neumaticos_atras ? `${specs.presion_neumaticos_atras} PSI` : "—", icon: Gauge },
     { label: "PSI repuesto", value: specs?.presion_neumaticos_repuesto ? `${specs.presion_neumaticos_repuesto} PSI` : "—", icon: Ruler },
+    { label: "Llanta", value: [specs?.llanta_ancho, specs?.llanta_perfil, specs?.llanta_rin].filter((v) => v != null).length === 3 ? `${specs?.llanta_ancho}/${specs?.llanta_perfil} R${specs?.llanta_rin}` : "—", icon: Layers },
     { label: "Tanque", value: specs?.capacidad_tanque_galones ? `${specs.capacidad_tanque_galones} ${specs.tanque_unidad || "gal"}` : "—", icon: Fuel },
     { label: "Octanaje", value: specs?.octanaje_recomendado || "—", icon: Layers },
+    { label: "Km anuales", value: specs?.km_anuales ? `${specs.km_anuales.toLocaleString("es-PE")} km` : "—", icon: Gauge },
   ];
 
+  // Campo con etiqueta + ayuda (texto debajo explicando cómo encontrar el dato)
+  const Field = ({ label, help, children }: { label: string; help?: string; children: React.ReactNode }) => (
+    <label className="block">
+      <span className="text-[10px] font-bold text-zinc-400">{label}</span>
+      {children}
+      {help && <span className="block text-[8px] leading-tight text-zinc-600 mt-0.5">{help}</span>}
+    </label>
+  );
+
+  const inputCls = "w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200";
+
+  const GroupTitle = ({ icon: GI, children }: { icon: any; children: React.ReactNode }) => (
+    <p className="text-[10px] font-extrabold text-auto-400 flex items-center gap-1.5 uppercase tracking-wide mt-1 first:mt-0">
+      <GI className="w-3.5 h-3.5" /> {children}
+    </p>
+  );
+
   const renderFields = (
-    <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
-      <div className="grid grid-cols-3 gap-2">
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Tipo de aceite</span>
-          <input value={form.tipo_aceite} onChange={(e) => setForm({ ...form, tipo_aceite: e.target.value })} placeholder="Ej: Sintético" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Viscosidad</span>
-          <input value={form.viscosidad_aceite} onChange={(e) => setForm({ ...form, viscosidad_aceite: e.target.value })} placeholder="5W-30" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Marca aceite</span>
-          <input value={form.aceite_marca} onChange={(e) => setForm({ ...form, aceite_marca: e.target.value })} placeholder="Ej: Castrol" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
+    <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      {/* 🛢️ Motor y lubricación */}
+      <div className="space-y-2">
+        <GroupTitle icon={Droplets}>Motor y lubricación</GroupTitle>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <Field label="Tipo de aceite" help="Ej: Sintético / Mineral / Semisintético (manual o lata de aceite)">
+            <input value={form.tipo_aceite} onChange={(e) => setForm({ ...form, tipo_aceite: e.target.value })} placeholder="Sintético" className={inputCls} />
+          </Field>
+          <Field label="Viscosidad" help="Ej: 5W-30 (manual o lata de aceite)">
+            <input value={form.viscosidad_aceite} onChange={(e) => setForm({ ...form, viscosidad_aceite: e.target.value })} placeholder="5W-30" className={inputCls} />
+          </Field>
+          <Field label="Marca de aceite" help="Ej: Castrol, Mobil, Total">
+            <input value={form.aceite_marca} onChange={(e) => setForm({ ...form, aceite_marca: e.target.value })} placeholder="Castrol" className={inputCls} />
+          </Field>
+          <Field label="Capacidad de aceite (L)" help="Cuántos litros lleva el motor (manual)">
+            <input type="number" step="0.1" value={form.capacidad_aceite_litros} onChange={(e) => setForm({ ...form, capacidad_aceite_litros: e.target.value })} placeholder="4.5" className={inputCls} />
+          </Field>
+        </div>
       </div>
-      <div className="grid grid-cols-3 gap-2">
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Cap. aceite (L)</span>
-          <input type="number" step="0.1" value={form.capacidad_aceite_litros} onChange={(e) => setForm({ ...form, capacidad_aceite_litros: e.target.value })} placeholder="4.5" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Refrigerante</span>
-          <input value={form.tipo_refrigerante} onChange={(e) => setForm({ ...form, tipo_refrigerante: e.target.value })} placeholder="Etilenglicol" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Marca refrig.</span>
-          <input value={form.refrigerante_marca} onChange={(e) => setForm({ ...form, refrigerante_marca: e.target.value })} placeholder="Ej: Prestone" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
+
+      {/* 🌡️ Refrigeración */}
+      <div className="space-y-2 pt-2 border-t border-white/5">
+        <GroupTitle icon={Thermometer}>Refrigeración</GroupTitle>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <Field label="Tipo de refrigerante" help="Ej: Etilenglicol / orgánico (manual o envase)">
+            <input value={form.tipo_refrigerante} onChange={(e) => setForm({ ...form, tipo_refrigerante: e.target.value })} placeholder="Etilenglicol" className={inputCls} />
+          </Field>
+          <Field label="Marca de refrigerante" help="Ej: Prestone, Valvoline">
+            <input value={form.refrigerante_marca} onChange={(e) => setForm({ ...form, refrigerante_marca: e.target.value })} placeholder="Prestone" className={inputCls} />
+          </Field>
+          <Field label="Capacidad (L)" help="Total del sistema (manual)">
+            <input type="number" step="0.1" value={form.capacidad_refrigerante_litros} onChange={(e) => setForm({ ...form, capacidad_refrigerante_litros: e.target.value })} placeholder="5.0" className={inputCls} />
+          </Field>
+        </div>
       </div>
-      <div className="grid grid-cols-3 gap-2">
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Cap. refrig. (L)</span>
-          <input type="number" step="0.1" value={form.capacidad_refrigerante_litros} onChange={(e) => setForm({ ...form, capacidad_refrigerante_litros: e.target.value })} placeholder="5.0" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Líq. frenos</span>
-          <input value={form.tipo_freno} onChange={(e) => setForm({ ...form, tipo_freno: e.target.value })} placeholder="DOT 4" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Marca frenos</span>
-          <input value={form.freno_marca} onChange={(e) => setForm({ ...form, freno_marca: e.target.value })} placeholder="Ej: Bosch" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
+
+      {/* 🛑 Frenos */}
+      <div className="space-y-2 pt-2 border-t border-white/5">
+        <GroupTitle icon={OctagonAlert}>Frenos</GroupTitle>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <Field label="Tipo de líquido" help="Ej: DOT 3 / DOT 4 (tapa del depósito de frenos)">
+            <input value={form.tipo_freno} onChange={(e) => setForm({ ...form, tipo_freno: e.target.value })} placeholder="DOT 4" className={inputCls} />
+          </Field>
+          <Field label="Marca de frenos" help="Ej: Bosch, Brembo (pastillas)">
+            <input value={form.freno_marca} onChange={(e) => setForm({ ...form, freno_marca: e.target.value })} placeholder="Bosch" className={inputCls} />
+          </Field>
+        </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Marca batería</span>
-          <input value={form.bateria_marca} onChange={(e) => setForm({ ...form, bateria_marca: e.target.value })} placeholder="Ej: BOSCH" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Próx. mantenimiento batería</span>
-          <DatePicker colorTheme="auto" value={form.bateria_mantenimiento_fecha} onChange={(d) => setForm({ ...form, bateria_mantenimiento_fecha: d })} />
-        </label>
+
+      {/* 🔋 Batería */}
+      <div className="space-y-2 pt-2 border-t border-white/5">
+        <GroupTitle icon={Battery}>Batería</GroupTitle>
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="Marca / referencia" help="Léela en la etiqueta de la batería (ej: BOSCH S4)">
+            <input value={form.bateria_marca} onChange={(e) => setForm({ ...form, bateria_marca: e.target.value })} placeholder="BOSCH S4" className={inputCls} />
+          </Field>
+          <Field label="Fecha del próximo mantenimiento" help="Sirve para recordar revisarla">
+            <DatePicker colorTheme="auto" value={form.bateria_mantenimiento_fecha} onChange={(d) => setForm({ ...form, bateria_mantenimiento_fecha: d })} />
+          </Field>
+        </div>
       </div>
-      <div className="grid grid-cols-3 gap-2">
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">PSI delante</span>
-          <input type="number" value={form.presion_neumaticos_delante} onChange={(e) => setForm({ ...form, presion_neumaticos_delante: e.target.value })} placeholder="32" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">PSI atrás</span>
-          <input type="number" value={form.presion_neumaticos_atras} onChange={(e) => setForm({ ...form, presion_neumaticos_atras: e.target.value })} placeholder="32" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">PSI repuesto</span>
-          <input type="number" value={form.presion_neumaticos_repuesto} onChange={(e) => setForm({ ...form, presion_neumaticos_repuesto: e.target.value })} placeholder="60" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
+
+      {/* 🛞 Neumáticos */}
+      <div className="space-y-2 pt-2 border-t border-white/5">
+        <GroupTitle icon={Ruler}>Neumáticos</GroupTitle>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <Field label="Presión delantera (PSI)" help="Valor en el sticker del marco de la puerta o manual">
+            <input type="number" value={form.presion_neumaticos_delante} onChange={(e) => setForm({ ...form, presion_neumaticos_delante: e.target.value })} placeholder="32" className={inputCls} />
+          </Field>
+          <Field label="Presión trasera (PSI)" help="Normalmente igual o mayor que la delantera">
+            <input type="number" value={form.presion_neumaticos_atras} onChange={(e) => setForm({ ...form, presion_neumaticos_atras: e.target.value })} placeholder="32" className={inputCls} />
+          </Field>
+          <Field label="Presión de repuesto (PSI)" help="En el sticker o en la propia llanta de repuesto">
+            <input type="number" value={form.presion_neumaticos_repuesto} onChange={(e) => setForm({ ...form, presion_neumaticos_repuesto: e.target.value })} placeholder="60" className={inputCls} />
+          </Field>
+          <Field label="Medida (ancho)" help="Ej: 205 en '205/55 R16' (costado de la llanta)">
+            <input type="number" value={form.llanta_ancho} onChange={(e) => setForm({ ...form, llanta_ancho: e.target.value })} placeholder="205" className={inputCls} />
+          </Field>
+          <Field label="Medida (perfil)" help="Ej: 55 en '205/55 R16'">
+            <input type="number" value={form.llanta_perfil} onChange={(e) => setForm({ ...form, llanta_perfil: e.target.value })} placeholder="55" className={inputCls} />
+          </Field>
+          <Field label="Medida (rin)" help="Ej: 16 en '205/55 R16'">
+            <input type="number" value={form.llanta_rin} onChange={(e) => setForm({ ...form, llanta_rin: e.target.value })} placeholder="16" className={inputCls} />
+          </Field>
+        </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Capacidad tanque ({cfg.fuelUnitShort})</span>
-          <input type="number" step="0.1" value={form.capacidad_tanque_galones} onChange={(e) => setForm({ ...form, capacidad_tanque_galones: e.target.value })} placeholder="14" className="w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" /></label>
-        <label className="block"><span className="text-[10px] font-bold text-zinc-500">Octanaje recomendado (toca para elegir)</span>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {octanajes.map((o) => {
-              const sel = (form.octanaje_recomendado || "").split(",").map((s) => s.trim()).includes(o.value);
-              return (
-                <button type="button" key={o.value}
-                  onClick={() => {
-                    const cur = (form.octanaje_recomendado || "").split(",").map((s) => s.trim()).filter(Boolean);
-                    const next = sel ? cur.filter((v) => v !== o.value) : [...cur, o.value];
-                    setForm({ ...form, octanaje_recomendado: next.join(",") });
-                  }}
-                  className={`px-2 py-1 rounded-full text-[10px] font-bold border transition-colors ${sel ? "bg-auto-500 text-white border-auto-500" : "bg-zinc-800 text-zinc-400 border-white/10 hover:bg-zinc-700"}`}>
-                  {o.label.replace(/\(.*\)/, "").trim()}
-                </button>
-              );
-            })}
-          </div>
-        </label>
+
+      {/* ⛽ Combustible */}
+      <div className="space-y-2 pt-2 border-t border-white/5">
+        <GroupTitle icon={Fuel}>Combustible</GroupTitle>
+        <div className="grid grid-cols-2 gap-2">
+          <Field label={`Capacidad de tanque (${cfg.fuelUnitShort})`} help="Cuánto le cabe al tanque lleno (manual)">
+            <input type="number" step="0.1" value={form.capacidad_tanque_galones} onChange={(e) => setForm({ ...form, capacidad_tanque_galones: e.target.value })} placeholder="14" className={inputCls} />
+          </Field>
+          <Field label="Octanaje recomendado" help="Toca los chips para elegir">
+            <div className="flex flex-wrap gap-1 mt-1">
+              {octanajes.map((o) => {
+                const sel = (form.octanaje_recomendado || "").split(",").map((s) => s.trim()).includes(o.value);
+                return (
+                  <button type="button" key={o.value}
+                    onClick={() => {
+                      const cur = (form.octanaje_recomendado || "").split(",").map((s) => s.trim()).filter(Boolean);
+                      const next = sel ? cur.filter((v) => v !== o.value) : [...cur, o.value];
+                      setForm({ ...form, octanaje_recomendado: next.join(",") });
+                    }}
+                    className={`px-2 py-1 rounded-full text-[10px] font-bold border transition-colors ${sel ? "bg-auto-500 text-white border-auto-500" : "bg-zinc-800 text-zinc-400 border-white/10 hover:bg-zinc-700"}`}>
+                    {o.label.replace(/\(.*\)/, "").trim()}
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
+        </div>
+        <Field label="Kilómetros anuales estimados" help="Cuánto recorres al año aprox. Lo usan las herramientas (depreciación, costo por km, comparador)">
+          <input type="number" value={form.km_anuales} onChange={(e) => setForm({ ...form, km_anuales: e.target.value })} placeholder="15000" className={inputCls} />
+        </Field>
       </div>
-      <div className="flex gap-1.5">
-        <button type="button" onClick={handleSave} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "Guardando..." : "Guardar"}</button>
-        <button type="button" onClick={() => setEditing(false)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
+
+      <div className="flex gap-1.5 pt-2 border-t border-white/5">
+        <button type="button" onClick={handleSave} disabled={saving} className="flex-1 px-3 py-2.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "Guardando..." : "Guardar ADN del vehículo"}</button>
+        <button type="button" onClick={() => setEditing(false)} className="px-3 py-2.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );

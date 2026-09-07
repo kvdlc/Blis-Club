@@ -13,11 +13,20 @@ const tasasComunes = [
   { label: "Auto chino nuevo", tasa: 18 },
 ];
 
-export default function DepreciacionClient() {
+interface Props {
+  defaults?: { precioVehiculo: number | null; anios: number | null };
+}
+
+export default function DepreciacionClient({ defaults }: Props) {
   const { money, symbol } = useMoney();
-  const [valorCompra, setValorCompra] = useState("");
-  const [anios, setAnios] = useState("3");
+  const [valorCompra, setValorCompra] = useState(defaults?.precioVehiculo != null ? String(Math.round(defaults.precioVehiculo)) : "");
+  const [anios, setAnios] = useState(defaults?.anios != null ? String(defaults.anios) : "3");
   const [tasaAnual, setTasaAnual] = useState("12");
+
+  const usarMisDatos = () => {
+    if (defaults?.precioVehiculo != null) setValorCompra(String(Math.round(defaults.precioVehiculo)));
+    if (defaults?.anios != null) setAnios(String(defaults.anios));
+  };
 
   const resultados = useMemo(() => {
     const valor = parseFloat(valorCompra);
@@ -83,6 +92,12 @@ export default function DepreciacionClient() {
 
       {/* Inputs */}
       <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+        {defaults?.precioVehiculo != null && (
+          <button type="button" onClick={usarMisDatos}
+            className="w-full flex items-center justify-center gap-1.5 text-[10px] font-bold bg-auto-500/10 border border-auto-500/25 text-auto-400 rounded-lg py-2 hover:bg-auto-500/20 transition-colors">
+            <Calendar className="w-3.5 h-3.5" /> Usar datos de mi vehículo ({money(Math.round(defaults.precioVehiculo))})
+          </button>
+        )}
         <label className="block">
           <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
             <DollarSign className="w-3.5 h-3.5 text-auto-500" /> Valor de compra ({symbol})
@@ -90,7 +105,7 @@ export default function DepreciacionClient() {
           <input
             type="number" min="1" step="1000"
             value={valorCompra} onChange={(e) => setValorCompra(e.target.value)}
-            placeholder="Ej: 65000"
+            placeholder={defaults?.precioVehiculo ? String(Math.round(defaults.precioVehiculo)) : "Ej: 65000"}
             className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </label>

@@ -12,6 +12,7 @@ import { KpiChip } from "@/components/charts/KpiChip";
 import { EmptyPrompt } from "@/components/charts/EmptyPrompt";
 import { Activity, Fuel, Wrench, ShieldCheck, Droplets, DollarSign, Trophy, Battery, Timer } from "lucide-react";
 import { computeInsights, serieGasto, serieRendimiento, rendimientoPromedio, calcEficiencia, serieKm } from "@/lib/insights";
+import { formatoRestante, diasHasta } from "@/lib/dates";
 import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleUpgrade, VehicleSpecs } from "@/types/database";
 
 interface Props {
@@ -179,16 +180,16 @@ function StatLine({ label, value, color }: { label: string; value: string; color
 }
 
 function DocRow({ doc }: { doc: VehicleDocument }) {
-  const dias = Math.ceil((new Date(doc.fecha_vencimiento + "T12:00:00").getTime() - Date.now()) / (1000 * 3600 * 24));
+  const dias = diasHasta(doc.fecha_vencimiento);
   const etiqueta = doc.tipo === "seguro_obligatorio" ? "Seguro Obligatorio" : doc.tipo === "revision_tecnica" ? "Revisión Técnica" : doc.tipo === "poliza_seguro" ? "Póliza" : doc.tipo;
   const color = dias <= 15 ? "#ef4444" : dias <= 30 ? CHART.orange : CHART.emerald;
   return (
     <div className="flex items-center justify-between rounded-xl p-3 border border-white/10 bg-white/[0.04]">
       <div>
         <p className="text-sm font-bold text-zinc-100">{etiqueta}</p>
-        <p className="text-[10px] text-zinc-500">Vence {dias < 0 ? `hace ${Math.abs(dias)} días` : `en ${dias} días`}</p>
+        <p className="text-[10px] text-zinc-500">Vence {formatoRestante(doc.fecha_vencimiento)}</p>
       </div>
-      <span className="text-xs font-black" style={{ color }}>{dias <= 0 ? "Vencido" : `${dias} d`}</span>
+      <span className="text-xs font-black" style={{ color }}>{dias <= 0 ? "Vencido" : formatoRestante(doc.fecha_vencimiento)}</span>
     </div>
   );
 }

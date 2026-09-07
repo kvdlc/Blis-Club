@@ -4,9 +4,16 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Droplets, AlertTriangle, CheckCircle2, Info } from "lucide-react";
 
-export default function ConsumoAceiteClient() {
+interface Props {
+  defaults?: { kmActual: number | null; kmUltimoCambio: number | null; capacidadAceiteLitros: number | null; marca: string | null };
+}
+
+export default function ConsumoAceiteClient({ defaults }: Props) {
+  const kmDesdeUltimo = defaults?.kmActual != null && defaults.kmUltimoCambio != null
+    ? Math.max(0, defaults.kmActual - defaults.kmUltimoCambio)
+    : null;
   const [mlRellenados, setMlRellenados] = useState("");
-  const [kmRecorridos, setKmRecorridos] = useState("");
+  const [kmRecorridos, setKmRecorridos] = useState(kmDesdeUltimo ? String(kmDesdeUltimo) : "");
 
   const resultados = useMemo(() => {
     const ml = parseFloat(mlRellenados);
@@ -77,6 +84,13 @@ export default function ConsumoAceiteClient() {
 
       {/* Inputs */}
       <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+        {defaults?.marca && (
+          <p className="text-[10px] text-zinc-500 bg-white/[0.04] border border-white/5 rounded-lg px-2.5 py-2">
+            🚗 {defaults.marca}
+            {defaults.capacidadAceiteLitros != null ? ` · Capacidad de aceite ${defaults.capacidadAceiteLitros} L` : ""}
+            {kmDesdeUltimo != null ? ` · ${kmDesdeUltimo.toLocaleString("es-PE")} km desde el último cambio` : ""}
+          </p>
+        )}
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-auto-600/15 flex items-center justify-center">
             <Droplets className="w-3.5 h-3.5 text-auto-500" />

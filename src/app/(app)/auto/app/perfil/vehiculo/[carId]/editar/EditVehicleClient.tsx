@@ -32,6 +32,7 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
     color: vehicle.color || "",
     vin: vehicle.vin || "",
     foto_url: vehicle.foto_url || "",
+    precio: vehicle.precio != null ? String(vehicle.precio) : "",
   });
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,6 +58,7 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
       color: form.color || null,
       vin: form.vin || null,
       foto_url: form.foto_url || null,
+      precio: form.precio ? parseFloat(form.precio) : null,
       estado,
     }).eq("id", vehicle.id).eq("owner_id", userId);
 
@@ -134,6 +136,21 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
         </div>
 
         <label className="block">
+          <span className="text-xs font-bold text-zinc-500 flex items-center gap-1">
+            Precio de compra
+            <span className="relative group inline-flex">
+              <HelpCircle className="w-3 h-3 text-zinc-500 cursor-help" />
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap bg-zinc-900 border border-white/10 text-zinc-300 text-[10px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                Cuánto pagaste al comprarlo. Se usa en depreciación, costo por km y financiamiento.
+              </span>
+            </span>
+          </span>
+          <input type="number" min={0} step="0.01" value={form.precio}
+            onChange={(e) => setForm({ ...form, precio: e.target.value })}
+            placeholder="Ej: 45000" className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+        </label>
+
+        <label className="block">
           <span className="text-xs font-bold text-zinc-500">Foto del vehículo</span>
           <div className="flex items-center gap-2 mt-1">
             <label className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm cursor-pointer hover:bg-zinc-800/80 transition-colors">
@@ -149,7 +166,7 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
           )}
         </label>
 
-        <SpecsSection vehicleId={vehicle.id} catalogSpecId={vehicle.catalog_spec_id} initialSpecs={initialSpecs} defaultEditing={!initialSpecs} />
+        <SpecsSection vehicleId={vehicle.id} catalogSpecId={vehicle.catalog_spec_id} initialSpecs={initialSpecs} defaultEditing />
 
         {/* Estado del vehículo (antes separado en "Perfil público") */}
         <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">

@@ -10,16 +10,23 @@ interface Defaults {
   fuelLogs: FuelLog[];
   maintenances: MaintenanceLog[];
   specs: VehicleSpecs | null;
-  valorCompra: null;
+  precioVehiculo: number | null;
+  kmAnualesSpec: number | null;
   anios: number | null;
 }
 
 export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) {
   const { money, symbol } = useMoney();
-  const [valorCompra, setValorCompra] = useState("");
+  const [valorCompra, setValorCompra] = useState(defaults.precioVehiculo != null ? String(Math.round(defaults.precioVehiculo)) : "");
   const [tasaDepreciacion, setTasaDepreciacion] = useState("12");
   const [anios, setAnios] = useState(defaults.anios?.toString() || "3");
-  const [kmAnuales, setKmAnuales] = useState("15000");
+  const [kmAnuales, setKmAnuales] = useState(defaults.kmAnualesSpec != null ? String(defaults.kmAnualesSpec) : "15000");
+
+  const usarMisDatos = () => {
+    if (defaults.precioVehiculo != null) setValorCompra(String(Math.round(defaults.precioVehiculo)));
+    if (defaults.kmAnualesSpec != null) setKmAnuales(String(defaults.kmAnualesSpec));
+    if (defaults.anios != null) setAnios(String(defaults.anios));
+  };
 
   const resultados = useMemo(() => {
     const valor = parseFloat(valorCompra);
@@ -79,6 +86,12 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
       </div>
 
       <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+        {(defaults.precioVehiculo != null || defaults.kmAnualesSpec != null) && (
+          <button type="button" onClick={usarMisDatos}
+            className="w-full flex items-center justify-center gap-1.5 text-[10px] font-bold bg-auto-500/10 border border-auto-500/25 text-auto-400 rounded-lg py-2 hover:bg-auto-500/20 transition-colors">
+            <TrendingDown className="w-3.5 h-3.5" /> Usar datos de mi vehículo
+          </button>
+        )}
         <label className="block">
           <span className="text-xs font-bold text-zinc-500">Valor de compra ({symbol})</span>
           <input type="number" min="1" step="1000" value={valorCompra}

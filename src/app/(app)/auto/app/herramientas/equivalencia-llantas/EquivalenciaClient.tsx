@@ -13,8 +13,13 @@ interface TireData {
   circunferencia: number;
 }
 
-export default function EquivalenciaClient() {
-  const [original, setOriginal] = useState({ ancho: "205", perfil: "55", rin: "16" });
+interface Props {
+  defaults?: { ancho: number | null; perfil: number | null; rin: number | null } | null;
+}
+
+export default function EquivalenciaClient({ defaults }: Props) {
+  const originalDefault = defaults?.ancho != null ? String(defaults.ancho) : "205";
+  const [original, setOriginal] = useState({ ancho: originalDefault, perfil: defaults?.perfil != null ? String(defaults.perfil) : "55", rin: defaults?.rin != null ? String(defaults.rin) : "16" });
   const [nuevo, setNuevo] = useState({ ancho: "225", perfil: "45", rin: "17" });
 
   const resultados = useMemo(() => {

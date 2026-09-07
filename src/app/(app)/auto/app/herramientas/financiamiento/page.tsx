@@ -1,5 +1,7 @@
+import { getActiveVehicleToolData } from "@/lib/auto-tool-data";
 import FinanciamientoClient from "./FinanciamientoClient";
 
-export default function FinanciamientoPage() {
-  return <FinanciamientoClient />;
+export default async function FinanciamientoPage() {
+  const d = await getActiveVehicleToolData();
+  return <FinanciamientoClient defaults={{ precioVehiculo: d.precioVehiculo }} />;
 }

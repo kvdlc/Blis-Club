@@ -62,6 +62,7 @@ export interface Vehicle {
   vin: string | null;
   estado: "activo" | "en venta" | "robado" | "vendido";
   tipo_vehiculo: "auto" | "suv" | "pickup" | "moto" | "furgoneta";
+  precio: number | null;
   catalog_spec_id: string | null;
   created_at: string;
   updated_at: string;
@@ -135,6 +136,7 @@ export interface VehicleContact {
   id: string;
   vehicle_id: string | null;
   nombre: string;
+  encargado: string | null;
   tipo: "mecanico" | "electromecanico" | "grua" | "tienda_repuestos" | "aseguradora" | "otro";
   telefono: string | null;
   whatsapp: string | null;
@@ -167,9 +169,13 @@ export interface VehicleSpecs {
   presion_neumaticos_delante: number | null;
   presion_neumaticos_atras: number | null;
   presion_neumaticos_repuesto: number | null;
+  llanta_ancho: number | null;
+  llanta_perfil: number | null;
+  llanta_rin: number | null;
   capacidad_tanque_galones: number | null;
   tanque_unidad: string;
   octanaje_recomendado: string | null;
+  km_anuales: number | null;
   created_at: string;
   updated_at: string;
 }

@@ -5,9 +5,13 @@ import Link from "next/link";
 import { ArrowLeft, DollarSign, Calendar, Percent } from "lucide-react";
 import { useMoney } from "@/lib/money";
 
-export default function FinanciamientoClient() {
+interface Props {
+  defaults?: { precioVehiculo: number | null };
+}
+
+export default function FinanciamientoClient({ defaults }: Props) {
   const { money, symbol } = useMoney();
-  const [monto, setMonto] = useState("65000");
+  const [monto, setMonto] = useState(defaults?.precioVehiculo != null ? String(Math.round(defaults.precioVehiculo)) : "65000");
   const [tasa, setTasa] = useState("12");
   const [plazo, setPlazo] = useState("48");
 
