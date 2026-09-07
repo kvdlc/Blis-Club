@@ -56,6 +56,35 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
     return totalGal > 0 ? Math.round(totalKm / totalGal) : null;
   })();
 
+  // Serie de gasto semanal (últimas 6 semanas) para sparkline
+  const gastoSemanal = useMemo(() => {
+    if (!mounted || fuelLogs.length === 0) return null;
+    const semanas: number[] = [];
+    const hoy = Date.now();
+    for (let w = 5; w >= 0; w--) {
+      const fin = hoy - w * 7 * 24 * 3600 * 1000;
+      const ini = fin - 7 * 24 * 3600 * 1000;
+      const total = fuelLogs
+        .filter((f) => { const t = new Date(f.fecha).getTime(); return t > ini && t <= fin; })
+        .reduce((s, f) => s + (f.litros / 3.78541) * f.precio_por_galon, 0);
+      semanas.push(Math.round(total));
+    }
+    return semanas;
+  }, [mounted, fuelLogs]);
+
+  // Serie de rendimiento por carga (últimos ~6) para sparkline
+  const rendSerie = useMemo(() => {
+    if (fuelLogs.length < 2) return null;
+    const sorted = [...fuelLogs].sort((a, b) => a.odometro - b.odometro).slice(-7);
+    const out: number[] = [];
+    for (let i = 1; i < sorted.length; i++) {
+      const km = sorted[i].odometro - sorted[i - 1].odometro;
+      const gal = sorted[i - 1].litros / 3.78541;
+      if (km > 0 && gal > 0) out.push(Math.round(km / gal));
+    }
+    return out;
+  }, [fuelLogs]);
+
   // Eco-score color - uniform emerald
   const ecoColor = "text-auto-500";
   const ecoDashOffset = 97.4 - (97.4 * ecoScore) / 100;
@@ -103,13 +132,13 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
 
       {/* Grid inferior: Eco-Score, Estado, Gasto, Rendimiento */}
       <div className="grid grid-cols-2 gap-3">
-        {/* Eco-Score */}
+        {/* Eficiencia */}
         <div className="bg-white/[0.06] border border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-7 h-7 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
               <TrendingUp className="w-3.5 h-3.5 text-auto-500" />
             </div>
-            <h3 className="text-xs font-bold text-zinc-300">Eco-Score</h3>
+            <h3 className="text-xs font-bold text-zinc-300">Eficiencia</h3>
           </div>
           <div className="flex items-center justify-center py-1">
             <div className="relative w-16 h-16">
@@ -119,12 +148,12 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
                   className={ecoColor} strokeDasharray="97.4" strokeDashoffset={ecoDashOffset} strokeLinecap="round" />
               </svg>
               <span className={`absolute inset-0 flex items-center justify-center text-sm font-black ${ecoColor}`}>
-                {ecoScore}
+                {ecoScore}%
               </span>
             </div>
           </div>
           <p className="text-[10px] text-zinc-500 text-center mt-1">
-            {fuelLogs.length < 2 ? "Carga combustible para calcular" : "Basado en tus últimas cargas"}
+            {fuelLogs.length < 2 ? "Carga combustible para calcular" : "De 100 · según tu consumo"}
           </p>
         </div>
 
@@ -165,8 +194,11 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
               {money(Math.round(gastoMensual))}
             </span>
           </div>
+          <div className="flex justify-center mt-1">
+            <Sparkline data={gastoSemanal ?? []} color="#be0b3c" />
+          </div>
           <p className="text-[10px] text-zinc-500 text-center mt-1">
-            {fuelLogs.length > 0 ? "Combustible últimos 30 días" : "Sin datos"}
+            {fuelLogs.length > 0 ? "Combustible · últimas 6 semanas" : "Sin datos"}
           </p>
         </div>
 
@@ -184,8 +216,11 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
             </span>
             {rendimientoPromedio && <span className="text-xs text-zinc-500 ml-0.5">km/gal</span>}
           </div>
+          <div className="flex justify-center mt-1">
+            <Sparkline data={rendSerie ?? []} color="#3b82f6" />
+          </div>
           <p className="text-[10px] text-zinc-500 text-center mt-1">
-            {fuelLogs.length >= 2 ? "Promedio general" : "Registra 2+ cargas"}
+            {fuelLogs.length >= 2 ? "Tendencia de tus últimas cargas" : "Registra 2+ cargas"}
           </p>
         </div>
       </div>
@@ -196,7 +231,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
           <div className="flex flex-wrap gap-1.5">
             {badges.map((key) => (
               <span key={key} className="text-[9px] font-bold bg-auto-600/10 text-auto-500 px-2 py-1 rounded-full border border-auto-600/20">
-                {key.replace(/_/g, " ")}
+                {badgeLabel(key)}
               </span>
             ))}
           </div>
@@ -370,5 +405,37 @@ function LastFuelWidget({ fuelLogs }: { fuelLogs: FuelLog[] }) {
         {lastFuel ? `${lastFuel.litros} L · ${money(lastFuel.precio_por_galon)}/gal` : "Sin cargas registradas"}
       </p>
     </div>
+  );
+}
+
+const BADGE_LABELS: Record<string, string> = {
+  primera_carga: "Primera carga",
+  tanque_lleno: "Tanque lleno",
+  eco_warrior: "Eficiencia alta",
+  preventivo: "Preventivo",
+  viajero: "Viajero",
+  documentado: "Documentado",
+  primer_vehiculo: "Primer vehículo",
+};
+
+function badgeLabel(key: string): string {
+  return BADGE_LABELS[key] ?? key.replace(/_/g, " ");
+}
+
+function Sparkline({ data, color = "#be0b3c" }: { data: number[]; color?: string }) {  if (!data || data.length < 2) return <div className="h-6" />;
+  const w = 80, h = 24;
+  const min = Math.min(...data), max = Math.max(...data);
+  const span = max - min || 1;
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / span) * (h - 4) - 2;
+    return [x, y];
+  });
+  const line = pts.map((p) => p.join(",")).join(" ");
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="overflow-visible">
+      <polyline points={line} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
+      <circle cx={pts[pts.length - 1][0]} cy={pts[pts.length - 1][1]} r="2" fill={color} />
+    </svg>
   );
 }

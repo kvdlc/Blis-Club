@@ -1,110 +1,114 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { Vehicle, FuelLog } from "@/types/database";
-import { MapPin, Calendar, Activity, TrendingUp, Link as LinkIcon, Car } from "lucide-react";
+import { Car, Gauge, Calendar, Tag } from "lucide-react";
+import { rendimientoPromedio, calcEficiencia } from "@/lib/insights";
 
 interface Props {
   vehicle: Vehicle;
   fuelLogs: FuelLog[];
-  ecoScore: number;
+  ecoScore: number; // 0-100 (eficiencia)
 }
 
-export function HeroCard({ vehicle, fuelLogs, ecoScore }: Props) {
-  const kmFormatted = vehicle.kilometraje.toLocaleString("es-PE");
+export function HeroCard({ vehicle, fuelLogs }: Props) {
+  const [kmDisplay, setKmDisplay] = useState(0);
+  const rendKmGal = rendimientoPromedio(fuelLogs);
+  const eficiencia = calcEficiencia(rendKmGal);
+  const targetKm = vehicle.kilometraje || 0;
+
+  // Contador animado del odómetro
+  useEffect(() => {
+    let raf = 0;
+    const dur = 900;
+    const t0 = performance.now();
+    const from = Math.max(0, targetKm - 600);
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / dur);
+      const ease = 1 - Math.pow(1 - p, 3);
+      setKmDisplay(Math.round(from + (targetKm - from) * ease));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [targetKm]);
+
   const estadoLabel =
     vehicle.estado === "activo" ? "Todo al día" :
     vehicle.estado === "en venta" ? "En venta" :
     vehicle.estado === "robado" ? "Robado" : "Vendido";
 
-  const estadoColor =
-    vehicle.estado === "activo" ? "bg-emerald-500" :
-    vehicle.estado === "en venta" ? "bg-amber-500" : "bg-red-600";
+  const estadoPill =
+    vehicle.estado === "activo" ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" :
+    vehicle.estado === "en venta" ? "text-amber-400 border-amber-500/30 bg-amber-500/10" :
+    "text-red-400 border-red-500/30 bg-red-500/10";
 
-  // Último rendimiento
-  let lastRendimiento: string | null = null;
-  if (fuelLogs.length >= 2) {
-    const sorted = [...fuelLogs].sort((a, b) => a.odometro - b.odometro);
-    const last = sorted[sorted.length - 1];
-    const prev = sorted[sorted.length - 2];
-    const kmRecorridos = last.odometro - prev.odometro;
-    const galones = last.litros / 3.78541;
-    if (galones > 0) lastRendimiento = `${Math.round(kmRecorridos / galones)} km/gal`;
-  }
+  const eficienciaColor = eficiencia >= 70 ? "text-emerald-400" : eficiencia >= 40 ? "text-amber-400" : "text-red-400";
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] bg-white/[0.08] border border-white/10 p-5 text-zinc-100">
-      {/* Decorative glows */}
-      <div className="absolute -top-10 -right-10 w-36 h-36 bg-auto-600/10 rounded-full blur-3xl" />
-      <div className="absolute -bottom-8 -left-8 w-28 h-28 bg-auto-600/5 rounded-full blur-3xl" />
+    <div className="relative overflow-hidden rounded-[1.75rem] bg-white/[0.06] border border-white/10">
+      {/* HUD corners */}
+      <span className="absolute top-2 left-2 w-5 h-5 border-t-2 border-l-2 border-auto-500/60 rounded-tl-md pointer-events-none" />
+      <span className="absolute top-2 right-2 w-5 h-5 border-t-2 border-r-2 border-auto-500/60 rounded-tr-md pointer-events-none" />
+      <span className="absolute bottom-2 left-2 w-5 h-5 border-b-2 border-l-2 border-auto-500/60 rounded-bl-md pointer-events-none" />
+      <span className="absolute bottom-2 right-2 w-5 h-5 border-b-2 border-r-2 border-auto-500/60 rounded-br-md pointer-events-none" />
 
-      <div className="relative z-10 flex gap-4">
-        {/* Vehicle photo */}
-        <div className="w-28 h-28 rounded-2xl bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 overflow-hidden shrink-0 shadow-inner">
-          {vehicle.foto_url ? (
-            <img src={vehicle.foto_url} alt="" className="w-full h-full object-cover object-center" />
-          ) : (
-            <Car className="w-8 h-8 text-zinc-400" />
-          )}
-        </div>
+      {/* carbon-ish top strip */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-auto-600 via-auto-400 to-auto-600 opacity-80" />
 
-        {/* Vehicle info */}
-        <div className="flex-1 min-w-0 py-1 flex flex-col justify-center">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-xl font-bold truncate text-zinc-100">{vehicle.marca} {vehicle.modelo}</h2>
-            <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border shrink-0 ${
-              vehicle.estado === "activo" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-              vehicle.estado === "en venta" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-              "bg-red-500/10 text-red-400 border-red-500/20"
-            }`}>
-              {estadoLabel}
-            </span>
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5">
-            <p className="text-zinc-400 text-xs flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 shrink-0 text-auto-500" />
-              <span className="text-zinc-200 font-semibold">{kmFormatted}</span> km
-            </p>
-            <p className="text-zinc-400 text-xs flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 shrink-0 text-auto-500" />
-              <span className="text-zinc-200 font-semibold">{vehicle.año}</span>
-            </p>
-            <p className="text-zinc-400 text-xs flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 shrink-0 text-auto-500" />
-              <span className="text-zinc-200 font-semibold">{vehicle.placa}</span>
-            </p>
-            {lastRendimiento && (
-              <p className="text-zinc-400 text-xs flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5 shrink-0 text-auto-500" />
-                <span className="text-zinc-200 font-semibold">{lastRendimiento}</span>
-              </p>
+      <div className="p-4">
+        <div className="flex gap-4">
+          {/* Foto */}
+          <div className="w-24 h-24 rounded-2xl bg-white/5 border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+            {vehicle.foto_url ? (
+              <img src={vehicle.foto_url} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <Car className="w-8 h-8 text-zinc-500" />
             )}
           </div>
+
+          {/* Nombre + estado + año */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h2 className="text-xl font-extrabold text-zinc-100 truncate leading-tight">{vehicle.marca} {vehicle.modelo}</h2>
+            </div>
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${estadoPill}`}>{estadoLabel}</span>
+              <span className="inline-flex items-center gap-1 text-[10px] text-zinc-500"><Calendar className="w-3 h-3" />{vehicle.año}</span>
+            </div>
+
+            {/* Placa estilo placa real */}
+            <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-md bg-zinc-900 border border-zinc-700 px-2 py-0.5">
+              <Tag className="w-3 h-3 text-zinc-500" />
+              <span className="text-[11px] font-black tracking-[0.2em] text-zinc-100">{vehicle.placa}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Odómetro digital */}
+        <div className="mt-3 flex items-end justify-between rounded-xl bg-black/40 border border-white/10 px-3 py-2">
+          <div className="flex items-center gap-2 text-zinc-500">
+            <Gauge className="w-4 h-4 text-auto-400" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Odómetro</span>
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="font-digit text-2xl font-black text-white tabular-nums">{kmDisplay.toLocaleString("es-PE")}</span>
+            <span className="text-[10px] text-zinc-500">km</span>
+          </div>
+        </div>
+
+        {/* Eficiencia */}
+        <div className="mt-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-zinc-500">Eficiencia</span>
+            <span className={`text-sm font-black ${eficienciaColor}`}>{eficiencia}%</span>
+            <span className="text-[10px] text-zinc-600">de 100</span>
+          </div>
+          {rendKmGal != null && (
+            <span className="text-[10px] text-zinc-500">{rendKmGal} km/gal</span>
+          )}
         </div>
       </div>
-
-      {/* Eco-score minibadge */}
-      <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 bg-white/5 backdrop-blur-md rounded-full pl-1.5 pr-2.5 py-1 border border-white/10">
-        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black ${
-          ecoScore >= 70 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" :
-          ecoScore >= 40 ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" :
-          "bg-red-500/20 text-red-400 border border-red-500/30"
-        }`}>
-          {ecoScore}
-        </div>
-        <span className="text-[9px] font-semibold text-zinc-400">Eco</span>
-      </div>
-
-      {/* Public profile link */}
-      <a
-        href={`/auto/vehiculo/${vehicle.id}`}
-        target="_blank"
-        rel="noopener"
-        className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center transition-colors"
-        title="Perfil público del vehículo"
-      >
-        <LinkIcon className="w-4 h-4 text-zinc-300" />
-      </a>
     </div>
   );
 }

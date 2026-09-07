@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { cookies } from "next/headers";
-import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs } from "@/types/database";
+import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs, VehicleUpgrade } from "@/types/database";
 import { AUTO_BADGES } from "@/lib/auto-badges";
 import DashboardContent from "./DashboardContent";
 
@@ -18,20 +18,22 @@ async function getDashboardData(userId: string, carId: string | null) {
       .single();
     carId = (fallback.data as { id: string } | null)?.id ?? null;
   }
-  if (!carId) return { vehicle: null, fuelLogs: [], documents: [], ecoScore: 0, nextDocExpiry: null, maintenances: [], specs: null };
+  if (!carId) return { vehicle: null, fuelLogs: [], documents: [], ecoScore: 0, nextDocExpiry: null, maintenances: [], upgrades: [], specs: null };
 
-  // Fetch vehicle, fuel logs (last 30), documents, maintenances, and specs in parallel
+  // Fetch vehicle, fuel logs (last 30), documents, maintenances, upgrades, and specs in parallel
   const [
     { data: vehicle },
     { data: fuelLogs },
     { data: documents },
     { data: maintenances },
+    { data: upgrades },
     { data: specs },
   ] = await Promise.all([
     supabase.from("vehicles").select("*").eq("id", carId).single(),
     supabase.from("fuel_logs").select("*").eq("vehicle_id", carId).order("fecha", { ascending: false }).limit(30),
     supabase.from("vehicle_documents").select("*").eq("vehicle_id", carId).order("fecha_vencimiento", { ascending: true }),
     supabase.from("maintenance_logs").select("*").eq("vehicle_id", carId).order("fecha", { ascending: false }).limit(50),
+    supabase.from("vehicle_upgrades").select("*").eq("vehicle_id", carId).order("fecha", { ascending: false }),
     supabase.from("vehicle_specs").select("*").eq("vehicle_id", carId).maybeSingle(),
   ]);
 
@@ -79,6 +81,7 @@ async function getDashboardData(userId: string, carId: string | null) {
     ecoScore,
     nextDocExpiry,
     maintenances: (maintenances as MaintenanceLog[] | null) ?? [],
+    upgrades: (upgrades as VehicleUpgrade[] | null) ?? [],
     specs: specs as VehicleSpecs | null,
     badges: unlockedBadges,
   };
@@ -105,6 +108,6 @@ export default async function AutoDashboardPage() {
   const data = await getDashboardData(user.id, carId);
 
   return (
-    <DashboardContent vehicle={data.vehicle} fuelLogs={data.fuelLogs} ecoScore={data.ecoScore} nextDocExpiry={data.nextDocExpiry} maintenances={data.maintenances} specs={data.specs} badges={data.badges} />
+    <DashboardContent vehicle={data.vehicle} fuelLogs={data.fuelLogs} ecoScore={data.ecoScore} nextDocExpiry={data.nextDocExpiry} documents={data.documents} maintenances={data.maintenances} upgrades={data.upgrades} specs={data.specs} badges={data.badges} />
   );
 }

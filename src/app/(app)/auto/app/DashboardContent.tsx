@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs } from "@/types/database";
+import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs, VehicleUpgrade } from "@/types/database";
 import { Car } from "lucide-react";
 import { HeroCard } from "./HeroCard";
+import BlisbotCard from "@/components/BlisbotCard";
 import { QuickActions } from "./QuickActions";
 import { DashboardWidgets } from "./DashboardWidgets";
 
@@ -12,12 +13,14 @@ interface Props {
   fuelLogs: FuelLog[];
   ecoScore: number;
   nextDocExpiry: VehicleDocument | null;
+  documents: VehicleDocument[];
   maintenances: MaintenanceLog[];
+  upgrades: VehicleUpgrade[];
   specs: VehicleSpecs | null;
   badges?: string[];
 }
 
-export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocExpiry, maintenances, specs, badges = [] }: Props) {
+export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocExpiry, documents, maintenances, upgrades, specs, badges = [] }: Props) {
   const router = useRouter();
 
   if (!vehicle) {
@@ -48,6 +51,7 @@ export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocE
     <div className="relative -mx-4 -mt-14 px-4 pt-14 min-h-screen bg-auto-gradient text-zinc-200">
       <div className="space-y-4 pt-4 pb-8">
         <HeroCard vehicle={vehicle} fuelLogs={fuelLogs} ecoScore={ecoScore} />
+        <BlisbotCard vehicle={vehicle} fuelLogs={fuelLogs} documents={documents} maintenances={maintenances} upgrades={upgrades} specs={specs} />
         <QuickActions />
         <DashboardWidgets vehicle={vehicle} ecoScore={ecoScore} nextDocExpiry={nextDocExpiry} fuelLogs={fuelLogs} maintenances={maintenances} specs={specs} badges={badges} />
       </div>
