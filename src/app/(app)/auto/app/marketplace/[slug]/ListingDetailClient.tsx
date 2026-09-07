@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { MarketplaceListing } from "@/types/database";
 import { ArrowLeft, MapPin, Tag, MessageCircle, Package } from "lucide-react";
+import { useMoney } from "@/lib/money";
 
 const categoryLabels: Record<string, string> = {
   repuestos: "Repuestos", accesorios: "Accesorios", servicios: "Servicios",
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function ListingDetailClient({ listing }: Props) {
+  const { money } = useMoney();
   const sellerWhatsapp = listing.whatsapp || "";
   const sellerName = listing.profiles?.display_name || "Vendedor";
 
@@ -44,7 +46,7 @@ export default function ListingDetailClient({ listing }: Props) {
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-xl font-extrabold text-zinc-200 flex-1">{listing.titulo}</h1>
           <p className="text-2xl font-black text-auto-500 shrink-0">
-            {listing.precio === 0 ? "Gratis" : `S/ ${listing.precio.toLocaleString("es-PE")}`}
+            {listing.precio === 0 ? "Gratis" : money(listing.precio)}
           </p>
         </div>
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { getCatalogSpec, catalogSpecToVehicleSpecs, diffSpecsWithCatalog } from "@/lib/catalog";
 import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/types/database";
 import {
   FileText, Phone, Wrench, AlertTriangle, Plus, Trash2, X,
@@ -82,7 +83,7 @@ export default function GuanteraClient({ userId, vehicle, documents: initialDocs
 
       <DocumentsSection vehicleId={vehicle.id} initialDocs={initialDocs} />
       <ContactsSection vehicleId={vehicle.id} initialContacts={initialContacts} />
-      <SpecsSection vehicleId={vehicle.id} initialSpecs={initialSpecs} />
+      <SpecsSection vehicleId={vehicle.id} catalogSpecId={vehicle.catalog_spec_id} initialSpecs={initialSpecs} />
       <WarningLightsSection />
     </div>
   );
@@ -298,10 +299,11 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
 }
 
 /* ═══════════════════════════ 3. ADN del Vehículo ═══════════════════════ */
-function SpecsSection({ vehicleId, initialSpecs }: { vehicleId: string; initialSpecs: VehicleSpecs | null }) {
+function SpecsSection({ vehicleId, catalogSpecId, initialSpecs }: { vehicleId: string; catalogSpecId: string | null; initialSpecs: VehicleSpecs | null }) {
   const [specs, setSpecs] = useState<VehicleSpecs | null>(initialSpecs);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [form, setForm] = useState({
     tipo_aceite: specs?.tipo_aceite || "",
     viscosidad_aceite: specs?.viscosidad_aceite || "",
@@ -342,7 +344,41 @@ function SpecsSection({ vehicleId, initialSpecs }: { vehicleId: string; initialS
     if (!error && data) {
       setSpecs(data as VehicleSpecs);
       setEditing(false);
+      // Registrar correcciones vs catálogo (aprendizaje)
+      if (catalogSpecId) {
+        const catSpec = await getCatalogSpec(catalogSpecId);
+        if (catSpec) {
+          const correcciones = diffSpecsWithCatalog(data as VehicleSpecs, catSpec);
+          if (correcciones.length > 0) {
+            await supabase.from("spec_corrections").insert(
+              correcciones.map((c) => ({
+                vehicle_id: vehicleId,
+                catalog_spec_id: catalogSpecId,
+                campo: c.campo,
+                valor_catalogo: c.valor_catalogo,
+                valor_usuario: c.valor_usuario,
+              }))
+            );
+          }
+        }
+      }
     }
+  };
+
+  const handleSyncCatalog = async () => {
+    if (!catalogSpecId) return;
+    setSyncing(true);
+    const catSpec = await getCatalogSpec(catalogSpecId);
+    if (catSpec) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("vehicle_specs")
+        .upsert({ vehicle_id: vehicleId, ...catalogSpecToVehicleSpecs(catSpec) })
+        .select()
+        .single();
+      if (!error && data) setSpecs(data as VehicleSpecs);
+    }
+    setSyncing(false);
   };
 
   const specsCards = [
@@ -363,9 +399,16 @@ function SpecsSection({ vehicleId, initialSpecs }: { vehicleId: string; initialS
         <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
           <Settings className="w-4 h-4 text-auto-500" /> ADN del Vehículo
         </h2>
-        <button onClick={() => setEditing(!editing)} className="text-xs font-bold text-auto-500 hover:text-auto-500 transition-colors">
-          {editing ? "Cancelar" : "Editar"}
-        </button>
+        <div className="flex items-center gap-2">
+          {catalogSpecId && (
+            <button onClick={handleSyncCatalog} disabled={syncing} className="text-[10px] font-bold text-auto-500 bg-auto-600/10 border border-auto-600/20 px-2 py-1 rounded-lg hover:bg-auto-600/20 transition-colors disabled:opacity-50">
+              {syncing ? "Sincronizando..." : "Sincronizar con catálogo"}
+            </button>
+          )}
+          <button onClick={() => setEditing(!editing)} className="text-xs font-bold text-auto-500 hover:text-auto-500 transition-colors">
+            {editing ? "Cancelar" : "Editar"}
+          </button>
+        </div>
       </div>
 
       {editing ? (

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { COUNTRIES, getCountryConfig } from "@/lib/countries";
 import type { Profile, Vehicle } from "@/types/database";
 import { User, Settings, Plus, Pencil, Trash2, Car } from "lucide-react";
 
@@ -22,9 +23,11 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
     first_name: profile?.first_name || "",
     last_name: profile?.last_name || "",
     whatsapp: profile?.whatsapp || "",
-    country: profile?.country || "",
+    country: profile?.country || "PE",
   });
   const [saving, setSaving] = useState(false);
+
+  const countryConfig = getCountryConfig(form.country);
 
   const handleSaveProfile = async () => {
     setSaving(true);
@@ -35,6 +38,8 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
       last_name: form.last_name || null,
       whatsapp: form.whatsapp || null,
       country: form.country || null,
+      currency: countryConfig.currency,
+      fuel_unit: countryConfig.fuelUnit,
     }).eq("id", userId);
     setSaving(false);
     setEditingProfile(false);
@@ -102,9 +107,18 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
               </label>
               <label className="block">
                 <span className="text-[10px] font-bold text-zinc-500">País</span>
-                <input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}
-                  placeholder="PE" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}
+                  className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-zinc-800 text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20">
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>{c.bandera} {c.nombre}</option>
+                  ))}
+                </select>
               </label>
+            </div>
+            <div className="rounded-lg bg-zinc-800/60 border border-white/5 p-2 flex items-center gap-2">
+              <span className="text-[10px] text-zinc-500">Se configurará:</span>
+              <span className="text-[10px] font-bold text-zinc-300">Moneda {countryConfig.currency}</span>
+              <span className="text-[10px] font-bold text-zinc-300">· Combustible en {countryConfig.fuelUnit === "galon" ? "galón" : "litro"}</span>
             </div>
             <button onClick={handleSaveProfile} disabled={saving}
               className="w-full py-2.5 rounded-xl bg-auto-600 text-white text-sm font-bold hover:bg-auto-500 transition-colors disabled:opacity-50">
@@ -116,7 +130,7 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
             <InfoRow label="Nombre" value={[profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "—"} />
             <InfoRow label="Email" value={profile?.email || "—"} />
             <InfoRow label="WhatsApp" value={profile?.whatsapp || "—"} />
-            <InfoRow label="País" value={profile?.country || "—"} />
+            <InfoRow label="País" value={getCountryConfig(profile?.country).bandera + " " + getCountryConfig(profile?.country).nombre} />
             <InfoRow label="Miembro desde" value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString("es-PE") : "—"} />
           </div>
         )}

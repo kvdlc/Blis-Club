@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Fuel, TrendingDown, Zap, BarChart3, Info } from "lucide-react";
+import { useMoney } from "@/lib/money";
 
 interface Defaults {
   octanajeRecomendado: string | null;
@@ -11,6 +12,7 @@ interface Defaults {
 }
 
 export default function RendimientoClient({ defaults }: { defaults: Defaults }) {
+  const { money, symbol } = useMoney();
   const [precioA, setPrecioA] = useState(defaults.ultimosPrecios?.regular?.toString() || "");
   const [precioB, setPrecioB] = useState(defaults.ultimosPrecios?.premium?.toString() || "");
   const [rendimientoA, setRendimientoA] = useState("");
@@ -105,14 +107,14 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
 
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
-            <span className="text-[10px] font-bold text-zinc-500">Precio por galón (S/)</span>
+            <span className="text-[10px] font-bold text-zinc-500">Precio por galón ({symbol})</span>
             <div className="flex gap-1 mt-0.5">
               <input type="number" min="1" step="0.01" value={precioA}
-                onChange={(e) => setPrecioA(e.target.value)} placeholder="S/"
+                onChange={(e) => setPrecioA(e.target.value)} placeholder={symbol}
                 className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               {defaults.ultimosPrecios?.regular && (
                 <button onClick={() => usarPrecio("regular", "a")} className="px-2 py-2 rounded-lg bg-zinc-800 text-[10px] font-bold text-zinc-500 hover:bg-auto-600/15 hover:text-auto-500 transition-colors">
-                  S/{defaults.ultimosPrecios.regular}
+                  {money(defaults.ultimosPrecios.regular)}
                 </button>
               )}
             </div>
@@ -147,14 +149,14 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
 
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
-            <span className="text-[10px] font-bold text-zinc-500">Precio por galón (S/)</span>
+            <span className="text-[10px] font-bold text-zinc-500">Precio por galón ({symbol})</span>
             <div className="flex gap-1 mt-0.5">
               <input type="number" min="1" step="0.01" value={precioB}
-                onChange={(e) => setPrecioB(e.target.value)} placeholder="S/"
+                onChange={(e) => setPrecioB(e.target.value)} placeholder={symbol}
                 className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               {defaults.ultimosPrecios?.premium && (
                 <button onClick={() => usarPrecio("premium", "b")} className="px-2 py-2 rounded-lg bg-zinc-800 text-[10px] font-bold text-zinc-500 hover:bg-auto-600/10 hover:text-auto-500 transition-colors">
-                  S/{defaults.ultimosPrecios.premium}
+                  {money(defaults.ultimosPrecios.premium)}
                 </button>
               )}
             </div>
@@ -213,11 +215,11 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <div>
               <div className="flex justify-between text-[10px] mb-1">
                 <span className="font-bold text-zinc-300">{nombres.a}</span>
-                <span className="font-bold text-zinc-200">S/ {resultados.costoPorKm.a.toFixed(4)}</span>
+                <span className="font-bold text-zinc-200">{money(resultados.costoPorKm.a, 4)}</span>
               </div>
               <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
                 <div className="h-full bg-auto-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500" style={{ width: `${Math.max(resultados.barraA, 5)}%` }}>
-                  {resultados.barraA > 25 && <span className="text-[8px] font-bold text-white">S/ {resultados.costoPorKm.a.toFixed(2)}</span>}
+                  {resultados.barraA > 25 && <span className="text-[8px] font-bold text-white">{money(resultados.costoPorKm.a, 2)}</span>}
                 </div>
               </div>
             </div>
@@ -226,11 +228,11 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <div>
               <div className="flex justify-between text-[10px] mb-1">
                 <span className="font-bold text-zinc-300">{nombres.b}</span>
-                <span className="font-bold text-zinc-200">S/ {resultados.costoPorKm.b.toFixed(4)}</span>
+                <span className="font-bold text-zinc-200">{money(resultados.costoPorKm.b, 4)}</span>
               </div>
               <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
                 <div className="h-full bg-auto-500 rounded-full flex items-center justify-end pr-2 transition-all duration-500" style={{ width: `${Math.max(resultados.barraB, 5)}%` }}>
-                  {resultados.barraB > 25 && <span className="text-[8px] font-bold text-white">S/ {resultados.costoPorKm.b.toFixed(2)}</span>}
+                  {resultados.barraB > 25 && <span className="text-[8px] font-bold text-white">{money(resultados.costoPorKm.b, 2)}</span>}
                 </div>
               </div>
             </div>
@@ -244,13 +246,13 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
                 {resultados.mejor === "a" ? "Ahorras" : "Ahorras"}
               </p>
               <p className="text-xs font-bold text-auto-500">
-                S/ {resultados.diferenciaPorTanque.toFixed(2)}
+                {money(resultados.diferenciaPorTanque, 2)}
               </p>
             </div>
             <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Ahorro anual</p>
               <p className="text-base font-black text-zinc-200">
-                S/ {resultados.ahorroAnual.toLocaleString("es-PE", { maximumFractionDigits: 0 })}
+                {money(Math.round(resultados.ahorroAnual))}
               </p>
               <p className="text-xs font-bold text-auto-500">
                 con {resultados.mejor === "a" ? nombres.a : nombres.b}

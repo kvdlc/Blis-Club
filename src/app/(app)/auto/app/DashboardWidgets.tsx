@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useMoney } from "@/lib/money";
 import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs } from "@/types/database";
 import { Calendar, TrendingUp, ShieldCheck, Droplets, DollarSign, Wrench, Clock, Gauge, Trophy } from "lucide-react";
 
@@ -31,6 +32,7 @@ function daysUntil(dateStr: string): number {
 export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, maintenances, specs, badges = [] }: Props) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
+  const { money } = useMoney();
 
   // Calcular gasto mensual promedio en combustible (solo cliente)
   const gastoMensual = useMemo(() => {
@@ -160,7 +162,7 @@ export function DashboardWidgets({ vehicle, ecoScore, nextDocExpiry, fuelLogs, m
           </div>
           <div className="flex items-center justify-center py-1">
             <span className="text-lg font-black text-zinc-100">
-              S/ {Math.round(gastoMensual).toLocaleString("es-PE")}
+              {money(Math.round(gastoMensual))}
             </span>
           </div>
           <p className="text-[10px] text-zinc-500 text-center mt-1">
@@ -261,6 +263,7 @@ function MaintenanceWidget({ maintenances, currentKm }: { maintenances: Maintena
 }
 
 function CompareMonthWidget({ fuelLogs, maintenances }: { fuelLogs: FuelLog[]; maintenances: MaintenanceLog[] }) {
+  const { money } = useMoney();
   const ahora = new Date();
   const mesActual = ahora.getMonth();
   const mesPasado = mesActual === 0 ? 11 : mesActual - 1;
@@ -297,10 +300,10 @@ function CompareMonthWidget({ fuelLogs, maintenances }: { fuelLogs: FuelLog[]; m
         </div>
         <h3 className="text-xs font-bold text-zinc-300">vs mes pasado</h3>
       </div>
-      <p className="text-lg font-black text-zinc-100">S/ {actual.toLocaleString("es-PE")}</p>
+      <p className="text-lg font-black text-zinc-100">{money(actual)}</p>
       {pasado > 0 && (
         <p className={`text-[10px] font-bold mt-1 ${subio ? "text-red-400" : "text-emerald-400"}`}>
-          {subio ? "↑" : "↓"} {pctCambio}% vs S/ {pasado.toLocaleString("es-PE")}
+          {subio ? "↑" : "↓"} {pctCambio}% vs {money(pasado)}
         </p>
       )}
       {pasado === 0 && <p className="text-[10px] text-zinc-500 mt-1">Sin datos del mes pasado</p>}
@@ -343,6 +346,7 @@ function AutonomiaWidget({ fuelLogs, specs }: { fuelLogs: FuelLog[]; specs: Vehi
 }
 
 function LastFuelWidget({ fuelLogs }: { fuelLogs: FuelLog[] }) {
+  const { money } = useMoney();
   const lastFuel = fuelLogs.length > 0
     ? fuelLogs.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())[0]
     : null;
@@ -363,7 +367,7 @@ function LastFuelWidget({ fuelLogs }: { fuelLogs: FuelLog[] }) {
         {diasSinCargar != null ? `${diasSinCargar} días` : "—"}
       </p>
       <p className="text-[10px] text-zinc-500 mt-1">
-        {lastFuel ? `${lastFuel.litros} L · S/ ${lastFuel.precio_por_galon}/gal` : "Sin cargas registradas"}
+        {lastFuel ? `${lastFuel.litros} L · ${money(lastFuel.precio_por_galon)}/gal` : "Sin cargas registradas"}
       </p>
     </div>
   );

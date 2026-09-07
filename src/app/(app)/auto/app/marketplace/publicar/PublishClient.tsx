@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { ArrowLeft, Plus, X } from "lucide-react";
+import { useMoney } from "@/lib/money";
 
 const categories = [
   { value: "repuestos", label: "Repuestos" },
@@ -23,6 +24,7 @@ function generateSlug(titulo: string): string {
 }
 
 export default function PublishClient({ userId }: { userId: string }) {
+  const { symbol } = useMoney();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -127,7 +129,7 @@ export default function PublishClient({ userId }: { userId: string }) {
         </div>
 
         <label className="block">
-          <span className="text-xs font-bold text-zinc-500">Precio (S/) *</span>
+          <span className="text-xs font-bold text-zinc-500">Precio ({symbol}) *</span>
           <input required type="number" min="0" step="0.01" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })}
             placeholder="0 = Gratis"
             className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />

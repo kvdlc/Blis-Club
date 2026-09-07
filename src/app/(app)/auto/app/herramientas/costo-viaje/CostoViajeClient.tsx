@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Plus, Trash2, Users, Fuel, Coins, Route } from "lucide-react";
+import { useMoney } from "@/lib/money";
 
 interface Defaults {
   rendimientoPromedio: number | null;
@@ -17,6 +18,7 @@ interface Peaje {
 }
 
 export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
+  const { money, symbol } = useMoney();
   const [distancia, setDistancia] = useState("");
   const [rendimiento, setRendimiento] = useState(defaults.rendimientoPromedio?.toString() || "");
   const [precioGalon, setPrecioGalon] = useState(defaults.ultimoPrecio?.toString() || "");
@@ -136,11 +138,11 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
         <label className="block">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
-              <Coins className="w-3.5 h-3.5 text-auto-500" /> Precio por galón (S/)
+              <Coins className="w-3.5 h-3.5 text-auto-500" /> Precio por galón ({symbol})
             </span>
             {defaults.ultimoPrecio && (
               <button onClick={usarUltimoPrecio} className="text-[10px] font-bold text-auto-500 bg-auto-600/10 px-2 py-0.5 rounded-full hover:bg-auto-600/15 transition-colors">
-                S/ {defaults.ultimoPrecio}
+                {money(defaults.ultimoPrecio)}
               </button>
             )}
           </div>
@@ -152,7 +154,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               placeholder="Ej: 18.50"
               className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">S/</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">{symbol}</span>
           </div>
         </label>
 
@@ -163,7 +165,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
           {peajes.map((p) => (
             <div key={p.id} className="flex items-center gap-2 bg-zinc-800 rounded-xl px-3 py-2">
               <span className="text-xs font-medium text-zinc-300 flex-1">{p.nombre}</span>
-              <span className="text-xs font-bold text-zinc-200">S/ {p.costo.toFixed(2)}</span>
+              <span className="text-xs font-bold text-zinc-200">{money(p.costo, 2)}</span>
               <button onClick={() => eliminarPeaje(p.id)} className="text-zinc-500 hover:text-auto-400 transition-colors">
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -180,7 +182,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
             <input
               type="number" min="0" step="0.5" value={nuevoPeaje.costo}
               onChange={(e) => setNuevoPeaje({ ...nuevoPeaje, costo: e.target.value })}
-              placeholder="S/"
+              placeholder={symbol}
               className="w-20 px-3 py-2 rounded-xl border border-white/10 bg-zinc-900 text-xs focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <button
@@ -214,7 +216,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
           {/* Total grande */}
           <div className="text-center">
             <p className="text-4xl font-black text-auto-500">
-              S/ {resultados.costoTotal.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {money(resultados.costoTotal, 2)}
             </p>
             <p className="text-xs text-zinc-500 mt-1">Costo total del viaje</p>
           </div>
@@ -224,7 +226,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
             <div>
               <div className="flex justify-between text-xs mb-1">
                 <span className="font-bold text-zinc-300">Combustible</span>
-                <span className="font-bold text-zinc-200">S/ {resultados.costoCombustible.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</span>
+                <span className="font-bold text-zinc-200">{money(resultados.costoCombustible, 2)}</span>
               </div>
               <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
                 <div className="h-full bg-auto-600 rounded-full transition-all duration-500" style={{ width: `${Math.max(resultados.barraCombustible, 5)}%` }} />
@@ -236,7 +238,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               <div>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="font-bold text-zinc-300">Peajes</span>
-                  <span className="font-bold text-zinc-200">S/ {resultados.totalPeajes.toFixed(2)}</span>
+                  <span className="font-bold text-zinc-200">{money(resultados.totalPeajes, 2)}</span>
                 </div>
                 <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
                   <div className="h-full bg-auto-600 rounded-full transition-all duration-500" style={{ width: `${resultados.barraPeajes}%` }} />
@@ -251,7 +253,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
             <div className="bg-auto-600/10 rounded-2xl p-3 text-center">
               <p className="text-xs text-zinc-500">Por persona ({pasajeros} pasajeros)</p>
               <p className="text-xl font-black text-auto-500">
-                S/ {resultados.costoPorPersona.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+                {money(resultados.costoPorPersona, 2)}
               </p>
             </div>
           )}
@@ -271,9 +273,9 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               <p className="text-sm font-bold text-zinc-200">{parseFloat(rendimiento)} km/gal</p>
             </div>
             <div className="bg-zinc-800 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-zinc-500">S/ por km</p>
+              <p className="text-[10px] text-zinc-500">{symbol} por km</p>
               <p className="text-sm font-bold text-zinc-200">
-                S/ {(resultados.costoCombustible / parseFloat(distancia)).toFixed(2)}
+                {money(resultados.costoCombustible / parseFloat(distancia), 2)}
               </p>
             </div>
           </div>

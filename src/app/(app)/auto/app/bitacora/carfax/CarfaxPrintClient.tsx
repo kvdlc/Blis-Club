@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Clock } from "lucide-react";
 import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade, VehicleSpecs } from "@/types/database";
+import { useMoney } from "@/lib/money";
 
 interface Props {
   vehicle: Vehicle;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upgrades, specs }: Props) {
+  const { money, symbol } = useMoney();
   useEffect(() => {
     // Auto-imprimir al cargar
     const timer = setTimeout(() => window.print(), 1500);
@@ -119,7 +121,7 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
                   <th className="px-3 py-2 font-bold text-zinc-500">Fecha</th>
                   <th className="px-3 py-2 font-bold text-zinc-500">Odom.</th>
                   <th className="px-3 py-2 font-bold text-zinc-500">Litros</th>
-                  <th className="px-3 py-2 font-bold text-zinc-500">S/ gal</th>
+                  <th className="px-3 py-2 font-bold text-zinc-500">{symbol} gal</th>
                   <th className="px-3 py-2 font-bold text-zinc-500 text-right">Total</th>
                 </tr>
               </thead>
@@ -129,8 +131,8 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
                     <td className="px-3 py-2">{new Date(f.fecha + "T12:00:00").toLocaleDateString("es-PE")}</td>
                     <td className="px-3 py-2">{f.odometro.toLocaleString("es-PE")}</td>
                     <td className="px-3 py-2">{f.litros}</td>
-                    <td className="px-3 py-2">S/ {f.precio_por_galon}</td>
-                    <td className="px-3 py-2 text-right font-bold">S/ {Math.round(f.precio_por_galon * (f.litros / 3.78541)).toLocaleString("es-PE")}</td>
+                    <td className="px-3 py-2">{money(f.precio_por_galon)}</td>
+                    <td className="px-3 py-2 text-right font-bold">{money(Math.round(f.precio_por_galon * (f.litros / 3.78541)))}</td>
                   </tr>
                 ))}
               </tbody>
@@ -165,7 +167,7 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
                     <td className="px-3 py-2 capitalize">{m.tipo}</td>
                     <td className="px-3 py-2">{m.titulo}</td>
                     <td className="px-3 py-2">{m.taller || "—"}</td>
-                    <td className="px-3 py-2 text-right font-bold">{m.costo ? `S/ ${m.costo.toLocaleString("es-PE")}` : "—"}</td>
+                    <td className="px-3 py-2 text-right font-bold">{m.costo ? money(m.costo) : "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -196,7 +198,7 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
                     <td className="px-3 py-2">{new Date(u.fecha + "T12:00:00").toLocaleDateString("es-PE")}</td>
                     <td className="px-3 py-2 capitalize">{u.categoria}</td>
                     <td className="px-3 py-2">{u.nombre}</td>
-                    <td className="px-3 py-2 text-right font-bold">{u.costo ? `S/ ${u.costo.toLocaleString("es-PE")}` : "—"}</td>
+                    <td className="px-3 py-2 text-right font-bold">{u.costo ? money(u.costo) : "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -209,11 +211,11 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
       <div className="mb-6">
         <h2 className="text-sm font-extrabold text-zinc-700 uppercase tracking-wide mb-3">6. Resumen Financiero</h2>
         <div className="bg-zinc-100 rounded-xl p-4 print:p-3 space-y-2">
-          <SummaryRow label="Total combustible" value={`S/ ${Math.round(totalCombustible).toLocaleString("es-PE")}`} />
-          <SummaryRow label="Total mantenimientos" value={`S/ ${Math.round(totalMant).toLocaleString("es-PE")}`} />
-          {totalUpgrades > 0 && <SummaryRow label="Total mejoras" value={`S/ ${Math.round(totalUpgrades).toLocaleString("es-PE")}`} />}
+          <SummaryRow label="Total combustible" value={money(Math.round(totalCombustible))} />
+          <SummaryRow label="Total mantenimientos" value={money(Math.round(totalMant))} />
+          {totalUpgrades > 0 && <SummaryRow label="Total mejoras" value={money(Math.round(totalUpgrades))} />}
           <div className="pt-2 border-t border-zinc-200">
-            <SummaryRow label="Inversión total" value={`S/ ${Math.round(totalGeneral).toLocaleString("es-PE")}`} bold />
+            <SummaryRow label="Inversión total" value={money(Math.round(totalGeneral))} bold />
           </div>
         </div>
       </div>

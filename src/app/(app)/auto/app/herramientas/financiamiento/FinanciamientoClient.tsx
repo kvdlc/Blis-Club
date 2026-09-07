@@ -3,8 +3,10 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, DollarSign, Calendar, Percent } from "lucide-react";
+import { useMoney } from "@/lib/money";
 
 export default function FinanciamientoClient() {
+  const { money, symbol } = useMoney();
   const [monto, setMonto] = useState("65000");
   const [tasa, setTasa] = useState("12");
   const [plazo, setPlazo] = useState("48");
@@ -45,7 +47,7 @@ export default function FinanciamientoClient() {
 
       <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         <label className="block">
-          <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5 text-auto-500" /> Monto del préstamo (S/)</span>
+          <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5 text-auto-500" /> Monto del préstamo ({symbol})</span>
           <input type="number" min="1" step="100" value={monto} onChange={(e) => setMonto(e.target.value)}
             className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
@@ -65,17 +67,17 @@ export default function FinanciamientoClient() {
         <div className="space-y-3">
           <div className="rounded-2xl bg-gradient-to-br from-auto-500 to-auto-800 p-5 text-white text-center shadow-lg shadow-auto-600/20">
             <p className="text-xs text-white/70 mb-1">Cuota mensual</p>
-            <p className="text-3xl font-black">S/ {Math.round(resultados.cuota).toLocaleString("es-PE")}</p>
+            <p className="text-3xl font-black">{money(Math.round(resultados.cuota))}</p>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Total a pagar</p>
-              <p className="text-sm font-bold text-zinc-200">S/ {Math.round(resultados.totalPagar).toLocaleString("es-PE")}</p>
+              <p className="text-sm font-bold text-zinc-200">{money(Math.round(resultados.totalPagar))}</p>
             </div>
             <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Intereses</p>
-              <p className="text-sm font-bold text-auto-400">S/ {Math.round(resultados.intereses).toLocaleString("es-PE")}</p>
+              <p className="text-sm font-bold text-auto-400">{money(Math.round(resultados.intereses))}</p>
             </div>
             <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Tasa mensual</p>
@@ -100,10 +102,10 @@ export default function FinanciamientoClient() {
                   {resultados.tabla.map((r) => (
                     <tr key={r.mes} className="border-b border-white/5">
                       <td className="py-1 px-1 font-bold">{r.mes}</td>
-                      <td className="py-1 px-1">S/ {Math.round(r.cuota).toLocaleString("es-PE")}</td>
-                      <td className="py-1 px-1 text-auto-400">S/ {Math.round(r.interes).toLocaleString("es-PE")}</td>
-                      <td className="py-1 px-1 text-auto-500">S/ {Math.round(r.capital).toLocaleString("es-PE")}</td>
-                      <td className="py-1 px-1 text-right">S/ {Math.round(r.saldo).toLocaleString("es-PE")}</td>
+                      <td className="py-1 px-1">{money(Math.round(r.cuota))}</td>
+                      <td className="py-1 px-1 text-auto-400">{money(Math.round(r.interes))}</td>
+                      <td className="py-1 px-1 text-auto-500">{money(Math.round(r.capital))}</td>
+                      <td className="py-1 px-1 text-right">{money(Math.round(r.saldo))}</td>
                     </tr>
                   ))}
                 </tbody>

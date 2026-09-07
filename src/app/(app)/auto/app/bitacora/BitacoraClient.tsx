@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { getCountryConfig, getCurrentCountryCode } from "@/lib/countries";
 import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade } from "@/types/database";
 import {
   ChevronDown, Gauge, Droplets, Wrench, ShoppingBag, Shield, FileDown,
@@ -12,6 +13,7 @@ import {
 } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
+import { useMoney } from "@/lib/money";
 
 /* ═══════════════════════════ Tipos y datos ═══════════════════════ */
 const maintTypes = [
@@ -99,6 +101,7 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
 function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
   fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; vehicleId: string;
 }) {
+  const { money } = useMoney();
   const [addingFuel, setAddingFuel] = useState(false);
   const [addingMaint, setAddingMaint] = useState(false);
   const [fuelLogsState, setFuelLogsState] = useState(fuelLogs);
@@ -141,7 +144,7 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-zinc-100">
                   {item.type === "fuel" ? (
-                    <>{(item.data as FuelLog).litros} L · S/ {(item.data as FuelLog).precio_por_galon}/gal</>
+                    <>{(item.data as FuelLog).litros} L · {money((item.data as FuelLog).precio_por_galon)}/gal</>
                   ) : (
                     <>{(item.data as MaintenanceLog).titulo}</>
                   )}
@@ -153,11 +156,11 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
                 </p>
               </div>
               <span className="text-xs font-bold text-zinc-300 shrink-0">
-                S/ {Math.round(
+                {money(Math.round(
                   item.type === "fuel"
                     ? (item.data as FuelLog).precio_por_galon * ((item.data as FuelLog).litros / 3.78541)
                     : (item.data as MaintenanceLog).costo || 0
-                ).toLocaleString("es-PE")}
+                ))}
               </span>
             </div>
           ))
@@ -169,8 +172,20 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
 
 /* ═══════════════════════════ Forms ═══════════════════════ */
 function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: FuelLog | null) => void }) {
-  const [form, setForm] = useState({ litros: "", precio_por_galon: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "regular" });
+  const [countryCode, setCountryCode] = useState<string | null>(null);
+  const [form, setForm] = useState({ litros: "", precio_por_galon: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "90" });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getCurrentCountryCode().then((code) => {
+      setCountryCode(code);
+      const cfg = getCountryConfig(code);
+      setForm((f) => ({ ...f, tipo: cfg.fuelTypes[0]?.value || "90" }));
+    });
+  }, []);
+
+  const cfg = getCountryConfig(countryCode);
+  const precioUnit = cfg.fuelUnit === "galon" ? "galón" : "litro";
 
   const handleSubmit = async () => {
     const l = parseFloat(form.litros);
@@ -193,16 +208,13 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
     <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2 border border-amber-500/20">
       <div className="grid grid-cols-4 gap-1.5">
         <input type="number" step="0.1" value={form.litros} onChange={(e) => setForm({ ...form, litros: e.target.value })} placeholder="Litros" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder="S/ gal" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder={`${cfg.currency}/${cfg.fuelUnitShort}`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
         <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
         <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
-          <option value="regular">Regular</option>
-          <option value="premium">Premium</option>
-          <option value="diesel">Diésel</option>
-          <option value="glp">GLP</option>
-          <option value="gnv">GNV</option>
+          {cfg.fuelTypes.map((ft) => <option key={ft.value} value={ft.value}>{ft.label}</option>)}
         </select>
       </div>
+      <p className="text-[9px] text-zinc-500">Precio por {precioUnit} ({cfg.currency})</p>
       <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
         <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : "Guardar"}</button>
@@ -213,6 +225,7 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
 }
 
 function AddMaintForm({ vehicleId, onDone }: { vehicleId: string; onDone: (m: MaintenanceLog | null) => void }) {
+  const { symbol } = useMoney();
   const [form, setForm] = useState({ tipo: "preventivo", titulo: "", costo: "", odometro: "", taller: "", fecha: new Date().toISOString().split("T")[0] });
   const [saving, setSaving] = useState(false);
 
@@ -240,7 +253,7 @@ function AddMaintForm({ vehicleId, onDone }: { vehicleId: string; onDone: (m: Ma
         <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
           {maintTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
-        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`${symbol} costo`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
       </div>
       <div className="grid grid-cols-2 gap-1.5">
         <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
@@ -259,6 +272,7 @@ function AddMaintForm({ vehicleId, onDone }: { vehicleId: string; onDone: (m: Ma
 const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[]; maintenances: MaintenanceLog[] }) {
+  const { money } = useMoney();
   const [showRendimiento, setShowRendimiento] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [showProyeccion, setShowProyeccion] = useState(false);
@@ -384,7 +398,7 @@ function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[];
                 </div>
                 <div className="grid grid-cols-[repeat(53,1fr)] gap-[1px]">
                   {heatmapData.map((cell, i) => (
-                    <div key={i} title={`${cell.date.toLocaleDateString("es-PE")}: S/ ${cell.gasto}`}
+                    <div key={i} title={`${cell.date.toLocaleDateString("es-PE")}: ${money(cell.gasto)}`}
                       className={`aspect-square rounded-[1px] ${
                         cell.level === 0 ? "bg-zinc-800" : cell.level === 1 ? "bg-auto-200" : cell.level === 2 ? "bg-auto-500" : cell.level === 3 ? "bg-auto-600" : "bg-auto-700"
                       }`} />
@@ -410,12 +424,12 @@ function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[];
                 <div className="grid grid-cols-3 gap-2">
                   <div className="text-center">
                     <p className="text-[10px] text-zinc-500">Gasto estimado</p>
-                    <p className="text-lg font-black text-auto-500">S/ {proyeccionAnual.toLocaleString("es-PE")}</p>
+                    <p className="text-lg font-black text-auto-500">{money(proyeccionAnual)}</p>
                     <p className="text-[9px] text-zinc-500">próximos 12 meses</p>
                   </div>
                   <div className="text-center">
                     <p className="text-[10px] text-zinc-500">Por mes</p>
-                    <p className="text-lg font-black text-zinc-100">S/ {Math.round(proyeccionAnual / 12).toLocaleString("es-PE")}</p>
+                    <p className="text-lg font-black text-zinc-100">{money(Math.round(proyeccionAnual / 12))}</p>
                     <p className="text-[9px] text-zinc-500">promedio proyectado</p>
                   </div>
                   <div className="text-center">
@@ -477,6 +491,7 @@ function WarrantySection({ vehicle, maintenances }: { vehicle: Vehicle; maintena
 
 /* ═══════════════════════════ 4. Upgrades ═══════════════════════ */
 function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; initialUpgrades: VehicleUpgrade[] }) {
+  const { money, symbol } = useMoney();
   const [upgrades, setUpgrades] = useState(initialUpgrades);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ categoria: "estetico", nombre: "", costo: "", fecha: new Date().toISOString().split("T")[0] });
@@ -518,7 +533,7 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
             <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
               {upgradeCats.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
-            <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="S/ costo" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`${symbol} costo`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
           </div>
           <div className="flex gap-1.5">
             <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">Guardar</button>
@@ -545,7 +560,7 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-auto-500">{u.costo ? `S/ ${u.costo.toLocaleString("es-PE")}` : "—"}</span>
+                <span className="text-xs font-bold text-auto-500">{u.costo ? money(u.costo) : "—"}</span>
                 <button onClick={() => handleDelete(u.id)} className="w-6 h-6 rounded-lg hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500 transition-colors">
                   <Trash2 className="w-3 h-3" />
                 </button>

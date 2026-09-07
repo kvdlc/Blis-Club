@@ -20,6 +20,8 @@ export interface Profile {
   country: string | null;
   whatsapp: string | null;
   timezone: string | null;
+  currency: string | null;
+  fuel_unit: "galon" | "litro" | null;
   has_seen_tutorial?: boolean;
   created_at: string;
 }
@@ -59,8 +61,49 @@ export interface Vehicle {
   color: string | null;
   vin: string | null;
   estado: "activo" | "en venta" | "robado" | "vendido";
+  tipo_vehiculo: "auto" | "suv" | "pickup" | "moto";
+  catalog_spec_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export type VehicleType = "auto" | "suv" | "pickup" | "moto";
+
+export interface CatalogMake {
+  id: string;
+  nombre: string;
+  slug: string;
+  pais_origen: string | null;
+  logo_url: string | null;
+}
+
+export interface CatalogModel {
+  id: string;
+  make_id: string;
+  nombre: string;
+  slug: string;
+  tipo_vehiculo: VehicleType;
+}
+
+export interface CatalogSpec {
+  id: string;
+  model_id: string;
+  año: number | null;
+  motor_nombre: string | null;
+  tipo_combustible: "gasolina" | "diesel" | "gas" | "electrico" | "hibrido";
+  rendimiento_km_l: number | null;
+  capacidad_tanque_l: number | null;
+  aceite_viscosidad: string | null;
+  aceite_capacidad_l: number | null;
+  refrigerante_tipo: string | null;
+  refrigerante_capacidad_l: number | null;
+  freno_tipo: string | null;
+  psi_delante: number | null;
+  psi_atras: number | null;
+  psi_repuesto: number | null;
+  octanaje_sugerido: string | null;
+  fuente_url: string | null;
+  verified: boolean;
 }
 
 export interface FuelLog {

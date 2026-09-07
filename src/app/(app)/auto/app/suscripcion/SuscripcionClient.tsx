@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, Crown, Zap, Shield, Star, Fuel, Wrench, Calculator, FileText, ShoppingCart, BarChart3, Camera, ClipboardList } from "lucide-react";
+import { formatMoney } from "@/lib/money";
 
 interface Props {
   subscription: any;
@@ -20,7 +21,7 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
     : 0;
 
   const formatPrice = (cents: number) => {
-    return `S/ ${(cents / 100).toFixed(0)}`;
+    return formatMoney(cents / 100);
   };
 
   return (

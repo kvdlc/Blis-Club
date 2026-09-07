@@ -7,7 +7,7 @@ import {
   LayoutDashboard, GraduationCap, UtensilsCrossed, BadgeCheck,
   DollarSign, Trophy, Image, Syringe, Users,
   Globe, Settings, Shield, ChevronDown, LogOut, Mail, ArrowUpCircle,
-  Key, ShoppingCart, Package, Car, ShoppingBag,
+  Key, ShoppingCart, Package, Car, ShoppingBag, Database, Coins,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -50,10 +50,12 @@ const autoItems: NavItem[] = [
   { href: "/superadmin/vehiculos", icon: Car, label: "Vehículos", appSlug: "auto" },
   { href: "/superadmin/marketplace", icon: ShoppingBag, label: "Marketplace", appSlug: "auto" },
   { href: "/superadmin/proveedores", icon: Package, label: "Proveedores", appSlug: "auto" },
+  { href: "/superadmin/catalogo-vehiculos", icon: Database, label: "Catálogo", appSlug: "auto" },
 ];
 
 const advancedItems: NavItem[] = [
   { href: "/superadmin/planes", icon: DollarSign, label: "Planes" },
+  { href: "/superadmin/monedas", icon: Coins, label: "Monedas" },
   { href: "/superadmin/imagenes", icon: Image, label: "Imágenes" },
   { divider: true },
   { href: "/superadmin/email", icon: Mail, label: "Email" },

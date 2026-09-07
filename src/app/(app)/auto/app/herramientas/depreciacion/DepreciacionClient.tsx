@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, DollarSign, TrendingDown, Calendar, BarChart3 } from "lucide-react";
+import { useMoney } from "@/lib/money";
 
 const tasasComunes = [
   { label: "Sedán / Hatchback", tasa: 12 },
@@ -13,6 +14,7 @@ const tasasComunes = [
 ];
 
 export default function DepreciacionClient() {
+  const { money, symbol } = useMoney();
   const [valorCompra, setValorCompra] = useState("");
   const [anios, setAnios] = useState("3");
   const [tasaAnual, setTasaAnual] = useState("12");
@@ -83,7 +85,7 @@ export default function DepreciacionClient() {
       <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         <label className="block">
           <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
-            <DollarSign className="w-3.5 h-3.5 text-auto-500" /> Valor de compra (S/)
+            <DollarSign className="w-3.5 h-3.5 text-auto-500" /> Valor de compra ({symbol})
           </span>
           <input
             type="number" min="1" step="1000"
@@ -143,13 +145,13 @@ export default function DepreciacionClient() {
           <div className="rounded-2xl bg-gradient-to-br from-auto-500 to-auto-800 p-5 text-white text-center shadow-lg shadow-auto-600/20">
             <p className="text-xs text-white/70 mb-1">Valor actual estimado</p>
             <p className="text-3xl font-black">
-              S/ {Math.round(resultados.valorActualLineal).toLocaleString("es-PE")}
+              {money(Math.round(resultados.valorActualLineal))}
             </p>
             <p className="text-sm text-white/80 mt-1">
               {resultados.pctRestanteLineal.toFixed(0)}% del valor original
             </p>
             <p className="text-[10px] text-white/60 mt-1">
-              Perdiste S/ {Math.round(resultados.depreciacionTotalLineal).toLocaleString("es-PE")} en {anios} años
+              Perdiste {money(Math.round(resultados.depreciacionTotalLineal))} en {anios} años
             </p>
           </div>
 
@@ -162,7 +164,7 @@ export default function DepreciacionClient() {
             <div>
               <div className="flex justify-between text-[10px] mb-1">
                 <span className="font-bold text-zinc-300">Lineal</span>
-                <span className="font-bold text-zinc-200">S/ {Math.round(resultados.valorActualLineal).toLocaleString("es-PE")}</span>
+                <span className="font-bold text-zinc-200">{money(Math.round(resultados.valorActualLineal))}</span>
               </div>
               <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
                 <div className="h-full bg-auto-600 rounded-full flex items-center px-2 transition-all duration-500" style={{ width: `${resultados.barraLineal}%` }}>
@@ -174,7 +176,7 @@ export default function DepreciacionClient() {
             <div>
               <div className="flex justify-between text-[10px] mb-1">
                 <span className="font-bold text-zinc-300">Compuesto</span>
-                <span className="font-bold text-zinc-200">S/ {Math.round(resultados.valorActualCompuesto).toLocaleString("es-PE")}</span>
+                <span className="font-bold text-zinc-200">{money(Math.round(resultados.valorActualCompuesto))}</span>
               </div>
               <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
                 <div className="h-full bg-auto-500 rounded-full flex items-center px-2 transition-all duration-500" style={{ width: `${resultados.barraCompuesto}%` }}>
@@ -199,13 +201,13 @@ export default function DepreciacionClient() {
                       style={{ width: `${(p.valor / parseFloat(valorCompra)) * 100}%` }}
                     >
                       {p.valor > parseFloat(valorCompra) * 0.15 && (
-                        <span className="text-[8px] font-bold text-white">S/ {Math.round(p.valor).toLocaleString("es-PE")}</span>
+                        <span className="text-[8px] font-bold text-white">{money(Math.round(p.valor))}</span>
                       )}
                     </div>
                   </div>
                   {p.anio > 0 && (
                     <span className="text-[9px] text-auto-400 w-14 text-right">
-                      -S/ {Math.round(p.perdida).toLocaleString("es-PE")}
+                      -{money(Math.round(p.perdida))}
                     </span>
                   )}
                 </div>
@@ -218,13 +220,13 @@ export default function DepreciacionClient() {
             <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Pérdida mensual</p>
               <p className="text-sm font-bold text-auto-400">
-                S/ {Math.round(resultados.perdidaMensualLineal).toLocaleString("es-PE")}
+                {money(Math.round(resultados.perdidaMensualLineal))}
               </p>
             </div>
             <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Pérdida diaria</p>
               <p className="text-sm font-bold text-auto-400">
-                S/ {Math.round(resultados.perdidaDiariaLineal).toLocaleString("es-PE")}
+                {money(Math.round(resultados.perdidaDiariaLineal))}
               </p>
             </div>
             <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">

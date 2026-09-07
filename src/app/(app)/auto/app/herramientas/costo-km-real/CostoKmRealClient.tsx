@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, DollarSign, Fuel, Wrench, TrendingDown } from "lucide-react";
+import { useMoney } from "@/lib/money";
 import type { FuelLog, MaintenanceLog, VehicleSpecs } from "@/types/database";
 
 interface Defaults {
@@ -14,6 +15,7 @@ interface Defaults {
 }
 
 export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) {
+  const { money, symbol } = useMoney();
   const [valorCompra, setValorCompra] = useState("");
   const [tasaDepreciacion, setTasaDepreciacion] = useState("12");
   const [anios, setAnios] = useState(defaults.anios?.toString() || "3");
@@ -78,7 +80,7 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
 
       <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         <label className="block">
-          <span className="text-xs font-bold text-zinc-500">Valor de compra (S/)</span>
+          <span className="text-xs font-bold text-zinc-500">Valor de compra ({symbol})</span>
           <input type="number" min="1" step="1000" value={valorCompra}
             onChange={(e) => setValorCompra(e.target.value)} placeholder="Ej: 65000"
             className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
@@ -109,8 +111,8 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
         <div className="space-y-3">
           <div className="rounded-2xl bg-gradient-to-br from-auto-500 to-auto-800 p-5 text-white text-center shadow-lg shadow-auto-600/20">
             <p className="text-xs text-white/70 mb-1">Costo real por kilómetro</p>
-            <p className="text-3xl font-black">S/ {resultados.costoTotalPorKm.toFixed(2)}</p>
-            <p className="text-xs text-white/60 mt-1">S/ {Math.round(resultados.costoMensual).toLocaleString("es-PE")}/mes · S/ {Math.round(resultados.costoDiario).toLocaleString("es-PE")}/día</p>
+            <p className="text-3xl font-black">{money(resultados.costoTotalPorKm, 2)}</p>
+            <p className="text-xs text-white/60 mt-1">{money(Math.round(resultados.costoMensual))}/mes · {money(Math.round(resultados.costoDiario))}/día</p>
           </div>
 
           <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
@@ -123,7 +125,7 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
               <div key={d.label}>
                 <div className="flex justify-between text-[10px] mb-1">
                   <span className="font-bold text-zinc-300">{d.label}</span>
-                  <span className="font-bold text-zinc-200">S/ {d.value.toFixed(2)}</span>
+                  <span className="font-bold text-zinc-200">{money(d.value, 2)}</span>
                 </div>
                 <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
                   <div className={`h-full ${d.color} rounded-full`} style={{ width: `${d.barra}%` }} />

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { MarketplaceListing } from "@/types/database";
 import { ShoppingBag, Search, Plus, MapPin, Tag, ShoppingCart, Wrench, Armchair, Ticket, Car, Package } from "lucide-react";
+import { useMoney } from "@/lib/money";
 
 const categories = [
   { key: "todas", label: "Todas", icon: "🛒" },
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export default function MarketplaceClient({ listings, activeCat, searchMarca }: Props) {
+  const { money } = useMoney();
   const router = useRouter();
   const [marca, setMarca] = useState(searchMarca);
 
@@ -128,7 +130,7 @@ export default function MarketplaceClient({ listings, activeCat, searchMarca }: 
                 </p>
 
                 <p className="text-sm font-black text-auto-500">
-                  {listing.precio === 0 ? "Gratis" : `S/ ${listing.precio.toLocaleString("es-PE")}`}
+                  {listing.precio === 0 ? "Gratis" : money(listing.precio)}
                 </p>
 
                 <div className="flex items-center gap-1.5">
