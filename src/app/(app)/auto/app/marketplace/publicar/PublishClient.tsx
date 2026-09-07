@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { uploadMarketplacePhoto } from "@/lib/storage";
 import Link from "next/link";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { ArrowLeft, X, Upload } from "lucide-react";
 import { useMoney } from "@/lib/money";
 
 const categories = [
@@ -39,13 +40,21 @@ export default function PublishClient({ userId }: { userId: string }) {
     ciudad: "",
     fotos: [] as string[],
   });
-  const [fotoUrl, setFotoUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
 
-  const addFoto = () => {
-    if (fotoUrl.trim() && form.fotos.length < 5) {
-      setForm({ ...form, fotos: [...form.fotos, fotoUrl.trim()] });
-      setFotoUrl("");
+  const addFotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setUploading(true);
+    const done = [...form.fotos];
+    for (const file of files) {
+      if (done.length >= 5) break;
+      const url = await uploadMarketplacePhoto(file, file.name.replace(/\.[^.]+$/, ""));
+      if (url) done.push(url);
     }
+    setForm({ ...form, fotos: done });
+    setUploading(false);
+    e.target.value = "";
   };
 
   const removeFoto = (i: number) => {
@@ -174,17 +183,12 @@ export default function PublishClient({ userId }: { userId: string }) {
 
         {/* Fotos */}
         <div>
-          <span className="text-xs font-bold text-zinc-500">Fotos (URL, máx 5)</span>
-          <div className="flex gap-1.5 mt-1">
-            <input value={fotoUrl} onChange={(e) => setFotoUrl(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addFoto())}
-              placeholder="https://..."
-              className="flex-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
-            <button type="button" onClick={addFoto} disabled={!fotoUrl.trim() || form.fotos.length >= 5}
-              className="px-3 py-2.5 rounded-xl bg-zinc-800 text-zinc-500 hover:bg-auto-100 hover:text-auto-500 disabled:opacity-40 transition-colors">
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
+          <span className="text-xs font-bold text-zinc-500">Fotos (máx 5)</span>
+          <label className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl border border-dashed border-white/15 bg-zinc-900 text-sm cursor-pointer hover:bg-zinc-800/60 transition-colors mt-1 ${uploading ? "opacity-60" : ""}`}>
+            <Upload className="w-4 h-4 text-zinc-400" />
+            <span className="text-zinc-400">{uploading ? "Subiendo..." : form.fotos.length === 0 ? "Seleccionar fotos" : "Agregar más fotos"}</span>
+            <input type="file" accept="image/*" multiple onChange={addFotos} className="hidden" disabled={uploading} />
+          </label>
           {form.fotos.length > 0 && (
             <div className="flex gap-1.5 mt-1.5 flex-wrap">
               {form.fotos.map((url, i) => (
