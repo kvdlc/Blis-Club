@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getCountryConfig, getCurrentCountryCode } from "@/lib/countries";
@@ -9,7 +9,7 @@ import {
   ChevronDown, Gauge, Droplets, Wrench, ShoppingBag, Shield, FileDown,
   Plus, Trash2, X, RotateCw, TrendingUp, BarChart3, Fuel, ScrollText,
   Sparkles, CheckCircle2, Circle, AlertTriangle, Calendar,
-  Palette, Smartphone, Zap, Armchair, Pin, Ban,
+  Palette, Smartphone, Zap, Armchair, Pin, Ban, MoreVertical, Pencil,
 } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { BitacoraCharts } from "./BitacoraCharts";
@@ -114,6 +114,7 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [addingFuel, setAddingFuel] = useState(false);
   const [addingMaint, setAddingMaint] = useState(false);
+  const [editTarget, setEditTarget] = useState<TimelineItem | null>(null);
   const [fuelLogsState, setFuelLogsState] = useState(fuelLogs);
   const [maintsState, setMaintsState] = useState(maintenances);
 
@@ -151,7 +152,7 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
       {/* Botones grandes de registro */}
       <div className="grid grid-cols-2 gap-2">
         <button
-          onClick={() => { setAddingFuel(!addingFuel); setAddingMaint(false); }}
+          onClick={() => { setEditTarget(null); setAddingFuel(!addingFuel || !!editTarget); setAddingMaint(false); }}
           className={`flex flex-col items-center gap-1.5 rounded-2xl px-4 py-4 border transition-all active:scale-[0.98] ${
             addingFuel
               ? "bg-amber-500/20 border-amber-500/40"
@@ -159,11 +160,11 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
           }`}
         >
           <Fuel className="w-6 h-6 text-amber-400" />
-          <span className="text-xs font-extrabold text-zinc-100">Cargar combustible</span>
+          <span className="text-xs font-extrabold text-zinc-100">{editTarget && editTarget.type === "fuel" ? "Editar carga" : "Cargar combustible"}</span>
           <span className="text-[10px] text-zinc-500">Registra una carga</span>
         </button>
         <button
-          onClick={() => { setAddingMaint(!addingMaint); setAddingFuel(false); }}
+          onClick={() => { setEditTarget(null); setAddingMaint(!addingMaint || !!editTarget); setAddingFuel(false); }}
           className={`flex flex-col items-center gap-1.5 rounded-2xl px-4 py-4 border transition-all active:scale-[0.98] ${
             addingMaint
               ? "bg-blue-500/20 border-blue-500/40"
@@ -171,45 +172,68 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
           }`}
         >
           <Wrench className="w-6 h-6 text-blue-400" />
-          <span className="text-xs font-extrabold text-zinc-100">Registrar servicio</span>
+          <span className="text-xs font-extrabold text-zinc-100">{editTarget && editTarget.type === "maintenance" ? "Editar servicio" : "Registrar servicio"}</span>
           <span className="text-[10px] text-zinc-500">Mantenimiento u otro</span>
         </button>
       </div>
 
-      {addingFuel && <AddFuelForm vehicleId={vehicleId} onDone={(f) => { if (f) setFuelLogsState([f, ...fuelLogsState]); setAddingFuel(false); }} />}
-      {addingMaint && <AddMaintForm vehicleId={vehicleId} onDone={(m) => { if (m) setMaintsState([m, ...maintsState]); setAddingMaint(false); }} />}
+      {addingFuel && (
+        <AddFuelForm
+          vehicleId={vehicleId}
+          editItem={editTarget && editTarget.type === "fuel" ? editTarget.data : null}
+          onDone={(f) => {
+            if (f) {
+              if (editTarget && editTarget.type === "fuel") {
+                setFuelLogsState(fuelLogsState.map((x) => (x.id === f.id ? f : x)));
+              } else {
+                setFuelLogsState([f, ...fuelLogsState]);
+              }
+            }
+            setEditTarget(null); setAddingFuel(false);
+          }}
+        />
+      )}
+      {addingMaint && (
+        <AddMaintForm
+          vehicleId={vehicleId}
+          editItem={editTarget && editTarget.type === "maintenance" ? editTarget.data : null}
+          onDone={(m) => {
+            if (m) {
+              if (editTarget && editTarget.type === "maintenance") {
+                setMaintsState(maintsState.map((x) => (x.id === m.id ? m : x)));
+              } else {
+                setMaintsState([m, ...maintsState]);
+              }
+            }
+            setEditTarget(null); setAddingMaint(false);
+          }}
+        />
+      )}
 
       <div className="space-y-2">
         {timeline.length === 0 ? (
           <p className="text-xs text-zinc-500 text-center py-4">Sin eventos registrados. Agrega tu primera carga o mantenimiento.</p>
         ) : (
           timeline.slice(0, 10).map((item) => (
-            <div key={`${item.type}-${item.data.id}`} className={`bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3 border-l-2 ${item.type === "fuel" ? "border-l-amber-500" : "border-l-blue-500"}`}>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.type === "fuel" ? "bg-amber-500/10 border border-amber-500/20" : "bg-blue-500/10 border border-blue-500/20"}`}>
-                {item.type === "fuel" ? <Fuel className="w-5 h-5 text-amber-400" /> : <Wrench className="w-5 h-5 text-blue-400" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-zinc-100">
-                  {item.type === "fuel" ? (
-                    <>{volLabel((item.data as FuelLog).litros)} · {precioLabel((item.data as FuelLog).precio_por_galon)}{esGalon ? "/gal" : "/L"}</>
-                  ) : (
-                    <>{(item.data as MaintenanceLog).titulo}</>
-                  )}
-                </p>
-                <p className="text-[10px] text-zinc-500 flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  {new Date(item.data.fecha + "T12:00:00").toLocaleDateString("es-PE")}
-                  {item.type === "fuel" && ` · ${(item.data as FuelLog).odometro.toLocaleString("es-PE")} km`}
-                </p>
-              </div>
-              <span className="text-xs font-bold text-zinc-300 shrink-0">
-                {money(Math.round(
-                  item.type === "fuel"
-                    ? (item.data as FuelLog).precio_por_galon * ((item.data as FuelLog).litros / 3.78541)
-                    : (item.data as MaintenanceLog).costo || 0
-                ))}
-              </span>
-            </div>
+            <TimelineItemCard
+              key={`${item.type}-${item.data.id}`}
+              item={item}
+              esGalon={esGalon}
+              volLabel={volLabel}
+              precioLabel={precioLabel}
+              money={money}
+              onEdit={() => { setAddingFuel(item.type === "fuel"); setAddingMaint(item.type === "maintenance"); setEditTarget(item); }}
+              onDelete={async () => {
+                const conf = confirm(item.type === "fuel" ? "¿Eliminar esta carga?" : "¿Eliminar este servicio?");
+                if (!conf) return;
+                const supabase = createClient();
+                const table = item.type === "fuel" ? "fuel_logs" : "maintenance_logs";
+                const { error } = await supabase.from(table).delete().eq("id", item.data.id);
+                if (error) { alert("No se pudo eliminar."); return; }
+                if (item.type === "fuel") setFuelLogsState(fuelLogsState.filter((x) => x.id !== item.data.id));
+                else setMaintsState(maintsState.filter((x) => x.id !== item.data.id));
+              }}
+            />
           ))
         )}
       </div>
@@ -217,8 +241,86 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
   );
 }
 
+function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, onEdit, onDelete }: {
+  item: TimelineItem;
+  esGalon: boolean;
+  volLabel: (litros: number) => string;
+  precioLabel: (p: number) => string;
+  money: (n: number) => string;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div className={`bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3 border-l-2 ${item.type === "fuel" ? "border-l-amber-500" : "border-l-blue-500"}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.type === "fuel" ? "bg-amber-500/10 border border-amber-500/20" : "bg-blue-500/10 border border-blue-500/20"}`}>
+        {item.type === "fuel" ? <Fuel className="w-5 h-5 text-amber-400" /> : <Wrench className="w-5 h-5 text-blue-400" />}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-bold text-zinc-100">
+          {item.type === "fuel" ? (
+            <>{volLabel((item.data as FuelLog).litros)} · {precioLabel((item.data as FuelLog).precio_por_galon)}{esGalon ? "/gal" : "/L"}</>
+          ) : (
+            <>{(item.data as MaintenanceLog).titulo}</>
+          )}
+        </p>
+        <p className="text-[10px] text-zinc-500 flex items-center gap-1">
+          <Calendar className="w-3 h-3" />
+          {new Date(item.data.fecha + "T12:00:00").toLocaleDateString("es-PE")}
+          {item.type === "fuel" && ` · ${(item.data as FuelLog).odometro.toLocaleString("es-PE")} km`}
+        </p>
+      </div>
+      <span className="text-xs font-bold text-zinc-300 shrink-0">
+        {money(Math.round(
+          item.type === "fuel"
+            ? (item.data as FuelLog).precio_por_galon * ((item.data as FuelLog).litros / 3.78541)
+            : (item.data as MaintenanceLog).costo || 0
+        ))}
+      </span>
+      <div className="relative shrink-0" ref={menuRef}>
+        <button
+          type="button"
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.06] transition-colors"
+          aria-label="Opciones"
+        >
+          <MoreVertical className="w-4 h-4" />
+        </button>
+        {menuOpen && (
+          <div className="absolute z-30 right-0 mt-1 w-32 bg-zinc-800 border border-white/10 rounded-xl shadow-xl overflow-hidden">
+            <button
+              type="button"
+              onClick={() => { setMenuOpen(false); onEdit(); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-zinc-200 hover:bg-white/[0.06] transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" /> Editar
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMenuOpen(false); onDelete(); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-300 hover:bg-red-500/10 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Eliminar
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════ Forms ═══════════════════════ */
-function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: FuelLog | null) => void }) {
+function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editItem?: FuelLog | null; onDone: (f: FuelLog | null) => void }) {
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [form, setForm] = useState({ cantidad: "", precio_por_galon: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "90" });
   const [saving, setSaving] = useState(false);
@@ -227,9 +329,21 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
     getCurrentCountryCode().then((code) => {
       setCountryCode(code);
       const cfg = getCountryConfig(code);
-      setForm((f) => ({ ...f, tipo: cfg.fuelTypes[0]?.value || "90" }));
+      const esGalon = cfg.fuelUnit === "galon";
+      if (editItem) {
+        setForm({
+          cantidad: String(esGalon ? editItem.litros / GAL : editItem.litros),
+          precio_por_galon: String(esGalon ? editItem.precio_por_galon : editItem.precio_por_galon / GAL),
+          odometro: String(editItem.odometro || ""),
+          fecha: editItem.fecha,
+          tipo: editItem.tipo_combustible || (cfg.fuelTypes[0]?.value || "90"),
+        });
+      } else {
+        setForm((f) => ({ ...f, tipo: cfg.fuelTypes[0]?.value || "90" }));
+      }
     });
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editItem]);
 
   const cfg = getCountryConfig(countryCode);
   const esGalon = cfg.fuelUnit === "galon";
@@ -251,14 +365,23 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
 
     setSaving(true);
     const supabase = createClient();
-    const { data } = await supabase.from("fuel_logs").insert({
-      vehicle_id: vehicleId, litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo,
-    }).select().single();
+    let data: FuelLog | null = null;
+    if (editItem) {
+      const { data: d } = await supabase.from("fuel_logs").update({
+        litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo,
+      }).eq("id", editItem.id).select().single();
+      data = d as FuelLog | null;
+    } else {
+      const { data: d } = await supabase.from("fuel_logs").insert({
+        vehicle_id: vehicleId, litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo,
+      }).select().single();
+      data = d as FuelLog | null;
+    }
     if (data) {
       await supabase.from("vehicles").update({ kilometraje: o }).eq("id", vehicleId);
     }
     setSaving(false);
-    if (data) onDone(data as FuelLog);
+    if (data) onDone(data);
   };
 
   return (
@@ -277,33 +400,54 @@ function AddFuelForm({ vehicleId, onDone }: { vehicleId: string; onDone: (f: Fue
       <p className="text-[9px] text-zinc-500">Cantidad en {unidadLabel} · Precio por {precioUnit} ({cfg.currency})</p>
       <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
-        <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : "Guardar"}</button>
+        <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : editItem ? "Guardar cambios" : "Guardar"}</button>
         <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );
 }
 
-function AddMaintForm({ vehicleId, onDone }: { vehicleId: string; onDone: (m: MaintenanceLog | null) => void }) {
+function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; editItem?: MaintenanceLog | null; onDone: (m: MaintenanceLog | null) => void }) {
   const { symbol } = useMoney();
   const [form, setForm] = useState({ tipo: "preventivo", titulo: "", costo: "", odometro: "", taller: "", fecha: new Date().toISOString().split("T")[0] });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (editItem) {
+      setForm({
+        tipo: editItem.tipo || "preventivo",
+        titulo: editItem.titulo || "",
+        costo: editItem.costo != null ? String(editItem.costo) : "",
+        odometro: editItem.odometro != null ? String(editItem.odometro) : "",
+        taller: editItem.taller || "",
+        fecha: editItem.fecha,
+      });
+    }
+  }, [editItem]);
 
   const handleSubmit = async () => {
     if (!form.titulo) return;
     setSaving(true);
     const supabase = createClient();
-    const { data } = await supabase.from("maintenance_logs").insert({
-      vehicle_id: vehicleId, tipo: form.tipo, titulo: form.titulo,
+    const payload = {
+      tipo: form.tipo, titulo: form.titulo,
       costo: form.costo ? parseFloat(form.costo) : null,
       odometro: form.odometro ? parseInt(form.odometro) : null,
       taller: form.taller || null, fecha: form.fecha,
-    }).select().single();
+    };
+    let data: MaintenanceLog | null = null;
+    if (editItem) {
+      const { data: d } = await supabase.from("maintenance_logs").update(payload).eq("id", editItem.id).select().single();
+      data = d as MaintenanceLog | null;
+    } else {
+      const { data: d } = await supabase.from("maintenance_logs").insert({ ...payload, vehicle_id: vehicleId }).select().single();
+      data = d as MaintenanceLog | null;
+    }
     if (data && form.odometro) {
       await supabase.from("vehicles").update({ kilometraje: parseInt(form.odometro) }).eq("id", vehicleId);
     }
     setSaving(false);
-    if (data) onDone(data as MaintenanceLog);
+    if (data) onDone(data);
   };
 
   return (
@@ -321,7 +465,7 @@ function AddMaintForm({ vehicleId, onDone }: { vehicleId: string; onDone: (m: Ma
       </div>
       <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
-        <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">Guardar</button>
+        <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : editItem ? "Guardar cambios" : "Guardar"}</button>
         <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
