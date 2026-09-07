@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { COUNTRIES, getCountryConfig } from "@/lib/countries";
+import { useMoney } from "@/lib/money";
 import type { Profile, Vehicle } from "@/types/database";
 import { User, Plus, Pencil, Trash2, Car } from "lucide-react";
 
@@ -16,6 +17,7 @@ interface Props {
 
 export default function ProfileClient({ userId, profile, vehicles: initialVehicles }: Props) {
   const router = useRouter();
+  const { money } = useMoney();
   const [vehicles, setVehicles] = useState(initialVehicles);
   const [editingProfile, setEditingProfile] = useState(false);
   const [form, setForm] = useState({
@@ -153,18 +155,27 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
             {vehicles.map((v) => (
               <div key={v.id} className="flex items-center justify-between bg-zinc-800 rounded-xl p-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0 border border-white/10">
-                    <Car className="w-5 h-5 text-zinc-500" />
+                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-zinc-800 border border-white/10 flex items-center justify-center shrink-0">
+                    {v.foto_url ? (
+                      <img src={v.foto_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <Car className="w-6 h-6 text-zinc-500" />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-zinc-200 truncate">{v.marca} {v.modelo}</p>
                     <p className="text-[10px] text-zinc-500">{v.año} · {v.placa} · {v.kilometraje.toLocaleString("es-PE")} km</p>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                      v.estado === "activo" ? "bg-emerald-500/10 text-emerald-400" :
-                      v.estado === "en venta" ? "bg-amber-500/10 text-amber-400" :
-                      v.estado === "robado" ? "bg-red-500/10 text-red-400" :
-                      "bg-zinc-800 text-zinc-500"
-                    }`}>{v.estado === "robado" ? "robado" : v.estado}</span>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      {v.precio != null && (
+                        <span className="text-[10px] font-bold text-auto-400">{money(v.precio)}</span>
+                      )}
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                        v.estado === "activo" ? "bg-emerald-500/10 text-emerald-400" :
+                        v.estado === "en venta" ? "bg-amber-500/10 text-amber-400" :
+                        v.estado === "robado" ? "bg-red-500/10 text-red-400" :
+                        "bg-zinc-800 text-zinc-500"
+                      }`}>{v.estado === "robado" ? "robado" : v.estado}</span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">

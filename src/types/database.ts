@@ -208,6 +208,11 @@ export interface VehicleUpgrade {
   fecha_vencimiento: string | null;   // fin de vida útil
   ciclo: "tiempo" | "km" | null;
   duracion_km: number | null;
+  tipo_componente: string | null;     // catálogo de repuestos (ej. bateria, llantas, filtro_aceite)
+  marca: string | null;
+  proveedor: string | null;
+  odometro: number | null;            // km al momento de la compra
+  notas: string | null;
   foto_url: string | null;
   created_at: string;
 }

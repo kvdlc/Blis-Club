@@ -18,7 +18,7 @@ export const CHART = {
 export const CATEGORIA_COLOR: Record<string, { color: string; soft: string; label: string }> = {
   combustible: { color: CHART.amber, soft: CHART.amberSoft, label: "Combustible" },
   mantenimiento: { color: CHART.violet, soft: CHART.violetSoft, label: "Mantenimiento" },
-  mejoras: { color: CHART.blue, soft: CHART.blueSoft, label: "Mejoras" },
+  mejoras: { color: CHART.blue, soft: CHART.blueSoft, label: "Repuestos/Accesorios" },
   rendimiento: { color: CHART.teal, soft: CHART.tealSoft, label: "Rendimiento" },
   eficiencia: { color: CHART.emerald, soft: CHART.emeraldSoft, label: "Eficiencia" },
   tramites: { color: CHART.orange, soft: CHART.orangeSoft, label: "Trámites" },

@@ -21,7 +21,7 @@ const actions = [
   {
     key: "accesorios",
     icon: Sparkles,
-    label: "Accesorios",
+    label: "Repuestos",
     color: "bg-blue-500/15 text-blue-300 border border-blue-500/25",
     href: "/auto/app/bitacora?add=upgrade",
   },

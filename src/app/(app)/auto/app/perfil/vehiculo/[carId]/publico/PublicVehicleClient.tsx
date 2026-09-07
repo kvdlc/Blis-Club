@@ -50,8 +50,12 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
             className="ml-auto text-[10px] font-bold text-auto-500 hover:underline">Ver perfil →</a>
         </div>
 
-        <div className="h-32 bg-zinc-800 rounded-xl flex items-center justify-center mb-3">
-          <Car className="w-10 h-10 text-zinc-500" />
+        <div className="h-32 bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center mb-3">
+          {vehicle.foto_url ? (
+            <img src={vehicle.foto_url} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <Car className="w-10 h-10 text-zinc-500" />
+          )}
         </div>
         <p className="text-sm font-bold text-zinc-200 text-center">{vehicle.marca} {vehicle.modelo}</p>
         <p className="text-xs text-zinc-500 text-center">{vehicle.año} · {vehicle.kilometraje.toLocaleString("es-PE")} km</p>

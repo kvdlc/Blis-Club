@@ -58,8 +58,8 @@ export function RecentExpenses({ fuelLogs, maintenances, upgrades }: Props) {
       tipo: "upgrade" as const,
       fecha: u.fecha,
       monto: u.costo || 0,
-      titulo: u.nombre || "Mejora",
-      detalle: "Accesorio / mejora",
+      titulo: u.nombre || "Repuesto / accesorio",
+      detalle: "Repuesto / compra",
     })),
   ].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 

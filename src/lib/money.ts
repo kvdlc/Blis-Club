@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getCountryConfig } from "@/lib/countries";
 
 /* ═══════════════════════ Monedas ═══════════════════════ */
 
@@ -45,7 +46,7 @@ export function getCurrencySymbol(code: string): string {
   return (CURRENCIES[code] ?? CURRENCIES.PEN).symbol;
 }
 
-/** Devuelve la moneda del usuario logueado (default PEN). */
+/** Devuelve la moneda del usuario logueado según su país (default PEN). */
 export async function getCurrentCurrency(): Promise<string> {
   try {
     const supabase = createClient();
@@ -54,7 +55,9 @@ export async function getCurrentCurrency(): Promise<string> {
     const { data } = await supabase.from("profiles").select("currency, country").eq("id", user.id).single();
     const p = data as { currency: string | null; country: string | null } | null;
     if (p?.currency) return p.currency;
-    return p?.country === "MX" ? "MXN" : p?.country === "CO" ? "COP" : p?.country === "CL" ? "CLP" : p?.country === "AR" ? "ARS" : "PEN";
+    // Derivar de la moneda configurada por país (Ecuador → USD, etc.)
+    if (p?.country) return getCountryConfig(p.country).currency;
+    return "PEN";
   } catch {
     return "PEN";
   }

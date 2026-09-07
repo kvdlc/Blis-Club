@@ -8,6 +8,7 @@ import { uploadAutoPhoto } from "@/lib/storage";
 import type { Vehicle, VehicleSpecs } from "@/types/database";
 import { SpecsSection } from "@/app/(app)/auto/app/guantera/GuanteraClient";
 import { ArrowLeft, Upload, Check, HelpCircle, Shield, Tag, AlertTriangle, EyeOff } from "lucide-react";
+import { useMoney } from "@/lib/money";
 
 type VehicleEstado = "activo" | "en venta" | "robado" | "vendido";
 
@@ -42,6 +43,7 @@ function Tip({ text }: { text: string }) {
 
 export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { userId: string; vehicle: Vehicle; initialSpecs: VehicleSpecs | null }) {
   const router = useRouter();
+  const { symbol } = useMoney();
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [estado, setEstado] = useState<VehicleEstado>(vehicle.estado as VehicleEstado || "activo");
@@ -153,12 +155,15 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
 
         <div className="block">
           <div className="flex items-center gap-1 text-xs font-bold text-zinc-500">
-            Precio de compra
+            Precio de compra ({symbol})
             <Tip text="Cuánto pagaste cuando compraste el vehículo. Se usa para calcular depreciación, costo por kilómetro real y financiamiento. Si no lo recuerdas, revisa tu factura o contrato de compra." />
           </div>
-          <input type="number" min={0} step="0.01" value={form.precio}
-            onChange={(e) => setForm({ ...form, precio: e.target.value })}
-            placeholder="Ej: 45000" className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+          <div className="relative mt-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-500">{symbol}</span>
+            <input type="number" min={0} step="0.01" value={form.precio}
+              onChange={(e) => setForm({ ...form, precio: e.target.value })}
+              placeholder="45000" className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+          </div>
         </div>
 
         <label className="block">

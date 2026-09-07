@@ -273,7 +273,7 @@ export function serieKm(fuelLogs: FuelLog[], start: string, end: string): SerieP
   return [
     { name: "Combustible", value: Math.round(combustible), color: CHART.amber },
     { name: "Mantenimiento", value: Math.round(mantenimiento), color: CHART.violet },
-    { name: "Mejoras", value: Math.round(mejoras), color: CHART.blue },
+    { name: "Repuestos/Accesorios", value: Math.round(mejoras), color: CHART.blue },
   ].filter((x) => x.value >= 0) as { name: string; value: number; color: string }[];
 }
 

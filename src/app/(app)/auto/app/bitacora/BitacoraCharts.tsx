@@ -65,7 +65,7 @@ export function BitacoraCharts({ fuelLogs, maintenances, upgrades }: Props) {
           <BarCompare stacked data={mensual} series={[
             { key: "combustible", label: "Combustible", color: CHART.amber },
             { key: "mantenimiento", label: "Mantenimiento", color: CHART.violet },
-            { key: "mejoras", label: "Mejoras", color: CHART.blue },
+            { key: "mejoras", label: "Repuestos/Accesorios", color: CHART.blue },
           ]} />
         ) : (
           <EmptyPrompt emoji="📊" texto="Registra gastos para comparar por período." />

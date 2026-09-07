@@ -7,13 +7,13 @@ import { getCountryConfig, getCurrentCountryCode } from "@/lib/countries";
 import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade } from "@/types/database";
 import {
   ChevronDown, Gauge, Droplets, Wrench, ShoppingBag, Shield, FileDown,
-  Plus, Trash2, X, RotateCw, TrendingUp, BarChart3, Fuel, ScrollText,
-  Sparkles, CheckCircle2, Circle, AlertTriangle, Calendar,
-  Palette, Smartphone, Zap, Armchair, Pin, Ban, MoreVertical, Pencil,
+  Trash2, X, RotateCw, Fuel, ScrollText, CheckCircle2, AlertTriangle, Calendar,
+  MoreVertical, Pencil, Store,
 } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { BitacoraCharts } from "./BitacoraCharts";
 import { useMoney } from "@/lib/money";
+import { PART_PRODUCTS, partProduct, PART_CATEGORIA_LABEL } from "@/lib/auto-parts";
 
 /* ═══════════════════════════ Tipos y datos ═══════════════════════ */
 const maintTypes = [
@@ -25,34 +25,10 @@ const maintTypes = [
   { value: "otro", label: "Otro", icon: "📌" },
 ];
 
-const maintIconMap: Record<string, React.ReactNode> = {
-  "🛢️": <Droplets className="w-3.5 h-3.5 text-amber-500" />,
-  "🔧": <Wrench className="w-3.5 h-3.5 text-auto-500" />,
-  "🛠️": <Wrench className="w-3.5 h-3.5 text-amber-400" />,
-  "🧽": <Droplets className="w-3.5 h-3.5 text-blue-400" />,
-  "🔍": <Gauge className="w-3.5 h-3.5 text-violet-400" />,
-  "📌": <Pin className="w-3.5 h-3.5 text-zinc-500" />,
-};
-
-const upgradeCats = [
-  { value: "estetico", label: "Estético", icon: "🎨" },
-  { value: "tecnologico", label: "Tecnológico", icon: "📱" },
-  { value: "performance", label: "Performance", icon: "⚡" },
-  { value: "seguridad", label: "Seguridad", icon: "🛡️" },
-  { value: "confort", label: "Confort", icon: "🛋️" },
-  { value: "otro", label: "Otro", icon: "📌" },
-];
-
-const upgradeIconMap: Record<string, React.ReactNode> = {
-  "🎨": <Palette className="w-3.5 h-3.5 inline text-violet-400" />,
-  "📱": <Smartphone className="w-3.5 h-3.5 inline text-blue-400" />,
-  "⚡": <Zap className="w-3.5 h-3.5 inline text-amber-400" />,
-  "🛡️": <Shield className="w-3.5 h-3.5 inline text-emerald-400" />,
-  "🛋️": <Armchair className="w-3.5 h-3.5 inline text-orange-400" />,
-  "📌": <Pin className="w-3.5 h-3.5 inline text-zinc-500" />,
-};
-
-type TimelineItem = { type: "fuel"; data: FuelLog } | { type: "maintenance"; data: MaintenanceLog };
+type TimelineItem =
+  | { type: "fuel"; data: FuelLog }
+  | { type: "maintenance"; data: MaintenanceLog }
+  | { type: "part"; data: VehicleUpgrade };
 
 interface Props {
   userId: string;
@@ -62,11 +38,49 @@ interface Props {
   upgrades: VehicleUpgrade[];
 }
 
+const GAL = 3.78541;
+const MESES_LARGO = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+/** Suma el costo de un evento en la moneda local. */
+function eventCost(item: TimelineItem): number {
+  if (item.type === "fuel") {
+    const f = item.data as FuelLog;
+    return f.precio_por_galon * (f.litros / GAL);
+  }
+  if (item.type === "maintenance") return (item.data as MaintenanceLog).costo || 0;
+  return (item.data as VehicleUpgrade).costo || 0;
+}
+
+function itemFecha(item: TimelineItem): string {
+  return item.data.fecha;
+}
+
+function itemLabel(item: TimelineItem): string {
+  if (item.type === "fuel") {
+    const f = item.data as FuelLog;
+    const tipo = f.tipo_combustible ? ` (${f.tipo_combustible})` : "";
+    return `Combustible${tipo}`;
+  }
+  if (item.type === "maintenance") return (item.data as MaintenanceLog).titulo || "Mantenimiento";
+  const u = item.data as VehicleUpgrade;
+  return u.nombre || "Repuesto / accesorio";
+}
+
+function itemIcon(item: TimelineItem) {
+  if (item.type === "fuel") return { icon: <Fuel className="w-5 h-5 text-amber-400" />, chip: "bg-amber-500/10 border border-amber-500/20", border: "border-l-amber-500" };
+  if (item.type === "maintenance") {
+    const m = item.data as MaintenanceLog;
+    const esAceite = m.tipo === "cambio_aceite";
+    return { icon: esAceite ? <Droplets className="w-5 h-5 text-amber-400" /> : <Wrench className="w-5 h-5 text-blue-400" />, chip: esAceite ? "bg-amber-500/10 border border-amber-500/20" : "bg-blue-500/10 border border-blue-500/20", border: esAceite ? "border-l-amber-500" : "border-l-blue-500" };
+  }
+  return { icon: <ShoppingBag className="w-5 h-5 text-violet-400" />, chip: "bg-violet-500/10 border border-violet-500/20", border: "border-l-violet-500" };
+}
+
 export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances, upgrades }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const [addToOpen] = useState(() => searchParams.get("add") || "");
+
   useEffect(() => {
     const add = searchParams.get("add");
     if (add) router.replace(window.location.pathname, { scroll: false });
@@ -96,10 +110,10 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
         </div>
       </div>
 
-      <TimelineSection fuelLogs={fuelLogs} maintenances={maintenances} vehicleId={vehicle.id} />
+      <TimelineSection fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} vehicleId={vehicle.id} />
+      <PartsSection vehicleId={vehicle.id} initialParts={upgrades} />
       <BitacoraCharts fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} />
       <WarrantySection vehicle={vehicle} maintenances={maintenances} />
-      <UpgradesSection vehicleId={vehicle.id} initialUpgrades={upgrades} defaultAdding={addToOpen === "upgrade"} />
       <TireRotationSection />
       <CarfaxExportSection vehicle={vehicle} fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} />
     </div>
@@ -107,8 +121,8 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
 }
 
 /* ═══════════════════════════ 1. Línea de Tiempo ═══════════════════════ */
-function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
-  fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; vehicleId: string;
+function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId }: {
+  fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; upgrades: VehicleUpgrade[]; vehicleId: string;
 }) {
   const { money } = useMoney();
   const router = useRouter();
@@ -116,9 +130,12 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [addingFuel, setAddingFuel] = useState(false);
   const [addingMaint, setAddingMaint] = useState(false);
+  const [addingPart, setAddingPart] = useState(false);
   const [editTarget, setEditTarget] = useState<TimelineItem | null>(null);
   const [fuelLogsState, setFuelLogsState] = useState(fuelLogs);
   const [maintsState, setMaintsState] = useState(maintenances);
+  const [partsState, setPartsState] = useState(upgrades);
+  const [visible, setVisible] = useState(3);
 
   useEffect(() => { getCurrentCountryCode().then((c) => setCountryCode(c)); }, []);
 
@@ -127,21 +144,63 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
     const add = searchParams.get("add");
     if (add === "fuel") setAddingFuel(true);
     else if (add === "maint") setAddingMaint(true);
-    if (add) {
-      const url = window.location.pathname;
-      router.replace(url, { scroll: false });
-    }
+    else if (add === "upgrade" || add === "part") setAddingPart(true);
+    if (add) router.replace(window.location.pathname, { scroll: false });
   }, [searchParams, router]);
 
   const esGalon = getCountryConfig(countryCode).fuelUnit === "galon";
-  const GAL = 3.78541;
   const volLabel = (litros: number) => esGalon ? `${(litros / GAL).toFixed(2)} gal` : `${litros} L`;
   const precioLabel = (p: number) => esGalon ? money(p) : money(p / GAL);
 
   const timeline: TimelineItem[] = [
     ...fuelLogsState.map((f) => ({ type: "fuel" as const, data: f })),
     ...maintsState.map((m) => ({ type: "maintenance" as const, data: m })),
+    ...partsState.map((u) => ({ type: "part" as const, data: u })),
   ].sort((a, b) => new Date(b.data.fecha).getTime() - new Date(a.data.fecha).getTime());
+
+  // Agrupar por mes (yyyy-MM) y calcular total mensual sobre TODOS los eventos de cada mes
+  const months: { key: string; label: string; total: number; items: TimelineItem[] }[] = [];
+  const monthMap = new Map<string, TimelineItem[]>();
+  for (const it of timeline) {
+    const key = itemFecha(it).slice(0, 7);
+    if (!monthMap.has(key)) monthMap.set(key, []);
+    monthMap.get(key)!.push(it);
+  }
+  for (const [key, items] of monthMap) {
+    const [y, m] = key.split("-").map(Number);
+    const label = `${MESES_LARGO[(m || 1) - 1]} ${y}`;
+    const total = items.reduce((s, it) => s + eventCost(it), 0);
+    months.push({ key, label, total, items });
+  }
+  // Meses más recientes primero
+  months.sort((a, b) => (a.key < b.key ? 1 : -1));
+
+  const closeForms = () => {
+    setAddingFuel(false); setAddingMaint(false); setAddingPart(false); setEditTarget(null);
+  };
+
+  const deleteItem = async (item: TimelineItem) => {
+    const conf = confirm(item.type === "fuel" ? "¿Eliminar esta carga?" : item.type === "maintenance" ? "¿Eliminar este servicio?" : "¿Eliminar este repuesto?");
+    if (!conf) return;
+    const table = item.type === "fuel" ? "fuel_logs" : item.type === "maintenance" ? "maintenance_logs" : "vehicle_upgrades";
+    const { error } = await createClient().from(table).delete().eq("id", item.data.id);
+    if (error) { alert("No se pudo eliminar."); return; }
+    if (item.type === "fuel") setFuelLogsState(fuelLogsState.filter((x) => x.id !== item.data.id));
+    else if (item.type === "maintenance") setMaintsState(maintsState.filter((x) => x.id !== item.data.id));
+    else setPartsState(partsState.filter((x) => x.id !== item.data.id));
+  };
+
+  // Conteo visible: recorre meses hasta sumar `visible` eventos
+  const shown: { month: typeof months[number]; items: TimelineItem[] }[] = [];
+  let acc = 0;
+  for (const month of months) {
+    if (acc >= visible) break;
+    const take = month.items.slice(0, Math.max(0, visible - acc));
+    if (take.length > 0) shown.push({ month, items: take });
+    acc += take.length;
+  }
+  const totalVisibleEvents = shown.reduce((s, m) => s + m.items.length, 0);
+  const hasMore = totalVisibleEvents < timeline.length;
 
   return (
     <div className="space-y-3">
@@ -152,93 +211,128 @@ function TimelineSection({ fuelLogs, maintenances, vehicleId }: {
       </div>
 
       {/* Botones grandes de registro */}
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={() => { setEditTarget(null); setAddingFuel(!addingFuel || !!editTarget); setAddingMaint(false); }}
-          className={`flex flex-col items-center gap-1.5 rounded-2xl px-4 py-4 border transition-all active:scale-[0.98] ${
-            addingFuel
-              ? "bg-amber-500/20 border-amber-500/40"
-              : "bg-amber-500/10 border-amber-500/25 hover:bg-amber-500/20"
-          }`}
-        >
-          <Fuel className="w-6 h-6 text-amber-400" />
-          <span className="text-xs font-extrabold text-zinc-100">{editTarget && editTarget.type === "fuel" ? "Editar carga" : "Cargar combustible"}</span>
-          <span className="text-[10px] text-zinc-500">Registra una carga</span>
+      <div className="grid grid-cols-3 gap-2">
+        <button type="button"
+          onClick={() => { setEditTarget(null); setAddingFuel(true); setAddingMaint(false); setAddingPart(false); }}
+          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addingFuel ? "bg-amber-500/20 border-amber-500/40" : "bg-amber-500/10 border-amber-500/25 hover:bg-amber-500/20"}`}>
+          <Fuel className="w-5 h-5 text-amber-400" />
+          <span className="text-[10px] font-extrabold text-zinc-100 text-center leading-tight">{editTarget && editTarget.type === "fuel" ? "Editar carga" : "Cargar combustible"}</span>
         </button>
-        <button
-          onClick={() => { setEditTarget(null); setAddingMaint(!addingMaint || !!editTarget); setAddingFuel(false); }}
-          className={`flex flex-col items-center gap-1.5 rounded-2xl px-4 py-4 border transition-all active:scale-[0.98] ${
-            addingMaint
-              ? "bg-blue-500/20 border-blue-500/40"
-              : "bg-blue-500/10 border-blue-500/25 hover:bg-blue-500/20"
-          }`}
-        >
-          <Wrench className="w-6 h-6 text-blue-400" />
-          <span className="text-xs font-extrabold text-zinc-100">{editTarget && editTarget.type === "maintenance" ? "Editar servicio" : "Registrar servicio"}</span>
-          <span className="text-[10px] text-zinc-500">Mantenimiento u otro</span>
+        <button type="button"
+          onClick={() => { setEditTarget(null); setAddingMaint(true); setAddingFuel(false); setAddingPart(false); }}
+          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addingMaint ? "bg-blue-500/20 border-blue-500/40" : "bg-blue-500/10 border-blue-500/25 hover:bg-blue-500/20"}`}>
+          <Wrench className="w-5 h-5 text-blue-400" />
+          <span className="text-[10px] font-extrabold text-zinc-100 text-center leading-tight">{editTarget && editTarget.type === "maintenance" ? "Editar servicio" : "Registrar servicio"}</span>
+        </button>
+        <button type="button"
+          onClick={() => { setEditTarget(null); setAddingPart(true); setAddingFuel(false); setAddingMaint(false); }}
+          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addingPart ? "bg-violet-500/20 border-violet-500/40" : "bg-violet-500/10 border-violet-500/25 hover:bg-violet-500/20"}`}>
+          <ShoppingBag className="w-5 h-5 text-violet-400" />
+          <span className="text-[10px] font-extrabold text-zinc-100 text-center leading-tight">Registrar repuesto</span>
         </button>
       </div>
 
-      {addingFuel && (
-        <AddFuelForm
-          vehicleId={vehicleId}
-          editItem={editTarget && editTarget.type === "fuel" ? editTarget.data : null}
-          onDone={(f) => {
-            if (f) {
-              if (editTarget && editTarget.type === "fuel") {
-                setFuelLogsState(fuelLogsState.map((x) => (x.id === f.id ? f : x)));
-              } else {
-                setFuelLogsState([f, ...fuelLogsState]);
-              }
-            }
-            setEditTarget(null); setAddingFuel(false);
-          }}
-        />
-      )}
-      {addingMaint && (
-        <AddMaintForm
-          vehicleId={vehicleId}
-          editItem={editTarget && editTarget.type === "maintenance" ? editTarget.data : null}
-          onDone={(m) => {
-            if (m) {
-              if (editTarget && editTarget.type === "maintenance") {
-                setMaintsState(maintsState.map((x) => (x.id === m.id ? m : x)));
-              } else {
-                setMaintsState([m, ...maintsState]);
-              }
-            }
-            setEditTarget(null); setAddingMaint(false);
-          }}
-        />
-      )}
+      {(addingFuel || addingMaint || addingPart) && (
+        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold text-auto-400">
+              {addingFuel ? (editTarget && editTarget.type === "fuel" ? "✏️ Editar carga" : "⛽ Nueva carga") :
+               addingMaint ? (editTarget && editTarget.type === "maintenance" ? "✏️ Editar servicio" : "🔧 Nuevo servicio") :
+               (editTarget && editTarget.type === "part" ? "✏️ Editar repuesto" : "🛒 Nuevo repuesto / accesorio")}
+            </p>
+            <button type="button" onClick={closeForms} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500"><X className="w-3.5 h-3.5" /></button>
+          </div>
 
-      <div className="space-y-2">
-        {timeline.length === 0 ? (
-          <p className="text-xs text-zinc-500 text-center py-4">Sin eventos registrados. Agrega tu primera carga o mantenimiento.</p>
-        ) : (
-          timeline.slice(0, 10).map((item) => (
-            <TimelineItemCard
-              key={`${item.type}-${item.data.id}`}
-              item={item}
-              esGalon={esGalon}
-              volLabel={volLabel}
-              precioLabel={precioLabel}
-              money={money}
-              onEdit={() => { setAddingFuel(item.type === "fuel"); setAddingMaint(item.type === "maintenance"); setEditTarget(item); }}
-              onDelete={async () => {
-                const conf = confirm(item.type === "fuel" ? "¿Eliminar esta carga?" : "¿Eliminar este servicio?");
-                if (!conf) return;
-                const supabase = createClient();
-                const table = item.type === "fuel" ? "fuel_logs" : "maintenance_logs";
-                const { error } = await supabase.from(table).delete().eq("id", item.data.id);
-                if (error) { alert("No se pudo eliminar."); return; }
-                if (item.type === "fuel") setFuelLogsState(fuelLogsState.filter((x) => x.id !== item.data.id));
-                else setMaintsState(maintsState.filter((x) => x.id !== item.data.id));
+          {addingFuel && (
+            <AddFuelForm
+              vehicleId={vehicleId}
+              editItem={editTarget && editTarget.type === "fuel" ? editTarget.data : null}
+              onDone={(f) => {
+                if (f) {
+                  if (editTarget && editTarget.type === "fuel") setFuelLogsState(fuelLogsState.map((x) => (x.id === f.id ? f : x)));
+                  else setFuelLogsState([f, ...fuelLogsState]);
+                }
+                closeForms();
               }}
             />
-          ))
-        )}
-      </div>
+          )}
+          {addingMaint && (
+            <AddMaintForm
+              vehicleId={vehicleId}
+              editItem={editTarget && editTarget.type === "maintenance" ? editTarget.data : null}
+              onDone={(m) => {
+                if (m) {
+                  if (editTarget && editTarget.type === "maintenance") setMaintsState(maintsState.map((x) => (x.id === m.id ? m : x)));
+                  else setMaintsState([m, ...maintsState]);
+                }
+                closeForms();
+              }}
+            />
+          )}
+          {addingPart && (
+            <AddPartForm
+              vehicleId={vehicleId}
+              editItem={editTarget && editTarget.type === "part" ? editTarget.data : null}
+              onDone={(p) => {
+                if (p) {
+                  if (editTarget && editTarget.type === "part") setPartsState(partsState.map((x) => (x.id === p.id ? p : x)));
+                  else setPartsState([p, ...partsState]);
+                }
+                closeForms();
+              }}
+            />
+          )}
+        </div>
+      )}
+
+      {timeline.length === 0 ? (
+        <p className="text-xs text-zinc-500 text-center py-4">Sin eventos registrados. Agrega tu primera carga, servicio o repuesto.</p>
+      ) : (
+        <div className="space-y-4">
+          {shown.map(({ month, items }) => (
+            <div key={month.key}>
+              {/* Separador de mes con total */}
+              <div className="flex items-center gap-2 mb-1.5">
+                <p className="text-[11px] font-extrabold text-zinc-400 uppercase tracking-wide">{month.label}</p>
+                {month.total > 0 && (
+                  <span className="text-[10px] font-bold text-auto-400 bg-auto-500/10 border border-auto-500/20 px-2 py-0.5 rounded-full ml-auto tabular-nums">
+                    {money(Math.round(month.total))}
+                  </span>
+                )}
+              </div>
+              <div className="space-y-2">
+                {items.map((item) => (
+                  <TimelineItemCard
+                    key={`${item.type}-${item.data.id}`}
+                    item={item}
+                    esGalon={esGalon}
+                    volLabel={volLabel}
+                    precioLabel={precioLabel}
+                    money={money}
+                    onEdit={() => {
+                      setEditTarget(item);
+                      setAddingFuel(item.type === "fuel");
+                      setAddingMaint(item.type === "maintenance");
+                      setAddingPart(item.type === "part");
+                    }}
+                    onDelete={() => deleteItem(item)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {hasMore && (
+            <button
+              type="button"
+              onClick={() => setVisible((v) => v + 10)}
+              className="w-full py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-[11px] font-bold text-auto-400 hover:bg-white/[0.08] transition-colors flex items-center justify-center gap-1.5"
+            >
+              <ChevronDown className="w-3.5 h-3.5" /> Ver más ({timeline.length - totalVisibleEvents} restantes)
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -263,67 +357,137 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, onEdit,
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const st = itemIcon(item);
+
+  let detail: string = "";
+  if (item.type === "fuel") {
+    const f = item.data as FuelLog;
+    detail = `${f.odometro.toLocaleString("es-PE")} km`;
+  } else if (item.type === "maintenance") {
+    const m = item.data as MaintenanceLog;
+    detail = m.odometro != null ? `${m.odometro.toLocaleString("es-PE")} km` : "";
+    if (m.km_proximo != null) {
+      detail += detail ? ` · próximo cambio ${m.km_proximo.toLocaleString("es-PE")} km` : `Próximo cambio ${m.km_proximo.toLocaleString("es-PE")} km`;
+    }
+  } else {
+    const u = item.data as VehicleUpgrade;
+    const prod = partProduct(u.tipo_componente || "");
+    detail = prod ? prod.emoji + " " + (PART_CATEGORIA_LABEL[u.categoria] || "") : PART_CATEGORIA_LABEL[u.categoria] || "";
+    if (u.odometro != null) detail += detail ? ` · ${u.odometro.toLocaleString("es-PE")} km` : `${u.odometro.toLocaleString("es-PE")} km`;
+    if (u.ciclo === "km" && u.duracion_km) detail += ` · dura ${u.duracion_km.toLocaleString("es-PE")} km`;
+    else if (u.fecha_vencimiento) detail += ` · vence ${new Date(u.fecha_vencimiento + "T12:00:00").toLocaleDateString("es-PE")}`;
+  }
+
   return (
-    <div className={`bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3 border-l-2 ${item.type === "fuel" ? "border-l-amber-500" : "border-l-blue-500"}`}>
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.type === "fuel" ? "bg-amber-500/10 border border-amber-500/20" : "bg-blue-500/10 border border-blue-500/20"}`}>
-        {item.type === "fuel" ? <Fuel className="w-5 h-5 text-amber-400" /> : <Wrench className="w-5 h-5 text-blue-400" />}
-      </div>
+    <div className={`bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3 border-l-2 ${st.border}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${st.chip}`}>{st.icon}</div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-bold text-zinc-100">
-          {item.type === "fuel" ? (
-            <>{volLabel((item.data as FuelLog).litros)} · {precioLabel((item.data as FuelLog).precio_por_galon)}{esGalon ? "/gal" : "/L"}</>
-          ) : (
-            <>{(item.data as MaintenanceLog).titulo}</>
-          )}
+          {itemLabel(item)}
+          {item.type === "fuel" && <> · {volLabel((item.data as FuelLog).litros)} {esGalon ? `/gal @ ${precioLabel((item.data as FuelLog).precio_por_galon)}` : ` @ ${precioLabel((item.data as FuelLog).precio_por_galon)}/L`}</>}
         </p>
-        <p className="text-[10px] text-zinc-500 flex items-center gap-1">
-          <Calendar className="w-3 h-3" />
+        <p className="text-[10px] text-zinc-500 flex items-center gap-1 truncate">
+          <Calendar className="w-3 h-3 shrink-0" />
           {new Date(item.data.fecha + "T12:00:00").toLocaleDateString("es-PE")}
-          {item.type === "fuel" && ` · ${(item.data as FuelLog).odometro.toLocaleString("es-PE")} km`}
-          {item.type === "maintenance" && (item.data as MaintenanceLog).odometro != null && ` · ${(item.data as MaintenanceLog).odometro?.toLocaleString("es-PE")} km`}
+          {detail && <span className="truncate"> · {detail}</span>}
         </p>
-        {item.type === "maintenance" && (item.data as MaintenanceLog).km_proximo != null && (
-          <p className={`text-[9px] font-bold mt-0.5 ${(item.data as MaintenanceLog).km_proximo! <= ((item.data as MaintenanceLog).odometro || 0) ? "text-red-400" : "text-amber-400"}`}>
-            🛢️ Próx. cambio: {((item.data as MaintenanceLog).km_proximo as number).toLocaleString("es-PE")} km
-          </p>
-        )}
       </div>
-      <span className="text-xs font-bold text-zinc-300 shrink-0">
-        {money(Math.round(
-          item.type === "fuel"
-            ? (item.data as FuelLog).precio_por_galon * ((item.data as FuelLog).litros / 3.78541)
-            : (item.data as MaintenanceLog).costo || 0
-        ))}
-      </span>
+      <span className="text-xs font-bold text-zinc-300 shrink-0">{money(Math.round(eventCost(item)))}</span>
       <div className="relative shrink-0" ref={menuRef}>
-        <button
-          type="button"
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.06] transition-colors"
-          aria-label="Opciones"
-        >
+        <button type="button" onClick={() => setMenuOpen(!menuOpen)}
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.06] transition-colors" aria-label="Opciones">
           <MoreVertical className="w-4 h-4" />
         </button>
         {menuOpen && (
           <div className="absolute z-30 right-0 mt-1 w-32 bg-zinc-800 border border-white/10 rounded-xl shadow-xl overflow-hidden">
-            <button
-              type="button"
-              onClick={() => { setMenuOpen(false); onEdit(); }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-zinc-200 hover:bg-white/[0.06] transition-colors"
-            >
+            <button type="button" onClick={() => { setMenuOpen(false); onEdit(); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-zinc-200 hover:bg-white/[0.06] transition-colors">
               <Pencil className="w-3.5 h-3.5" /> Editar
             </button>
-            <button
-              type="button"
-              onClick={() => { setMenuOpen(false); onDelete(); }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-300 hover:bg-red-500/10 transition-colors"
-            >
+            <button type="button" onClick={() => { setMenuOpen(false); onDelete(); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-300 hover:bg-red-500/10 transition-colors">
               <Trash2 className="w-3.5 h-3.5" /> Eliminar
             </button>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+/* ═══════════════════════════ 2. Repuestos y Accesorios ═══════════════════════ */
+function PartsSection({ vehicleId, initialParts }: { vehicleId: string; initialParts: VehicleUpgrade[] }) {
+  const { money } = useMoney();
+  const [parts, setParts] = useState(initialParts);
+
+  const refreshPart = (p: VehicleUpgrade) => setParts(parts.map((x) => (x.id === p.id ? p : x)));
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+          <Store className="w-4 h-4 text-auto-500" /> Repuestos y Accesorios
+        </h2>
+        <span className="text-[10px] font-bold text-zinc-500 bg-white/[0.06] px-2 py-0.5 rounded-full">{parts.length}</span>
+      </div>
+
+      {parts.length === 0 ? (
+        <p className="text-xs text-zinc-500 text-center py-4">Registra la compra de baterías, llantas, pastillas, etc. para llevar su vida útil y gasto.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {parts.map((u) => {
+            const prod = partProduct(u.tipo_componente || "");
+            return (
+              <div key={u.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0 text-lg">
+                  {prod ? prod.emoji : "🛒"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-zinc-100 truncate">{u.nombre}</p>
+                  <p className="text-[10px] text-zinc-500 truncate">
+                    {prod ? prod.label : PART_CATEGORIA_LABEL[u.categoria] || ""}
+                    {u.marca ? ` · ${u.marca}` : ""}
+                    {u.odometro != null ? ` · ${u.odometro.toLocaleString("es-PE")} km` : ""}
+                  </p>
+                  <p className="text-[10px] text-zinc-500 truncate">
+                    {new Date(u.fecha + "T12:00:00").toLocaleDateString("es-PE")}
+                    {u.ciclo === "km" && u.duracion_km ? ` · dura ${u.duracion_km.toLocaleString("es-PE")} km` : ""}
+                    {u.fecha_vencimiento ? ` · vence ${new Date(u.fecha_vencimiento + "T12:00:00").toLocaleDateString("es-PE")}` : ""}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <span className="text-xs font-bold text-auto-500">{u.costo ? money(u.costo) : "—"}</span>
+                  <PartEditButton vehicleId={vehicleId} part={u} onSaved={refreshPart} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PartEditButton({ vehicleId, part, onSaved }: { vehicleId: string; part: VehicleUpgrade; onSaved: (p: VehicleUpgrade) => void }) {
+  const [open, setOpen] = useState(false);
+  if (!open) {
+    return (
+      <div className="flex items-center gap-0.5">
+        <button type="button" onClick={() => setOpen(true)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-auto-300" title="Editar">
+          <Pencil className="w-3 h-3" />
+        </button>
+        <button type="button" onClick={async () => {
+          if (!confirm("¿Eliminar este repuesto?")) return;
+          const { error } = await createClient().from("vehicle_upgrades").delete().eq("id", part.id);
+          if (!error) window.location.reload();
+        }} className="w-6 h-6 rounded-md hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500" title="Eliminar">
+          <Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+    );
+  }
+  return (
+    <AddPartForm vehicleId={vehicleId} editItem={part} onDone={(p) => { setOpen(false); if (p) onSaved(p); }} />
   );
 }
 
@@ -357,17 +521,13 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
   const esGalon = cfg.fuelUnit === "galon";
   const unidadLabel = esGalon ? "galones" : "litros";
   const unidadShort = esGalon ? "gal" : "L";
-  // El precio local es por la unidad del país (galón o litro). Canonizamos a precio por galón.
   const precioUnit = esGalon ? "galón" : "litro";
-  const GAL = 3.78541;
 
   const handleSubmit = async () => {
-    const cant = parseFloat(form.cantidad); // en unidad local (gal o L)
+    const cant = parseFloat(form.cantidad);
     const precioLocal = parseFloat(form.precio_por_galon);
     const o = parseInt(form.odometro);
     if (!cant || !precioLocal || !o) return;
-
-    // Canonizar a litros y precio por galón
     const litros = esGalon ? cant * GAL : cant;
     const precioPorGalon = esGalon ? precioLocal : precioLocal * GAL;
 
@@ -385,18 +545,14 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
       }).select().single();
       data = d as FuelLog | null;
     }
-    if (data) {
-      await supabase.from("vehicles").update({ kilometraje: o }).eq("id", vehicleId);
-    }
+    if (data) await supabase.from("vehicles").update({ kilometraje: o }).eq("id", vehicleId);
     setSaving(false);
     if (data) onDone(data);
   };
 
   return (
-    <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2 border border-amber-500/20">
-      <p className="text-[10px] font-bold text-zinc-400">
-        Unidad: {esGalon ? "Estás en un país de galones" : "Estás en un país de litros"} · ingresa en {unidadLabel}
-      </p>
+    <div className="space-y-2">
+      <p className="text-[10px] font-bold text-zinc-400">Unidad: {esGalon ? "galones" : "litros"} · el precio es por {precioUnit}</p>
       <div className="grid grid-cols-4 gap-1.5">
         <input type="number" step="0.1" value={form.cantidad} onChange={(e) => setForm({ ...form, cantidad: e.target.value })} placeholder={unidadShort} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
         <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder={`${cfg.currency}/${unidadShort}`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
@@ -405,11 +561,9 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
           {cfg.fuelTypes.map((ft) => <option key={ft.value} value={ft.value}>{ft.label}</option>)}
         </select>
       </div>
-      <p className="text-[9px] text-zinc-500">Cantidad en {unidadLabel} · Precio por {precioUnit} ({cfg.currency})</p>
       <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
-        <button onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : editItem ? "Guardar cambios" : "Guardar"}</button>
-        <button onClick={() => onDone(null!)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
+        <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-2 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : editItem ? "Guardar cambios" : "Guardar"}</button>
       </div>
     </div>
   );
@@ -438,13 +592,9 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
 
   const handleTipo = (tipo: string) => {
     setForm((f) => ({
-      ...f,
-      tipo,
-      // Al elegir cambio de aceite, autocompletar el título y sugerir km de vencimiento
+      ...f, tipo,
       titulo: tipo === "cambio_aceite" && !editItem ? "Cambio de aceite" : f.titulo,
-      ...(tipo === "cambio_aceite" && !f.km_proximo && f.odometro
-        ? { km_proximo: String(parseInt(f.odometro || "0") + 5000) }
-        : {}),
+      ...(tipo === "cambio_aceite" && !f.km_proximo && f.odometro ? { km_proximo: String(parseInt(f.odometro || "0") + 5000) } : {}),
     }));
   };
 
@@ -468,15 +618,13 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
       const { data: d } = await supabase.from("maintenance_logs").insert({ ...payload, vehicle_id: vehicleId }).select().single();
       data = d as MaintenanceLog | null;
     }
-    if (data && form.odometro) {
-      await supabase.from("vehicles").update({ kilometraje: parseInt(form.odometro) }).eq("id", vehicleId);
-    }
+    if (data && form.odometro) await supabase.from("vehicles").update({ kilometraje: parseInt(form.odometro) }).eq("id", vehicleId);
     setSaving(false);
     if (data) onDone(data);
   };
 
   return (
-    <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2 border border-blue-500/20">
+    <div className="space-y-2">
       <div className="grid grid-cols-2 gap-1.5">
         <select value={form.tipo} onChange={(e) => handleTipo(e.target.value)} className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
           {maintTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
@@ -485,34 +633,23 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
       </div>
 
       {esAceite ? (
-        <>
-          {/* Cambio de aceite: fecha, km de cambio y km de vencimiento */}
-          <div className="rounded-xl bg-zinc-800/60 border border-amber-500/20 p-2.5 space-y-2">
-            <p className="text-[10px] font-bold text-amber-400 flex items-center gap-1"><Droplets className="w-3 h-3" /> Cambio de aceite</p>
-            <div className="grid grid-cols-2 gap-1.5">
-              <label className="block">
-                <span className="text-[9px] font-bold text-zinc-500">Fecha del cambio</span>
-                <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
-              </label>
-              <label className="block">
-                <span className="text-[9px] font-bold text-zinc-500">Km en el cambio</span>
-                <input type="number" value={form.odometro} onChange={(e) => {
-                  const od = e.target.value;
-                  setForm((f) => ({
-                    ...f, odometro: od,
-                    ...(!f.km_proximo && od ? { km_proximo: String(parseInt(od || "0") + 5000) } : {}),
-                  }));
-                }} placeholder="Ej: 45000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-              </label>
-            </div>
-            <label className="block">
-              <span className="text-[9px] font-bold text-zinc-500">Próximo cambio a los (km)</span>
-              <input type="number" value={form.km_proximo} onChange={(e) => setForm({ ...form, km_proximo: e.target.value })}
-                placeholder="Ej: 50000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <div className="rounded-xl bg-zinc-800/60 border border-amber-500/20 p-2.5 space-y-2">
+          <p className="text-[10px] font-bold text-amber-400 flex items-center gap-1"><Droplets className="w-3 h-3" /> Cambio de aceite</p>
+          <div className="grid grid-cols-2 gap-1.5">
+            <label className="block"><span className="text-[9px] font-bold text-zinc-500">Fecha del cambio</span>
+              <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
             </label>
-            <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título (opcional)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            <label className="block"><span className="text-[9px] font-bold text-zinc-500">Km en el cambio</span>
+              <input type="number" value={form.odometro} onChange={(e) => {
+                const od = e.target.value;
+                setForm((f) => ({ ...f, odometro: od, ...(!f.km_proximo && od ? { km_proximo: String(parseInt(od || "0") + 5000) } : {}) }));
+              }} placeholder="Ej: 45000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            </label>
           </div>
-        </>
+          <label className="block"><span className="text-[9px] font-bold text-zinc-500">Próximo cambio a los (km)</span>
+            <input type="number" value={form.km_proximo} onChange={(e) => setForm({ ...form, km_proximo: e.target.value })} placeholder="Ej: 50000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          </label>
+        </div>
       ) : (
         <>
           <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
@@ -526,13 +663,168 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
 
       <div className="flex gap-1.5">
         <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-2 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : editItem ? "Guardar cambios" : esAceite ? "Registrar cambio de aceite" : "Guardar"}</button>
-        <button type="button" onClick={() => onDone(null!)} className="px-3 py-2 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );
 }
 
-/* ═══════════════════════════ 2. Gráficos Financieros ═══════════════════════ */
+/* Formulario de repuesto/accesorio con catálogo de producto */
+function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editItem?: VehicleUpgrade | null; onDone: (p: VehicleUpgrade | null) => void }) {
+  const { symbol } = useMoney();
+  const [saving, setSaving] = useState(false);
+
+  const [form, setForm] = useState({
+    tipo_componente: editItem?.tipo_componente || "",
+    nombre: editItem?.nombre || "",
+    categoria: editItem?.categoria || "estetico",
+    marca: editItem?.marca || "",
+    proveedor: editItem?.proveedor || "",
+    costo: editItem?.costo != null ? String(editItem.costo) : "",
+    fecha: editItem?.fecha || new Date().toISOString().split("T")[0],
+    odometro: editItem?.odometro != null ? String(editItem.odometro) : "",
+    conKm: editItem?.ciclo === "km",
+    duracion_km: editItem?.duracion_km != null ? String(editItem.duracion_km) : "",
+    conVencimiento: !!editItem?.fecha_vencimiento,
+    fecha_vencimiento: editItem?.fecha_vencimiento || "",
+    notas: editItem?.notas || "",
+  });
+
+  const applyProduct = (value: string) => {
+    const prod = partProduct(value);
+    if (!prod) {
+      setForm((f) => ({ ...f, tipo_componente: value, categoria: "estetico" }));
+      return;
+    }
+    const next: typeof form = { ...form, tipo_componente: value, categoria: prod.categoria, nombre: editItem?.nombre || prod.label };
+    if (prod.vida) {
+      if (prod.vida.tipo === "km" && prod.vida.km) {
+        next.conKm = true;
+        next.duracion_km = String(prod.vida.km);
+        next.conVencimiento = false;
+        next.fecha_vencimiento = "";
+      } else if (prod.vida.tipo === "tiempo" && prod.vida.meses) {
+        next.conKm = false;
+        next.duracion_km = "";
+        next.conVencimiento = true;
+        const d = new Date(next.fecha + "T12:00:00");
+        d.setMonth(d.getMonth() + prod.vida.meses);
+        next.fecha_vencimiento = d.toISOString().slice(0, 10);
+      }
+    }
+    setForm(next);
+  };
+
+  const handleSubmit = async () => {
+    if (!form.nombre) return;
+    setSaving(true);
+    const supabase = createClient();
+    const payload = {
+      vehicle_id: vehicleId,
+      tipo_componente: form.tipo_componente || null,
+      nombre: form.nombre,
+      categoria: form.categoria,
+      marca: form.marca || null,
+      proveedor: form.proveedor || null,
+      costo: form.costo ? parseFloat(form.costo) : null,
+      fecha: form.fecha,
+      odometro: form.odometro ? parseInt(form.odometro) : null,
+      fecha_mantenimiento: null,
+      fecha_vencimiento: form.conVencimiento ? form.fecha_vencimiento || null : null,
+      ciclo: form.conKm ? "km" : (form.conVencimiento ? "tiempo" : null),
+      duracion_km: form.conKm && form.duracion_km ? parseInt(form.duracion_km) : null,
+      notas: form.notas || null,
+    };
+    let data: VehicleUpgrade | null = null;
+    if (editItem) {
+      const { data: d } = await supabase.from("vehicle_upgrades").update(payload).eq("id", editItem.id).select().single();
+      data = d as VehicleUpgrade | null;
+    } else {
+      const { data: d } = await supabase.from("vehicle_upgrades").insert(payload).select().single();
+      data = d as VehicleUpgrade | null;
+    }
+    setSaving(false);
+    if (data) onDone(data);
+  };
+
+  return (
+    <div className="space-y-2">
+      {/* Producto */}
+      <label className="block">
+        <span className="text-[10px] font-bold text-zinc-500">Producto</span>
+        <select value={form.tipo_componente} onChange={(e) => applyProduct(e.target.value)}
+          className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
+          <option value="">Selecciona el producto…</option>
+          {PART_PRODUCTS.map((p) => <option key={p.value} value={p.value}>{p.emoji} {p.label}</option>)}
+        </select>
+      </label>
+      {form.tipo_componente && partProduct(form.tipo_componente)?.descripcion && (
+        <p className="text-[9px] text-zinc-500">{partProduct(form.tipo_componente)?.descripcion} · {PART_CATEGORIA_LABEL[partProduct(form.tipo_componente)!.categoria]} · {partProduct(form.tipo_componente)?.tipoMantenimiento}</p>
+      )}
+
+      <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre del repuesto / accesorio" className="w-full px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+
+      <div className="grid grid-cols-2 gap-1.5">
+        <input value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} placeholder="Marca (ej: BOSCH)" className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <input value={form.proveedor} onChange={(e) => setForm({ ...form, proveedor: e.target.value })} placeholder="Proveedor / tienda" className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-1.5">
+        <label className="block"><span className="text-[9px] font-bold text-zinc-500">Costo ({symbol})</span>
+          <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`Ej: 450`} className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        </label>
+        <label className="block"><span className="text-[9px] font-bold text-zinc-500">Odómetro al comprar</span>
+          <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Ej: 45000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        </label>
+      </div>
+
+      <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => {
+        setForm((f) => {
+          const next = { ...f, fecha: d };
+          if (form.conVencimiento && form.tipo_componente) {
+            const prod = partProduct(form.tipo_componente);
+            if (prod?.vida?.tipo === "tiempo" && prod.vida.meses) {
+              const fecha = new Date(d + "T12:00:00");
+              fecha.setMonth(fecha.getMonth() + prod.vida.meses);
+              next.fecha_vencimiento = fecha.toISOString().slice(0, 10);
+            }
+          }
+          return next;
+        });
+      }} />
+
+      {/* Vida útil */}
+      <div className="space-y-1.5">
+        <div className="grid grid-cols-2 gap-1.5">
+          <label className="flex items-center gap-2 cursor-pointer text-[11px] text-zinc-300">
+            <input type="checkbox" checked={form.conKm} onChange={(e) => {
+              const on = e.target.checked;
+              setForm((f) => ({ ...f, conKm: on, conVencimiento: on ? false : f.conVencimiento, fecha_vencimiento: on ? "" : f.fecha_vencimiento }));
+            }} className="accent-auto-500" /> Duración por km
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-[11px] text-zinc-300">
+            <input type="checkbox" checked={form.conVencimiento} onChange={(e) => {
+              const on = e.target.checked;
+              setForm((f) => ({ ...f, conVencimiento: on, conKm: on ? false : f.conKm, duracion_km: on ? "" : f.duracion_km }));
+            }} className="accent-auto-500" /> Vence (fecha)
+          </label>
+        </div>
+        {form.conKm && (
+          <input type="number" min="0" value={form.duracion_km} onChange={(e) => setForm({ ...form, duracion_km: e.target.value })} placeholder="Duración en km (ej: 40000)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        )}
+        {form.conVencimiento && (
+          <DatePicker colorTheme="auto" value={form.fecha_vencimiento} onChange={(d) => setForm({ ...form, fecha_vencimiento: d })} />
+        )}
+      </div>
+
+      <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} placeholder="Notas (opcional)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+
+      <div className="flex gap-1.5">
+        <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-2.5 rounded-lg bg-auto-600 text-white text-sm font-bold">{saving ? "..." : editItem ? "Guardar cambios" : "Registrar repuesto"}</button>
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════ 3. Control de Garantía ═══════════════════════ */
 function WarrantySection({ vehicle, maintenances }: { vehicle: Vehicle; maintenances: MaintenanceLog[] }) {
   const garantiaKm = 60000;
@@ -575,144 +867,7 @@ function WarrantySection({ vehicle, maintenances }: { vehicle: Vehicle; maintena
   );
 }
 
-/* ═══════════════════════════ 4. Upgrades ═══════════════════════ */
-function UpgradesSection({ vehicleId, initialUpgrades, defaultAdding = false }: { vehicleId: string; initialUpgrades: VehicleUpgrade[]; defaultAdding?: boolean }) {
-  const { money, symbol } = useMoney();
-  const [upgrades, setUpgrades] = useState(initialUpgrades);
-  const [adding, setAdding] = useState(defaultAdding);
-  const [form, setForm] = useState({
-    categoria: "estetico", nombre: "", costo: "",
-    fecha: new Date().toISOString().split("T")[0],
-    conMantenimiento: false, fecha_mantenimiento: "",
-    conVencimiento: false, fecha_vencimiento: "",
-    conKm: false, duracion_km: "",
-  });
-  const [saving, setSaving] = useState(false);
-
-  const totalUpgrades = upgrades.reduce((sum, u) => sum + (u.costo || 0), 0);
-
-  const handleAdd = async () => {
-    if (!form.nombre) return;
-    setSaving(true);
-    const { data } = await createClient().from("vehicle_upgrades").insert({
-      vehicle_id: vehicleId, categoria: form.categoria, nombre: form.nombre,
-      costo: form.costo ? parseFloat(form.costo) : null, fecha: form.fecha,
-      fecha_mantenimiento: form.conMantenimiento ? form.fecha_mantenimiento || null : null,
-      fecha_vencimiento: form.conVencimiento ? form.fecha_vencimiento || null : null,
-      ciclo: form.conKm ? "km" : (form.conVencimiento ? "tiempo" : null),
-      duracion_km: form.conKm && form.duracion_km ? parseInt(form.duracion_km) : null,
-    }).select().single();
-    setSaving(false);
-    if (data) {
-      setUpgrades([data as VehicleUpgrade, ...upgrades]);
-      setAdding(false);
-      setForm({ categoria: "estetico", nombre: "", costo: "", fecha: new Date().toISOString().split("T")[0], conMantenimiento: false, fecha_mantenimiento: "", conVencimiento: false, fecha_vencimiento: "", conKm: false, duracion_km: "" });
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    const { error } = await createClient().from("vehicle_upgrades").delete().eq("id", id);
-    if (!error) setUpgrades(upgrades.filter((u) => u.id !== id));
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-auto-500" /> Upgrades y Accesorios
-        </h2>
-        <button onClick={() => setAdding(!adding)} className="w-8 h-8 rounded-full bg-auto-600/10 border border-auto-600/20 flex items-center justify-center text-auto-500 hover:bg-auto-600/20 transition-colors">
-          <Plus className="w-4 h-4" />
-        </button>
-      </div>
-
-      {adding && (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
-          <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre del accesorio" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-          <div className="grid grid-cols-2 gap-1.5">
-            <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
-              {upgradeCats.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-            </select>
-            <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`${symbol} costo`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-          </div>
-
-          {/* Fecha de compra (siempre) */}
-          <label className="block"><span className="text-[10px] font-bold text-zinc-500">Fecha de compra</span>
-            <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
-          </label>
-
-          {/* Checkbox Mantenimiento */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={form.conMantenimiento} onChange={(e) => setForm({ ...form, conMantenimiento: e.target.checked })} className="accent-auto-500" />
-            <span className="text-[11px] text-zinc-300">Mantenimiento</span>
-          </label>
-          {form.conMantenimiento && (
-            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Fecha de próximo mantenimiento</span>
-              <DatePicker colorTheme="auto" value={form.fecha_mantenimiento} onChange={(d) => setForm({ ...form, fecha_mantenimiento: d })} />
-            </label>
-          )}
-
-          {/* Checkbox Vencimiento */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={form.conVencimiento} onChange={(e) => setForm({ ...form, conVencimiento: e.target.checked })} className="accent-auto-500" />
-            <span className="text-[11px] text-zinc-300">Vencimiento (vida útil)</span>
-          </label>
-          {form.conVencimiento && (
-            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Fecha de vencimiento</span>
-              <DatePicker colorTheme="auto" value={form.fecha_vencimiento} onChange={(d) => setForm({ ...form, fecha_vencimiento: d })} />
-            </label>
-          )}
-
-          {/* Checkbox Por km */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={form.conKm} onChange={(e) => setForm({ ...form, conKm: e.target.checked })} className="accent-auto-500" />
-            <span className="text-[11px] text-zinc-300">Duración por kilómetros</span>
-          </label>
-          {form.conKm && (
-            <input type="number" min="0" value={form.duracion_km} onChange={(e) => setForm({ ...form, duracion_km: e.target.value })} placeholder="Ej: 40000 km" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-          )}
-
-          <div className="flex gap-1.5">
-            <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">Guardar</button>
-            <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-2">
-        {upgrades.length === 0 && !adding && (
-          <p className="text-xs text-zinc-500 text-center py-4 col-span-2">No hay upgrades registrados</p>
-        )}
-        {upgrades.map((u) => {
-          const cat = upgradeCats.find((c) => c.value === u.categoria);
-          const vidaLabel = u.ciclo === "km" && u.duracion_km ? ` · ${u.duracion_km.toLocaleString("es-PE")} km` : (u.fecha_vencimiento ? ` · vence ${new Date(u.fecha_vencimiento + "T12:00:00").toLocaleDateString("es-PE")}` : "");
-          const mantLabel = u.fecha_mantenimiento ? ` · mant. ${new Date(u.fecha_mantenimiento + "T12:00:00").toLocaleDateString("es-PE")}` : "";
-          return (
-            <div key={u.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex flex-col gap-1.5">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-auto-600/10 border border-auto-600/20 flex items-center justify-center">
-                  {upgradeIconMap[cat?.icon || "📌"]}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-zinc-100 truncate">{u.nombre}</p>
-                  <p className="text-[10px] text-zinc-500">{cat?.label} · {new Date(u.fecha + "T12:00:00").toLocaleDateString("es-PE")}{vidaLabel}{mantLabel}</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-auto-500">{u.costo ? money(u.costo) : "—"}</span>
-                <button onClick={() => handleDelete(u.id)} className="w-6 h-6 rounded-lg hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500 transition-colors">
-                  <Trash2 className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════ 5. Rotación de Neumáticos ═══════════════════════ */
+/* ═══════════════════════════ 4. Rotación de Neumáticos ═══════════════════════ */
 function TireRotationSection() {
   type Position = "DI" | "DD" | "TI" | "TD";
   const initial: Record<Position, string> = { DI: "A", DD: "B", TI: "C", TD: "D" };
@@ -725,7 +880,6 @@ function TireRotationSection() {
     setTires(newTires);
     localStorage.setItem("blis_tire_positions", JSON.stringify(newTires));
   };
-
   const reset = () => {
     setTires({ ...initial });
     localStorage.setItem("blis_tire_positions", JSON.stringify(initial));
@@ -754,9 +908,7 @@ function TireRotationSection() {
           <button onClick={rotate} className="flex-1 py-2.5 rounded-xl bg-auto-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-auto-500 transition-colors">
             <RotateCw className="w-3.5 h-3.5" /> Rotar (cruzado)
           </button>
-          <button onClick={reset} className="px-4 py-2.5 rounded-xl bg-zinc-800 text-zinc-500 text-xs font-medium hover:bg-zinc-800 transition-colors">
-            Reiniciar
-          </button>
+          <button onClick={reset} className="px-4 py-2.5 rounded-xl bg-zinc-800 text-zinc-500 text-xs font-medium hover:bg-zinc-800 transition-colors">Reiniciar</button>
         </div>
         <p className="text-[10px] text-zinc-500 text-center">Patrón: TI → DI → DD → TD → TI</p>
       </div>
@@ -775,21 +927,18 @@ function TireCircle({ label, name, color }: { label: string; name: string; color
   );
 }
 
-/* ═══════════════════════════ 6. Exportación Carfax ═══════════════════════ */
+/* ═══════════════════════════ 5. Exportación Carfax ═══════════════════════ */
 function CarfaxExportSection({ vehicle, fuelLogs, maintenances, upgrades }: {
   vehicle: Vehicle; fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; upgrades: VehicleUpgrade[];
 }) {
-  const totalEvents = fuelLogs.length + maintenances.length;
-
+  const totalEvents = fuelLogs.length + maintenances.length + upgrades.length;
   return (
     <div className="space-y-3">
       <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
         <FileDown className="w-4 h-4 text-auto-500" /> Reporte Carfax
       </h2>
       <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
-        <p className="text-xs text-zinc-500">
-          Genera un reporte PDF con todo el historial de mantenimientos, cargas de combustible y mejoras.
-        </p>
+        <p className="text-xs text-zinc-500">Genera un reporte PDF con todo el historial de mantenimientos, cargas, repuestos y mejoras.</p>
         <div className="grid grid-cols-3 gap-2">
           <div className="bg-zinc-800 rounded-xl p-2 text-center">
             <p className="text-lg font-black text-amber-400">{fuelLogs.length}</p>
@@ -801,15 +950,13 @@ function CarfaxExportSection({ vehicle, fuelLogs, maintenances, upgrades }: {
           </div>
           <div className="bg-zinc-800 rounded-xl p-2 text-center">
             <p className="text-lg font-black text-violet-400">{upgrades.length}</p>
-            <p className="text-[9px] text-zinc-500">Mejoras</p>
+            <p className="text-[9px] text-zinc-500">Repuestos</p>
           </div>
         </div>
-        <button
-          onClick={() => window.open("/auto/app/bitacora/carfax", "_blank")}
+        <button onClick={() => window.open("/auto/app/bitacora/carfax", "_blank")}
           className="w-full py-3 rounded-xl bg-auto-600 text-white text-sm font-bold flex items-center justify-center gap-2 hover:bg-auto-500 transition-colors disabled:opacity-50"
           disabled={totalEvents === 0}>
-          <FileDown className="w-4 h-4" />
-          Exportar reporte PDF
+          <FileDown className="w-4 h-4" /> Exportar reporte PDF
         </button>
       </div>
     </div>
