@@ -12,7 +12,7 @@ import {
   Palette, Smartphone, Zap, Armchair, Pin, Ban,
 } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
+import { BitacoraCharts } from "./BitacoraCharts";
 import { useMoney } from "@/lib/money";
 
 /* ═══════════════════════════ Tipos y datos ═══════════════════════ */
@@ -88,7 +88,7 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
       </div>
 
       <TimelineSection fuelLogs={fuelLogs} maintenances={maintenances} vehicleId={vehicle.id} />
-      <FinanceChartsSection fuelLogs={fuelLogs} maintenances={maintenances} />
+      <BitacoraCharts fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} />
       <WarrantySection vehicle={vehicle} maintenances={maintenances} />
       <UpgradesSection vehicleId={vehicle.id} initialUpgrades={upgrades} />
       <TireRotationSection />
@@ -269,184 +269,6 @@ function AddMaintForm({ vehicleId, onDone }: { vehicleId: string; onDone: (m: Ma
 }
 
 /* ═══════════════════════════ 2. Gráficos Financieros ═══════════════════════ */
-const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-
-function FinanceChartsSection({ fuelLogs, maintenances }: { fuelLogs: FuelLog[]; maintenances: MaintenanceLog[] }) {
-  const { money } = useMoney();
-  const [showRendimiento, setShowRendimiento] = useState(false);
-  const [showHeatmap, setShowHeatmap] = useState(false);
-  const [showProyeccion, setShowProyeccion] = useState(false);
-
-  const monthlyData = (() => {
-    const ahora = new Date();
-    const months: { key: string; label: string; combustible: number; mantenimiento: number }[] = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
-      months.push({ key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, label: MESES_CORTOS[d.getMonth()], combustible: 0, mantenimiento: 0 });
-    }
-    fuelLogs.forEach((f) => {
-      const m = `${new Date(f.fecha).getFullYear()}-${String(new Date(f.fecha).getMonth() + 1).padStart(2, "0")}`;
-      const entry = months.find((x) => x.key === m);
-      if (entry) entry.combustible += Math.round(f.precio_por_galon * (f.litros / 3.78541));
-    });
-    maintenances.forEach((m) => {
-      const key = `${new Date(m.fecha).getFullYear()}-${String(new Date(m.fecha).getMonth() + 1).padStart(2, "0")}`;
-      const entry = months.find((x) => x.key === key);
-      if (entry) entry.mantenimiento += Math.round(m.costo || 0);
-    });
-    return months;
-  })();
-
-  const gastoTotal = monthlyData.reduce((s, m) => s + m.combustible + m.mantenimiento, 0);
-
-  const rendimientoData = (() => {
-    if (fuelLogs.length < 2) return [];
-    const sorted = [...fuelLogs].sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
-    const puntos: { fecha: string; kmgal: number; odometro: number }[] = [];
-    for (let i = 1; i < sorted.length; i++) {
-      const km = sorted[i].odometro - sorted[i - 1].odometro;
-      const gal = sorted[i - 1].litros / 3.78541;
-      if (km > 0 && gal > 0) {
-        puntos.push({ fecha: new Date(sorted[i].fecha).toLocaleDateString("es-PE", { day: "numeric", month: "short" }), kmgal: Math.round(km / gal), odometro: sorted[i].odometro });
-      }
-    }
-    return puntos;
-  })();
-
-  const heatmapData = (() => {
-    const ahora = new Date();
-    const yearStart = new Date(ahora.getFullYear(), 0, 1);
-    const cells: { date: Date; gasto: number; level: number }[] = [];
-    const gastosPorFecha: Record<string, number> = {};
-    fuelLogs.forEach((f) => { gastosPorFecha[f.fecha] = (gastosPorFecha[f.fecha] || 0) + Math.round(f.precio_por_galon * (f.litros / 3.78541)); });
-    maintenances.forEach((m) => { gastosPorFecha[m.fecha] = (gastosPorFecha[m.fecha] || 0) + Math.round(m.costo || 0); });
-    const startDay = yearStart.getDay();
-    const mondayStart = startDay === 0 ? 6 : startDay - 1;
-    for (let d = -mondayStart; d < 365; d++) {
-      const date = new Date(ahora.getFullYear(), 0, d + 1);
-      const key = date.toISOString().split("T")[0];
-      const gasto = gastosPorFecha[key] || 0;
-      cells.push({ date, gasto, level: gasto === 0 ? 0 : gasto < 50 ? 1 : gasto < 150 ? 2 : gasto < 300 ? 3 : 4 });
-    }
-    return cells;
-  })();
-
-  const proyeccionAnual = (() => {
-    if (monthlyData.length === 0) return 0;
-    const recent = monthlyData.slice(-3);
-    const avg = recent.reduce((s, m) => s + m.combustible + m.mantenimiento, 0) / recent.length;
-    return Math.round(avg * 12);
-  })();
-
-  return (
-    <div className="space-y-3">
-      <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
-        <BarChart3 className="w-4 h-4 text-auto-500" /> Gráficos Financieros
-      </h2>
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-4">
-        {gastoTotal === 0 ? (
-          <p className="text-xs text-zinc-500 text-center py-4">Sin datos de gastos. Registra cargas y mantenimientos.</p>
-        ) : (
-          <>
-            <div>
-              <p className="text-[10px] font-extrabold text-zinc-500 mb-2">Gasto mensual (12 meses)</p>
-              <div className="h-44">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                    <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#a1a1aa" }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 9, fill: "#a1a1aa" }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)", fontSize: 11 }} />
-                    <Bar dataKey="combustible" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} name="Combustible" />
-                    <Bar dataKey="mantenimiento" stackId="a" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Mantenimiento" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <button onClick={() => setShowRendimiento(!showRendimiento)} className="w-full text-left py-2 border-t border-white/5">
-              <p className="text-[10px] font-extrabold text-zinc-500 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> Rendimiento histórico {rendimientoData.length > 0 ? `(${rendimientoData.length} puntos)` : ""}
-                <span className="ml-auto text-[9px] text-zinc-500">{showRendimiento ? "▲" : "▼"}</span>
-              </p>
-            </button>
-            {showRendimiento && rendimientoData.length > 0 && (
-              <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={rendimientoData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                    <XAxis dataKey="fecha" tick={{ fontSize: 8, fill: "#a1a1aa" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                    <YAxis tick={{ fontSize: 9, fill: "#a1a1aa" }} axisLine={false} tickLine={false} domain={["auto", "auto"]} />
-                    <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)", fontSize: 11 }} formatter={(v: number) => [`${v} km/gal`, "Rendimiento"]} />
-                    <Line type="monotone" dataKey="kmgal" stroke="#10b981" strokeWidth={2} dot={{ r: 2, fill: "#10b981" }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            <button onClick={() => setShowHeatmap(!showHeatmap)} className="w-full text-left py-2 border-t border-white/5">
-              <p className="text-[10px] font-extrabold text-zinc-500 flex items-center gap-1">
-                <BarChart3 className="w-3 h-3" /> Mapa de gasto anual <span className="ml-auto text-[9px] text-zinc-500">{showHeatmap ? "▲" : "▼"}</span>
-              </p>
-            </button>
-            {showHeatmap && (
-              <div>
-                <div className="flex gap-0.5 mb-1">
-                  {["L", "M", "X", "J", "V", "S", "D"].map((d, i) => (
-                    <span key={i} className="text-[8px] text-zinc-500 w-3.5 text-center">{d}</span>
-                  ))}
-                </div>
-                <div className="grid grid-cols-[repeat(53,1fr)] gap-[1px]">
-                  {heatmapData.map((cell, i) => (
-                    <div key={i} title={`${cell.date.toLocaleDateString("es-PE")}: ${money(cell.gasto)}`}
-                      className={`aspect-square rounded-[1px] ${
-                        cell.level === 0 ? "bg-zinc-800" : cell.level === 1 ? "bg-auto-200" : cell.level === 2 ? "bg-auto-500" : cell.level === 3 ? "bg-auto-600" : "bg-auto-700"
-                      }`} />
-                  ))}
-                </div>
-                <div className="flex items-center gap-2 mt-2 justify-center">
-                  <span className="text-[8px] text-zinc-500">Menos</span>
-                  {[0, 1, 2, 3, 4].map((l) => (
-                    <div key={l} className={`w-2.5 h-2.5 rounded-sm ${l === 0 ? "bg-zinc-800" : l === 1 ? "bg-auto-200" : l === 2 ? "bg-auto-500" : l === 3 ? "bg-auto-600" : "bg-auto-700"}`} />
-                  ))}
-                  <span className="text-[8px] text-zinc-500">Más</span>
-                </div>
-              </div>
-            )}
-
-            <button onClick={() => setShowProyeccion(!showProyeccion)} className="w-full text-left py-2 border-t border-white/5">
-              <p className="text-[10px] font-extrabold text-zinc-500 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> Proyección anual <span className="ml-auto text-[9px] text-zinc-500">{showProyeccion ? "▲" : "▼"}</span>
-              </p>
-            </button>
-            {showProyeccion && (
-              <div className="bg-auto-600/10 rounded-2xl p-3 border border-auto-600/20">
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="text-center">
-                    <p className="text-[10px] text-zinc-500">Gasto estimado</p>
-                    <p className="text-lg font-black text-auto-500">{money(proyeccionAnual)}</p>
-                    <p className="text-[9px] text-zinc-500">próximos 12 meses</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[10px] text-zinc-500">Por mes</p>
-                    <p className="text-lg font-black text-zinc-100">{money(Math.round(proyeccionAnual / 12))}</p>
-                    <p className="text-[9px] text-zinc-500">promedio proyectado</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[10px] text-zinc-500">Tendencia</p>
-                    <p className={`text-lg font-black ${proyeccionAnual > 0 ? "text-amber-400" : "text-zinc-500"}`}>{proyeccionAnual > 0 ? "→" : "—"}</p>
-                    <p className="text-[9px] text-zinc-500">basado en 3 meses</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
 /* ═══════════════════════════ 3. Control de Garantía ═══════════════════════ */
 function WarrantySection({ vehicle, maintenances }: { vehicle: Vehicle; maintenances: MaintenanceLog[] }) {
   const garantiaKm = 60000;

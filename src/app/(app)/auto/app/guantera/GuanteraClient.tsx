@@ -4,6 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getCatalogSpec, catalogSpecToVehicleSpecs, diffSpecsWithCatalog } from "@/lib/catalog";
+import { CHART } from "@/lib/chart-theme";
+import { ChartCard } from "@/components/charts/ChartCard";
+import { DonutBreakdown } from "@/components/charts/DonutBreakdown";
+import { KpiChip } from "@/components/charts/KpiChip";
+import { ShieldCheck, BadgeAlert } from "lucide-react";
 import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/types/database";
 import {
   FileText, Phone, Wrench, AlertTriangle, Plus, Trash2, X,
@@ -81,11 +86,54 @@ export default function GuanteraClient({ userId, vehicle, documents: initialDocs
         </div>
       </div>
 
+      <GuanteraInsights docs={initialDocs} contacts={initialContacts} />
       <DocumentsSection vehicleId={vehicle.id} initialDocs={initialDocs} />
       <ContactsSection vehicleId={vehicle.id} initialContacts={initialContacts} />
       <SpecsSection vehicleId={vehicle.id} catalogSpecId={vehicle.catalog_spec_id} initialSpecs={initialSpecs} />
       <WarningLightsSection />
     </div>
+  );
+}
+
+/* ═══════════════════════════ Vigencia (insights) ═══════════════════════ */
+function GuanteraInsights({ docs, contacts }: { docs: VehicleDocument[]; contacts: VehicleContact[] }) {
+  const hoy = new Date();
+  const diasHasta = (d: string) => Math.ceil((new Date(d + "T12:00:00").getTime() - hoy.getTime()) / (1000 * 3600 * 24));
+
+  let vigentes = 0, proximos = 0, vencidos = 0;
+  for (const d of docs) {
+    const dias = diasHasta(d.fecha_vencimiento);
+    if (dias < 0) vencidos++;
+    else if (dias <= 30) proximos++;
+    else vigentes++;
+  }
+
+  const donut = [
+    { name: "Vigentes", value: vigentes, color: CHART.emerald },
+    { name: "Próximos", value: proximos, color: CHART.orange },
+    { name: "Vencidos", value: vencidos, color: "#ef4444" },
+  ];
+  const total = docs.length;
+
+  return (
+    <ChartCard title="Estado de tus documentos" icon={<ShieldCheck className="w-3.5 h-3.5" />} accent={CHART.emerald}>
+      {total === 0 ? (
+        <div className="flex flex-col items-center py-3 gap-2">
+          <BadgeAlert className="w-6 h-6 text-zinc-500" />
+          <p className="text-xs text-zinc-500 text-center">Agrega SOAT, revisión técnica y póliza para vigilar su vencimiento aquí.</p>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3">
+          <DonutBreakdown data={donut} centerValue={`${total}`} centerLabel="docs" height={140} />
+          <div className="flex-1 grid grid-cols-2 gap-2">
+            <KpiChip icon={<ShieldCheck className="w-3.5 h-3.5" />} label="Vigentes" value={`${vigentes}`} color={CHART.emerald} soft={CHART.emeraldSoft} href="/auto/app/guantera" />
+            <KpiChip icon={<BadgeAlert className="w-3.5 h-3.5" />} label="Vencidos" value={`${vencidos}`} color="#ef4444" soft="rgba(239,68,68,0.15)" href="/auto/app/guantera" />
+            <KpiChip icon={<Phone className="w-3.5 h-3.5" />} label="Contactos" value={`${contacts.length}`} color={CHART.teal} soft={CHART.tealSoft} href="/auto/app/guantera" />
+            <KpiChip icon={<Wrench className="w-3.5 h-3.5" />} label="Aviso" value={proximos > 0 ? `${proximos}` : "—"} color={CHART.orange} soft={CHART.orangeSoft} href="/auto/app/guantera" />
+          </div>
+        </div>
+      )}
+    </ChartCard>
   );
 }
 

@@ -8,7 +8,7 @@ const actions = [
     key: "cargar-combustible",
     icon: Fuel,
     label: "Cargar combustible",
-    color: "bg-auto-600 text-white shadow-auto-glow",
+    color: "grad-emerald text-white shadow-auto-glow",
     href: "/auto/app/bitacora?add=fuel",
   },
   {

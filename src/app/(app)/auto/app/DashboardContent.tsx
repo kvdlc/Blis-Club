@@ -53,7 +53,7 @@ export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocE
         <HeroCard vehicle={vehicle} fuelLogs={fuelLogs} ecoScore={ecoScore} />
         <BlisbotCard vehicle={vehicle} fuelLogs={fuelLogs} documents={documents} maintenances={maintenances} upgrades={upgrades} specs={specs} />
         <QuickActions />
-        <DashboardWidgets vehicle={vehicle} ecoScore={ecoScore} nextDocExpiry={nextDocExpiry} fuelLogs={fuelLogs} maintenances={maintenances} specs={specs} badges={badges} />
+        <DashboardWidgets vehicle={vehicle} ecoScore={ecoScore} nextDocExpiry={nextDocExpiry} fuelLogs={fuelLogs} documents={documents} maintenances={maintenances} upgrades={upgrades} specs={specs} badges={badges} />
       </div>
     </div>
   );

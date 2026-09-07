@@ -1,4 +1,5 @@
 import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleUpgrade, VehicleSpecs } from "@/types/database";
+import { CHART } from "@/lib/chart-theme";
 
 export const GAL = 3.78541;
 
@@ -180,4 +181,95 @@ export function nivelGeneral(alertas: Alert[]): "ok" | "media" | "alta" {
   if (alertas.some((a) => a.nivel === "alta")) return "alta";
   if (alertas.length) return "media";
   return "ok";
+}
+
+/* ══════════════ Series por rango de fechas (para gráficas) ══════════════ */
+
+export interface SeriePoint { label: string; value: number; [k: string]: string | number; }
+
+function inRange(fecha: string, start: string, end: string): boolean {
+  return fecha >= start && fecha <= end;
+}
+
+function keyByBucket(fecha: string, granularity: "dia" | "semana" | "mes"): string {
+  const d = new Date(fecha + "T12:00:00");
+  if (granularity === "dia") return d.toISOString().slice(0, 10);
+  if (granularity === "semana") {
+    const m = new Date(d); m.setDate(m.getDate() - m.getDay()); return iso(m);
+  }
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function iso(d: Date): string { return d.toISOString().slice(0, 10); }
+
+function granularidadPara(rangoDias: number): "dia" | "semana" | "mes" {
+  if (rangoDias <= 14) return "dia";
+  if (rangoDias <= 90) return "semana";
+  return "mes";
+}
+
+const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+function labelFor(key: string, granularity: "dia" | "semana" | "mes"): string {
+  const d = new Date(key + "T12:00:00");
+  if (granularity === "dia") return `${d.getDate()}/${d.getMonth() + 1}`;
+  if (granularity === "semana") return `${d.getDate()}/${d.getMonth() + 1}`;
+  return `${MESES[d.getMonth()]}`;
+}
+
+/** Serie de gasto de combustible en el rango, agrupada según duración. */
+export function serieGasto(fuelLogs: FuelLog[], start: string, end: string): SeriePoint[] {
+  const dias = Math.max(1, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000));
+  const g = granularidadPara(dias);
+  const map = new Map<string, number>();
+  for (const f of fuelLogs) {
+    if (!inRange(f.fecha, start, end)) continue;
+    const k = keyByBucket(f.fecha, g);
+    map.set(k, (map.get(k) || 0) + (f.litros / GAL) * f.precio_por_galon);
+  }
+  return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([k, v]) => ({ label: labelFor(k, g), value: Math.round(v) }));
+}
+
+/** Serie de rendimiento (km/gal) en el rango, por carga. */
+export function serieRendimiento(fuelLogs: FuelLog[], start: string, end: string): SeriePoint[] {
+  const sorted = [...fuelLogs].filter((f) => inRange(f.fecha, start, end)).sort((a, b) => a.odometro - b.odometro);
+  const out: SeriePoint[] = [];
+  for (let i = 1; i < sorted.length; i++) {
+    const km = sorted[i].odometro - sorted[i - 1].odometro;
+    const gal = sorted[i - 1].litros / GAL;
+    if (km > 0 && gal > 0) {
+      const d = new Date(sorted[i].fecha + "T12:00:00");
+      out.push({ label: `${d.getDate()}/${d.getMonth() + 1}`, value: Math.round(km / gal) });
+    }
+  }
+  return out;
+}
+
+/** Composición de gasto por categoría en el rango. */
+export function desgloseCategorias(fuelLogs: FuelLog[], maintenances: MaintenanceLog[], upgrades: VehicleUpgrade[], start: string, end: string) {
+  const combustible = fuelLogs.filter((f) => inRange(f.fecha, start, end))
+    .reduce((s, f) => s + (f.litros / GAL) * f.precio_por_galon, 0);
+  const mantenimiento = maintenances.filter((m) => inRange(m.fecha, start, end))
+    .reduce((s, m) => s + (m.costo || 0), 0);
+  const mejoras = upgrades.filter((u) => inRange(u.fecha, start, end))
+    .reduce((s, u) => s + (u.costo || 0), 0);
+  return [
+    { name: "Combustible", value: Math.round(combustible), color: CHART.amber },
+    { name: "Mantenimiento", value: Math.round(mantenimiento), color: CHART.violet },
+    { name: "Mejoras", value: Math.round(mejoras), color: CHART.blue },
+  ].filter((x) => x.value >= 0) as { name: string; value: number; color: string }[];
+}
+
+/** Serie de gasto por mes (fuel+mantenimiento+mejoras) para bar chart comparativo. */
+export function serieMensual(fuelLogs: FuelLog[], maintenances: MaintenanceLog[], upgrades: VehicleUpgrade[], start: string, end: string): { label: string; combustible: number; mantenimiento: number; mejoras: number }[] {
+  const dias = Math.max(1, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000));
+  const g = granularidadPara(dias);
+  const map = new Map<string, { combustible: number; mantenimiento: number; mejoras: number }>();
+  const ensure = (k: string) => { if (!map.has(k)) map.set(k, { combustible: 0, mantenimiento: 0, mejoras: 0 }); return map.get(k)!; };
+  for (const f of fuelLogs) if (inRange(f.fecha, start, end)) ensure(keyByBucket(f.fecha, g)).combustible += (f.litros / GAL) * f.precio_por_galon;
+  for (const m of maintenances) if (inRange(m.fecha, start, end)) ensure(keyByBucket(m.fecha, g)).mantenimiento += (m.costo || 0);
+  for (const u of upgrades) if (inRange(u.fecha, start, end)) ensure(keyByBucket(u.fecha, g)).mejoras += (u.costo || 0);
+  return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([k, v]) => ({ label: labelFor(k, g), combustible: Math.round(v.combustible), mantenimiento: Math.round(v.mantenimiento), mejoras: Math.round(v.mejoras) }));
 }
