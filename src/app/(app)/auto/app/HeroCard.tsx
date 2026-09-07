@@ -47,11 +47,11 @@ export function HeroCard({ vehicle, fuelLogs }: Props) {
 
   return (
     <div className="relative overflow-hidden rounded-[1.75rem] bg-white/[0.06] border border-white/10">
-      {/* HUD corners */}
-      <span className="absolute top-2 left-2 w-5 h-5 border-t-2 border-l-2 border-auto-500/60 rounded-tl-md pointer-events-none" />
-      <span className="absolute top-2 right-2 w-5 h-5 border-t-2 border-r-2 border-auto-500/60 rounded-tr-md pointer-events-none" />
-      <span className="absolute bottom-2 left-2 w-5 h-5 border-b-2 border-l-2 border-auto-500/60 rounded-bl-md pointer-events-none" />
-      <span className="absolute bottom-2 right-2 w-5 h-5 border-b-2 border-r-2 border-auto-500/60 rounded-br-md pointer-events-none" />
+      {/* HUD corners — pegados al borde del contenedor, radio coherente */}
+      <span className="absolute top-0 left-0 w-9 h-9 border-t-2 border-l-2 border-auto-500/70 rounded-tl-[1.75rem] pointer-events-none" />
+      <span className="absolute top-0 right-0 w-9 h-9 border-t-2 border-r-2 border-auto-500/70 rounded-tr-[1.75rem] pointer-events-none" />
+      <span className="absolute bottom-0 left-0 w-9 h-9 border-b-2 border-l-2 border-auto-500/70 rounded-bl-[1.75rem] pointer-events-none" />
+      <span className="absolute bottom-0 right-0 w-9 h-9 border-b-2 border-r-2 border-auto-500/70 rounded-br-[1.75rem] pointer-events-none" />
 
       {/* carbon-ish top strip */}
       <div className="h-1.5 w-full bg-gradient-to-r from-auto-600 via-auto-400 to-auto-600 opacity-80" />
