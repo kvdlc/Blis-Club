@@ -7,6 +7,7 @@ import { HeroCard } from "./HeroCard";
 import BlisbotCard from "@/components/BlisbotCard";
 import { QuickActions } from "./QuickActions";
 import { DashboardWidgets } from "./DashboardWidgets";
+import { RecentExpenses } from "./RecentExpenses";
 
 interface Props {
   vehicle: Vehicle | null;
@@ -53,6 +54,7 @@ export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocE
         <HeroCard vehicle={vehicle} fuelLogs={fuelLogs} ecoScore={ecoScore} />
         <BlisbotCard vehicle={vehicle} fuelLogs={fuelLogs} documents={documents} maintenances={maintenances} upgrades={upgrades} specs={specs} />
         <QuickActions />
+        <RecentExpenses fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} />
         <DashboardWidgets vehicle={vehicle} ecoScore={ecoScore} nextDocExpiry={nextDocExpiry} fuelLogs={fuelLogs} documents={documents} maintenances={maintenances} upgrades={upgrades} specs={specs} badges={badges} />
       </div>
     </div>

@@ -109,12 +109,21 @@ export async function uploadMarketplacePhoto(file: File, listingId: string): Pro
 
 export async function uploadDocumentPhoto(file: File, vehicleId: string): Promise<string | null> {
   const supabase = createClient();
-  const compressed = await compressImage(file);
-  const fileName = `documentos/${vehicleId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.jpg`;
+  let blob: Blob;
+  let contentType: string;
+  try {
+    blob = await compressImage(file);
+    contentType = blob.type || file.type || "image/jpeg";
+  } catch {
+    blob = file;
+    contentType = file.type || "image/jpeg";
+  }
+  const ext = contentType.includes("png") ? "png" : "jpg";
+  const fileName = `documentos/${vehicleId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
 
   const { data, error } = await supabase.storage
     .from("auto-photos")
-    .upload(fileName, compressed, { upsert: true, contentType: "image/jpeg" });
+    .upload(fileName, blob, { upsert: true, contentType });
 
   if (error) {
     console.error("Upload document photo error:", error.message);

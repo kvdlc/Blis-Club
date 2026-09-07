@@ -14,7 +14,7 @@ import { DatePicker } from "@/components/DatePicker";
 import { ShieldCheck, BadgeAlert, MessageCircle } from "lucide-react";
 import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/types/database";
 import {
-  FileText, Phone, Wrench, AlertTriangle, Plus, Trash2, X, Upload, Eye,
+  FileText, Phone, Wrench, AlertTriangle, Plus, Trash2, X, Upload, Eye, Pencil,
   BadgeCheck, Settings, Circle, Droplet, Droplets, Battery, BatteryCharging, Thermometer, OctagonAlert, Fuel, RotateCw, Lock, Cog, Sun,
   Shield, ClipboardList, Anchor, Store, Building2, Pin, Zap,
   Calendar, Gauge, FlaskConical, Ruler, Layers, CircleDot, RefreshCcw, CircleOff, Lightbulb, Waves,
@@ -163,10 +163,17 @@ function GuanteraInsights({ docs, contacts }: { docs: VehicleDocument[]; contact
 function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initialDocs: VehicleDocument[] }) {
   const [docs, setDocs] = useState(initialDocs);
   const [adding, setAdding] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [form, setForm] = useState({ tipo: "seguro_obligatorio", fecha_emision: "", fecha_vencimiento: "", notas: "", imagen_url: "" });
   const [verDoc, setVerDoc] = useState<VehicleDocument | null>(null);
+
+  const resetForm = () => {
+    setForm({ tipo: "seguro_obligatorio", fecha_emision: "", fecha_vencimiento: "", notas: "", imagen_url: "" });
+    setUploadError(null);
+  };
 
   // Auto-vencimiento +1 año para tipos de ciclo anual
   const handleEmision = (tipo: string, fecha: string) => {
@@ -184,28 +191,64 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const url = await uploadDocumentPhoto(file, vehicleId);
-    if (url) setForm({ ...form, imagen_url: url });
-    setUploading(false);
+    setUploadError(null);
+    try {
+      const url = await uploadDocumentPhoto(file, vehicleId);
+      if (url) setForm({ ...form, imagen_url: url });
+      else setUploadError("No se pudo subir la imagen. Intenta con otra foto (JPG/PNG).");
+    } catch {
+      setUploadError("Error al procesar la imagen. Intenta con una foto más liviana.");
+    } finally {
+      setUploading(false);
+    }
     e.target.value = "";
   };
 
-  const handleAdd = async () => {
+  const startAdd = () => {
+    setEditId(null);
+    resetForm();
+    setAdding(true);
+  };
+
+  const startEdit = (doc: VehicleDocument) => {
+    setEditId(doc.id);
+    setForm({
+      tipo: doc.tipo,
+      fecha_emision: doc.fecha_emision || "",
+      fecha_vencimiento: doc.fecha_vencimiento,
+      notas: doc.notas || "",
+      imagen_url: doc.imagen_url || "",
+    });
+    setUploadError(null);
+    setAdding(true);
+  };
+
+  const cancelForm = () => {
+    setAdding(false);
+    setEditId(null);
+    resetForm();
+  };
+
+  const handleSave = async () => {
     if (!form.fecha_vencimiento) return;
     setSaving(true);
     const supabase = createClient();
-    const { data, error } = await supabase.from("vehicle_documents").insert({
-      vehicle_id: vehicleId, tipo: form.tipo, fecha_emision: form.fecha_emision || null, fecha_vencimiento: form.fecha_vencimiento, notas: form.notas || null, imagen_url: form.imagen_url || null,
-    }).select().single();
+    const payload = {
+      tipo: form.tipo, fecha_emision: form.fecha_emision || null, fecha_vencimiento: form.fecha_vencimiento, notas: form.notas || null, imagen_url: form.imagen_url || null,
+    };
+    const { data, error } = editId
+      ? await supabase.from("vehicle_documents").update(payload).eq("id", editId).select().single()
+      : await supabase.from("vehicle_documents").insert({ ...payload, vehicle_id: vehicleId }).select().single();
     setSaving(false);
     if (!error && data) {
-      setDocs([...docs, data as VehicleDocument]);
-      setAdding(false);
-      setForm({ tipo: "seguro_obligatorio", fecha_emision: "", fecha_vencimiento: "", notas: "", imagen_url: "" });
+      const saved = data as VehicleDocument;
+      setDocs(editId ? docs.map((d) => (d.id === saved.id ? saved : d)) : [...docs, saved]);
+      cancelForm();
     }
   };
 
   const handleDelete = async (id: string) => {
+    if (!confirm("¿Eliminar este documento?")) return;
     const supabase = createClient();
     const { error } = await supabase.from("vehicle_documents").delete().eq("id", id);
     if (!error) setDocs(docs.filter((d) => d.id !== id));
@@ -229,13 +272,14 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
         <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
           <BadgeCheck className="w-4 h-4 text-auto-500" /> Documentos Digitales
         </h2>
-        <button onClick={() => setAdding(!adding)} className="w-8 h-8 rounded-full bg-auto-600/10 border border-auto-600/20 flex items-center justify-center text-auto-500 hover:bg-auto-600/20 transition-colors">
-          <Plus className="w-4 h-4" />
+        <button onClick={() => adding ? cancelForm() : startAdd()} className="w-8 h-8 rounded-full bg-auto-600/10 border border-auto-600/20 flex items-center justify-center text-auto-500 hover:bg-auto-600/20 transition-colors">
+          {adding ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
         </button>
       </div>
 
       {adding && (
         <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
+          <p className="text-[10px] font-bold text-auto-400">{editId ? "✏️ Editando documento" : "Nuevo documento"}</p>
           <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
             className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs font-medium bg-zinc-800 text-zinc-200">
             {documentTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
@@ -260,13 +304,14 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
               <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" disabled={uploading} />
             </label>
             {form.imagen_url && <img src={form.imagen_url} alt="" className="mt-1 h-24 w-full object-cover rounded-lg" />}
+            {uploadError && <p className="text-[10px] text-red-400 mt-1">{uploadError}</p>}
           </label>
 
           <div className="flex gap-1.5">
-            <button onClick={handleAdd} disabled={saving || !form.fecha_vencimiento} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">
-              {saving ? "Guardando..." : "Guardar"}
+            <button onClick={handleSave} disabled={saving || !form.fecha_vencimiento} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">
+              {saving ? "Guardando..." : editId ? "Guardar cambios" : "Guardar"}
             </button>
-            <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs">
+            <button onClick={cancelForm} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -300,6 +345,9 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
                     <Eye className="w-4 h-4" />
                   </button>
                 )}
+                <button onClick={() => startEdit(doc)} className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-auto-300" title="Editar documento">
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${style.badge}`}>
                   {dias <= 0 ? "Vencido" : `${dias}d`}
                 </span>
