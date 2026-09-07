@@ -16,7 +16,7 @@ import { formatoRestante, diasHasta } from "@/lib/dates";
 import { ShieldCheck, BadgeAlert, MessageCircle } from "lucide-react";
 import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/types/database";
 import {
-  FileText, Phone, Wrench, AlertTriangle, Plus, Trash2, X, Upload, Eye, Pencil, MapPin,
+  FileText, Phone, Wrench, AlertTriangle, Plus, Trash2, X, Upload, Eye, Pencil, MapPin, HelpCircle,
   BadgeCheck, Settings, Circle, Droplet, Droplets, Battery, BatteryCharging, Thermometer, OctagonAlert, Fuel, RotateCw, Lock, Cog, Sun,
   Shield, ClipboardList, Anchor, Store, Building2, Pin, Zap,
   Calendar, Gauge, FlaskConical, Ruler, Layers, CircleDot, RefreshCcw, CircleOff, Lightbulb, Waves,
@@ -684,6 +684,45 @@ function CountryPrefixOnly(pais: string) {
 }
 
 /* ═══════════════════════════ 3. ADN del Vehículo ═══════════════════════ */
+const specsInputCls = "w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200";
+
+/** Título de grupo con ícono (a nivel módulo para no remontar inputs). */
+function GroupTitle({ icon: GI, children }: { icon: any; children: React.ReactNode }) {
+  return (
+    <p className="text-[10px] font-extrabold text-auto-400 flex items-center gap-1.5 uppercase tracking-wide mt-1 first:mt-0">
+      <GI className="w-3.5 h-3.5" /> {children}
+    </p>
+  );
+}
+
+/** Campo con etiqueta + tooltip de ayuda (ⓘ) explicando qué es y cómo encontrar el dato. */
+function Field({ label, help, children }: { label: string; help?: string; children: React.ReactNode }) {
+  const [showHelp, setShowHelp] = useState(false);
+  return (
+    <div className="block">
+      <div className="flex items-start gap-1">
+        <span className="text-[10px] font-bold text-zinc-400 leading-tight pt-0.5">{label}</span>
+        {help && (
+          <button
+            type="button"
+            onClick={() => setShowHelp((v) => !v)}
+            aria-label={`Ayuda: ${label}`}
+            className={`shrink-0 rounded-full p-0.5 transition-colors ${showHelp ? "text-auto-400" : "text-zinc-500 hover:text-auto-400"}`}
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+      {children}
+      {showHelp && help && (
+        <span className="block text-[9px] leading-snug text-zinc-400 bg-auto-500/[0.06] border border-auto-500/15 rounded-lg px-2 py-1.5 mt-1">
+          {help}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEditing = false }: { vehicleId: string; catalogSpecId: string | null; initialSpecs: VehicleSpecs | null; defaultEditing?: boolean }) {
   const [specs, setSpecs] = useState<VehicleSpecs | null>(initialSpecs);
   const [editing, setEditing] = useState(defaultEditing);
@@ -805,39 +844,23 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
   ];
 
   // Campo con etiqueta + ayuda (texto debajo explicando cómo encontrar el dato)
-  const Field = ({ label, help, children }: { label: string; help?: string; children: React.ReactNode }) => (
-    <label className="block">
-      <span className="text-[10px] font-bold text-zinc-400">{label}</span>
-      {children}
-      {help && <span className="block text-[8px] leading-tight text-zinc-600 mt-0.5">{help}</span>}
-    </label>
-  );
-
-  const inputCls = "w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200";
-
-  const GroupTitle = ({ icon: GI, children }: { icon: any; children: React.ReactNode }) => (
-    <p className="text-[10px] font-extrabold text-auto-400 flex items-center gap-1.5 uppercase tracking-wide mt-1 first:mt-0">
-      <GI className="w-3.5 h-3.5" /> {children}
-    </p>
-  );
-
   const renderFields = (
     <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
       {/* 🛢️ Motor y lubricación */}
       <div className="space-y-2">
         <GroupTitle icon={Droplets}>Motor y lubricación</GroupTitle>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <Field label="Tipo de aceite" help="Ej: Sintético / Mineral / Semisintético (manual o lata de aceite)">
-            <input value={form.tipo_aceite} onChange={(e) => setForm({ ...form, tipo_aceite: e.target.value })} placeholder="Sintético" className={inputCls} />
+          <Field label="Tipo de aceite" help="Qué aceite lleva el motor (Sintético / Semisintético / Mineral). Está en el manual o en la tapa del motor. Si no sabes, busca en internet: tipo de aceite [marca y modelo]">
+            <input value={form.tipo_aceite} onChange={(e) => setForm({ ...form, tipo_aceite: e.target.value })} placeholder="Sintético" className={specsInputCls} />
           </Field>
-          <Field label="Viscosidad" help="Ej: 5W-30 (manual o lata de aceite)">
-            <input value={form.viscosidad_aceite} onChange={(e) => setForm({ ...form, viscosidad_aceite: e.target.value })} placeholder="5W-30" className={inputCls} />
+          <Field label="Viscosidad" help="Número como 5W-30 que sale en el manual o en la lata del aceite. Importante para no dañar el motor. Busca: aceite recomendado [marca y modelo]">
+            <input value={form.viscosidad_aceite} onChange={(e) => setForm({ ...form, viscosidad_aceite: e.target.value })} placeholder="5W-30" className={specsInputCls} />
           </Field>
-          <Field label="Marca de aceite" help="Ej: Castrol, Mobil, Total">
-            <input value={form.aceite_marca} onChange={(e) => setForm({ ...form, aceite_marca: e.target.value })} placeholder="Castrol" className={inputCls} />
+          <Field label="Marca de aceite" help="Marca que usas o recomienda el fabricante. Mírala en la lata del aceite o pregunta al taller donde cambias el aceite.">
+            <input value={form.aceite_marca} onChange={(e) => setForm({ ...form, aceite_marca: e.target.value })} placeholder="Castrol" className={specsInputCls} />
           </Field>
-          <Field label="Capacidad de aceite (L)" help="Cuántos litros lleva el motor (manual)">
-            <input type="number" step="0.1" value={form.capacidad_aceite_litros} onChange={(e) => setForm({ ...form, capacidad_aceite_litros: e.target.value })} placeholder="4.5" className={inputCls} />
+          <Field label="Capacidad de aceite (L)" help="Capacidad total de aceite del motor. Está en el manual (sección especificaciones). Busca: capacidad de aceite [marca y modelo]">
+            <input type="number" step="0.1" value={form.capacidad_aceite_litros} onChange={(e) => setForm({ ...form, capacidad_aceite_litros: e.target.value })} placeholder="4.5" className={specsInputCls} />
           </Field>
         </div>
       </div>
@@ -846,14 +869,14 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
       <div className="space-y-2 pt-2 border-t border-white/5">
         <GroupTitle icon={Thermometer}>Refrigeración</GroupTitle>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <Field label="Tipo de refrigerante" help="Ej: Etilenglicol / orgánico (manual o envase)">
-            <input value={form.tipo_refrigerante} onChange={(e) => setForm({ ...form, tipo_refrigerante: e.target.value })} placeholder="Etilenglicol" className={inputCls} />
+          <Field label="Tipo de refrigerante" help="Líquido para el radiador. El tipo y mezcla están en el manual o en el envase. Busca: refrigerante para [marca y modelo]">
+            <input value={form.tipo_refrigerante} onChange={(e) => setForm({ ...form, tipo_refrigerante: e.target.value })} placeholder="Etilenglicol" className={specsInputCls} />
           </Field>
-          <Field label="Marca de refrigerante" help="Ej: Prestone, Valvoline">
-            <input value={form.refrigerante_marca} onChange={(e) => setForm({ ...form, refrigerante_marca: e.target.value })} placeholder="Prestone" className={inputCls} />
+          <Field label="Marca de refrigerante" help="Marca del refrigerante que usas. Mírala en el envase del producto.">
+            <input value={form.refrigerante_marca} onChange={(e) => setForm({ ...form, refrigerante_marca: e.target.value })} placeholder="Prestone" className={specsInputCls} />
           </Field>
-          <Field label="Capacidad (L)" help="Total del sistema (manual)">
-            <input type="number" step="0.1" value={form.capacidad_refrigerante_litros} onChange={(e) => setForm({ ...form, capacidad_refrigerante_litros: e.target.value })} placeholder="5.0" className={inputCls} />
+          <Field label="Capacidad (L)" help="Litros totales que necesita el sistema de enfriamiento (no solo el vaso de reserva). Está en el manual.">
+            <input type="number" step="0.1" value={form.capacidad_refrigerante_litros} onChange={(e) => setForm({ ...form, capacidad_refrigerante_litros: e.target.value })} placeholder="5.0" className={specsInputCls} />
           </Field>
         </div>
       </div>
@@ -862,11 +885,11 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
       <div className="space-y-2 pt-2 border-t border-white/5">
         <GroupTitle icon={OctagonAlert}>Frenos</GroupTitle>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <Field label="Tipo de líquido" help="Ej: DOT 3 / DOT 4 (tapa del depósito de frenos)">
-            <input value={form.tipo_freno} onChange={(e) => setForm({ ...form, tipo_freno: e.target.value })} placeholder="DOT 4" className={inputCls} />
+          <Field label="Tipo de líquido" help="Tipo de líquido de frenos: DOT 3 o DOT 4. Está escrito en la tapa del depósito (junto al motor). Usa el que indique el manual.">
+            <input value={form.tipo_freno} onChange={(e) => setForm({ ...form, tipo_freno: e.target.value })} placeholder="DOT 4" className={specsInputCls} />
           </Field>
-          <Field label="Marca de frenos" help="Ej: Bosch, Brembo (pastillas)">
-            <input value={form.freno_marca} onChange={(e) => setForm({ ...form, freno_marca: e.target.value })} placeholder="Bosch" className={inputCls} />
+          <Field label="Marca de frenos" help="Marca de pastillas/discos de freno. Si no la ves, pregunta en la casa de repuestos o revisa la factura del último cambio.">
+            <input value={form.freno_marca} onChange={(e) => setForm({ ...form, freno_marca: e.target.value })} placeholder="Bosch" className={specsInputCls} />
           </Field>
         </div>
       </div>
@@ -875,10 +898,10 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
       <div className="space-y-2 pt-2 border-t border-white/5">
         <GroupTitle icon={Battery}>Batería</GroupTitle>
         <div className="grid grid-cols-2 gap-2">
-          <Field label="Marca / referencia" help="Léela en la etiqueta de la batería (ej: BOSCH S4)">
-            <input value={form.bateria_marca} onChange={(e) => setForm({ ...form, bateria_marca: e.target.value })} placeholder="BOSCH S4" className={inputCls} />
+          <Field label="Marca / referencia" help="Marca y referencia exacta que trae la batería (ej: BOSCH S4, VARTA E11). Está en la etiqueta superior de la batería.">
+            <input value={form.bateria_marca} onChange={(e) => setForm({ ...form, bateria_marca: e.target.value })} placeholder="BOSCH S4" className={specsInputCls} />
           </Field>
-          <Field label="Fecha del próximo mantenimiento" help="Sirve para recordar revisarla">
+          <Field label="Fecha del próximo mantenimiento" help="Fecha para agendar la próxima revisión o cambio de batería (suele ser cada 2-3 años). La pones tú como recordatorio.">
             <DatePicker colorTheme="auto" value={form.bateria_mantenimiento_fecha} onChange={(d) => setForm({ ...form, bateria_mantenimiento_fecha: d })} />
           </Field>
         </div>
@@ -888,23 +911,23 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
       <div className="space-y-2 pt-2 border-t border-white/5">
         <GroupTitle icon={Ruler}>Neumáticos</GroupTitle>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <Field label="Presión delantera (PSI)" help="Valor en el sticker del marco de la puerta o manual">
-            <input type="number" value={form.presion_neumaticos_delante} onChange={(e) => setForm({ ...form, presion_neumaticos_delante: e.target.value })} placeholder="32" className={inputCls} />
+          <Field label="Presión delantera (PSI)" help="PSI recomendado para las ruedas delanteras. Está en una etiqueta pegada en el marco de la puerta del conductor o en el manual.">
+            <input type="number" value={form.presion_neumaticos_delante} onChange={(e) => setForm({ ...form, presion_neumaticos_delante: e.target.value })} placeholder="32" className={specsInputCls} />
           </Field>
-          <Field label="Presión trasera (PSI)" help="Normalmente igual o mayor que la delantera">
-            <input type="number" value={form.presion_neumaticos_atras} onChange={(e) => setForm({ ...form, presion_neumaticos_atras: e.target.value })} placeholder="32" className={inputCls} />
+          <Field label="Presión trasera (PSI)" help="PSI de las ruedas traseras. Suele ser igual o un poco mayor que el delantero; míralo en la misma etiqueta de la puerta.">
+            <input type="number" value={form.presion_neumaticos_atras} onChange={(e) => setForm({ ...form, presion_neumaticos_atras: e.target.value })} placeholder="32" className={specsInputCls} />
           </Field>
-          <Field label="Presión de repuesto (PSI)" help="En el sticker o en la propia llanta de repuesto">
-            <input type="number" value={form.presion_neumaticos_repuesto} onChange={(e) => setForm({ ...form, presion_neumaticos_repuesto: e.target.value })} placeholder="60" className={inputCls} />
+          <Field label="Presión de repuesto (PSI)" help="Presión de la llanta de repuesto. Está indicado en el sticker de la puerta o en la llanta misma. Suele ser más alta.">
+            <input type="number" value={form.presion_neumaticos_repuesto} onChange={(e) => setForm({ ...form, presion_neumaticos_repuesto: e.target.value })} placeholder="60" className={specsInputCls} />
           </Field>
-          <Field label="Medida (ancho)" help="Ej: 205 en '205/55 R16' (costado de la llanta)">
-            <input type="number" value={form.llanta_ancho} onChange={(e) => setForm({ ...form, llanta_ancho: e.target.value })} placeholder="205" className={inputCls} />
+          <Field label="Medida (ancho)" help="Ancho de la llanta en mm: el primer número (205 en 205/55 R16). Está grabado en el costado de la llanta.">
+            <input type="number" value={form.llanta_ancho} onChange={(e) => setForm({ ...form, llanta_ancho: e.target.value })} placeholder="205" className={specsInputCls} />
           </Field>
-          <Field label="Medida (perfil)" help="Ej: 55 en '205/55 R16'">
-            <input type="number" value={form.llanta_perfil} onChange={(e) => setForm({ ...form, llanta_perfil: e.target.value })} placeholder="55" className={inputCls} />
+          <Field label="Medida (perfil)" help="Perfil o altura: el segundo número (55 en 205/55 R16). Va junto al ancho en el costado de la llanta.">
+            <input type="number" value={form.llanta_perfil} onChange={(e) => setForm({ ...form, llanta_perfil: e.target.value })} placeholder="55" className={specsInputCls} />
           </Field>
-          <Field label="Medida (rin)" help="Ej: 16 en '205/55 R16'">
-            <input type="number" value={form.llanta_rin} onChange={(e) => setForm({ ...form, llanta_rin: e.target.value })} placeholder="16" className={inputCls} />
+          <Field label="Medida (rin)" help="Rin o diámetro de la llanta en pulgadas: el número tras la R (16 en 205/55 R16). También grabado en el costado.">
+            <input type="number" value={form.llanta_rin} onChange={(e) => setForm({ ...form, llanta_rin: e.target.value })} placeholder="16" className={specsInputCls} />
           </Field>
         </div>
       </div>
@@ -913,10 +936,10 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
       <div className="space-y-2 pt-2 border-t border-white/5">
         <GroupTitle icon={Fuel}>Combustible</GroupTitle>
         <div className="grid grid-cols-2 gap-2">
-          <Field label={`Capacidad de tanque (${cfg.fuelUnitShort})`} help="Cuánto le cabe al tanque lleno (manual)">
-            <input type="number" step="0.1" value={form.capacidad_tanque_galones} onChange={(e) => setForm({ ...form, capacidad_tanque_galones: e.target.value })} placeholder="14" className={inputCls} />
+          <Field label={`Capacidad de tanque (${cfg.fuelUnitShort})`} help="Capacidad del tanque de combustible. Está en el manual. También puedes buscarla en internet: capacidad de tanque [marca y modelo]">
+            <input type="number" step="0.1" value={form.capacidad_tanque_galones} onChange={(e) => setForm({ ...form, capacidad_tanque_galones: e.target.value })} placeholder="14" className={specsInputCls} />
           </Field>
-          <Field label="Octanaje recomendado" help="Toca los chips para elegir">
+          <Field label="Octanaje recomendado" help="Toca los botones para marcar el o los tipos de combustible que recomienda el fabricante (95, 97, etc.). Está en el manual o en la tapa del tanque.">
             <div className="flex flex-wrap gap-1 mt-1">
               {octanajes.map((o) => {
                 const sel = (form.octanaje_recomendado || "").split(",").map((s) => s.trim()).includes(o.value);
@@ -935,8 +958,8 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
             </div>
           </Field>
         </div>
-        <Field label="Kilómetros anuales estimados" help="Cuánto recorres al año aprox. Lo usan las herramientas (depreciación, costo por km, comparador)">
-          <input type="number" value={form.km_anuales} onChange={(e) => setForm({ ...form, km_anuales: e.target.value })} placeholder="15000" className={inputCls} />
+        <Field label="Kilómetros anuales estimados" help="Estimación de cuántos km haces al año. Súmale los km del odómetro de hace 1 año o divide tu recorrido mensual por 12. Lo usan las herramientas de costo.">
+          <input type="number" value={form.km_anuales} onChange={(e) => setForm({ ...form, km_anuales: e.target.value })} placeholder="15000" className={specsInputCls} />
         </Field>
       </div>
 

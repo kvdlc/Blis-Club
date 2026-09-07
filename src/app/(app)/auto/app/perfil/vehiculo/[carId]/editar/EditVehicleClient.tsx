@@ -18,6 +18,28 @@ const estadoOptions: { value: VehicleEstado; label: string; desc: string; icon: 
   { value: "vendido", label: "Vendido", desc: "Se oculta de tu lista activa.", icon: EyeOff, color: "bg-zinc-800 text-zinc-500 border-white/10" },
 ];
 
+/** Botón ⓘ que despliega una ayuda en la misma línea (funciona con tap en móvil). */
+function Tip({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="inline-flex flex-col">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Ayuda"
+        className={`inline-flex rounded-full p-0.5 -m-0.5 ${open ? "text-auto-400" : "text-zinc-500 hover:text-auto-400"}`}
+      >
+        <HelpCircle className="w-3.5 h-3.5" />
+      </button>
+      {open && (
+        <span className="block text-[10px] leading-snug text-zinc-400 bg-auto-500/[0.06] border border-auto-500/15 rounded-lg px-2 py-1.5 mt-0.5 max-w-[260px]">
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
+
 export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { userId: string; vehicle: Vehicle; initialSpecs: VehicleSpecs | null }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -120,35 +142,24 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
             <input value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })}
               className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
-          <label className="block">
-            <span className="text-xs font-bold text-zinc-500 flex items-center gap-1">
-              VIN
-              <span className="relative group inline-flex">
-                <HelpCircle className="w-3 h-3 text-zinc-500 cursor-help" />
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap bg-zinc-900 border border-white/10 text-zinc-300 text-[10px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  Número de identificación del vehículo (chasis)
-                </span>
-              </span>
-            </span>
+          <div className="block">
+            <div className="flex items-center gap-1 text-xs font-bold text-zinc-500">
+              VIN <Tip text="Número de identificación del vehículo (chasis). Son 17 caracteres y suele estar en el tablero o en la documentación. Es opcional." />
+            </div>
             <input value={form.vin} onChange={(e) => setForm({ ...form, vin: e.target.value.toUpperCase() })}
               maxLength={17} placeholder="Opcional" className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
-          </label>
+          </div>
         </div>
 
-        <label className="block">
-          <span className="text-xs font-bold text-zinc-500 flex items-center gap-1">
+        <div className="block">
+          <div className="flex items-center gap-1 text-xs font-bold text-zinc-500">
             Precio de compra
-            <span className="relative group inline-flex">
-              <HelpCircle className="w-3 h-3 text-zinc-500 cursor-help" />
-              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap bg-zinc-900 border border-white/10 text-zinc-300 text-[10px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                Cuánto pagaste al comprarlo. Se usa en depreciación, costo por km y financiamiento.
-              </span>
-            </span>
-          </span>
+            <Tip text="Cuánto pagaste cuando compraste el vehículo. Se usa para calcular depreciación, costo por kilómetro real y financiamiento. Si no lo recuerdas, revisa tu factura o contrato de compra." />
+          </div>
           <input type="number" min={0} step="0.01" value={form.precio}
             onChange={(e) => setForm({ ...form, precio: e.target.value })}
             placeholder="Ej: 45000" className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
-        </label>
+        </div>
 
         <label className="block">
           <span className="text-xs font-bold text-zinc-500">Foto del vehículo</span>
