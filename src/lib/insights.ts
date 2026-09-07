@@ -131,7 +131,7 @@ export function computeInsights(opts: {
 
   for (const doc of docsQueVencen) {
     const d = daysUntil(doc.fecha_vencimiento);
-    const etiqueta = doc.tipo === "soat" ? "SOAT" : doc.tipo === "revision_tecnica" ? "revisión técnica" : doc.tipo === "poliza_seguro" ? "póliza de seguro" : doc.tipo;
+    const etiqueta = doc.tipo === "seguro_obligatorio" ? "seguro obligatorio" : doc.tipo === "revision_tecnica" ? "revisión técnica" : doc.tipo === "poliza_seguro" ? "póliza de seguro" : doc.tipo;
     if (d < 0) alertas.push({ id: "doc_" + doc.id, nivel: "alta", emoji: "🚨", frase: `Tu ${etiqueta} venció hace ${Math.abs(d)} día${Math.abs(d) !== 1 ? "s" : ""}.`, href: "/auto/app/guantera" });
     else if (d === 0) alertas.push({ id: "doc_" + doc.id, nivel: "alta", emoji: "🚨", frase: `Tu ${etiqueta} vence HOY.`, href: "/auto/app/guantera" });
     else if (d <= 15) alertas.push({ id: "doc_" + doc.id, nivel: "alta", emoji: "🛡️", frase: `Tu ${etiqueta} vence en ${d} día${d !== 1 ? "s" : ""}.`, href: "/auto/app/guantera" });

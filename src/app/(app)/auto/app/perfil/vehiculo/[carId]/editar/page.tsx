@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { Vehicle } from "@/types/database";
+import type { Vehicle, VehicleSpecs } from "@/types/database";
 import EditVehicleClient from "./EditVehicleClient";
 
 export default async function EditVehiclePage({
@@ -22,5 +22,11 @@ export default async function EditVehiclePage({
 
   if (!vehicle) redirect("/auto/app/perfil");
 
-  return <EditVehicleClient userId={user.id} vehicle={vehicle as Vehicle} />;
+  const { data: specs } = await supabase
+    .from("vehicle_specs")
+    .select("*")
+    .eq("vehicle_id", carId)
+    .maybeSingle();
+
+  return <EditVehicleClient userId={user.id} vehicle={vehicle as Vehicle} initialSpecs={specs as VehicleSpecs | null} />;
 }

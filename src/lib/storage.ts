@@ -106,3 +106,21 @@ export async function uploadMarketplacePhoto(file: File, listingId: string): Pro
   const { data: urlData } = supabase.storage.from("auto-photos").getPublicUrl(data.path);
   return urlData.publicUrl;
 }
+
+export async function uploadDocumentPhoto(file: File, vehicleId: string): Promise<string | null> {
+  const supabase = createClient();
+  const compressed = await compressImage(file);
+  const fileName = `documentos/${vehicleId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.jpg`;
+
+  const { data, error } = await supabase.storage
+    .from("auto-photos")
+    .upload(fileName, compressed, { upsert: true, contentType: "image/jpeg" });
+
+  if (error) {
+    console.error("Upload document photo error:", error.message);
+    return null;
+  }
+
+  const { data: urlData } = supabase.storage.from("auto-photos").getPublicUrl(data.path);
+  return urlData.publicUrl;
+}

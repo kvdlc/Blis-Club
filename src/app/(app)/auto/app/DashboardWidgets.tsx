@@ -161,7 +161,7 @@ function StatLine({ label, value, color }: { label: string; value: string; color
 
 function DocRow({ doc }: { doc: VehicleDocument }) {
   const dias = Math.ceil((new Date(doc.fecha_vencimiento + "T12:00:00").getTime() - Date.now()) / (1000 * 3600 * 24));
-  const etiqueta = doc.tipo === "soat" ? "SOAT" : doc.tipo === "revision_tecnica" ? "Revisión Técnica" : doc.tipo === "poliza_seguro" ? "Póliza" : doc.tipo;
+  const etiqueta = doc.tipo === "seguro_obligatorio" ? "Seguro Obligatorio" : doc.tipo === "revision_tecnica" ? "Revisión Técnica" : doc.tipo === "poliza_seguro" ? "Póliza" : doc.tipo;
   const color = dias <= 15 ? "#ef4444" : dias <= 30 ? CHART.orange : CHART.emerald;
   return (
     <div className="flex items-center justify-between rounded-xl p-3 border border-white/10 bg-white/[0.04]">

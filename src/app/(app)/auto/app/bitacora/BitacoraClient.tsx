@@ -356,7 +356,13 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
   const { money, symbol } = useMoney();
   const [upgrades, setUpgrades] = useState(initialUpgrades);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ categoria: "estetico", nombre: "", costo: "", fecha: new Date().toISOString().split("T")[0] });
+  const [form, setForm] = useState({
+    categoria: "estetico", nombre: "", costo: "",
+    fecha: new Date().toISOString().split("T")[0],
+    conMantenimiento: false, fecha_mantenimiento: "",
+    conVencimiento: false, fecha_vencimiento: "",
+    conKm: false, duracion_km: "",
+  });
   const [saving, setSaving] = useState(false);
 
   const totalUpgrades = upgrades.reduce((sum, u) => sum + (u.costo || 0), 0);
@@ -367,9 +373,17 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
     const { data } = await createClient().from("vehicle_upgrades").insert({
       vehicle_id: vehicleId, categoria: form.categoria, nombre: form.nombre,
       costo: form.costo ? parseFloat(form.costo) : null, fecha: form.fecha,
+      fecha_mantenimiento: form.conMantenimiento ? form.fecha_mantenimiento || null : null,
+      fecha_vencimiento: form.conVencimiento ? form.fecha_vencimiento || null : null,
+      ciclo: form.conKm ? "km" : (form.conVencimiento ? "tiempo" : null),
+      duracion_km: form.conKm && form.duracion_km ? parseInt(form.duracion_km) : null,
     }).select().single();
     setSaving(false);
-    if (data) { setUpgrades([data as VehicleUpgrade, ...upgrades]); setAdding(false); setForm({ categoria: "estetico", nombre: "", costo: "", fecha: new Date().toISOString().split("T")[0] }); }
+    if (data) {
+      setUpgrades([data as VehicleUpgrade, ...upgrades]);
+      setAdding(false);
+      setForm({ categoria: "estetico", nombre: "", costo: "", fecha: new Date().toISOString().split("T")[0], conMantenimiento: false, fecha_mantenimiento: "", conVencimiento: false, fecha_vencimiento: "", conKm: false, duracion_km: "" });
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -390,13 +404,50 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
 
       {adding && (
         <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
-          <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre de la mejora" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre del accesorio" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
           <div className="grid grid-cols-2 gap-1.5">
             <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
               {upgradeCats.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
             <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`${symbol} costo`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
           </div>
+
+          {/* Fecha de compra (siempre) */}
+          <label className="block"><span className="text-[10px] font-bold text-zinc-500">Fecha de compra</span>
+            <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
+          </label>
+
+          {/* Checkbox Mantenimiento */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={form.conMantenimiento} onChange={(e) => setForm({ ...form, conMantenimiento: e.target.checked })} className="accent-auto-500" />
+            <span className="text-[11px] text-zinc-300">Mantenimiento</span>
+          </label>
+          {form.conMantenimiento && (
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Fecha de próximo mantenimiento</span>
+              <DatePicker colorTheme="auto" value={form.fecha_mantenimiento} onChange={(d) => setForm({ ...form, fecha_mantenimiento: d })} />
+            </label>
+          )}
+
+          {/* Checkbox Vencimiento */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={form.conVencimiento} onChange={(e) => setForm({ ...form, conVencimiento: e.target.checked })} className="accent-auto-500" />
+            <span className="text-[11px] text-zinc-300">Vencimiento (vida útil)</span>
+          </label>
+          {form.conVencimiento && (
+            <label className="block"><span className="text-[10px] font-bold text-zinc-500">Fecha de vencimiento</span>
+              <DatePicker colorTheme="auto" value={form.fecha_vencimiento} onChange={(d) => setForm({ ...form, fecha_vencimiento: d })} />
+            </label>
+          )}
+
+          {/* Checkbox Por km */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={form.conKm} onChange={(e) => setForm({ ...form, conKm: e.target.checked })} className="accent-auto-500" />
+            <span className="text-[11px] text-zinc-300">Duración por kilómetros</span>
+          </label>
+          {form.conKm && (
+            <input type="number" min="0" value={form.duracion_km} onChange={(e) => setForm({ ...form, duracion_km: e.target.value })} placeholder="Ej: 40000 km" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          )}
+
           <div className="flex gap-1.5">
             <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">Guardar</button>
             <button onClick={() => setAdding(false)} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
@@ -410,6 +461,8 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
         )}
         {upgrades.map((u) => {
           const cat = upgradeCats.find((c) => c.value === u.categoria);
+          const vidaLabel = u.ciclo === "km" && u.duracion_km ? ` · ${u.duracion_km.toLocaleString("es-PE")} km` : (u.fecha_vencimiento ? ` · vence ${new Date(u.fecha_vencimiento + "T12:00:00").toLocaleDateString("es-PE")}` : "");
+          const mantLabel = u.fecha_mantenimiento ? ` · mant. ${new Date(u.fecha_mantenimiento + "T12:00:00").toLocaleDateString("es-PE")}` : "";
           return (
             <div key={u.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex flex-col gap-1.5">
               <div className="flex items-center gap-2">
@@ -418,7 +471,7 @@ function UpgradesSection({ vehicleId, initialUpgrades }: { vehicleId: string; in
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-zinc-100 truncate">{u.nombre}</p>
-                  <p className="text-[10px] text-zinc-500">{cat?.label}</p>
+                  <p className="text-[10px] text-zinc-500">{cat?.label} · {new Date(u.fecha + "T12:00:00").toLocaleDateString("es-PE")}{vidaLabel}{mantLabel}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between">

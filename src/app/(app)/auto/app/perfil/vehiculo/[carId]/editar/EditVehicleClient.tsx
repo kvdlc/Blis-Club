@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { uploadAutoPhoto } from "@/lib/storage";
-import type { Vehicle } from "@/types/database";
+import type { Vehicle, VehicleSpecs } from "@/types/database";
+import { SpecsSection } from "@/app/(app)/auto/app/guantera/GuanteraClient";
 import { ArrowLeft, Upload, Check, HelpCircle } from "lucide-react";
 
-export default function EditVehicleClient({ userId, vehicle }: { userId: string; vehicle: Vehicle }) {
+export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { userId: string; vehicle: Vehicle; initialSpecs: VehicleSpecs | null }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -136,6 +137,8 @@ export default function EditVehicleClient({ userId, vehicle }: { userId: string;
             </div>
           )}
         </label>
+
+        <SpecsSection vehicleId={vehicle.id} catalogSpecId={vehicle.catalog_spec_id} initialSpecs={initialSpecs} defaultEditing={!initialSpecs} />
 
         <button type="submit" disabled={saving}
           className="w-full py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-500 transition-colors active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-auto-600/20">

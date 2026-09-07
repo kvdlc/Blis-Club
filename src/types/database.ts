@@ -122,7 +122,7 @@ export interface FuelLog {
 export interface VehicleDocument {
   id: string;
   vehicle_id: string;
-  tipo: "soat" | "revision_tecnica" | "poliza_seguro" | "matricula" | "licencia_conducir";
+  tipo: "seguro_obligatorio" | "revision_tecnica" | "poliza_seguro" | "matricula" | "licencia_conducir";
   fecha_emision: string | null;
   fecha_vencimiento: string;
   imagen_url: string | null;
@@ -138,6 +138,7 @@ export interface VehicleContact {
   tipo: "mecanico" | "electromecanico" | "grua" | "tienda_repuestos" | "aseguradora" | "otro";
   telefono: string | null;
   whatsapp: string | null;
+  pais_telefono: string | null;
   direccion: string | null;
   notas: string | null;
   created_at: string;
@@ -149,14 +150,20 @@ export interface VehicleSpecs {
   vehicle_id: string;
   tipo_aceite: string | null;
   viscosidad_aceite: string | null;
+  aceite_marca: string | null;
   capacidad_aceite_litros: number | null;
   tipo_refrigerante: string | null;
+  refrigerante_marca: string | null;
   capacidad_refrigerante_litros: number | null;
   tipo_freno: string | null;
+  freno_marca: string | null;
+  bateria_marca: string | null;
+  bateria_mantenimiento_fecha: string | null;
   presion_neumaticos_delante: number | null;
   presion_neumaticos_atras: number | null;
   presion_neumaticos_repuesto: number | null;
   capacidad_tanque_galones: number | null;
+  tanque_unidad: string;
   octanaje_recomendado: string | null;
   created_at: string;
   updated_at: string;
@@ -184,7 +191,11 @@ export interface VehicleUpgrade {
   nombre: string;
   descripcion: string | null;
   costo: number | null;
-  fecha: string;
+  fecha: string;                      // fecha de compra
+  fecha_mantenimiento: string | null; // próximo mantenimiento
+  fecha_vencimiento: string | null;   // fin de vida útil
+  ciclo: "tiempo" | "km" | null;
+  duracion_km: number | null;
   foto_url: string | null;
   created_at: string;
 }
