@@ -197,11 +197,14 @@ export default function IzipayCheckout({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        <AnimatePresence mode="wait">
-          {formState === 'loading' && (
-            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-5 py-6 space-y-4">
-              {/* Skeleton que replica el formulario de blis-corp */}
+      <div className="flex-1 overflow-y-auto relative min-h-[320px]">
+        {/* El formulario de Izipay se inyecta aquí. SIEMPRE visible para que el iframe tenga tamaño. */}
+        <div id="kr-root-anchor" className="w-full px-5" />
+
+        {/* Overlay de carga (se superpone y desaparece al estar listo) */}
+        {formState === 'loading' && (
+          <div className="absolute inset-0 bg-white z-10">
+            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5 py-6 space-y-4">
               <div className="bg-[#f4f4f5] rounded-3xl p-5 space-y-3">
                 <div className="h-11 bg-white rounded-xl border border-zinc-200/60 animate-pulse" />
                 <div className="grid grid-cols-2 gap-3">
@@ -219,14 +222,11 @@ export default function IzipayCheckout({
                 <p className="text-sm text-zinc-400 font-medium">Conectando con la pasarela de pago...</p>
               </div>
             </motion.div>
-          )}
+          </div>
+        )}
 
-          {formState === 'ready' && (
-            <motion.div key="ready" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5 py-4">
-              {/* El formulario de Izipay se renderiza aquí automáticamente por el SDK */}
-            </motion.div>
-          )}
-
+        {/* Estados de resultado */}
+        <AnimatePresence mode="wait">
           {formState === 'processing' && (
             <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-5 pb-8 text-center py-10">
               <Loader2 className="w-8 h-8 text-primary-500 animate-spin mx-auto mb-4" />
@@ -244,17 +244,12 @@ export default function IzipayCheckout({
                 </div>
               </motion.div>
               <div className="space-y-3 mb-10">
-                <h3 className="text-3xl font-black text-zinc-800">¡Suscripción Activada!</h3>
-                <p className="text-zinc-500">Hemos procesado tu suscripción{totalLabel ? ` por ${totalLabel}` : ''}.<br/>Hemos enviado tu contraseña temporal a tu correo electrónico.</p>
+                <h3 className="text-3xl font-black text-zinc-800">¡Pago Confirmado!</h3>
+                <p className="text-zinc-500">Hemos procesado tu pago{totalLabel ? ` por ${totalLabel}` : ''}.<br/>Recibirás tu comprobante por correo electrónico.</p>
                 <div className="inline-flex gap-2 px-4 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full">
                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1" />
                   <span className="text-xs text-emerald-700 font-medium">Pago confirmado</span>
                 </div>
-              </div>
-              <div className="space-y-3">
-                <Link href={successRedirect} className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-black uppercase text-sm rounded-2xl transition-all shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 group">
-                  {successCtaLabel} <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
               </div>
             </motion.div>
           )}
@@ -266,20 +261,6 @@ export default function IzipayCheckout({
               </div>
               <h3 className="text-xl font-black text-zinc-800 mb-2">Pago no completado</h3>
               <p className="text-sm text-zinc-500 mb-6 max-w-sm mx-auto">{errorMsg || 'No se pudo procesar el pago.'}</p>
-              
-              {sdkLogs.length > 0 && (
-                <div className="mb-6 mx-auto max-w-sm">
-                  <details className="text-left">
-                    <summary className="text-[10px] text-zinc-400 cursor-pointer hover:text-zinc-600">Ver logs técnicos</summary>
-                    <div className="mt-2 p-2 bg-zinc-100 rounded-lg text-[10px] text-zinc-600 font-mono max-h-32 overflow-y-auto">
-                      {sdkLogs.map((log, i) => (
-                        <div key={i} className="truncate">{log}</div>
-                      ))}
-                    </div>
-                  </details>
-                </div>
-              )}
-              
               <div className="space-y-3">
                 <button onClick={() => window.location.reload()} className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-primary-500/25">
                   <Shield className="w-4 h-4" /> Reintentar Pago
@@ -288,8 +269,6 @@ export default function IzipayCheckout({
             </motion.div>
           )}
         </AnimatePresence>
-
-        <div id="kr-root-anchor" className={`w-full px-5 ${formState === 'loading' || formState === 'success' ? 'hidden' : ''}`} />
       </div>
 
       {/* Footer - Badges + Card logos */}
