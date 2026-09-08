@@ -52,7 +52,7 @@ interface Props {
   userEmail?: string;
 }
 
-export default function ProductDetailClient({ product, similares, userId, userEmail }: Props) {
+export default function ProductDetailClient({ product, similares, userId }: Props) {
   const { money } = useMoney();
   const r = ratingFor(product.id);
   const g = product.galeria || [];
@@ -236,7 +236,7 @@ export default function ProductDetailClient({ product, similares, userId, userEm
           </div>
 
           {/* Checkout */}
-          <ProductCheckout product={product} userEmail={userEmail} />
+          <ProductCheckout product={product} />
 
           {/* Garantías */}
           <div className="grid grid-cols-3 gap-2">

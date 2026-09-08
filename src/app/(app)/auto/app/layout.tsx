@@ -4,6 +4,7 @@ import AutoNav from "@/components/AutoNav";
 import { CarProvider } from "@/components/CarSwitcher";
 import TrialWarningToast from "@/components/TrialWarningToast";
 import ReferralTracker from "@/components/ReferralTracker";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { AutoAppHeader } from "./AutoAppHeader";
@@ -26,6 +27,7 @@ export default async function AutoAppLayout({ children }: { children: React.Reac
     <div className="min-h-screen md:pl-60 bg-auto-gradient bg-[#0a0a0c] text-zinc-200">
       <CarProvider>
         <ReferralTracker />
+        <ScrollToTop />
         <AutoNav />
         <main className="relative z-10 pb-28 md:pb-8 px-4 pt-3 max-w-3xl mx-auto">
           <AutoAppHeader />
