@@ -18,7 +18,7 @@ import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/t
 import {
   FileText, Phone, Wrench, AlertTriangle, Plus, Trash2, X, Upload, Eye, Pencil, MapPin, HelpCircle,
   BadgeCheck, Settings, Circle, Droplet, Droplets, Battery, BatteryCharging, Thermometer, OctagonAlert, Fuel, RotateCw, Lock, Cog, Sun,
-  Shield, ClipboardList, Anchor, Store, Building2, Pin, Zap, ShoppingBag,
+  Shield, ClipboardList, Anchor, Store, Building2, Pin, Zap, ShoppingBag, Siren,
   Calendar, Gauge, FlaskConical, Ruler, Layers, CircleDot, RefreshCcw, CircleOff, Lightbulb, Waves,
 } from "lucide-react";
 
@@ -391,7 +391,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
   const [form, setForm] = useState({
     nombre: "", encargado: "", tipo: "mecanico", telefono: "", telefono_alt: "",
     pais: "PE", pais_alt: "PE", foto_url: "", lat: null as number | null,
-    lng: null as number | null, referencia: "", notas: "",
+    lng: null as number | null, referencia: "", notas: "", es_emergencia: false,
   });
 
   // Prefijo por defecto = país del usuario
@@ -402,7 +402,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
   }, []);
 
   const resetContactForm = (pais: string) => {
-    setForm({ nombre: "", encargado: "", tipo: "mecanico", telefono: "", telefono_alt: "", pais, pais_alt: pais, foto_url: "", lat: null, lng: null, referencia: "", notas: "" });
+    setForm({ nombre: "", encargado: "", tipo: "mecanico", telefono: "", telefono_alt: "", pais, pais_alt: pais, foto_url: "", lat: null, lng: null, referencia: "", notas: "", es_emergencia: false });
     setPhotoError(null);
   };
 
@@ -429,6 +429,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
       lng: c.lng ?? null,
       referencia: c.ubicacion || "",
       notas: c.notas || "",
+      es_emergencia: c.es_emergencia === true,
     });
     setPhotoError(null);
     setAdding(true);
@@ -472,6 +473,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
       lat: (form.lat != null && !isNaN(form.lat)) ? form.lat : null,
       lng: (form.lng != null && !isNaN(form.lng)) ? form.lng : null,
       ubicacion: form.referencia || null,
+      es_emergencia: form.es_emergencia === true,
       notas: form.notas || null,
     };
     const { data, error } = editId
@@ -606,6 +608,23 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
           <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })}
             placeholder="Notas" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
 
+          {/* Marcar como SOS / emergencia */}
+          <label className="flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-red-500/20 bg-red-500/[0.05] px-3 py-2.5">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={form.es_emergencia}
+              onClick={() => setForm((f) => ({ ...f, es_emergencia: !f.es_emergencia }))}
+              className={`relative w-10 h-5.5 shrink-0 rounded-full transition-colors ${form.es_emergencia ? "bg-red-500" : "bg-zinc-600"}`}
+            >
+              <span className={`absolute top-0.5 w-4.5 h-4.5 rounded-full bg-white transition-all ${form.es_emergencia ? "left-5" : "left-0.5"}`} />
+            </button>
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold text-red-300 flex items-center gap-1"><Siren className="w-3.5 h-3.5" /> Marcar como SOS / emergencia</p>
+              <p className="text-[9px] text-zinc-500">Aparecerá primero en el asistente en carretera (SOS) del Home.</p>
+            </div>
+          </label>
+
           <button type="button" onClick={handleSaveContact} disabled={saving}
             className="w-full py-3 rounded-xl bg-auto-600 text-white text-sm font-bold hover:bg-auto-500 transition-colors active:scale-[0.98] disabled:opacity-50">
             {saving ? "Guardando..." : editId ? "Guardar cambios" : "Guardar taller"}
@@ -639,7 +658,12 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
 
               {/* Info central */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-zinc-100 truncate leading-tight">{c.nombre}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-bold text-zinc-100 truncate leading-tight">{c.nombre}</p>
+                  {c.es_emergencia === true && (
+                    <span className="shrink-0 text-[8px] font-bold text-red-400 bg-red-500/10 border border-red-500/25 px-1.5 py-0.5 rounded-full">SOS</span>
+                  )}
+                </div>
                 {c.encargado && <p className="text-[10px] text-zinc-300 truncate leading-tight">{c.encargado}</p>}
                 <p className="text-[10px] text-zinc-500 truncate">{tipo?.label}</p>
                 {principal && <p className="text-[11px] font-bold text-zinc-300 mt-0.5 tabular-nums truncate">{principal}</p>}

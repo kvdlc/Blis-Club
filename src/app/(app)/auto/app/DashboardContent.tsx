@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs, VehicleUpgrade } from "@/types/database";
 import { Car } from "lucide-react";
@@ -8,6 +9,7 @@ import BlisbotCard from "@/components/BlisbotCard";
 import { QuickActions } from "./QuickActions";
 import { DashboardWidgets } from "./DashboardWidgets";
 import { RecentExpenses } from "./RecentExpenses";
+import { SosModal } from "./SosModal";
 
 interface Props {
   vehicle: Vehicle | null;
@@ -23,6 +25,7 @@ interface Props {
 
 export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocExpiry, documents, maintenances, upgrades, specs, badges = [] }: Props) {
   const router = useRouter();
+  const [sosOpen, setSosOpen] = useState(false);
 
   if (!vehicle) {
     return (
@@ -53,10 +56,12 @@ export default function DashboardContent({ vehicle, fuelLogs, ecoScore, nextDocE
       <div className="space-y-4 pt-4 pb-8">
         <HeroCard vehicle={vehicle} fuelLogs={fuelLogs} ecoScore={ecoScore} />
         <BlisbotCard vehicle={vehicle} fuelLogs={fuelLogs} documents={documents} maintenances={maintenances} upgrades={upgrades} specs={specs} />
-        <QuickActions />
+        <QuickActions onSos={() => setSosOpen(true)} />
         <RecentExpenses fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} />
         <DashboardWidgets vehicle={vehicle} ecoScore={ecoScore} nextDocExpiry={nextDocExpiry} fuelLogs={fuelLogs} documents={documents} maintenances={maintenances} upgrades={upgrades} specs={specs} badges={badges} />
       </div>
+
+      <SosModal vehicle={vehicle} open={sosOpen} onClose={() => setSosOpen(false)} />
     </div>
   );
 }

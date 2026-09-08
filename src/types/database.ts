@@ -145,6 +145,7 @@ export interface VehicleContact {
   pais_telefono: string | null;
   telefono_alt: string | null;
   foto_url: string | null;
+  es_emergencia: boolean;
   lat: number | null;
   lng: number | null;
   ubicacion: string | null;

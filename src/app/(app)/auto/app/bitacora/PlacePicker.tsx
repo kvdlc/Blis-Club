@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getCurrentCountryCode } from "@/lib/countries";
 import { uploadContactPhoto } from "@/lib/storage";
 import type { VehicleContact } from "@/types/database";
-import { Store, Fuel, Wrench, Anchor, Building2, Pin, Plus, ChevronDown, Zap, ShoppingBag, MapPin, Phone, Upload, X, Search } from "lucide-react";
+import { Store, Fuel, Wrench, Anchor, Building2, Pin, Plus, ChevronDown, Zap, ShoppingBag, MapPin, Phone, Upload, X, Search, Siren } from "lucide-react";
 
 export const CONTACT_TYPES_META: { value: string; label: string; icon: any }[] = [
   { value: "mecanico", label: "Mecánico", icon: Wrench },
@@ -117,11 +117,15 @@ export function PlacePicker({ vehicleId, tipos, value, onSelect, placeholder }: 
                   <button key={c.id} type="button"
                     onClick={() => pick(c)}
                     className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.06] text-left">
-                    <Icon className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                    <div className="relative shrink-0">
+                      <Icon className="w-4 h-4 text-zinc-400" />
+                      {c.es_emergencia && <Siren className="w-2.5 h-2.5 text-red-500 absolute -top-1.5 -right-1.5" />}
+                    </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-bold text-zinc-200 truncate">{c.nombre}</p>
                       {c.encargado && <p className="text-[9px] text-zinc-500 truncate">{c.encargado}</p>}
                     </div>
+                    {c.es_emergencia && <span className="text-[8px] font-bold text-red-400 shrink-0">SOS</span>}
                     {c.telefono && <span className="text-[9px] text-zinc-500 shrink-0">{c.telefono}</span>}
                   </button>
                 );
@@ -170,7 +174,7 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
 }) {
   const [form, setForm] = useState({
     nombre: "", encargado: "", tipo: defaultTipos[0]?.value || "otro",
-    telefono: "", whatsapp: "", pais: "PE", notas: "", foto_url: "",
+    telefono: "", whatsapp: "", pais: "PE", notas: "", foto_url: "", es_emergencia: false,
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -211,6 +215,7 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
         pais_telefono: form.pais,
         notas: form.notas.trim() || null,
         foto_url: form.foto_url || null,
+        es_emergencia: form.es_emergencia === true,
       })
       .select()
       .single();
@@ -294,6 +299,19 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
       </div>
 
       <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} placeholder="Notas (opcional)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200" />
+
+      <label className="flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-red-500/20 bg-red-500/[0.05] px-3 py-2">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={form.es_emergencia}
+          onClick={() => setForm((f) => ({ ...f, es_emergencia: !f.es_emergencia }))}
+          className={`relative w-9 h-5 shrink-0 rounded-full transition-colors ${form.es_emergencia ? "bg-red-500" : "bg-zinc-600"}`}
+        >
+          <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${form.es_emergencia ? "left-4.5" : "left-0.5"}`} />
+        </button>
+        <span className="text-[11px] font-bold text-red-300">Marcar como SOS / emergencia</span>
+      </label>
 
       {error && <p className="text-[10px] text-red-400">{error}</p>}
 
