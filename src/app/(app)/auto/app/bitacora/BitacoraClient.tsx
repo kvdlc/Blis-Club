@@ -4,17 +4,17 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getCountryConfig, getCurrentCountryCode } from "@/lib/countries";
-import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade } from "@/types/database";
+import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade, VehicleSpecs } from "@/types/database";
 import {
   ChevronDown, Gauge, Droplets, Wrench, ShoppingBag, Shield, FileDown,
   Trash2, X, RotateCw, Fuel, ScrollText, CheckCircle2, AlertTriangle, Calendar,
-  MoreVertical, Pencil, Store,
+  MoreVertical, Pencil, Search,
 } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { BitacoraCharts } from "./BitacoraCharts";
 import { useMoney } from "@/lib/money";
 import { formatoRestante } from "@/lib/dates";
-import { PART_PRODUCTS, partProduct, PART_CATEGORIA_LABEL } from "@/lib/auto-parts";
+import { partProduct, PART_CATEGORIA_LABEL, searchProducts, type PartProduct } from "@/lib/auto-parts";
 
 /* ═══════════════════════════ Tipos y datos ═══════════════════════ */
 const maintTypes = [
@@ -41,6 +41,8 @@ interface Props {
 
 const GAL = 3.78541;
 const MESES_LARGO = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+const itemKey = (item: TimelineItem) => `${item.type}-${item.data.id}`;
 
 /** Suma el costo de un evento en la moneda local. */
 function eventCost(item: TimelineItem): number {
@@ -77,7 +79,7 @@ function itemIcon(item: TimelineItem) {
   return { icon: <ShoppingBag className="w-5 h-5 text-violet-400" />, chip: "bg-violet-500/10 border border-violet-500/20", border: "border-l-violet-500" };
 }
 
-/** Estado de vida útil de un repuesto: por km (odómetro compra + duración) y/o por fecha. Devuelve etiquetas y nivel. */
+/** Estado de vida útil de un repuesto: por km y/o por fecha. */
 function partLife(u: VehicleUpgrade, currentKm: number): { km: string | null; fecha: string | null; nivel: "ok" | "aviso" | "vencido" } {
   let km: string | null = null;
   let fecha: string | null = null;
@@ -106,7 +108,6 @@ function partLife(u: VehicleUpgrade, currentKm: number): { km: string | null; fe
 export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances, upgrades }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [addToOpen] = useState(() => searchParams.get("add") || "");
 
   useEffect(() => {
     const add = searchParams.get("add");
@@ -138,7 +139,6 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
       </div>
 
       <TimelineSection fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} vehicleId={vehicle.id} currentKm={vehicle.kilometraje} />
-      <PartsSection vehicleId={vehicle.id} initialParts={upgrades} currentKm={vehicle.kilometraje} />
       <BitacoraCharts fuelLogs={fuelLogs} maintenances={maintenances} upgrades={upgrades} />
       <WarrantySection vehicle={vehicle} maintenances={maintenances} />
       <TireRotationSection />
@@ -147,7 +147,7 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
   );
 }
 
-/* ═══════════════════════════ 1. Línea de Tiempo ═══════════════════════ */
+/* ═══════════════════════════ 1. Línea de Tiempo (única) ═══════════════════════ */
 function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentKm }: {
   fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; upgrades: VehicleUpgrade[]; vehicleId: string; currentKm: number;
 }) {
@@ -155,10 +155,8 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
   const router = useRouter();
   const searchParams = useSearchParams();
   const [countryCode, setCountryCode] = useState<string | null>(null);
-  const [addingFuel, setAddingFuel] = useState(false);
-  const [addingMaint, setAddingMaint] = useState(false);
-  const [addingPart, setAddingPart] = useState(false);
-  const [editTarget, setEditTarget] = useState<TimelineItem | null>(null);
+  const [addType, setAddType] = useState<"fuel" | "maint" | "part" | null>(null);
+  const [editingKey, setEditingKey] = useState<string | null>(null);
   const [fuelLogsState, setFuelLogsState] = useState(fuelLogs);
   const [maintsState, setMaintsState] = useState(maintenances);
   const [partsState, setPartsState] = useState(upgrades);
@@ -169,9 +167,7 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
   // Desplegar automáticamente el formulario según ?add= (desde el Home)
   useEffect(() => {
     const add = searchParams.get("add");
-    if (add === "fuel") setAddingFuel(true);
-    else if (add === "maint") setAddingMaint(true);
-    else if (add === "upgrade" || add === "part") setAddingPart(true);
+    if (add === "fuel" || add === "maint" || add === "upgrade" || add === "part") setAddType(add === "fuel" ? "fuel" : add === "maint" ? "maint" : "part");
     if (add) router.replace(window.location.pathname, { scroll: false });
   }, [searchParams, router]);
 
@@ -185,26 +181,25 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
     ...partsState.map((u) => ({ type: "part" as const, data: u })),
   ].sort((a, b) => new Date(b.data.fecha).getTime() - new Date(a.data.fecha).getTime());
 
-  // Agrupar por mes (yyyy-MM) y calcular total mensual sobre TODOS los eventos de cada mes
-  const months: { key: string; label: string; total: number; items: TimelineItem[] }[] = [];
+  // Agrupar por mes (yyyy-MM) con el total de gasto del mes
   const monthMap = new Map<string, TimelineItem[]>();
   for (const it of timeline) {
     const key = itemFecha(it).slice(0, 7);
     if (!monthMap.has(key)) monthMap.set(key, []);
     monthMap.get(key)!.push(it);
   }
-  for (const [key, items] of monthMap) {
-    const [y, m] = key.split("-").map(Number);
-    const label = `${MESES_LARGO[(m || 1) - 1]} ${y}`;
-    const total = items.reduce((s, it) => s + eventCost(it), 0);
-    months.push({ key, label, total, items });
-  }
-  // Meses más recientes primero
-  months.sort((a, b) => (a.key < b.key ? 1 : -1));
+  const months = [...monthMap.entries()]
+    .map(([key, items]) => {
+      const [y, m] = key.split("-").map(Number);
+      return {
+        key, label: `${MESES_LARGO[(m || 1) - 1]} ${y}`,
+        total: items.reduce((s, it) => s + eventCost(it), 0),
+        items,
+      };
+    })
+    .sort((a, b) => (a.key < b.key ? 1 : -1));
 
-  const closeForms = () => {
-    setAddingFuel(false); setAddingMaint(false); setAddingPart(false); setEditTarget(null);
-  };
+  const closeAll = () => { setAddType(null); setEditingKey(null); };
 
   const deleteItem = async (item: TimelineItem) => {
     const conf = confirm(item.type === "fuel" ? "¿Eliminar esta carga?" : item.type === "maintenance" ? "¿Eliminar este servicio?" : "¿Eliminar este repuesto?");
@@ -215,9 +210,10 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
     if (item.type === "fuel") setFuelLogsState(fuelLogsState.filter((x) => x.id !== item.data.id));
     else if (item.type === "maintenance") setMaintsState(maintsState.filter((x) => x.id !== item.data.id));
     else setPartsState(partsState.filter((x) => x.id !== item.data.id));
+    setEditingKey(null);
   };
 
-  // Conteo visible: recorre meses hasta sumar `visible` eventos
+  // Paginación: muestra `visible` eventos (3 iniciales) y luego de 10 en 10
   const shown: { month: typeof months[number]; items: TimelineItem[] }[] = [];
   let acc = 0;
   for (const month of months) {
@@ -226,89 +222,54 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
     if (take.length > 0) shown.push({ month, items: take });
     acc += take.length;
   }
-  const totalVisibleEvents = shown.reduce((s, m) => s + m.items.length, 0);
-  const hasMore = totalVisibleEvents < timeline.length;
+  const totalVisible = shown.reduce((s, m) => s + m.items.length, 0);
+  const hasMore = totalVisible < timeline.length;
+
+  const currentEditItem = editingKey ? timeline.find((x) => itemKey(x) === editingKey) ?? null : null;
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
-          <ScrollText className="w-4 h-4 text-auto-500" /> Línea de Tiempo
+          <ScrollText className="w-4 h-4 text-auto-500" /> Historial
         </h2>
+        <span className="text-[10px] font-bold text-zinc-500 bg-white/[0.06] px-2 py-0.5 rounded-full">{timeline.length} eventos</span>
       </div>
 
       {/* Botones grandes de registro */}
       <div className="grid grid-cols-3 gap-2">
         <button type="button"
-          onClick={() => { setEditTarget(null); setAddingFuel(true); setAddingMaint(false); setAddingPart(false); }}
-          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addingFuel ? "bg-amber-500/20 border-amber-500/40" : "bg-amber-500/10 border-amber-500/25 hover:bg-amber-500/20"}`}>
+          onClick={() => { setEditingKey(null); setAddType(addType === "fuel" ? null : "fuel"); }}
+          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addType === "fuel" ? "bg-amber-500/20 border-amber-500/40" : "bg-amber-500/10 border-amber-500/25 hover:bg-amber-500/20"}`}>
           <Fuel className="w-5 h-5 text-amber-400" />
-          <span className="text-[10px] font-extrabold text-zinc-100 text-center leading-tight">{editTarget && editTarget.type === "fuel" ? "Editar carga" : "Cargar combustible"}</span>
+          <span className="text-[10px] font-extrabold text-zinc-100 text-center leading-tight">Cargar combustible</span>
         </button>
         <button type="button"
-          onClick={() => { setEditTarget(null); setAddingMaint(true); setAddingFuel(false); setAddingPart(false); }}
-          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addingMaint ? "bg-blue-500/20 border-blue-500/40" : "bg-blue-500/10 border-blue-500/25 hover:bg-blue-500/20"}`}>
+          onClick={() => { setEditingKey(null); setAddType(addType === "maint" ? null : "maint"); }}
+          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addType === "maint" ? "bg-blue-500/20 border-blue-500/40" : "bg-blue-500/10 border-blue-500/25 hover:bg-blue-500/20"}`}>
           <Wrench className="w-5 h-5 text-blue-400" />
-          <span className="text-[10px] font-extrabold text-zinc-100 text-center leading-tight">{editTarget && editTarget.type === "maintenance" ? "Editar servicio" : "Registrar servicio"}</span>
+          <span className="text-[10px] font-extrabold text-zinc-100 text-center leading-tight">Registrar servicio</span>
         </button>
         <button type="button"
-          onClick={() => { setEditTarget(null); setAddingPart(true); setAddingFuel(false); setAddingMaint(false); }}
-          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addingPart ? "bg-violet-500/20 border-violet-500/40" : "bg-violet-500/10 border-violet-500/25 hover:bg-violet-500/20"}`}>
+          onClick={() => { setEditingKey(null); setAddType(addType === "part" ? null : "part"); }}
+          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addType === "part" ? "bg-violet-500/20 border-violet-500/40" : "bg-violet-500/10 border-violet-500/25 hover:bg-violet-500/20"}`}>
           <ShoppingBag className="w-5 h-5 text-violet-400" />
           <span className="text-[10px] font-extrabold text-zinc-100 text-center leading-tight">Registrar repuesto</span>
         </button>
       </div>
 
-      {(addingFuel || addingMaint || addingPart) && (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 space-y-2">
+      {/* Formulario para NUEVO registro */}
+      {addType && (
+        <div className="bg-zinc-900 border border-auto-500/25 shadow-sm rounded-2xl p-4 space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-bold text-auto-400">
-              {addingFuel ? (editTarget && editTarget.type === "fuel" ? "✏️ Editar carga" : "⛽ Nueva carga") :
-               addingMaint ? (editTarget && editTarget.type === "maintenance" ? "✏️ Editar servicio" : "🔧 Nuevo servicio") :
-               (editTarget && editTarget.type === "part" ? "✏️ Editar repuesto" : "🛒 Nuevo repuesto / accesorio")}
+              {addType === "fuel" ? "⛽ Nueva carga" : addType === "maint" ? "🔧 Nuevo servicio" : "🛒 Nuevo repuesto / accesorio"}
             </p>
-            <button type="button" onClick={closeForms} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500"><X className="w-3.5 h-3.5" /></button>
+            <button type="button" onClick={() => setAddType(null)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500"><X className="w-3.5 h-3.5" /></button>
           </div>
-
-          {addingFuel && (
-            <AddFuelForm
-              vehicleId={vehicleId}
-              editItem={editTarget && editTarget.type === "fuel" ? editTarget.data : null}
-              onDone={(f) => {
-                if (f) {
-                  if (editTarget && editTarget.type === "fuel") setFuelLogsState(fuelLogsState.map((x) => (x.id === f.id ? f : x)));
-                  else setFuelLogsState([f, ...fuelLogsState]);
-                }
-                closeForms();
-              }}
-            />
-          )}
-          {addingMaint && (
-            <AddMaintForm
-              vehicleId={vehicleId}
-              editItem={editTarget && editTarget.type === "maintenance" ? editTarget.data : null}
-              onDone={(m) => {
-                if (m) {
-                  if (editTarget && editTarget.type === "maintenance") setMaintsState(maintsState.map((x) => (x.id === m.id ? m : x)));
-                  else setMaintsState([m, ...maintsState]);
-                }
-                closeForms();
-              }}
-            />
-          )}
-          {addingPart && (
-            <AddPartForm
-              vehicleId={vehicleId}
-              editItem={editTarget && editTarget.type === "part" ? editTarget.data : null}
-              onDone={(p) => {
-                if (p) {
-                  if (editTarget && editTarget.type === "part") setPartsState(partsState.map((x) => (x.id === p.id ? p : x)));
-                  else setPartsState([p, ...partsState]);
-                }
-                closeForms();
-              }}
-            />
-          )}
+          {addType === "fuel" && <AddFuelForm vehicleId={vehicleId} onDone={(f) => { if (f) setFuelLogsState([f, ...fuelLogsState]); setAddType(null); }} />}
+          {addType === "maint" && <AddMaintForm vehicleId={vehicleId} onDone={(m) => { if (m) setMaintsState([m, ...maintsState]); setAddType(null); }} />}
+          {addType === "part" && <AddPartForm vehicleId={vehicleId} onDone={(p) => { if (p) setPartsState([p, ...partsState]); setAddType(null); }} />}
         </div>
       )}
 
@@ -328,35 +289,61 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
                 )}
               </div>
               <div className="space-y-2">
-                {items.map((item) => (
-                  <TimelineItemCard
-                    key={`${item.type}-${item.data.id}`}
-                    item={item}
-                    esGalon={esGalon}
-                    volLabel={volLabel}
-                    precioLabel={precioLabel}
-                    money={money}
-                    currentKm={currentKm}
-                    onEdit={() => {
-                      setEditTarget(item);
-                      setAddingFuel(item.type === "fuel");
-                      setAddingMaint(item.type === "maintenance");
-                      setAddingPart(item.type === "part");
-                    }}
-                    onDelete={() => deleteItem(item)}
-                  />
-                ))}
+                {items.map((item) => {
+                  const key = itemKey(item);
+                  // Edición inline: reemplaza la tarjeta por el formulario en su posición
+                  if (key === editingKey) {
+                    return (
+                      <div key={key} className="bg-zinc-900 border border-auto-500/30 shadow-sm rounded-2xl p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-bold text-auto-400">
+                            ✏️ {item.type === "fuel" ? "Editar carga" : item.type === "maintenance" ? "Editar servicio" : "Editar repuesto"}
+                          </p>
+                          <button type="button" onClick={() => setEditingKey(null)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500"><X className="w-3.5 h-3.5" /></button>
+                        </div>
+                        {item.type === "fuel" && (
+                          <AddFuelForm vehicleId={vehicleId} editItem={item.data as FuelLog} onDone={(f) => {
+                            if (f) setFuelLogsState(fuelLogsState.map((x) => (x.id === f.id ? f : x)));
+                            setEditingKey(null);
+                          }} />
+                        )}
+                        {item.type === "maintenance" && (
+                          <AddMaintForm vehicleId={vehicleId} editItem={item.data as MaintenanceLog} onDone={(m) => {
+                            if (m) setMaintsState(maintsState.map((x) => (x.id === m.id ? m : x)));
+                            setEditingKey(null);
+                          }} />
+                        )}
+                        {item.type === "part" && (
+                          <AddPartForm vehicleId={vehicleId} editItem={item.data as VehicleUpgrade} onDone={(p) => {
+                            if (p) setPartsState(partsState.map((x) => (x.id === p.id ? p : x)));
+                            setEditingKey(null);
+                          }} />
+                        )}
+                      </div>
+                    );
+                  }
+                  return (
+                    <TimelineItemCard
+                      key={key}
+                      item={item}
+                      esGalon={esGalon}
+                      volLabel={volLabel}
+                      precioLabel={precioLabel}
+                      money={money}
+                      currentKm={currentKm}
+                      onEdit={() => { setAddType(null); setEditingKey(key); }}
+                      onDelete={() => deleteItem(item)}
+                    />
+                  );
+                })}
               </div>
             </div>
           ))}
 
           {hasMore && (
-            <button
-              type="button"
-              onClick={() => setVisible((v) => v + 10)}
-              className="w-full py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-[11px] font-bold text-auto-400 hover:bg-white/[0.08] transition-colors flex items-center justify-center gap-1.5"
-            >
-              <ChevronDown className="w-3.5 h-3.5" /> Ver más ({timeline.length - totalVisibleEvents} restantes)
+            <button type="button" onClick={() => setVisible((v) => v + 10)}
+              className="w-full py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-[11px] font-bold text-auto-400 hover:bg-white/[0.08] transition-colors flex items-center justify-center gap-1.5">
+              <ChevronDown className="w-3.5 h-3.5" /> Ver más ({timeline.length - totalVisible} restantes)
             </button>
           )}
         </div>
@@ -422,9 +409,7 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
           {new Date(item.data.fecha + "T12:00:00").toLocaleDateString("es-PE")}
           {detail && <span className="truncate"> · {detail}</span>}
         </p>
-        {part && lifeText && (
-          <p className={`text-[9px] font-bold mt-0.5 truncate ${lifeColor}`}>⏳ {lifeText}</p>
-        )}
+        {part && lifeText && <p className={`text-[9px] font-bold mt-0.5 truncate ${lifeColor}`}>⏳ {lifeText}</p>}
       </div>
       <span className="text-xs font-bold text-zinc-300 shrink-0">{money(Math.round(eventCost(item)))}</span>
       <div className="relative shrink-0" ref={menuRef}>
@@ -445,97 +430,6 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════ 2. Repuestos y Accesorios ═══════════════════════ */
-function PartsSection({ vehicleId, initialParts, currentKm }: { vehicleId: string; initialParts: VehicleUpgrade[]; currentKm: number }) {
-  const { money } = useMoney();
-  const [parts, setParts] = useState(initialParts);
-  const [editingId, setEditingId] = useState<string | null>(null);
-
-  const refreshPart = (p: VehicleUpgrade) => {
-    setParts(parts.map((x) => (x.id === p.id ? p : x)));
-    setEditingId(null);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Eliminar este repuesto?")) return;
-    const { error } = await createClient().from("vehicle_upgrades").delete().eq("id", id);
-    if (!error) {
-      setParts(parts.filter((x) => x.id !== id));
-      if (editingId === id) setEditingId(null);
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
-          <Store className="w-4 h-4 text-auto-500" /> Repuestos y Accesorios
-        </h2>
-        <span className="text-[10px] font-bold text-zinc-500 bg-white/[0.06] px-2 py-0.5 rounded-full">{parts.length}</span>
-      </div>
-
-      {parts.length === 0 ? (
-        <p className="text-xs text-zinc-500 text-center py-4">Registra la compra de baterías, llantas, pastillas, etc. para llevar su vida útil y gasto.</p>
-      ) : (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {parts.map((u) => {
-            const prod = partProduct(u.tipo_componente || "");
-            const life = partLife(u, currentKm);
-            const lifeColor = life.nivel === "vencido" ? "text-red-400" : life.nivel === "aviso" ? "text-amber-400" : "text-emerald-400";
-            const lifeText = [life.km, life.fecha].filter(Boolean).join(" · ");
-            // En edición: formulario ancho ocupando toda la fila, sin tarjeta previa
-            if (editingId === u.id) {
-              return (
-                <div key={u.id} className="sm:col-span-2 bg-zinc-900 border border-auto-500/25 shadow-sm rounded-2xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] font-bold text-auto-400">✏️ Editando repuesto / accesorio</p>
-                    <button type="button" onClick={() => setEditingId(null)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500" aria-label="Cancelar">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  <AddPartForm vehicleId={vehicleId} editItem={u} onDone={(p) => { if (p) refreshPart(p); }} />
-                </div>
-              );
-            }
-            return (
-              <div key={u.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0 text-lg">
-                  {prod ? prod.emoji : "🛒"}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-zinc-100 truncate">{u.nombre}</p>
-                  <p className="text-[10px] text-zinc-500 truncate">
-                    {prod ? prod.label : PART_CATEGORIA_LABEL[u.categoria] || ""}
-                    {u.marca ? ` · ${u.marca}` : ""}
-                    {u.odometro != null ? ` · compra a ${u.odometro.toLocaleString("es-PE")} km` : ""}
-                  </p>
-                  <p className="text-[10px] text-zinc-500 truncate">
-                    {new Date(u.fecha + "T12:00:00").toLocaleDateString("es-PE")}
-                    {u.duracion_km ? ` · dura ${u.duracion_km.toLocaleString("es-PE")} km` : ""}
-                    {u.fecha_vencimiento ? ` · ${formatoRestante(u.fecha_vencimiento)}` : ""}
-                  </p>
-                  {lifeText && <p className={`text-[9px] font-bold mt-0.5 truncate ${lifeColor}`}>⏳ {lifeText}</p>}
-                </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <span className="text-xs font-bold text-auto-500">{u.costo ? money(u.costo) : "—"}</span>
-                  <div className="flex items-center gap-0.5">
-                    <button type="button" onClick={() => setEditingId(u.id)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-auto-300" title="Editar">
-                      <Pencil className="w-3 h-3" />
-                    </button>
-                    <button type="button" onClick={() => handleDelete(u.id)} className="w-6 h-6 rounded-md hover:bg-red-600/10 flex items-center justify-center text-zinc-500 hover:text-red-500" title="Eliminar">
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }
@@ -603,10 +497,10 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
     <div className="space-y-2">
       <p className="text-[10px] font-bold text-zinc-400">Unidad: {esGalon ? "galones" : "litros"} · el precio es por {precioUnit}</p>
       <div className="grid grid-cols-4 gap-1.5">
-        <input type="number" step="0.1" value={form.cantidad} onChange={(e) => setForm({ ...form, cantidad: e.target.value })} placeholder={unidadShort} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder={`${cfg.currency}/${unidadShort}`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
+        <input type="number" step="0.1" value={form.cantidad} onChange={(e) => setForm({ ...form, cantidad: e.target.value })} placeholder={unidadShort} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0" />
+        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder={`${cfg.currency}/${unidadShort}`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0" />
+        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0" />
+        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0">
           {cfg.fuelTypes.map((ft) => <option key={ft.value} value={ft.value}>{ft.label}</option>)}
         </select>
       </div>
@@ -717,10 +611,19 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
   );
 }
 
-/* Formulario de repuesto/accesorio con catálogo de producto */
+/* Formulario de repuesto/accesorio: buscador + catálogo + sincronización con el ADN */
 function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editItem?: VehicleUpgrade | null; onDone: (p: VehicleUpgrade | null) => void }) {
   const { symbol } = useMoney();
   const [saving, setSaving] = useState(false);
+  const [query, setQuery] = useState("");
+  const [showPicker, setShowPicker] = useState(false);
+  const [specs, setSpecs] = useState<VehicleSpecs | null>(null);
+
+  // Cargar el ADN actual para pre-llenar campos sincronizables
+  useEffect(() => {
+    createClient().from("vehicle_specs").select("*").eq("vehicle_id", vehicleId).maybeSingle()
+      .then(({ data }) => setSpecs(data as VehicleSpecs | null));
+  }, [vehicleId]);
 
   const [form, setForm] = useState({
     tipo_componente: editItem?.tipo_componente || "",
@@ -736,31 +639,49 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
     conVencimiento: !!editItem?.fecha_vencimiento,
     fecha_vencimiento: editItem?.fecha_vencimiento || "",
     notas: editItem?.notas || "",
+    adn: {} as Record<string, string>,
   });
 
-  const applyProduct = (value: string) => {
-    const prod = partProduct(value);
-    if (!prod) {
-      setForm((f) => ({ ...f, tipo_componente: value, categoria: "estetico" }));
-      return;
-    }
-    const next: typeof form = { ...form, tipo_componente: value, categoria: prod.categoria, nombre: editItem?.nombre || prod.label };
-    if (prod.vida) {
-      if (prod.vida.tipo === "km" && prod.vida.km) {
-        next.conKm = true;
-        next.duracion_km = String(prod.vida.km);
-        next.conVencimiento = false;
-        next.fecha_vencimiento = "";
-      } else if (prod.vida.tipo === "tiempo" && prod.vida.meses) {
-        next.conKm = false;
-        next.duracion_km = "";
-        next.conVencimiento = true;
-        const d = new Date(next.fecha + "T12:00:00");
-        d.setMonth(d.getMonth() + prod.vida.meses);
-        next.fecha_vencimiento = d.toISOString().slice(0, 10);
+  const picked = partProduct(form.tipo_componente);
+  const results = searchProducts(query);
+
+  const adnDefault = (key: string): string => {
+    const v = (specs as unknown as Record<string, unknown>)?.[key];
+    if (v == null) return "";
+    if (key === "bateria_mantenimiento_fecha") return String(v);
+    return String(v);
+  };
+
+  const applyProduct = (prod: PartProduct) => {
+    const adn: Record<string, string> = {};
+    for (const f of prod.adn || []) adn[f.key] = adnDefault(f.key);
+    setForm((f) => {
+      const next: typeof form = {
+        ...f,
+        tipo_componente: prod.value,
+        categoria: prod.categoria,
+        nombre: f.nombre || prod.label,
+        adn,
+      };
+      if (prod.vida) {
+        if (prod.vida.tipo === "km" && prod.vida.km) {
+          next.conKm = true;
+          next.duracion_km = String(prod.vida.km);
+          next.conVencimiento = false;
+          next.fecha_vencimiento = "";
+        } else if (prod.vida.tipo === "tiempo" && prod.vida.meses) {
+          next.conKm = false;
+          next.duracion_km = "";
+          next.conVencimiento = true;
+          const d = new Date(next.fecha + "T12:00:00");
+          d.setMonth(d.getMonth() + prod.vida.meses);
+          next.fecha_vencimiento = d.toISOString().slice(0, 10);
+        }
       }
-    }
-    setForm(next);
+      return next;
+    });
+    setQuery("");
+    setShowPicker(false);
   };
 
   const handleSubmit = async () => {
@@ -791,37 +712,89 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
       const { data: d } = await supabase.from("vehicle_upgrades").insert(payload).select().single();
       data = d as VehicleUpgrade | null;
     }
+
+    // Sincronizar campos del ADN si el producto los tiene y el usuario completó alguno
+    const adnFields = picked?.adn || [];
+    if (adnFields.length > 0) {
+      const specPayload: Record<string, unknown> = { vehicle_id: vehicleId };
+      for (const f of adnFields) {
+        const raw = form.adn[f.key]?.trim() ?? "";
+        if (!raw) continue;
+        specPayload[f.key] = f.kind === "number" ? Number(raw) : raw;
+      }
+      if (Object.keys(specPayload).length > 1) {
+        await supabase.from("vehicle_specs").upsert(specPayload, { onConflict: "vehicle_id" });
+      }
+    }
+
     setSaving(false);
     if (data) onDone(data);
   };
 
+  const adnFields = picked?.adn || [];
+
   return (
     <div className="space-y-2">
-      {/* Producto */}
-      <label className="block">
-        <span className="text-[10px] font-bold text-zinc-500">Producto</span>
-        <select value={form.tipo_componente} onChange={(e) => applyProduct(e.target.value)}
-          className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
-          <option value="">Selecciona el producto…</option>
-          {PART_PRODUCTS.map((p) => <option key={p.value} value={p.value}>{p.emoji} {p.label}</option>)}
-        </select>
-      </label>
-      {form.tipo_componente && partProduct(form.tipo_componente)?.descripcion && (
-        <p className="text-[9px] text-zinc-500">{partProduct(form.tipo_componente)?.descripcion} · {PART_CATEGORIA_LABEL[partProduct(form.tipo_componente)!.categoria]} · {partProduct(form.tipo_componente)?.tipoMantenimiento}</p>
+      {/* Buscador de producto */}
+      <div>
+        <span className="text-[10px] font-bold text-zinc-500">Producto (busca el que compraste)</span>
+        <div className="relative mt-0.5">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+          <input
+            value={picked ? picked.label : query}
+            readOnly={!!picked}
+            onChange={(e) => { setQuery(e.target.value); setShowPicker(true); }}
+            onFocus={() => setShowPicker(true)}
+            onBlur={() => setTimeout(() => setShowPicker(false), 150)}
+            placeholder="Llantas, batería, parlantes, gata…"
+            className="w-full pl-8 pr-8 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200"
+          />
+          {picked && (
+            <button type="button" onClick={() => setForm((f) => ({ ...f, tipo_componente: "", categoria: "estetico", adn: {} }))}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-zinc-500 hover:text-zinc-200">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+        {showPicker && !picked && (
+          <div className="mt-1 max-h-52 overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 p-1.5 space-y-0.5">
+            {results.map((p) => (
+              <button key={p.value} type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyProduct(p)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.06] text-left">
+                <span className="text-base">{p.emoji}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-zinc-200 truncate">{p.label}</p>
+                  <p className="text-[9px] text-zinc-500 truncate">
+                    {PART_CATEGORIA_LABEL[p.categoria]} · {p.tipoMantenimiento}
+                    {p.vida?.tipo === "km" && p.vida.km ? ` · ${p.vida.km.toLocaleString("es-PE")} km` : ""}
+                    {p.vida?.tipo === "tiempo" && p.vida.meses ? ` · ${p.vida.meses} meses` : ""}
+                  </p>
+                </div>
+              </button>
+            ))}
+            {results.length === 0 && <p className="text-[10px] text-zinc-500 px-2 py-2">Sin resultados. Puedes registrarlo como accesorio escribiendo el nombre.</p>}
+          </div>
+        )}
+      </div>
+
+      {picked?.descripcion && (
+        <p className="text-[9px] text-zinc-500">{picked.descripcion} · {picked.tipoMantenimiento}</p>
       )}
 
       <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre del repuesto / accesorio" className="w-full px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
 
       <div className="grid grid-cols-2 gap-1.5">
-        <input value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} placeholder="Marca (ej: BOSCH)" className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-        <input value={form.proveedor} onChange={(e) => setForm({ ...form, proveedor: e.target.value })} placeholder="Proveedor / tienda" className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <input value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} placeholder="Marca (ej: BOSCH)" className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0" />
+        <input value={form.proveedor} onChange={(e) => setForm({ ...form, proveedor: e.target.value })} placeholder="Proveedor / tienda" className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0" />
       </div>
 
       <div className="grid grid-cols-2 gap-1.5">
-        <label className="block"><span className="text-[9px] font-bold text-zinc-500">Costo ({symbol})</span>
-          <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`Ej: 450`} className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <label className="block min-w-0"><span className="text-[9px] font-bold text-zinc-500">Costo ({symbol})</span>
+          <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="Ej: 450" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
         </label>
-        <label className="block"><span className="text-[9px] font-bold text-zinc-500">Odómetro al comprar</span>
+        <label className="block min-w-0"><span className="text-[9px] font-bold text-zinc-500">Odómetro al comprar</span>
           <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Ej: 45000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
         </label>
       </div>
@@ -841,7 +814,34 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
         });
       }} />
 
-      {/* Vida útil: puede marcarse por km y/o por fecha (aplica lo que ocurra primero) */}
+      {/* Sincronización con el ADN del vehículo */}
+      {adnFields.length > 0 && (
+        <div className="rounded-xl bg-auto-500/[0.05] border border-auto-500/20 p-2.5 space-y-2">
+          <p className="text-[10px] font-bold text-auto-400 flex items-center gap-1">
+            <Gauge className="w-3 h-3" /> Se sincronizará con el ADN del vehículo
+          </p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {adnFields.map((f) => (
+              <label key={f.key} className="block min-w-0 col-span-2 sm:col-span-1">
+                <span className="text-[9px] font-bold text-zinc-500 block truncate">{f.label}</span>
+                {f.kind === "date" ? (
+                  <DatePicker colorTheme="auto" value={form.adn[f.key] || ""} onChange={(d) => setForm({ ...form, adn: { ...form.adn, [f.key]: d } })} />
+                ) : (
+                  <input
+                    type={f.kind === "number" ? "number" : "text"}
+                    value={form.adn[f.key] || ""}
+                    onChange={(e) => setForm({ ...form, adn: { ...form.adn, [f.key]: e.target.value } })}
+                    placeholder={f.help || ""}
+                    className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 mt-0.5"
+                  />
+                )}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Vida útil: km y/o fecha */}
       <div className="space-y-1.5">
         <div className="flex items-center gap-2 text-[10px] text-zinc-500">Marca el límite por kilómetros, por fecha, o ambos (se avisará lo que ocurra primero).</div>
         <div className="grid grid-cols-2 gap-1.5">
@@ -875,7 +875,7 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
   );
 }
 
-/* ═══════════════════════════ 3. Control de Garantía ═══════════════════════ */
+/* ═══════════════════════════ 2. Control de Garantía ═══════════════════════ */
 function WarrantySection({ vehicle, maintenances }: { vehicle: Vehicle; maintenances: MaintenanceLog[] }) {
   const garantiaKm = 60000;
   const kmRestantes = Math.max(0, garantiaKm - vehicle.kilometraje);
@@ -917,7 +917,7 @@ function WarrantySection({ vehicle, maintenances }: { vehicle: Vehicle; maintena
   );
 }
 
-/* ═══════════════════════════ 4. Rotación de Neumáticos ═══════════════════════ */
+/* ═══════════════════════════ 3. Rotación de Neumáticos ═══════════════════════ */
 function TireRotationSection() {
   type Position = "DI" | "DD" | "TI" | "TD";
   const initial: Record<Position, string> = { DI: "A", DD: "B", TI: "C", TD: "D" };
@@ -977,7 +977,7 @@ function TireCircle({ label, name, color }: { label: string; name: string; color
   );
 }
 
-/* ═══════════════════════════ 5. Exportación Carfax ═══════════════════════ */
+/* ═══════════════════════════ 4. Exportación Carfax ═══════════════════════ */
 function CarfaxExportSection({ vehicle, fuelLogs, maintenances, upgrades }: {
   vehicle: Vehicle; fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; upgrades: VehicleUpgrade[];
 }) {
