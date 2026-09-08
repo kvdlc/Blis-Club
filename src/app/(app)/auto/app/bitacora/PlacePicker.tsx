@@ -201,8 +201,17 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
     if (!form.nombre.trim()) { setError("El nombre del lugar es obligatorio."); return; }
     setSaving(true); setError(null);
     const supabase = createClient();
-    const tel = form.telefono ? `${prefijo}${form.telefono.replace(/[^0-9]/g, "")}` : null;
-    const wa = form.whatsapp ? `${prefijo}${form.whatsapp.replace(/[^0-9]/g, "")}` : tel;
+    const normalize = (num: string): string | null => {
+      const raw = (num || "").trim();
+      if (!raw) return null;
+      const prefixDigits = (countryPrefixes.find((p) => p.code === form.pais)?.prefix || "+51").replace("+", "");
+      let d = raw.replace(/[^0-9]/g, "");
+      if (d.startsWith("00")) d = d.slice(2);
+      if (d.startsWith(prefixDigits)) return `+${d}`;
+      return `+${prefixDigits}${d}`;
+    };
+    const tel = normalize(form.telefono);
+    const wa = normalize(form.whatsapp) || tel;
     const { data, error: err } = await supabase
       .from("vehicle_contacts")
       .insert({

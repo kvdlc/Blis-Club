@@ -462,11 +462,11 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
     if (!form.nombre) return;
     setSaving(true);
     const supabase = createClient();
-    const telefonoCompleto = form.telefono ? `+${CountryPrefixOnly(form.pais)}${form.telefono.replace(/[^0-9]/g, "")}` : null;
+    const telefonoCompleto = normalizePhone(form.telefono, form.pais);
     const payload = {
       nombre: form.nombre, encargado: form.encargado || null, tipo: form.tipo,
       telefono: telefonoCompleto,
-      telefono_alt: form.telefono_alt ? `+${CountryPrefixOnly(form.pais_alt)}${form.telefono_alt.replace(/[^0-9]/g, "")}` : null,
+      telefono_alt: normalizePhone(form.telefono_alt, form.pais_alt),
       whatsapp: telefonoCompleto,
       pais_telefono: form.pais,
       foto_url: form.foto_url || null,
@@ -480,7 +480,8 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
       ? await supabase.from("vehicle_contacts").update(payload).eq("id", editId).select().single()
       : await supabase.from("vehicle_contacts").insert({ ...payload, vehicle_id: vehicleId }).select().single();
     setSaving(false);
-    if (!error && data) {
+    if (error) { alert("No se pudo guardar el contacto: " + error.message); return; }
+    if (data) {
       const saved = data as VehicleContact;
       setContacts(editId ? contacts.map((c) => (c.id === saved.id ? saved : c)) : [...contacts, saved]);
       cancelContactForm();
@@ -707,6 +708,21 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
 function CountryPrefixOnly(pais: string) {
   const p = countryPrefixes.find((x) => x.code === pais)?.prefix || countryPrefixes[0].prefix;
   return p.replace("+", "");
+}
+
+/**
+ * Normaliza un número local a formato internacional con prefijo del país,
+ * sin duplicar el código si el usuario ya lo escribió (acepta +51, 51, 0051...).
+ */
+function normalizePhone(num: string, pais: string): string | null {
+  const raw = (num || "").trim();
+  if (!raw) return null;
+  const prefixDigits = CountryPrefixOnly(pais);
+  let d = raw.replace(/[^0-9]/g, "");
+  if (d.startsWith("00")) d = d.slice(2); // 005198... -> 5198...
+  // Si ya empieza con el código del país, no volver a anteponerlo
+  if (d.startsWith(prefixDigits)) return `+${d}`;
+  return `+${prefixDigits}${d}`;
 }
 
 /* ═══════════════════════════ 3. ADN del Vehículo ═══════════════════════ */

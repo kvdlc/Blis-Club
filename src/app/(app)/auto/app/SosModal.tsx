@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { getCurrentCountryCode } from "@/lib/countries";
 import { emergencyForCountry } from "@/lib/emergency";
@@ -89,12 +90,17 @@ export function SosModal({ vehicle, open, onClose }: Props) {
       .then(({ data }) => setContacts((data as VehicleContact[] | null) ?? []));
   }, [open, vehicle.id]);
 
-  // Esc para cerrar
+  // Esc para cerrar + bloquear scroll del fondo mientras está abierto
   useEffect(() => {
     if (!open) return;
     const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", h);
-    return () => document.removeEventListener("keydown", h);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", h);
+      document.body.style.overflow = prev;
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -137,11 +143,11 @@ export function SosModal({ vehicle, open, onClose }: Props) {
     ? `🚨 Necesito ayuda. Vehículo: ${datosVehiculo}. Mi ubicación: ${mapsUrl}`
     : "";
 
-  return (
-    <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm" onClick={onClose}>
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-md max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-zinc-900 border border-white/10 p-4 space-y-4"
+        className="w-full sm:max-w-md max-h-[92vh] overflow-y-auto overscroll-contain rounded-t-3xl sm:rounded-3xl bg-zinc-900 border border-white/10 p-4 space-y-4"
       >
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -292,6 +298,7 @@ export function SosModal({ vehicle, open, onClose }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
