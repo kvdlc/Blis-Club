@@ -154,7 +154,7 @@ export async function POST(request: Request) {
 
     const paymentResponse = await createPayment(
       {
-        amount: totalDollars,
+        amount: total,
         currency: "USD",
         orderId,
         customer: {
