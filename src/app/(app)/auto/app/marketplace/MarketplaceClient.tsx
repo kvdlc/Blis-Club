@@ -14,8 +14,9 @@ import { useMoney } from "@/lib/money";
 import { MarketplaceHero3D } from "./MarketplaceHero3D";
 import { MarketplaceSplash } from "./MarketplaceSplash";
 import {
-  CategoryGrid, Trending, Featured, DailyDeals, Testimonials, Guides, TrustBar,
+  CategoryGrid, Trending, Featured, DailyDeals, Testimonials, Guides, TrustBar, TrustMarquee,
 } from "./MarketplaceSections";
+import { Stagger, StaggerItem, Reveal, GlowOrb, ScrollParallax } from "./MarketplaceMotion";
 
 const vehicleTypes = [
   { key: "todas", label: "Todos", icon: "🚗" },
@@ -106,7 +107,20 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
   }, [listings, marca]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Fondo parallax decorativo fijo */}
+      <div aria-hidden className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <ScrollParallax from={-40} to={60}>
+          <GlowOrb className="top-1/4 -left-24 bg-auto-600/[0.08]" size={340} float={1.4} />
+        </ScrollParallax>
+        <ScrollParallax from={80} to={-40}>
+          <GlowOrb className="top-2/3 -right-24 bg-violet-600/[0.07]" size={360} float={2} delay={0.6} />
+        </ScrollParallax>
+        <ScrollParallax from={0} to={120}>
+          <GlowOrb className="bottom-10 left-1/3 bg-amber-500/[0.05]" size={280} float={1} delay={1.2} />
+        </ScrollParallax>
+      </div>
+
       {/* Splash de carga de marca */}
       <MarketplaceSplash />
 
@@ -115,6 +129,11 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
 
       {/* Trust badges */}
       <TrustBar />
+
+      {/* Marquee de marcas */}
+      <Reveal>
+        <TrustMarquee />
+      </Reveal>
 
       {/* Tiendas por categoría */}
       <CategoryGrid products={products} />
@@ -170,49 +189,56 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <Stagger className="grid grid-cols-2 md:grid-cols-3 gap-2" stagger={0.06}>
               {autos.slice(0, visibleAutos).map((listing) => {
                 const r = ratingFor(listing.id);
                 const fav = favoritos.has(listing.id);
                 return (
-                  <motion.div key={listing.id} whileHover={{ y: -3 }} className="relative">
-                    <Link href={`/auto/app/marketplace/${listing.slug}`}
-                      className="block bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow group">
-                      <div className="aspect-square bg-zinc-800 flex items-center justify-center relative overflow-hidden">
-                        {listing.fotos?.[0] ? (
-                          <img src={listing.fotos[0]} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <Car className="w-10 h-10 text-zinc-600" />
-                        )}
-                        <span className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full bg-auto-600/90 text-white">
-                          {listing.marca || "Auto"}
-                        </span>
-                      </div>
-                      <div className="p-3 space-y-1">
-                        <p className="text-xs font-bold text-zinc-200 line-clamp-1 leading-tight group-hover:text-auto-400">{listing.titulo}</p>
-                        <p className="text-[10px] text-zinc-500 truncate">{listing.marca} {listing.modelo}</p>
-                        <div className="flex items-center gap-1">
-                          <Stars value={r.stars} />
-                          <span className="text-[9px] text-zinc-500">({r.count})</span>
+                  <StaggerItem key={listing.id}>
+                    <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} className="relative">
+                      <Link href={`/auto/app/marketplace/${listing.slug}`}
+                        className="block bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden hover:border-auto-500/30 hover:shadow-[0_10px_40px_rgba(16,185,129,0.15)] transition-all duration-300 group">
+                        <div className="aspect-square bg-zinc-800 flex items-center justify-center relative overflow-hidden">
+                          {listing.fotos?.[0] ? (
+                            <img src={listing.fotos[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          ) : (
+                            <Car className="w-10 h-10 text-zinc-600" />
+                          )}
+                          <span className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full bg-auto-600/90 text-white">
+                            {listing.marca || "Auto"}
+                          </span>
                         </div>
-                        <p className="text-sm font-black text-auto-500">
-                          {listing.precio === 0 ? "Gratis" : money(listing.precio)}
-                        </p>
-                        {listing.ciudad && (
-                          <p className="text-[9px] text-zinc-500 flex items-center gap-0.5">
-                            <MapPin className="w-2.5 h-2.5" /> {listing.ciudad}
+                        <div className="p-3 space-y-1">
+                          <p className="text-xs font-bold text-zinc-200 line-clamp-1 leading-tight group-hover:text-auto-400">{listing.titulo}</p>
+                          <p className="text-[10px] text-zinc-500 truncate">{listing.marca} {listing.modelo}</p>
+                          <div className="flex items-center gap-1">
+                            <Stars value={r.stars} />
+                            <span className="text-[9px] text-zinc-500">({r.count})</span>
+                          </div>
+                          <p className="text-sm font-black text-auto-500">
+                            {listing.precio === 0 ? "Gratis" : money(listing.precio)}
                           </p>
-                        )}
-                      </div>
-                    </Link>
-                    <button type="button" onClick={() => toggleFav(listing.id)} aria-label="Favorito"
-                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur flex items-center justify-center transition-transform active:scale-90">
-                      <Heart className={`w-4 h-4 ${fav ? "text-red-500 fill-red-500" : "text-white"}`} />
-                    </button>
-                  </motion.div>
+                          {listing.ciudad && (
+                            <p className="text-[9px] text-zinc-500 flex items-center gap-0.5">
+                              <MapPin className="w-2.5 h-2.5" /> {listing.ciudad}
+                            </p>
+                          )}
+                        </div>
+                      </Link>
+                      <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.8 }}
+                        animate={fav ? { scale: [1, 1.25, 1] } : {}}
+                        transition={{ duration: 0.4 }}
+                        onClick={() => toggleFav(listing.id)} aria-label="Favorito"
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur flex items-center justify-center active:scale-90">
+                        <Heart className={`w-4 h-4 ${fav ? "text-red-500 fill-red-500" : "text-white"}`} />
+                      </motion.button>
+                    </motion.div>
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </Stagger>
             {autos.length > visibleAutos && (
               <button type="button" onClick={() => setVisibleAutos((v) => v + 6)}
                 className="w-full py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-[11px] font-bold text-auto-400 hover:bg-white/[0.08] transition-colors">
@@ -243,38 +269,37 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {products.slice(0, visibleProducts).map((p, idx) => (
-                <motion.div
-                  key={p.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ delay: Math.min(idx * 0.03, 0.2) }}
-                  className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden"
-                >
-                  <Link href={`/auto/app/marketplace/producto/${p.id}`} className="block group">
-                    <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden">
-                      {p.imagen_url ? (
-                        <img src={p.imagen_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      ) : (
-                        <ShoppingBag className="w-10 h-10 text-zinc-600" />
-                      )}
-                    </div>
-                    <div className="p-3 space-y-1">
-                      <p className="text-xs font-bold text-zinc-200 line-clamp-2 leading-tight">{p.titulo}</p>
-                      <p className="text-[9px] text-zinc-500">{p.categoria ? productCats[p.categoria] || p.categoria : "Accesorio"}</p>
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-sm font-black text-auto-500">{p.precio != null && p.precio > 0 ? money(p.precio) : "—"}</p>
-                        {p.precio_original != null && p.precio_original > (p.precio || 0) && (
-                          <span className="text-[10px] text-zinc-600 line-through">{money(p.precio_original)}</span>
+            <Stagger className="grid grid-cols-2 md:grid-cols-3 gap-2" stagger={0.05}>
+              {products.slice(0, visibleProducts).map((p) => (
+                <StaggerItem key={p.id}>
+                  <motion.div
+                    whileHover={{ y: -4 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden hover:border-auto-500/30 hover:shadow-[0_10px_40px_rgba(16,185,129,0.12)] transition-all duration-300"
+                  >
+                    <Link href={`/auto/app/marketplace/producto/${p.id}`} className="block group">
+                      <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden">
+                        {p.imagen_url ? (
+                          <motion.img src={p.imagen_url} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        ) : (
+                          <ShoppingBag className="w-10 h-10 text-zinc-600" />
                         )}
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
+                      <div className="p-3 space-y-1">
+                        <p className="text-xs font-bold text-zinc-200 line-clamp-2 leading-tight group-hover:text-auto-300">{p.titulo}</p>
+                        <p className="text-[9px] text-zinc-500">{p.categoria ? productCats[p.categoria] || p.categoria : "Accesorio"}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-black text-auto-500">{p.precio != null && p.precio > 0 ? money(p.precio) : "—"}</p>
+                          {p.precio_original != null && p.precio_original > (p.precio || 0) && (
+                            <span className="text-[10px] text-zinc-600 line-through">{money(p.precio_original)}</span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
             {products.length > visibleProducts && (
               <button type="button" onClick={() => setVisibleProducts((v) => v + 8)}
                 className="w-full py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-[11px] font-bold text-violet-300 hover:bg-white/[0.08] transition-colors">

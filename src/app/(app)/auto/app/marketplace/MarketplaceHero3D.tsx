@@ -59,8 +59,10 @@ export function MarketplaceHero3D() {
     >
       {/* Glow decorativo */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-auto-500/10 blur-3xl" />
-        <div className="absolute -bottom-32 -right-24 w-80 h-80 rounded-full bg-violet-500/10 blur-3xl" />
+        <motion.div animate={{ x: [0, 20, 0], y: [0, -16, 0] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-auto-500/10 blur-3xl" />
+        <motion.div animate={{ x: [0, -24, 0], y: [0, 18, 0] }} transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute -bottom-32 -right-24 w-80 h-80 rounded-full bg-violet-500/10 blur-3xl" />
       </div>
 
       <div className="relative grid md:grid-cols-2 gap-4 items-center p-6 md:p-10">
@@ -98,20 +100,24 @@ export function MarketplaceHero3D() {
             transition={{ delay: 0.4 }}
             className="flex flex-wrap gap-2 pt-1"
           >
-            <button
+            <motion.button
               type="button"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => router.push("/auto/app/marketplace/publicar")}
               className="px-5 py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-500 transition-colors shadow-auto-glow active:scale-[0.98]"
             >
               Vender mi vehículo
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               type="button"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => document.getElementById("autos")?.scrollIntoView({ behavior: "smooth" })}
               className="px-5 py-3 rounded-2xl bg-white/[0.06] border border-white/10 text-zinc-200 font-bold text-sm hover:bg-white/[0.1] transition-colors"
             >
               Explorar autos
-            </button>
+            </motion.button>
           </motion.div>
         </div>
 
