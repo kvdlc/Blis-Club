@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import type { MarketplaceProduct } from "@/types/database";
-import { ArrowLeft, Star, ExternalLink, Tag, ShoppingBag, Sparkles } from "lucide-react";
+import { ArrowLeft, Star, ExternalLink, Tag, ShoppingBag, Sparkles, Play } from "lucide-react";
 import { useMoney } from "@/lib/money";
+import { useState } from "react";
 
 const productCats: Record<string, string> = {
   accesorios: "Accesorios", repuestos: "Repuestos", electronica: "Electrónica",
@@ -28,23 +29,59 @@ export default function ProductDetailClient({ product, similares }: Props) {
   const r = ratingFor(product.id);
   const desc = product.descripcion || `Producto destacado de ${product.categoria ? productCats[product.categoria] || product.categoria : "autos"}. Calidad y buen precio.`;
 
+  // Galería: video primero (si existe) + imágenes
+  const media: { type: "video" | "img"; src: string }[] = [];
+  if (product.video_url) media.push({ type: "video", src: product.video_url });
+  const gal = (product.galeria && product.galeria.length ? product.galeria : []).filter(Boolean);
+  if (product.imagen_url && !gal.includes(product.imagen_url)) media.push({ type: "img", src: product.imagen_url });
+  for (const g of gal) if (!media.some((m) => m.src === g)) media.push({ type: "img", src: g });
+  const [active, setActive] = useState(0);
+  const current = media[active] || null;
+
   return (
     <div className="space-y-4 pb-10">
       <Link href="/auto/app/marketplace" className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500 hover:text-auto-500 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Marketplace
       </Link>
 
-      {/* Imagen */}
-      <div className="rounded-2xl overflow-hidden bg-zinc-800 relative">
-        {product.imagen_url ? (
-          <img src={product.imagen_url} alt={product.titulo} className="w-full h-64 md:h-80 object-cover" />
-        ) : (
-          <div className="h-64 md:h-80 flex items-center justify-center"><ShoppingBag className="w-16 h-16 text-zinc-600" /></div>
-        )}
-        {product.destacado && (
-          <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/90 text-white shadow">
-            <Sparkles className="w-3 h-3" /> Destacado
-          </span>
+      {/* Galería + Video */}
+      <div className="space-y-2">
+        <div className="rounded-2xl overflow-hidden bg-zinc-800 relative aspect-[4/3]">
+          {current ? (
+            current.type === "video" ? (
+              <video src={current.src} className="w-full h-full object-cover" autoPlay muted loop playsInline controls />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={current.src} alt={product.titulo} className="w-full h-full object-cover" />
+            )
+          ) : (
+            <div className="w-full h-full flex items-center justify-center"><ShoppingBag className="w-16 h-16 text-zinc-600" /></div>
+          )}
+          {product.destacado && (
+            <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/90 text-white shadow">
+              <Sparkles className="w-3 h-3" /> Destacado
+            </span>
+          )}
+          {current?.type === "video" && (
+            <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-black/60 text-white backdrop-blur">
+              <Play className="w-3 h-3" /> Video
+            </span>
+          )}
+        </div>
+        {media.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {media.map((m, i) => (
+              <button key={i} onClick={() => setActive(i)}
+                className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors ${i === active ? "border-auto-500" : "border-transparent opacity-70"}`}>
+                {m.type === "video" ? (
+                  <div className="w-full h-full bg-zinc-800 flex items-center justify-center"><Play className="w-5 h-5 text-auto-500" /></div>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={m.src} alt="" className="w-full h-full object-cover" />
+                )}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 

@@ -253,6 +253,8 @@ export interface MarketplaceProduct {
   url_temu: string | null;
   destacado: boolean;
   activo: boolean;
+  galeria: string[] | null;
+  video_url: string | null;
   created_at: string;
   updated_at: string;
 }
