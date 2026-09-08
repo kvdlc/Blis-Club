@@ -178,7 +178,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
                   <motion.div key={listing.id} whileHover={{ y: -3 }} className="relative">
                     <Link href={`/auto/app/marketplace/${listing.slug}`}
                       className="block bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow group">
-                      <div className="h-32 bg-zinc-800 flex items-center justify-center relative">
+                      <div className="aspect-square bg-zinc-800 flex items-center justify-center relative overflow-hidden">
                         {listing.fotos?.[0] ? (
                           <img src={listing.fotos[0]} alt="" className="w-full h-full object-cover" />
                         ) : (
@@ -254,7 +254,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
                   className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden"
                 >
                   <Link href={`/auto/app/marketplace/producto/${p.id}`} className="block group">
-                    <div className="h-32 bg-zinc-800 flex items-center justify-center overflow-hidden">
+                    <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden">
                       {p.imagen_url ? (
                         <img src={p.imagen_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (

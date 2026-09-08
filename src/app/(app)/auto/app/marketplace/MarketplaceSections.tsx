@@ -119,7 +119,7 @@ export function Featured({ products }: { products: MarketplaceProduct[] }) {
           return (
             <Link key={p.id} href={`/auto/app/marketplace/producto/${p.id}`}
               className="bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden hover:border-auto-500/30 hover:bg-white/[0.06] transition-colors group">
-              <div className="h-24 bg-zinc-800 flex items-center justify-center">
+              <div className="aspect-square bg-zinc-800 flex items-center justify-center">
                 {p.imagen_url ? <img src={p.imagen_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <ShoppingBag className="w-8 h-8 text-zinc-600" />}
               </div>
               <div className="p-2.5 space-y-1">

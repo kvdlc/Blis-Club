@@ -46,7 +46,7 @@ export default function ProductDetailClient({ product, similares }: Props) {
 
       {/* Galería + Video */}
       <div className="space-y-2">
-        <div className="rounded-2xl overflow-hidden bg-zinc-800 relative aspect-[4/3]">
+        <div className="rounded-2xl overflow-hidden bg-zinc-800 relative aspect-square">
           {current ? (
             current.type === "video" ? (
               <video src={current.src} className="w-full h-full object-cover" autoPlay muted loop playsInline controls />
@@ -138,7 +138,7 @@ export default function ProductDetailClient({ product, similares }: Props) {
             {similares.map((s) => (
               <Link key={s.id} href={`/auto/app/marketplace/producto/${s.id}`}
                 className="bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
-                <div className="h-24 bg-zinc-800 flex items-center justify-center overflow-hidden">
+                <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden">
                   {s.imagen_url ? <img src={s.imagen_url} alt="" className="w-full h-full object-cover" /> : <ShoppingBag className="w-8 h-8 text-zinc-600" />}
                 </div>
                 <div className="p-2 space-y-0.5">

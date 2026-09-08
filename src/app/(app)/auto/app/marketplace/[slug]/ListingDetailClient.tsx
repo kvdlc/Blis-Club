@@ -86,11 +86,11 @@ export default function ListingDetailClient({ listing, isOwner, userId, similare
       </Link>
 
       {/* Galería */}
-      <div className="rounded-2xl overflow-hidden bg-zinc-800 relative">
+      <div className="rounded-2xl overflow-hidden bg-zinc-800 relative aspect-square">
         {galeria[activoImg] ? (
-          <img src={galeria[activoImg]} alt={listing.titulo} className="w-full h-64 md:h-80 object-cover" />
+          <img src={galeria[activoImg]} alt={listing.titulo} className="w-full h-full object-cover" />
         ) : (
-          <div className="h-64 md:h-80 flex items-center justify-center"><span className="text-6xl">🚗</span></div>
+          <div className="w-full h-full flex items-center justify-center"><span className="text-6xl">🚗</span></div>
         )}
         {galeria.length > 1 && (
           <div className="absolute bottom-3 right-3 flex gap-1.5">
@@ -229,7 +229,7 @@ export default function ListingDetailClient({ listing, isOwner, userId, similare
             {similares.map((s) => (
               <Link key={s.id} href={`/auto/app/marketplace/${s.slug}`}
                 className="bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
-                <div className="h-24 bg-zinc-800 flex items-center justify-center">
+                <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden">
                   {s.fotos?.[0] ? <img src={s.fotos[0]} alt="" className="w-full h-full object-cover" /> : <span className="text-3xl">🚗</span>}
                 </div>
                 <div className="p-2 space-y-0.5">
