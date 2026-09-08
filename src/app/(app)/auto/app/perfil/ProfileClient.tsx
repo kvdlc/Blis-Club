@@ -83,7 +83,7 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
       </div>
 
       {/* Datos personales */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-extrabold text-zinc-300">Datos personales</h3>
           <button onClick={() => setEditingProfile(!editingProfile)}
@@ -98,36 +98,36 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
               <label className="block">
                 <span className="text-[10px] font-bold text-zinc-500">Nombre</span>
                 <input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-                  placeholder="Tu nombre" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                  placeholder="Tu nombre" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm glass-input focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               </label>
               <label className="block">
                 <span className="text-[10px] font-bold text-zinc-500">Apellido</span>
                 <input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-                  placeholder="Tu apellido" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                  placeholder="Tu apellido" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm glass-input focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               </label>
             </div>
             <label className="block">
               <span className="text-[10px] font-bold text-zinc-500">Nombre público</span>
               <input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })}
-                placeholder="Cómo te verán otros usuarios" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                placeholder="Cómo te verán otros usuarios" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm glass-input focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             </label>
             <div className="grid grid-cols-2 gap-2">
               <label className="block">
                 <span className="text-[10px] font-bold text-zinc-500">WhatsApp</span>
                 <input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
-                  placeholder="+51 999 888 777" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                  placeholder="+51 999 888 777" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm glass-input focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               </label>
               <label className="block">
                 <span className="text-[10px] font-bold text-zinc-500">País</span>
                 <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}
-                  className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm bg-zinc-800 text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20">
+                  className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-sm glass-input text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20">
                   {COUNTRIES.map((c) => (
                     <option key={c.code} value={c.code}>{c.bandera} {c.nombre}</option>
                   ))}
                 </select>
               </label>
             </div>
-            <div className="rounded-lg bg-zinc-800/60 border border-white/5 p-2 flex items-center gap-2">
+            <div className="rounded-lg glass-input border border-white/5 p-2 flex items-center gap-2">
               <span className="text-[10px] text-zinc-500">Se configurará:</span>
               <span className="text-[10px] font-bold text-zinc-300">Moneda {countryConfig.currency}</span>
               <span className="text-[10px] font-bold text-zinc-300">· Combustible en {countryConfig.fuelUnit === "galon" ? "galón" : "litro"}</span>
@@ -149,7 +149,7 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
       </div>
 
       {/* Vehículos */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-extrabold text-zinc-300">Mis vehículos</h3>
           <Link href="/auto/app/perfil/vehiculo/nuevo"
@@ -163,9 +163,9 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
         ) : (
           <div className="space-y-2">
             {vehicles.map((v) => (
-              <div key={v.id} className="flex items-center justify-between bg-zinc-800 rounded-xl p-3">
+              <div key={v.id} className="flex items-center justify-between glass-input rounded-xl p-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-zinc-800 border border-white/10 flex items-center justify-center shrink-0">
+                  <div className="w-14 h-14 rounded-xl overflow-hidden glass-input border border-white/10 flex items-center justify-center shrink-0">
                     {v.foto_url ? (
                       <img src={v.foto_url} alt="" className="w-full h-full object-cover" />
                     ) : (
@@ -183,7 +183,7 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
                         v.estado === "activo" ? "bg-emerald-500/10 text-emerald-400" :
                         v.estado === "en venta" ? "bg-amber-500/10 text-amber-400" :
                         v.estado === "robado" ? "bg-red-500/10 text-red-400" :
-                        "bg-zinc-800 text-zinc-500"
+                        "glass-input text-zinc-500"
                       }`}>{v.estado === "robado" ? "robado" : v.estado}</span>
                     </div>
                   </div>
@@ -215,7 +215,7 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
         </div>
 
         {initialOrders.length === 0 ? (
-          <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-6 text-center">
+          <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-6 text-center">
             <ShoppingBag className="w-8 h-8 mx-auto text-zinc-600 mb-2" />
             <p className="text-xs text-zinc-500">Todavía no has comprado nada.</p>
             <Link href="/auto/app/marketplace" className="inline-block mt-2 text-[11px] font-bold text-auto-400">Explorar productos</Link>
@@ -226,13 +226,13 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
               const prod = o.product as any;
               const paid = o.status === "paid";
               return (
-                <div key={o.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3">
+                <div key={o.id} className="glass-card border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3">
                   {prod?.imagen_url ? (
-                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden glass-input shrink-0">
                       <img src={prod.imagen_url} alt="" className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-14 h-14 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+                    <div className="w-14 h-14 rounded-xl glass-input flex items-center justify-center shrink-0">
                       <Package className="w-5 h-5 text-zinc-600" />
                     </div>
                   )}
@@ -252,10 +252,10 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
       </div>
 
       {/* Suscripción */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
         <h3 className="text-sm font-extrabold text-zinc-300 mb-2">Suscripción</h3>
         <Link href="/auto/app/suscripcion"
-          className="flex items-center justify-between bg-zinc-800 rounded-xl p-3 hover:bg-zinc-800 transition-colors">
+          className="flex items-center justify-between glass-input rounded-xl p-3 hover:bg-white/10 transition-colors">
           <span className="text-xs text-zinc-500">Ver mi plan actual</span>
           <span className="text-xs font-bold text-auto-500">→</span>
         </Link>
@@ -266,7 +266,7 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between bg-zinc-800 rounded-lg px-3 py-2">
+    <div className="flex items-center justify-between glass-input rounded-lg px-3 py-2">
       <span className="text-[10px] text-zinc-500">{label}</span>
       <span className="text-xs font-bold text-zinc-200">{value}</span>
     </div>

@@ -43,7 +43,7 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
 
       {/* Plan actual */}
       {subscription && (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
           <h3 className="text-xs font-extrabold text-zinc-300 mb-3">Tu plan actual</h3>
           <div className="bg-auto-600/10 rounded-2xl p-4">
             <div className="flex items-center gap-3">
@@ -74,7 +74,7 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
             onClick={() => setIsAnnual(!isAnnual)}
             className={`relative w-12 h-6 rounded-full transition-colors ${isAnnual ? "bg-auto-600/100" : "bg-white/15"}`}
           >
-            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-zinc-800 shadow transition-transform ${isAnnual ? "translate-x-6" : "translate-x-0.5"}`} />
+            <div className={`absolute top-0.5 w-5 h-5 rounded-full glass-input shadow transition-transform ${isAnnual ? "translate-x-6" : "translate-x-0.5"}`} />
           </button>
           <span className={`text-xs font-bold ${isAnnual ? "text-zinc-200" : "text-zinc-500"}`}>Anual</span>
           {isAnnual && <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded-full">Ahorra 20%</span>}
@@ -84,7 +84,7 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
       {/* Planes */}
       <div className="space-y-3">
         {planes.map((plan) => (
-          <div key={plan.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+          <div key={plan.id} className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
             <div className="flex items-start justify-between mb-3">
               <div>
                 <p className="text-sm font-extrabold text-zinc-200">{plan.name}</p>
@@ -113,7 +113,7 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
               href={`/auto/app/checkout?plan=${plan.id}`}
               className={`block w-full py-2.5 rounded-xl text-center text-xs font-bold transition-colors ${
                 plan.id === subscription?.plan_id
-                  ? "bg-zinc-800 text-zinc-500 cursor-default"
+                  ? "glass-input text-zinc-500 cursor-default"
                   : plan.price_cents === 0
                     ? "bg-emerald-500 text-white hover:bg-emerald-600"
                     : "bg-auto-600 text-white hover:bg-auto-500"
@@ -126,7 +126,7 @@ export default function SuscripcionClient({ subscription, planes }: Props) {
       </div>
 
       {/* Features */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
         <h3 className="text-xs font-extrabold text-zinc-300 mb-3">Todo lo que incluye</h3>
         <div className="grid grid-cols-2 gap-2">
           {[

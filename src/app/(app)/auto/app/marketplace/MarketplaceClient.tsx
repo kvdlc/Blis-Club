@@ -193,11 +193,11 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
             type="text" value={marca} onChange={(e) => setMarca(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             placeholder="Buscar por marca o modelo de auto..."
-            className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+            className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </div>
         <button onClick={handleSearch}
-          className="px-4 py-2.5 rounded-xl bg-zinc-800 text-zinc-500 text-sm font-bold hover:bg-zinc-700 transition-colors">
+          className="px-4 py-2.5 rounded-xl glass-input text-zinc-500 text-sm font-bold hover:bg-white/10 transition-colors">
           Buscar
         </button>
       </div>
@@ -220,13 +220,13 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
           <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide flex-1">
             {vehicleTypes.map((t) => (
               <button key={t.key} type="button" onClick={() => setTypeFilter(t.key)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${typeFilter === t.key ? "bg-auto-600 text-white shadow-md" : "bg-zinc-800 text-zinc-500 hover:bg-zinc-700"}`}>
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${typeFilter === t.key ? "bg-auto-600 text-white shadow-md" : "glass-input text-zinc-500 hover:bg-white/10"}`}>
                 <span>{t.icon}</span> {t.label}
               </button>
             ))}
           </div>
           <select value={autoSort} onChange={(e) => setAutoSort(e.target.value)}
-            className="shrink-0 text-[11px] font-bold px-2.5 py-2 rounded-xl bg-zinc-800 border border-white/10 text-zinc-300 focus:outline-none">
+            className="shrink-0 text-[11px] font-bold px-2.5 py-2 rounded-xl glass-input border border-white/10 text-zinc-300 focus:outline-none">
             <option value="recientes">Recientes</option>
             <option value="precioAsc">Precio ↑</option>
             <option value="precioDesc">Precio ↓</option>
@@ -235,7 +235,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
         </div>
 
         {autos.length === 0 ? (
-          <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-8 text-center">
+          <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-8 text-center">
             <Package className="w-12 h-12 mx-auto text-zinc-500 mb-3" />
             <p className="text-sm text-zinc-500">No hay autos en venta todavía.</p>
             <Link href="/auto/app/marketplace/publicar"
@@ -253,8 +253,8 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
                   <StaggerItem key={listing.id}>
                     <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} className="relative">
                       <Link href={`/auto/app/marketplace/${listing.slug}`}
-                        className="block bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden hover:border-auto-500/30 hover:shadow-[0_10px_40px_rgba(16,185,129,0.15)] transition-all duration-300 group">
-                        <div className="aspect-square bg-zinc-800 flex items-center justify-center relative overflow-hidden">
+                        className="block glass-card border border-white/10 shadow-sm rounded-2xl overflow-hidden hover:border-auto-500/30 hover:shadow-[0_10px_40px_rgba(16,185,129,0.15)] transition-all duration-300 group">
+                        <div className="aspect-square glass-input flex items-center justify-center relative overflow-hidden">
                           {listing.fotos?.[0] ? (
                             <img src={listing.fotos[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
@@ -318,10 +318,10 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
                   transition={{ type: "spring", stiffness: 260, damping: 24 }}
                   className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-[70] w-[calc(100%-2rem)] max-w-sm"
                 >
-                  <div className="bg-zinc-900/95 backdrop-blur-xl border border-auto-500/30 rounded-2xl shadow-2xl shadow-auto-600/20 p-3 flex items-center gap-3">
+                  <div className="glass-card backdrop-blur-xl border border-auto-500/30 rounded-2xl shadow-2xl shadow-auto-600/20 p-3 flex items-center gap-3">
                     <div className="flex -space-x-2">
                       {compareIds.map((id) => (
-                        <div key={id} className="w-9 h-9 rounded-xl border-2 border-zinc-900 bg-zinc-800 flex items-center justify-center">
+                        <div key={id} className="w-9 h-9 rounded-xl border-2 border-zinc-900 glass-input flex items-center justify-center">
                           <Car className="w-4 h-4 text-auto-400" />
                         </div>
                       ))}
@@ -354,7 +354,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
             <span className="text-[10px] font-bold text-zinc-500 bg-white/[0.06] px-2 py-0.5 rounded-full">{shownProducts.length}</span>
           </div>
           <select value={productSort} onChange={(e) => setProductSort(e.target.value)}
-            className="text-[11px] font-bold px-2.5 py-2 rounded-xl bg-zinc-800 border border-white/10 text-zinc-300 focus:outline-none">
+            className="text-[11px] font-bold px-2.5 py-2 rounded-xl glass-input border border-white/10 text-zinc-300 focus:outline-none">
             <option value="destacados">Destacados</option>
             <option value="ventas">Más vendidos</option>
             <option value="precioAsc">Precio ↑</option>
@@ -367,14 +367,14 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
         <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
           {["todas", "accesorios", "electronica", "confort", "seguridad", "repuestos"].map((c) => (
             <button key={c} type="button" onClick={() => { setProductCat(c); setVisibleProducts(8); }}
-              className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-colors capitalize ${productCat === c ? "bg-violet-600 text-white shadow-md" : "bg-zinc-800 text-zinc-500 hover:bg-zinc-700"}`}>
+              className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-colors capitalize ${productCat === c ? "bg-violet-600 text-white shadow-md" : "glass-input text-zinc-500 hover:bg-white/10"}`}>
               {c === "todas" ? "Todos" : productCats[c] || c}
             </button>
           ))}
         </div>
 
         {shownProducts.length === 0 ? (
-          <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-8 text-center">
+          <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-8 text-center">
             <ShoppingBag className="w-12 h-12 mx-auto text-zinc-500 mb-3" />
             <p className="text-sm text-zinc-500">No hay productos con ese filtro.</p>
           </div>
@@ -386,10 +386,10 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
                   <motion.div
                     whileHover={{ y: -4 }}
                     whileTap={{ scale: 0.98 }}
-                    className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden hover:border-auto-500/30 hover:shadow-[0_10px_40px_rgba(16,185,129,0.12)] transition-all duration-300"
+                    className="glass-card border border-white/10 shadow-sm rounded-2xl overflow-hidden hover:border-auto-500/30 hover:shadow-[0_10px_40px_rgba(16,185,129,0.12)] transition-all duration-300"
                   >
                     <Link href={`/auto/app/marketplace/producto/${p.id}`} className="block group">
-                      <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden relative">
+                      <div className="aspect-square glass-input flex items-center justify-center overflow-hidden relative">
                         {p.imagen_url ? (
                           <motion.img src={p.imagen_url} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                         ) : (
@@ -485,7 +485,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
             <p className="text-[11px] text-zinc-500">Recibe ofertas y accesorios destacados.</p>
           </div>
           <div className="flex gap-1.5">
-            <input placeholder="tu@correo.com" className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+            <input placeholder="tu@correo.com" className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             <button type="button" className="px-4 py-2 rounded-xl bg-auto-600 text-white text-xs font-bold hover:bg-auto-500 transition-colors">Suscribirme</button>
           </div>
         </div>

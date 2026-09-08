@@ -94,7 +94,7 @@ export function PlacePicker({ vehicleId, tipos, value, onSelect, placeholder }: 
             placeholder={placeholder || "Busca el lugar (taller, grifo, tienda…)"}
             onChange={(e) => { setQuery(e.target.value); setShowList(true); }}
             onFocus={() => { if (!selected) setShowList(true); }}
-            className="w-full pl-8 pr-8 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200"
+            className="w-full pl-8 pr-8 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200"
           />
           {selected ? (
             <button type="button" onClick={() => onSelect(null)} className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-zinc-500 hover:text-zinc-200">
@@ -105,7 +105,7 @@ export function PlacePicker({ vehicleId, tipos, value, onSelect, placeholder }: 
           )}
 
           {showList && !selected && (
-            <div ref={listRef} className="absolute z-30 mt-1 left-0 right-0 max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 p-1.5 space-y-0.5 shadow-xl">
+            <div ref={listRef} className="absolute z-30 mt-1 left-0 right-0 max-h-56 overflow-y-auto rounded-xl border border-white/10 glass-card p-1.5 space-y-0.5 shadow-xl">
               {loading && <p className="text-[10px] text-zinc-500 px-2 py-2">Cargando centros…</p>}
               {!loading && filtered.length === 0 && (
                 <p className="text-[10px] text-zinc-500 px-2 py-2">No hay lugares registrados de este tipo.</p>
@@ -236,7 +236,7 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
   const tipoOptions = defaultTipos.length > 1 ? defaultTipos : CONTACT_TYPES_META;
 
   return (
-    <div className="rounded-2xl bg-zinc-800/60 border border-auto-500/30 p-3 space-y-2">
+    <div className="rounded-2xl glass-input border border-auto-500/30 p-3 space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-[10px] font-bold text-auto-400">➕ Registrar lugar nuevo</p>
         <button type="button" onClick={onCancel} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500"><X className="w-3.5 h-3.5" /></button>
@@ -247,11 +247,11 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
         {form.foto_url ? (
           <img src={form.foto_url} alt="" className="w-16 h-16 rounded-xl object-cover border border-white/10" />
         ) : (
-          <div className="w-16 h-16 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-xl glass-card border border-white/10 flex items-center justify-center">
             <Store className="w-6 h-6 text-zinc-600" />
           </div>
         )}
-        <label className="flex-1 flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl border border-dashed border-white/15 bg-zinc-900 cursor-pointer hover:bg-zinc-800/60 transition-colors">
+        <label className="flex-1 flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl border border-dashed border-white/15 glass-card cursor-pointer hover:bg-white/10/60 transition-colors">
           <Upload className="w-4 h-4 text-zinc-400" />
           <span className="text-[10px] text-zinc-400">{uploading ? "Subiendo…" : form.foto_url ? "Cambiar foto" : "Subir foto"}</span>
           <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" disabled={uploading} />
@@ -262,12 +262,12 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
         <label className="block min-w-0">
           <span className="text-[9px] font-bold text-zinc-500">Nombre del lugar *</span>
           <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            placeholder="Ej: Grifo Primax" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200 mt-0.5" />
+            placeholder="Ej: Grifo Primax" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-card text-zinc-200 mt-0.5" />
         </label>
         <label className="block min-w-0">
           <span className="text-[9px] font-bold text-zinc-500">Encargado (opcional)</span>
           <input value={form.encargado} onChange={(e) => setForm({ ...form, encargado: e.target.value })}
-            placeholder="Ej: Juan Pérez" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200 mt-0.5" />
+            placeholder="Ej: Juan Pérez" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-card text-zinc-200 mt-0.5" />
         </label>
       </div>
 
@@ -275,14 +275,14 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
         <label className="block min-w-0">
           <span className="text-[9px] font-bold text-zinc-500">Tipo</span>
           <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200 mt-0.5 min-w-0">
+            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-card text-zinc-200 mt-0.5 min-w-0">
             {tipoOptions.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </label>
         <label className="block min-w-0">
           <span className="text-[9px] font-bold text-zinc-500">País</span>
           <select value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })}
-            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200 mt-0.5 min-w-0">
+            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-card text-zinc-200 mt-0.5 min-w-0">
             {countryPrefixes.map((p) => <option key={p.code} value={p.code}>{p.code} {p.prefix}</option>)}
           </select>
         </label>
@@ -294,7 +294,7 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
           <div className="flex items-center gap-1 mt-0.5 min-w-0">
             <span className="text-xs text-zinc-500 px-0.5 shrink-0">{prefijo}</span>
             <input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-              placeholder="999 888 777" className="flex-1 min-w-0 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200" />
+              placeholder="999 888 777" className="flex-1 min-w-0 px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-card text-zinc-200" />
           </div>
         </label>
         <label className="block min-w-0">
@@ -302,12 +302,12 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
           <div className="flex items-center gap-1 mt-0.5 min-w-0">
             <span className="text-xs text-zinc-500 px-0.5 shrink-0">{prefijo}</span>
             <input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
-              placeholder="999 888 777" className="flex-1 min-w-0 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200" />
+              placeholder="999 888 777" className="flex-1 min-w-0 px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-card text-zinc-200" />
           </div>
         </label>
       </div>
 
-      <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} placeholder="Notas (opcional)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200" />
+      <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} placeholder="Notas (opcional)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-card text-zinc-200" />
 
       <label className="flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-red-500/20 bg-red-500/[0.05] px-3 py-2">
         <button

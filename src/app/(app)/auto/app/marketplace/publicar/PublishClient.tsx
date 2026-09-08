@@ -127,7 +127,7 @@ export default function PublishClient({ userId, myVehicles, profile }: Props) {
       </div>
 
       {myVehicles.length === 0 ? (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-8 text-center">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-8 text-center">
           <Car className="w-12 h-12 mx-auto text-zinc-500 mb-3" />
           <p className="text-sm text-zinc-500">No tienes vehículos registrados.</p>
           <Link href="/auto/app/perfil/vehiculo/nuevo" className="inline-block mt-3 px-4 py-2 rounded-xl bg-auto-600 text-white text-xs font-bold">
@@ -140,7 +140,7 @@ export default function PublishClient({ userId, myVehicles, profile }: Props) {
           <label className="block">
             <span className="text-xs font-bold text-zinc-500">Mi vehículo *</span>
             <select required value={selectedId || ""} onChange={(e) => setSelectedId(e.target.value)}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20">
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20">
               <option value="">— Selecciona tu auto —</option>
               {myVehicles.map((v) => (
                 <option key={v.id} value={v.id}>{v.marca} {v.modelo} {v.año} · {v.placa}{v.estado === "en venta" ? " (en venta)" : ""}</option>
@@ -150,7 +150,7 @@ export default function PublishClient({ userId, myVehicles, profile }: Props) {
 
           {selected && (
             <div className="rounded-2xl border border-auto-500/20 bg-auto-500/[0.04] p-3 flex items-center gap-3">
-              <div className="w-20 h-20 rounded-xl bg-zinc-800 overflow-hidden flex items-center justify-center shrink-0">
+              <div className="w-20 h-20 rounded-xl glass-input overflow-hidden flex items-center justify-center shrink-0">
                 {selected.foto_url ? <img src={selected.foto_url} alt="" className="w-full h-full object-cover" /> : <Car className="w-8 h-8 text-zinc-500" />}
               </div>
               <div className="flex-1 min-w-0">
@@ -166,26 +166,26 @@ export default function PublishClient({ userId, myVehicles, profile }: Props) {
             <span className="text-xs font-bold text-zinc-500">Precio ({symbol}) *</span>
             <input required type="number" min="1" step="0.01" value={precio} onChange={(e) => setPrecio(e.target.value)}
               placeholder="Ej: 45000"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
 
           <div className="grid grid-cols-2 gap-2">
             <label className="block">
               <span className="text-xs font-bold text-zinc-500">Ciudad</span>
               <input value={ciudad} onChange={(e) => setCiudad(e.target.value)} placeholder="Ej: Lima"
-                className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             </label>
             <label className="block">
               <span className="text-xs font-bold text-zinc-500">WhatsApp *</span>
               <input required value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+51 999 888 777"
-                className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             </label>
           </div>
 
           {/* Fotos extra */}
           <div>
             <span className="text-xs font-bold text-zinc-500">Fotos adicionales (opcional, máx 5)</span>
-            <label className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl border border-dashed border-white/15 bg-zinc-900 text-sm cursor-pointer hover:bg-zinc-800/60 transition-colors mt-1 ${uploading ? "opacity-60" : ""}`}>
+            <label className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl border border-dashed border-white/15 glass-card text-sm cursor-pointer hover:bg-white/10/60 transition-colors mt-1 ${uploading ? "opacity-60" : ""}`}>
               <Upload className="w-4 h-4 text-zinc-400" />
               <span className="text-zinc-400">{uploading ? "Subiendo..." : "Agregar fotos"}</span>
               <input type="file" accept="image/*" multiple onChange={addFotos} className="hidden" disabled={uploading} />
@@ -193,7 +193,7 @@ export default function PublishClient({ userId, myVehicles, profile }: Props) {
             {fotosExtra.length > 0 && (
               <div className="flex gap-1.5 mt-1.5 flex-wrap">
                 {fotosExtra.map((url, i) => (
-                  <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-zinc-800">
+                  <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden glass-input">
                     <img src={url} alt="" className="w-full h-full object-cover" />
                     <button type="button" onClick={() => removeFoto(i)}
                       className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center">

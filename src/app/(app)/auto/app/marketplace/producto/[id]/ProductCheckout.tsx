@@ -37,18 +37,18 @@ export function ProductCheckout({ product }: { product: MarketplaceProduct }) {
   };
 
   return (
-    <div className="bg-zinc-900 border border-white/10 rounded-2xl p-4 space-y-4">
+    <div className="glass-card border border-white/10 rounded-2xl p-4 space-y-4">
       {/* Selector de cantidad */}
       <div>
         <p className="text-xs font-bold text-zinc-300 mb-2">Cantidad</p>
         <div className="flex items-center gap-2">
           <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))}
-            className="w-10 h-10 rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center text-zinc-300 hover:bg-zinc-700 transition-colors">
+            className="w-10 h-10 rounded-xl glass-input border border-white/10 flex items-center justify-center text-zinc-300 hover:bg-white/10 transition-colors">
             <Minus className="w-4 h-4" />
           </button>
           <span className="w-12 text-center text-lg font-black text-zinc-50 tabular-nums">{qty}</span>
           <button type="button" onClick={() => setQty((q) => Math.min(50, q + 1))}
-            className="w-10 h-10 rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center text-zinc-300 hover:bg-zinc-700 transition-colors">
+            className="w-10 h-10 rounded-xl glass-input border border-white/10 flex items-center justify-center text-zinc-300 hover:bg-white/10 transition-colors">
             <Plus className="w-4 h-4" />
           </button>
           <span className="ml-auto text-[10px] font-bold text-zinc-500">{tier.label}</span>

@@ -83,7 +83,7 @@ export default function ConsumoAceiteClient({ defaults }: Props) {
       </div>
 
       {/* Inputs */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         {defaults?.marca && (
           <p className="text-[10px] text-zinc-500 bg-white/[0.04] border border-white/5 rounded-lg px-2.5 py-2">
             🚗 {defaults.marca}
@@ -105,7 +105,7 @@ export default function ConsumoAceiteClient({ defaults }: Props) {
               type="number" min="1" step="10"
               value={mlRellenados} onChange={(e) => setMlRellenados(e.target.value)}
               placeholder="Ej: 500"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">ml</span>
           </div>
@@ -119,7 +119,7 @@ export default function ConsumoAceiteClient({ defaults }: Props) {
               type="number" min="1" step="100"
               value={kmRecorridos} onChange={(e) => setKmRecorridos(e.target.value)}
               placeholder="Ej: 5000"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">km</span>
           </div>
@@ -130,7 +130,7 @@ export default function ConsumoAceiteClient({ defaults }: Props) {
       {resultados ? (
         <div className="space-y-3">
           {/* Medidor visual */}
-          <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+          <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
             <h3 className="text-xs font-extrabold text-zinc-300 text-center mb-3">Medidor de desgaste</h3>
 
             <div className="flex justify-center">
@@ -198,7 +198,7 @@ export default function ConsumoAceiteClient({ defaults }: Props) {
                 <p className="text-xs text-zinc-500 mt-0.5">{resultados.diagnostico.descripcion}</p>
               </div>
             </div>
-            <div className="mt-3 bg-zinc-800 rounded-xl p-3">
+            <div className="mt-3 glass-input rounded-xl p-3">
               <p className="text-xs font-bold text-zinc-300">Qué hacer</p>
               <p className="text-xs text-zinc-500 mt-0.5">{resultados.diagnostico.recomendacion}</p>
             </div>
@@ -206,22 +206,22 @@ export default function ConsumoAceiteClient({ defaults }: Props) {
 
           {/* Datos numéricos */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
+            <div className="glass-card border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Rellenado</p>
               <p className="text-sm font-bold text-zinc-200">{parseFloat(mlRellenados).toLocaleString("es-PE")} ml</p>
             </div>
-            <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
+            <div className="glass-card border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Recorrido</p>
               <p className="text-sm font-bold text-zinc-200">{parseFloat(kmRecorridos).toLocaleString("es-PE")} km</p>
             </div>
-            <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
+            <div className="glass-card border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Cada 10k km</p>
               <p className="text-sm font-bold text-zinc-200">{resultados.consumo10000.toFixed(1)} L</p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-6 text-center">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-6 text-center">
           <p className="text-sm text-zinc-500">Completa los campos para ver el diagnóstico</p>
           <p className="text-xs text-zinc-500 mt-1">Mililitros rellenados y kilómetros recorridos desde el último cambio</p>
         </div>

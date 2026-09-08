@@ -44,7 +44,7 @@ export default function AutoNav() {
     <>
       {/* Desktop: dock vertical flotante a la izquierda (estilo móvil) */}
       <aside className="hidden md:flex fixed left-4 top-1/2 -translate-y-1/2 z-40">
-        <div className="flex flex-col items-center gap-1 bg-zinc-950/80 backdrop-blur-2xl border border-white/10 rounded-[1.75rem] px-2 py-3 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.7)]">
+        <div className="flex flex-col items-center gap-1 glass-strong backdrop-blur-2xl border border-white/10 rounded-[1.75rem] px-2 py-3 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.7)]">
           {tabs.map((tab) => {
             const active = activeTab === tab.key;
             return (
@@ -76,7 +76,7 @@ export default function AutoNav() {
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-4 left-4 right-4 z-40">
-        <div className="bg-zinc-950/95 backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.7)] border border-white/8 px-3 py-2 flex items-center justify-around h-16">
+        <div className="glass-strong backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.7)] border border-white/8 px-3 py-2 flex items-center justify-around h-16">
           {tabs.map((tab) => {
             const active = activeTab === tab.key;
             if (tab.key === "inicio") {

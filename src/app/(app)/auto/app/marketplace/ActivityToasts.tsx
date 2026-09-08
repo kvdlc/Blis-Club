@@ -59,11 +59,11 @@ export function ActivityToasts({ products }: { products: MarketplaceProduct[] })
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="pointer-events-auto flex items-center gap-2.5 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2.5 pr-2 shadow-2xl"
+            className="pointer-events-auto flex items-center gap-2.5 glass-card backdrop-blur-xl border border-white/10 rounded-2xl p-2.5 pr-2 shadow-2xl"
             onMouseEnter={() => { if (timerRef.current) clearTimeout(timerRef.current); }}
           >
             {active.img ? (
-              <div className="w-10 h-10 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
+              <div className="w-10 h-10 rounded-xl overflow-hidden glass-input shrink-0">
                 <img src={active.img} alt="" className="w-full h-full object-cover" />
               </div>
             ) : (

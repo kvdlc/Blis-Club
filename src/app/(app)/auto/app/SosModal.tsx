@@ -147,7 +147,7 @@ export function SosModal({ vehicle, open, onClose }: Props) {
     <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-md max-h-[92vh] overflow-y-auto overscroll-contain rounded-t-3xl sm:rounded-3xl bg-zinc-900 border border-white/10 p-4 space-y-4"
+        className="w-full sm:max-w-md max-h-[92vh] overflow-y-auto overscroll-contain rounded-t-3xl sm:rounded-3xl glass-card border border-white/10 p-4 space-y-4"
       >
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -167,7 +167,7 @@ export function SosModal({ vehicle, open, onClose }: Props) {
 
         {/* Vehículo */}
         <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-3 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-800 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl overflow-hidden glass-input flex items-center justify-center shrink-0">
             {vehicle.foto_url ? <img src={vehicle.foto_url} alt="" className="w-full h-full object-cover" /> : <Car className="w-6 h-6 text-zinc-500" />}
           </div>
           <div className="flex-1 min-w-0">
@@ -223,7 +223,7 @@ export function SosModal({ vehicle, open, onClose }: Props) {
         {/* Contactos */}
         <div className="space-y-2.5">
           {grupos.length === 0 && (
-            <div className="bg-zinc-800/50 rounded-2xl p-3 text-center">
+            <div className="glass-input rounded-2xl p-3 text-center">
               <p className="text-xs text-zinc-400">Aún no tienes contactos de emergencia.</p>
               <p className="text-[10px] text-zinc-500 mt-1">Agrega tu grúa, mecánico o aseguradora en <b>Guantera → Directorio</b> y márcalos como SOS.</p>
             </div>

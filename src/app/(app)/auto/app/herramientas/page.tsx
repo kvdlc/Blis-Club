@@ -48,7 +48,7 @@ export default function HerramientasPage() {
             <Link
               key={tool.slug}
               href={`/auto/app/herramientas/${tool.slug}`}
-              className={`${colSpan} ${height} ${padding} ${tool.color} bg-zinc-900 border border-white/10 shadow-sm rounded-2xl flex flex-col justify-between hover:bg-zinc-800 transition-all active:scale-[0.98] group`}
+              className={`${colSpan} ${height} ${padding} ${tool.color} glass-card border border-white/10 shadow-sm rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-all active:scale-[0.98] group`}
             >
               <div className="flex items-start justify-between">
                 <div className={`w-10 h-10 rounded-xl ${tool.color} flex items-center justify-center shrink-0`}>

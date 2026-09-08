@@ -261,7 +261,7 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
 
       {/* Formulario para NUEVO registro */}
       {addType && (
-        <div className="bg-zinc-900 border border-auto-500/25 shadow-sm rounded-2xl p-4 space-y-2">
+        <div className="glass-card border border-auto-500/25 shadow-sm rounded-2xl p-4 space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-bold text-auto-400">
               {addType === "fuel" ? "⛽ Nueva carga" : addType === "maint" ? "🔧 Nuevo servicio" : "🛒 Nuevo repuesto / accesorio"}
@@ -295,7 +295,7 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
                   // Edición inline: reemplaza la tarjeta por el formulario en su posición
                   if (key === editingKey) {
                     return (
-                      <div key={key} className="bg-zinc-900 border border-auto-500/30 shadow-sm rounded-2xl p-4 space-y-2">
+                      <div key={key} className="glass-card border border-auto-500/30 shadow-sm rounded-2xl p-4 space-y-2">
                         <div className="flex items-center justify-between">
                           <p className="text-[10px] font-bold text-auto-400">
                             ✏️ {item.type === "fuel" ? "Editar carga" : item.type === "maintenance" ? "Editar servicio" : "Editar repuesto"}
@@ -406,7 +406,7 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
   const lifeText = part ? [part.km, part.fecha].filter(Boolean).join(" · ") : null;
 
   return (
-    <div className={`bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3 border-l-2 ${st.border}`}>
+    <div className={`glass-card border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3 border-l-2 ${st.border}`}>
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${st.chip}`}>{st.icon}</div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-bold text-zinc-100">
@@ -427,7 +427,7 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
           <MoreVertical className="w-4 h-4" />
         </button>
         {menuOpen && (
-          <div className="absolute z-30 right-0 mt-1 w-32 bg-zinc-800 border border-white/10 rounded-xl shadow-xl overflow-hidden">
+          <div className="absolute z-30 right-0 mt-1 w-32 glass-input border border-white/10 rounded-xl shadow-xl overflow-hidden">
             <button type="button" onClick={() => { setMenuOpen(false); onEdit(); }}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-zinc-200 hover:bg-white/[0.06] transition-colors">
               <Pencil className="w-3.5 h-3.5" /> Editar
@@ -508,10 +508,10 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
     <div className="space-y-2">
       <p className="text-[10px] font-bold text-zinc-400">Unidad: {esGalon ? "galones" : "litros"} · el precio es por {precioUnit}</p>
       <div className="grid grid-cols-4 gap-1.5">
-        <input type="number" step="0.1" value={form.cantidad} onChange={(e) => setForm({ ...form, cantidad: e.target.value })} placeholder={unidadShort} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0" />
-        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder={`${cfg.currency}/${unidadShort}`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0" />
-        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0" />
-        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0">
+        <input type="number" step="0.1" value={form.cantidad} onChange={(e) => setForm({ ...form, cantidad: e.target.value })} placeholder={unidadShort} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200 min-w-0" />
+        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder={`${cfg.currency}/${unidadShort}`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200 min-w-0" />
+        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200 min-w-0" />
+        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200 min-w-0">
           {cfg.fuelTypes.map((ft) => <option key={ft.value} value={ft.value}>{ft.label}</option>)}
         </select>
       </div>
@@ -593,14 +593,14 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-2 gap-1.5">
-        <select value={form.tipo} onChange={(e) => handleTipo(e.target.value)} className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
+        <select value={form.tipo} onChange={(e) => handleTipo(e.target.value)} className="px-2 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200">
           {maintTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
-        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`${symbol} costo`} className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`${symbol} costo`} className="px-2 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
       </div>
 
       {esAceite ? (
-        <div className="rounded-xl bg-zinc-800/60 border border-violet-500/20 p-2.5 space-y-2">
+        <div className="rounded-xl glass-input border border-violet-500/20 p-2.5 space-y-2">
           <p className="text-[10px] font-bold text-violet-300 flex items-center gap-1"><Droplets className="w-3 h-3" /> Cambio de aceite</p>
           <div className="grid grid-cols-2 gap-1.5">
             <label className="block"><span className="text-[9px] font-bold text-zinc-500">Fecha del cambio</span>
@@ -610,17 +610,17 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
               <input type="number" value={form.odometro} onChange={(e) => {
                 const od = e.target.value;
                 setForm((f) => ({ ...f, odometro: od, ...(!f.km_proximo && od ? { km_proximo: String(parseInt(od || "0") + 5000) } : {}) }));
-              }} placeholder="Ej: 45000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+              }} placeholder="Ej: 45000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
             </label>
           </div>
           <label className="block"><span className="text-[9px] font-bold text-zinc-500">Próximo cambio a los (km)</span>
-            <input type="number" value={form.km_proximo} onChange={(e) => setForm({ ...form, km_proximo: e.target.value })} placeholder="Ej: 50000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            <input type="number" value={form.km_proximo} onChange={(e) => setForm({ ...form, km_proximo: e.target.value })} placeholder="Ej: 50000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
           </label>
         </div>
       ) : (
         <>
-          <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-          <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
+          <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
           <div>
             <span className="text-[10px] font-bold text-zinc-500">Taller / dónde lo hiciste</span>
             <div className="mt-0.5">
@@ -781,7 +781,7 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
             onFocus={() => setShowPicker(true)}
             onBlur={() => setTimeout(() => setShowPicker(false), 150)}
             placeholder="Llantas, batería, parlantes, gata…"
-            className="w-full pl-8 pr-8 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200"
+            className="w-full pl-8 pr-8 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200"
           />
           {picked && (
             <button type="button" onClick={() => setForm((f) => ({ ...f, tipo_componente: "", categoria: "estetico", adn: {} }))}
@@ -791,7 +791,7 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
           )}
         </div>
         {showPicker && !picked && (
-          <div className="mt-1 max-h-52 overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 p-1.5 space-y-0.5">
+          <div className="mt-1 max-h-52 overflow-y-auto rounded-xl border border-white/10 glass-card p-1.5 space-y-0.5">
             {results.map((p) => (
               <button key={p.value} type="button"
                 onMouseDown={(e) => e.preventDefault()}
@@ -817,10 +817,10 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
         <p className="text-[9px] text-zinc-500">{picked.descripcion} · {picked.tipoMantenimiento}</p>
       )}
 
-      <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre del repuesto / accesorio" className="w-full px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+      <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre del repuesto / accesorio" className="w-full px-2 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
 
       <div>
-        <input value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} placeholder="Marca (ej: BOSCH)" className="w-full px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+        <input value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} placeholder="Marca (ej: BOSCH)" className="w-full px-2 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
       </div>
       <div>
         <span className="text-[10px] font-bold text-zinc-500">Dónde lo compraste</span>
@@ -836,10 +836,10 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
 
       <div className="grid grid-cols-2 gap-1.5">
         <label className="block min-w-0"><span className="text-[9px] font-bold text-zinc-500">Costo ({symbol})</span>
-          <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="Ej: 450" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="Ej: 450" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
         </label>
         <label className="block min-w-0"><span className="text-[9px] font-bold text-zinc-500">Odómetro al comprar</span>
-          <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Ej: 45000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Ej: 45000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
         </label>
       </div>
 
@@ -876,7 +876,7 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
                     value={form.adn[f.key] || ""}
                     onChange={(e) => setForm({ ...form, adn: { ...form.adn, [f.key]: e.target.value } })}
                     placeholder={f.help || ""}
-                    className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 mt-0.5"
+                    className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200 mt-0.5"
                   />
                 )}
               </label>
@@ -899,7 +899,7 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
         {form.conKm && (
           <div>
             <span className="text-[9px] font-bold text-zinc-500">Duración útil en km</span>
-            <input type="number" min="0" value={form.duracion_km} onChange={(e) => setForm({ ...form, duracion_km: e.target.value })} placeholder="Ej: 40000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 mt-0.5" />
+            <input type="number" min="0" value={form.duracion_km} onChange={(e) => setForm({ ...form, duracion_km: e.target.value })} placeholder="Ej: 40000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200 mt-0.5" />
           </div>
         )}
         {form.conVencimiento && (
@@ -910,7 +910,7 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
         )}
       </div>
 
-      <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} placeholder="Notas (opcional)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+      <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} placeholder="Notas (opcional)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
 
       <div className="flex gap-1.5">
         <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-2.5 rounded-lg bg-auto-600 text-white text-sm font-bold">{saving ? "..." : editItem ? "Guardar cambios" : "Registrar repuesto"}</button>
@@ -931,22 +931,22 @@ function WarrantySection({ vehicle, maintenances }: { vehicle: Vehicle; maintena
       <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
         <Shield className="w-4 h-4 text-auto-500" /> Control de Garantía
       </h2>
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         <div>
           <div className="flex justify-between text-[10px] mb-1">
             <span className="font-bold text-zinc-500">Garantía: {garantiaKm.toLocaleString("es-PE")} km</span>
             <span className="font-bold text-zinc-500">{vehicle.kilometraje.toLocaleString("es-PE")} km actual</span>
           </div>
-          <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="h-4 glass-input rounded-full overflow-hidden">
             <div className={`h-full rounded-full ${kmPct > 90 ? "bg-red-500" : kmPct > 70 ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${kmPct}%` }} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-zinc-800 rounded-xl p-3 text-center">
+          <div className="glass-input rounded-xl p-3 text-center">
             <p className="text-[10px] text-zinc-500">Km restantes</p>
             <p className="text-sm font-bold text-zinc-100">{kmRestantes.toLocaleString("es-PE")}</p>
           </div>
-          <div className="bg-zinc-800 rounded-xl p-3 text-center">
+          <div className="glass-input rounded-xl p-3 text-center">
             <p className="text-[10px] text-zinc-500">En concesionaria</p>
             <p className="text-sm font-bold text-zinc-100">{enConcesionaria} visitas</p>
           </div>
@@ -984,17 +984,17 @@ function TireRotationSection() {
       <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
         <RotateCw className="w-4 h-4 text-auto-500" /> Rotación de Neumáticos
       </h2>
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
-        <div className="bg-zinc-800 rounded-2xl p-3">
-          <div className="aspect-[3/2] rounded-xl border-2 border-white/10 bg-zinc-800 relative flex flex-col">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+        <div className="glass-input rounded-2xl p-3">
+          <div className="aspect-[3/2] rounded-xl border-2 border-white/10 glass-input relative flex flex-col">
             <div className="flex-1 flex items-center justify-around px-2">
               <TireCircle label={tires.DI} name="Del. Izq." color="bg-auto-600/10 text-auto-500 border-auto-300" />
               <TireCircle label={tires.DD} name="Del. Der." color="bg-auto-600/10 text-auto-500 border-auto-300" />
             </div>
-            <div className="h-px mx-8 bg-zinc-800" />
+            <div className="h-px mx-8 glass-input" />
             <div className="flex-1 flex items-center justify-around px-2">
-              <TireCircle label={tires.TI} name="Tras. Izq." color="bg-zinc-800 text-zinc-500 border-white/10" />
-              <TireCircle label={tires.TD} name="Tras. Der." color="bg-zinc-800 text-zinc-500 border-white/10" />
+              <TireCircle label={tires.TI} name="Tras. Izq." color="glass-input text-zinc-500 border-white/10" />
+              <TireCircle label={tires.TD} name="Tras. Der." color="glass-input text-zinc-500 border-white/10" />
             </div>
           </div>
         </div>
@@ -1002,7 +1002,7 @@ function TireRotationSection() {
           <button onClick={rotate} className="flex-1 py-2.5 rounded-xl bg-auto-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-auto-500 transition-colors">
             <RotateCw className="w-3.5 h-3.5" /> Rotar (cruzado)
           </button>
-          <button onClick={reset} className="px-4 py-2.5 rounded-xl bg-zinc-800 text-zinc-500 text-xs font-medium hover:bg-zinc-800 transition-colors">Reiniciar</button>
+          <button onClick={reset} className="px-4 py-2.5 rounded-xl glass-input text-zinc-500 text-xs font-medium hover:bg-white/10 transition-colors">Reiniciar</button>
         </div>
         <p className="text-[10px] text-zinc-500 text-center">Patrón: TI → DI → DD → TD → TI</p>
       </div>
@@ -1031,18 +1031,18 @@ function CarfaxExportSection({ vehicle, fuelLogs, maintenances, upgrades }: {
       <h2 className="text-sm font-bold text-zinc-300 flex items-center gap-2">
         <FileDown className="w-4 h-4 text-auto-500" /> Reporte Carfax
       </h2>
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         <p className="text-xs text-zinc-500">Genera un reporte PDF con todo el historial de mantenimientos, cargas, repuestos y mejoras.</p>
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-zinc-800 rounded-xl p-2 text-center">
+          <div className="glass-input rounded-xl p-2 text-center">
             <p className="text-lg font-black text-cyan-400">{fuelLogs.length}</p>
             <p className="text-[9px] text-zinc-500">Cargas</p>
           </div>
-          <div className="bg-zinc-800 rounded-xl p-2 text-center">
+          <div className="glass-input rounded-xl p-2 text-center">
             <p className="text-lg font-black text-blue-400">{maintenances.length}</p>
             <p className="text-[9px] text-zinc-500">Mantenimientos</p>
           </div>
-          <div className="bg-zinc-800 rounded-xl p-2 text-center">
+          <div className="glass-input rounded-xl p-2 text-center">
             <p className="text-lg font-black text-violet-400">{upgrades.length}</p>
             <p className="text-[9px] text-zinc-500">Repuestos</p>
           </div>

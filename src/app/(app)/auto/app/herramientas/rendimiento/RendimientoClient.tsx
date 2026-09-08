@@ -95,7 +95,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
       </div>
 
       {/* Combustible A */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-auto-600/10 flex items-center justify-center">
             <Fuel className="w-3.5 h-3.5 text-auto-500" />
@@ -112,9 +112,9 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <div className="flex gap-1 mt-0.5">
               <input type="number" min="1" step="0.01" value={precioA}
                 onChange={(e) => setPrecioA(e.target.value)} placeholder={symbol}
-                className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               {defaults.ultimosPrecios?.regular && (
-                <button onClick={() => usarPrecio("regular", "a")} className="px-2 py-2 rounded-lg bg-zinc-800 text-[10px] font-bold text-zinc-500 hover:bg-auto-600/15 hover:text-auto-500 transition-colors">
+                <button onClick={() => usarPrecio("regular", "a")} className="px-2 py-2 rounded-lg glass-input text-[10px] font-bold text-zinc-500 hover:bg-auto-600/15 hover:text-auto-500 transition-colors">
                   {money(defaults.ultimosPrecios.regular)}
                 </button>
               )}
@@ -124,20 +124,20 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <span className="text-[10px] font-bold text-zinc-500">Rendimiento (km/gal)</span>
             <input type="number" min="1" step="0.1" value={rendimientoA}
               onChange={(e) => setRendimientoA(e.target.value)} placeholder="Ej: 42"
-              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
       </div>
 
       {/* VS */}
       <div className="flex items-center justify-center gap-4">
-        <div className="h-px flex-1 bg-zinc-800" />
-        <span className="text-xs font-black text-zinc-500 bg-zinc-800 px-3 py-1 rounded-full">VS</span>
-        <div className="h-px flex-1 bg-zinc-800" />
+        <div className="h-px flex-1 glass-input" />
+        <span className="text-xs font-black text-zinc-500 glass-input px-3 py-1 rounded-full">VS</span>
+        <div className="h-px flex-1 glass-input" />
       </div>
 
       {/* Combustible B */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-auto-600/10 flex items-center justify-center">
             <Zap className="w-3.5 h-3.5 text-auto-500" />
@@ -154,9 +154,9 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <div className="flex gap-1 mt-0.5">
               <input type="number" min="1" step="0.01" value={precioB}
                 onChange={(e) => setPrecioB(e.target.value)} placeholder={symbol}
-                className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
               {defaults.ultimosPrecios?.premium && (
-                <button onClick={() => usarPrecio("premium", "b")} className="px-2 py-2 rounded-lg bg-zinc-800 text-[10px] font-bold text-zinc-500 hover:bg-auto-600/10 hover:text-auto-500 transition-colors">
+                <button onClick={() => usarPrecio("premium", "b")} className="px-2 py-2 rounded-lg glass-input text-[10px] font-bold text-zinc-500 hover:bg-auto-600/10 hover:text-auto-500 transition-colors">
                   {money(defaults.ultimosPrecios.premium)}
                 </button>
               )}
@@ -166,13 +166,13 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <span className="text-[10px] font-bold text-zinc-500">Rendimiento (km/gal)</span>
             <input type="number" min="1" step="0.1" value={rendimientoB}
               onChange={(e) => setRendimientoB(e.target.value)} placeholder="Ej: 46"
-              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
       </div>
 
       {/* Parámetros adicionales */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         <h3 className="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
           <Info className="w-3.5 h-3.5" /> Parámetros de proyección
         </h3>
@@ -181,13 +181,13 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
             <span className="text-[10px] font-bold text-zinc-500">Km por año</span>
             <input type="number" min="1" value={kmAnuales}
               onChange={(e) => setKmAnuales(e.target.value)}
-              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-[10px] font-bold text-zinc-500">Capacidad tanque (gal)</span>
             <input type="number" min="1" step="0.1" value={capacidadTanque}
               onChange={(e) => setCapacidadTanque(e.target.value)}
-              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
       </div>
@@ -207,7 +207,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
           </div>
 
           {/* Barras de costo por km */}
-          <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+          <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
             <h3 className="text-xs font-extrabold text-zinc-300 flex items-center gap-1.5">
               <BarChart3 className="w-3.5 h-3.5 text-auto-500" /> Costo por kilómetro
             </h3>
@@ -218,7 +218,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
                 <span className="font-bold text-zinc-300">{nombres.a}</span>
                 <span className="font-bold text-zinc-200">{money(resultados.costoPorKm.a, 4)}</span>
               </div>
-              <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-4 glass-input rounded-full overflow-hidden">
                 <div className="h-full bg-auto-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500" style={{ width: `${Math.max(resultados.barraA, 5)}%` }}>
                   {resultados.barraA > 25 && <span className="text-[8px] font-bold text-white">{money(resultados.costoPorKm.a, 2)}</span>}
                 </div>
@@ -231,7 +231,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
                 <span className="font-bold text-zinc-300">{nombres.b}</span>
                 <span className="font-bold text-zinc-200">{money(resultados.costoPorKm.b, 4)}</span>
               </div>
-              <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-4 glass-input rounded-full overflow-hidden">
                 <div className="h-full bg-auto-500 rounded-full flex items-center justify-end pr-2 transition-all duration-500" style={{ width: `${Math.max(resultados.barraB, 5)}%` }}>
                   {resultados.barraB > 25 && <span className="text-[8px] font-bold text-white">{money(resultados.costoPorKm.b, 2)}</span>}
                 </div>
@@ -241,7 +241,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
 
           {/* Proyecciones */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
+            <div className="glass-card border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Por tanque lleno</p>
               <p className="text-base font-black text-zinc-200">
                 {resultados.mejor === "a" ? "Ahorras" : "Ahorras"}
@@ -250,7 +250,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
                 {money(resultados.diferenciaPorTanque, 2)}
               </p>
             </div>
-            <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
+            <div className="glass-card border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Ahorro anual</p>
               <p className="text-base font-black text-zinc-200">
                 {money(Math.round(resultados.ahorroAnual))}
@@ -259,14 +259,14 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
                 con {resultados.mejor === "a" ? nombres.a : nombres.b}
               </p>
             </div>
-            <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
+            <div className="glass-card border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Km por tanque (A)</p>
               <p className="text-base font-black text-zinc-200">
                 {Math.round(resultados.kmPorTanque.a).toLocaleString("es-PE")}
               </p>
               <p className="text-xs text-zinc-500">{nombres.a}</p>
             </div>
-            <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
+            <div className="glass-card border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Km por tanque (B)</p>
               <p className="text-base font-black text-zinc-200">
                 {Math.round(resultados.kmPorTanque.b).toLocaleString("es-PE")}
@@ -276,7 +276,7 @@ export default function RendimientoClient({ defaults }: { defaults: Defaults }) 
           </div>
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-6 text-center">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-6 text-center">
           <p className="text-sm text-zinc-500">Completa los 4 campos para comparar</p>
           <p className="text-xs text-zinc-500 mt-1">Precio y rendimiento de ambos combustibles</p>
         </div>

@@ -172,6 +172,36 @@ body {
   position: relative;
 }
 
+/* ── Glassmorphism (tematización navy-aurora) ── */
+.glass-card {
+  background: linear-gradient(150deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.03) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.glass-input {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.glass-input::placeholder { color: rgba(255,255,255,0.35); }
+.glass-input:focus {
+  border-color: rgba(16,185,129,0.45);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+}
+.glass-nav {
+  background: rgba(10,14,30,0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+.glass-strong {
+  background: rgba(10,14,30,0.82);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
 /* Obsidian Glass: ultra-premium dark glassmorphism */
 .card-auto-dark {
   background: rgba(255, 255, 255, 0.03);

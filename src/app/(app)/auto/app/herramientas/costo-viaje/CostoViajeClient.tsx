@@ -92,7 +92,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
       </div>
 
       {/* Inputs */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         {/* Distancia */}
         <label className="block">
           <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
@@ -104,7 +104,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               value={distancia}
               onChange={(e) => setDistancia(e.target.value)}
               placeholder="Ej: 350"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">km</span>
           </div>
@@ -128,7 +128,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               value={rendimiento}
               onChange={(e) => setRendimiento(e.target.value)}
               placeholder="Ej: 45"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">km/gal</span>
           </div>
@@ -152,7 +152,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               value={precioGalon}
               onChange={(e) => setPrecioGalon(e.target.value)}
               placeholder="Ej: 18.50"
-              className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full px-3 py-2.5 rounded-xl border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">{symbol}</span>
           </div>
@@ -163,7 +163,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
           <span className="text-xs font-bold text-zinc-500 block">Peajes (opcional)</span>
 
           {peajes.map((p) => (
-            <div key={p.id} className="flex items-center gap-2 bg-zinc-800 rounded-xl px-3 py-2">
+            <div key={p.id} className="flex items-center gap-2 glass-input rounded-xl px-3 py-2">
               <span className="text-xs font-medium text-zinc-300 flex-1">{p.nombre}</span>
               <span className="text-xs font-bold text-zinc-200">{money(p.costo, 2)}</span>
               <button onClick={() => eliminarPeaje(p.id)} className="text-zinc-500 hover:text-auto-400 transition-colors">
@@ -177,13 +177,13 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
               type="text" value={nuevoPeaje.nombre}
               onChange={(e) => setNuevoPeaje({ ...nuevoPeaje, nombre: e.target.value })}
               placeholder="Nombre"
-              className="flex-1 px-3 py-2 rounded-xl border border-white/10 bg-zinc-900 text-xs focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="flex-1 px-3 py-2 rounded-xl border border-white/10 glass-card text-xs focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <input
               type="number" min="0" step="0.5" value={nuevoPeaje.costo}
               onChange={(e) => setNuevoPeaje({ ...nuevoPeaje, costo: e.target.value })}
               placeholder={symbol}
-              className="w-20 px-3 py-2 rounded-xl border border-white/10 bg-zinc-900 text-xs focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-20 px-3 py-2 rounded-xl border border-white/10 glass-card text-xs focus:outline-none focus:ring-2 focus:ring-auto-600/20"
             />
             <button
               onClick={agregarPeaje}
@@ -203,14 +203,14 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
           <input
             type="number" min="1" max="20" value={pasajeros}
             onChange={(e) => setPasajeros(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
         </label>
       </div>
 
       {/* Resultados */}
       {resultados ? (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-4">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-4">
           <h3 className="text-sm font-extrabold text-zinc-200 text-center">Presupuesto Estimado</h3>
 
           {/* Total grande */}
@@ -228,7 +228,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
                 <span className="font-bold text-zinc-300">Combustible</span>
                 <span className="font-bold text-zinc-200">{money(resultados.costoCombustible, 2)}</span>
               </div>
-              <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-3 glass-input rounded-full overflow-hidden">
                 <div className="h-full bg-auto-600 rounded-full transition-all duration-500" style={{ width: `${Math.max(resultados.barraCombustible, 5)}%` }} />
               </div>
               <p className="text-[10px] text-zinc-500 mt-0.5">{resultados.galonesNecesarios.toFixed(1)} galones · {resultados.combustiblePct.toFixed(0)}% del total</p>
@@ -240,7 +240,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
                   <span className="font-bold text-zinc-300">Peajes</span>
                   <span className="font-bold text-zinc-200">{money(resultados.totalPeajes, 2)}</span>
                 </div>
-                <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-3 glass-input rounded-full overflow-hidden">
                   <div className="h-full bg-auto-600 rounded-full transition-all duration-500" style={{ width: `${resultados.barraPeajes}%` }} />
                 </div>
                 <p className="text-[10px] text-zinc-500 mt-0.5">{peajes.length} peaje(s) · {resultados.peajesPct.toFixed(0)}% del total</p>
@@ -260,19 +260,19 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
 
           {/* Info adicional */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-zinc-800 rounded-xl p-3 text-center">
+            <div className="glass-input rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Distancia</p>
               <p className="text-sm font-bold text-zinc-200">{parseFloat(distancia).toLocaleString("es-PE")} km</p>
             </div>
-            <div className="bg-zinc-800 rounded-xl p-3 text-center">
+            <div className="glass-input rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Combustible</p>
               <p className="text-sm font-bold text-zinc-200">{resultados.galonesNecesarios.toFixed(1)} gal</p>
             </div>
-            <div className="bg-zinc-800 rounded-xl p-3 text-center">
+            <div className="glass-input rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Rendimiento</p>
               <p className="text-sm font-bold text-zinc-200">{parseFloat(rendimiento)} km/gal</p>
             </div>
-            <div className="bg-zinc-800 rounded-xl p-3 text-center">
+            <div className="glass-input rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">{symbol} por km</p>
               <p className="text-sm font-bold text-zinc-200">
                 {money(resultados.costoCombustible / parseFloat(distancia), 2)}
@@ -281,7 +281,7 @@ export default function CostoViajeClient({ defaults }: { defaults: Defaults }) {
           </div>
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-6 text-center">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-6 text-center">
           <p className="text-sm text-zinc-500">Completa los campos para ver el presupuesto</p>
           <p className="text-xs text-zinc-500 mt-1">Ingresa al menos distancia, rendimiento y precio por galón</p>
         </div>

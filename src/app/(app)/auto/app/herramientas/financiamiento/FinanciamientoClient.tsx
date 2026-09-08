@@ -49,21 +49,21 @@ export default function FinanciamientoClient({ defaults }: Props) {
         <p className="text-xs text-zinc-500 mt-1">Calcula la cuota mensual de un préstamo para tu auto.</p>
       </div>
 
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         <label className="block">
           <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5 text-auto-500" /> Monto del préstamo ({symbol})</span>
           <input type="number" min="1" step="100" value={monto} onChange={(e) => setMonto(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
         <label className="block">
           <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5"><Percent className="w-3.5 h-3.5 text-auto-500" /> Tasa de interés anual (%)</span>
           <input type="number" min="1" max="50" step="0.1" value={tasa} onChange={(e) => setTasa(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
         <label className="block">
           <span className="text-xs font-bold text-zinc-500 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-auto-500" /> Plazo (meses)</span>
           <input type="number" min="1" max="96" value={plazo} onChange={(e) => setPlazo(e.target.value)}
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
       </div>
 
@@ -75,21 +75,21 @@ export default function FinanciamientoClient({ defaults }: Props) {
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
+            <div className="glass-card border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Total a pagar</p>
               <p className="text-sm font-bold text-zinc-200">{money(Math.round(resultados.totalPagar))}</p>
             </div>
-            <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
+            <div className="glass-card border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Intereses</p>
               <p className="text-sm font-bold text-auto-400">{money(Math.round(resultados.intereses))}</p>
             </div>
-            <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-xl p-3 text-center">
+            <div className="glass-card border border-white/10 shadow-sm rounded-xl p-3 text-center">
               <p className="text-[10px] text-zinc-500">Tasa mensual</p>
               <p className="text-sm font-bold text-zinc-200">{(resultados.i * 100).toFixed(2)}%</p>
             </div>
           </div>
 
-          <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+          <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
             <h3 className="text-xs font-extrabold text-zinc-300 mb-2">Primeros 12 meses</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-[10px]">
@@ -118,7 +118,7 @@ export default function FinanciamientoClient({ defaults }: Props) {
           </div>
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-6 text-center">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-6 text-center">
           <p className="text-sm text-zinc-500">Ingresa los datos para calcular la cuota</p>
         </div>
       )}

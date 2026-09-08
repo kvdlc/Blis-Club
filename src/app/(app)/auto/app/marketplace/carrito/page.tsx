@@ -75,7 +75,7 @@ function CartCheckoutInner() {
       {cartLoading && <div className="flex items-center gap-2 text-sm text-zinc-500"><Loader2 className="w-4 h-4 animate-spin" /> Cargando carrito...</div>}
 
       {items.length === 0 && !cartLoading ? (
-        <div className="bg-zinc-900 border border-white/10 rounded-2xl p-10 text-center">
+        <div className="glass-card border border-white/10 rounded-2xl p-10 text-center">
           <p className="text-sm text-zinc-500">Tu carrito está vacío.</p>
           <Link href="/auto/app/marketplace" className="inline-block mt-3 text-xs font-bold text-auto-400">Explorar productos</Link>
         </div>
@@ -83,8 +83,8 @@ function CartCheckoutInner() {
         <>
           <div className="space-y-2">
             {items.map((i) => (
-              <div key={i.id} className="flex gap-3 bg-zinc-900 border border-white/10 rounded-2xl p-3">
-                <Link href={`/auto/app/marketplace/producto/${i.product.id}`} className="w-16 h-16 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
+              <div key={i.id} className="flex gap-3 glass-card border border-white/10 rounded-2xl p-3">
+                <Link href={`/auto/app/marketplace/producto/${i.product.id}`} className="w-16 h-16 rounded-xl overflow-hidden glass-input shrink-0">
                   {i.product.imagen_url ? <img src={i.product.imagen_url} alt="" className="w-full h-full object-cover" /> : <span className="flex h-full items-center justify-center"><ShoppingCart className="w-6 h-6 text-zinc-600" /></span>}
                 </Link>
                 <div className="min-w-0 flex-1 space-y-1">
@@ -102,7 +102,7 @@ function CartCheckoutInner() {
             ))}
           </div>
 
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-4 space-y-2">
+          <div className="glass-card border border-white/10 rounded-2xl p-4 space-y-2">
             <div className="flex justify-between text-xs text-zinc-500">
               <span>{items.length} producto(s)</span><span>{money(total)}</span>
             </div>

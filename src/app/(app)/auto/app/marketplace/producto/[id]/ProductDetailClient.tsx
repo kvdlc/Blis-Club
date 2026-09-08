@@ -132,7 +132,7 @@ export default function ProductDetailClient({ product, similares, userId }: Prop
       <div className="grid md:grid-cols-2 gap-4">
         {/* ── Imagen + galería ── */}
         <div className="space-y-2">
-          <div className="rounded-2xl overflow-hidden bg-zinc-800 relative aspect-square">
+          <div className="rounded-2xl overflow-hidden glass-input relative aspect-square">
             {current ? (
               current.type === "video" ? (
                 <video src={current.src} className="w-full h-full object-cover" autoPlay muted loop playsInline controls />
@@ -174,7 +174,7 @@ export default function ProductDetailClient({ product, similares, userId }: Prop
                 <button key={i} onClick={() => setActive(i)}
                   className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors ${i === active ? "border-auto-500" : "border-transparent opacity-70"}`}>
                   {m2.type === "video" ? (
-                    <div className="w-full h-full bg-zinc-800 flex items-center justify-center"><Play className="w-5 h-5 text-auto-500" /></div>
+                    <div className="w-full h-full glass-input flex items-center justify-center"><Play className="w-5 h-5 text-auto-500" /></div>
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={m2.src} alt="" className="w-full h-full object-cover" />
@@ -215,7 +215,7 @@ export default function ProductDetailClient({ product, similares, userId }: Prop
           </div>
 
           {/* Precio + ahorro */}
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-4">
+          <div className="glass-card border border-white/10 rounded-2xl p-4">
             {precioOrig > precioBase && (
               <div className="flex items-center gap-2">
                 <p className="text-sm text-zinc-500 line-through">{money(precioOrig)}</p>
@@ -227,7 +227,7 @@ export default function ProductDetailClient({ product, similares, userId }: Prop
           </div>
 
           {/* Barra de urgencia por stock */}
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-3">
+          <div className="glass-card border border-white/10 rounded-2xl p-3">
             <div className="flex justify-between text-[10px] font-bold text-zinc-500 mb-1.5">
               <span>{ventas} vendidos</span>
               <span>{pctVendido}% del stock</span>
@@ -247,7 +247,7 @@ export default function ProductDetailClient({ product, similares, userId }: Prop
               { icon: ShieldCheck, label: "Compra segura" },
               { icon: PackageCheck, label: "Garantía" },
             ].map((b) => (
-              <div key={b.label} className="bg-zinc-900 border border-white/10 rounded-xl p-2 flex flex-col items-center gap-1 text-center">
+              <div key={b.label} className="glass-card border border-white/10 rounded-xl p-2 flex flex-col items-center gap-1 text-center">
                 <b.icon className="w-4 h-4 text-auto-400" />
                 <span className="text-[9px] font-bold text-zinc-400">{b.label}</span>
               </div>
@@ -257,7 +257,7 @@ export default function ProductDetailClient({ product, similares, userId }: Prop
       </div>
 
       {/* ── Descripción + características ── */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
         <h3 className="text-xs font-extrabold text-zinc-300 mb-2">Descripción del producto</h3>
         <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap">{desc}</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
@@ -279,8 +279,8 @@ export default function ProductDetailClient({ product, similares, userId }: Prop
           <div className="grid grid-cols-2 gap-2">
             {similares.map((s) => (
               <Link key={s.id} href={`/auto/app/marketplace/producto/${s.id}`}
-                className="bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
-                <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden">
+                className="glass-card border border-white/10 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+                <div className="aspect-square glass-input flex items-center justify-center overflow-hidden">
                   {s.imagen_url ? <img src={s.imagen_url} alt="" className="w-full h-full object-cover" /> : <ShoppingBag className="w-8 h-8 text-zinc-600" />}
                 </div>
                 <div className="p-2 space-y-0.5">

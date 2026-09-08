@@ -85,7 +85,7 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
         <p className="text-xs text-zinc-500 mt-1">El verdadero costo de usar tu vehículo, incluyendo depreciación.</p>
       </div>
 
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         {(defaults.precioVehiculo != null || defaults.kmAnualesSpec != null) && (
           <button type="button" onClick={usarMisDatos}
             className="w-full flex items-center justify-center gap-1.5 text-[10px] font-bold bg-auto-500/10 border border-auto-500/25 text-auto-400 rounded-lg py-2 hover:bg-auto-500/20 transition-colors">
@@ -96,26 +96,26 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
           <span className="text-xs font-bold text-zinc-500">Valor de compra ({symbol})</span>
           <input type="number" min="1" step="1000" value={valorCompra}
             onChange={(e) => setValorCompra(e.target.value)} placeholder="Ej: 65000"
-            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
         </label>
         <div className="grid grid-cols-3 gap-2">
           <label className="block">
             <span className="text-[10px] font-bold text-zinc-500">Deprec. anual %</span>
             <input type="number" min="1" max="30" value={tasaDepreciacion}
               onChange={(e) => setTasaDepreciacion(e.target.value)}
-              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-[10px] font-bold text-zinc-500">Años</span>
             <input type="number" min="0.5" step="0.5" value={anios}
               onChange={(e) => setAnios(e.target.value)}
-              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-[10px] font-bold text-zinc-500">Km/año</span>
             <input type="number" min="100" step="1000" value={kmAnuales}
               onChange={(e) => setKmAnuales(e.target.value)}
-              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-0.5 px-2 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
             <p className="text-xs text-white/60 mt-1">{money(Math.round(resultados.costoMensual))}/mes · {money(Math.round(resultados.costoDiario))}/día</p>
           </div>
 
-          <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
+          <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
             <h3 className="text-xs font-extrabold text-zinc-300">Desglose por km</h3>
             {[
               { label: "Combustible", value: resultados.combustiblePorKm, barra: resultados.barraComb, color: "bg-auto-600" },
@@ -140,7 +140,7 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
                   <span className="font-bold text-zinc-300">{d.label}</span>
                   <span className="font-bold text-zinc-200">{money(d.value, 2)}</span>
                 </div>
-                <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-3 glass-input rounded-full overflow-hidden">
                   <div className={`h-full ${d.color} rounded-full`} style={{ width: `${d.barra}%` }} />
                 </div>
               </div>
@@ -148,7 +148,7 @@ export default function CostoKmRealClient({ defaults }: { defaults: Defaults }) 
           </div>
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-6 text-center">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-6 text-center">
           <p className="text-sm text-zinc-500">Ingresa los datos para ver el costo por km</p>
           <p className="text-xs text-zinc-500 mt-1">El valor de compra y km/año son necesarios</p>
         </div>

@@ -87,7 +87,7 @@ function ProductCheckoutPageInner() {
         <Link href={`/auto/app/marketplace/producto/${productId}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-auto-500">
           <ArrowLeft className="w-4 h-4" /> Volver al producto
         </Link>
-        <div className="bg-zinc-900 border border-white/10 rounded-2xl p-5 space-y-3">
+        <div className="glass-card border border-white/10 rounded-2xl p-5 space-y-3">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-auto-600/15 flex items-center justify-center"><CreditCard className="w-5 h-5 text-auto-400" /></div>
             <div>
@@ -100,7 +100,7 @@ function ProductCheckoutPageInner() {
             type="email" value={email} onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && startCheckout(email)}
             placeholder="tu@correo.com" autoFocus
-            className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+            className="w-full px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-auto-600/20"
           />
           {error && <p className="text-xs text-red-400">{error}</p>}
           <button type="button" onClick={() => startCheckout(email)}

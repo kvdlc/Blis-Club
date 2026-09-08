@@ -58,7 +58,7 @@ const categories = [
   { key: "neumaticos", label: "Neumáticos", icon: Car, color: "bg-auto-600/10 text-auto-500" },
   { key: "luces", label: "Luces", icon: Lightbulb, color: "bg-auto-600/10 text-auto-500" },
   { key: "seguridad", label: "Seguridad", icon: Shield, color: "bg-auto-600/10 text-auto-500" },
-  { key: "documentos", label: "Documentos", icon: CheckCircle2, color: "bg-zinc-800 text-zinc-300" },
+  { key: "documentos", label: "Documentos", icon: CheckCircle2, color: "glass-input text-zinc-300" },
 ];
 
 export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
@@ -128,7 +128,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
       </div>
 
       {/* Barra de progreso */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs font-extrabold text-zinc-300">Progreso</h3>
           <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
           </div>
         </div>
 
-        <div className="relative h-3 bg-zinc-800 rounded-full overflow-hidden">
+        <div className="relative h-3 glass-input rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
               progressPct >= 90 ? "bg-auto-600" : progressPct >= 50 ? "bg-auto-600" : "bg-auto-600"
@@ -164,7 +164,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
         {grouped.map((cat) => {
           const CatIcon = cat.icon;
           return (
-            <div key={cat.key} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden">
+            <div key={cat.key} className="glass-card border border-white/10 shadow-sm rounded-2xl overflow-hidden">
               <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className={`w-8 h-8 rounded-xl ${cat.color} flex items-center justify-center`}>
@@ -180,7 +180,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
                     ? "bg-auto-600/10 text-auto-500"
                     : cat.catChecked >= cat.catTotal / 2
                       ? "bg-auto-600/10 text-auto-500"
-                      : "bg-zinc-800 text-zinc-500"
+                      : "glass-input text-zinc-500"
                 }`}>
                   {cat.catChecked === cat.catTotal ? <Check className="w-3.5 h-3.5 text-auto-500" /> : `${cat.catChecked}/${cat.catTotal}`}
                 </span>
@@ -194,7 +194,7 @@ export default function ChecklistClient({ defaults }: { defaults: Defaults }) {
                     className={`w-full flex items-start gap-3 py-2.5 px-3 rounded-xl text-left transition-colors ${
                       checks[item.id]
                         ? "bg-auto-600/10"
-                        : "bg-zinc-800 hover:bg-zinc-800"
+                        : "glass-input hover:bg-white/10"
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${

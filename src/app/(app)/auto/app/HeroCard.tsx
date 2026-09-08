@@ -78,7 +78,7 @@ export function HeroCard({ vehicle, fuelLogs }: Props) {
             </div>
 
             {/* Placa estilo placa real */}
-            <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-md bg-zinc-900 border border-zinc-700 px-2 py-0.5">
+            <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-md glass-card border border-zinc-700 px-2 py-0.5">
               <Tag className="w-3 h-3 text-zinc-500" />
               <span className="text-[11px] font-black tracking-[0.2em] text-zinc-100">{vehicle.placa}</span>
             </div>

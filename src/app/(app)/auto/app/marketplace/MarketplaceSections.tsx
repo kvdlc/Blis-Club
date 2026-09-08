@@ -107,7 +107,7 @@ export function Trending({ products }: { products: MarketplaceProduct[] }) {
                     transition={{ duration: 2, repeat: Infinity }}
                     className={`w-7 h-7 shrink-0 flex items-center justify-center text-lg font-black ${i === 0 ? "text-amber-400" : "text-auto-400/70"}`}
                   >{String(i + 1).padStart(2, "0")}</motion.span>
-                  <motion.div whileHover={{ scale: 1.06 }} className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
+                  <motion.div whileHover={{ scale: 1.06 }} className="w-12 h-12 rounded-xl overflow-hidden glass-input shrink-0">
                     {p.imagen_url ? <img src={p.imagen_url} alt="" className="w-full h-full object-cover" /> : <ShoppingBag className="w-5 h-5 m-auto text-zinc-600" />}
                   </motion.div>
                   <div className="min-w-0 flex-1">
@@ -142,7 +142,7 @@ export function Featured({ products }: { products: MarketplaceProduct[] }) {
               <TiltCard intensity={6}>
                 <Link href={`/auto/app/marketplace/producto/${p.id}`}
                   className="block bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden hover:border-auto-500/40 hover:bg-white/[0.06] hover:shadow-[0_10px_40px_rgba(16,185,129,0.15)] transition-all duration-300 group">
-                  <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden">
+                  <div className="aspect-square glass-input flex items-center justify-center overflow-hidden">
                     {p.imagen_url
                       ? <motion.img src={p.imagen_url} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                       : <ShoppingBag className="w-8 h-8 text-zinc-600" />}
@@ -240,7 +240,7 @@ export function DailyDeals({ products }: { products: MarketplaceProduct[] }) {
 
             {/* Producto de la oferta */}
             <Link href={`/auto/app/marketplace/producto/${deal.id}`} className="flex items-center gap-3 bg-black/30 border border-white/10 rounded-2xl p-3 hover:border-auto-500/40 hover:shadow-[0_6px_24px_rgba(16,185,129,0.12)] transition-all group">
-              <motion.div whileHover={{ scale: 1.06, rotate: 2 }} className="w-14 h-14 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
+              <motion.div whileHover={{ scale: 1.06, rotate: 2 }} className="w-14 h-14 rounded-xl overflow-hidden glass-input shrink-0">
                 {deal.imagen_url ? <img src={deal.imagen_url} alt="" className="w-full h-full object-cover" /> : <ShoppingBag className="w-6 h-6 m-auto text-zinc-600" />}
               </motion.div>
               <div className="min-w-0 flex-1">
@@ -424,7 +424,7 @@ export function Guides() {
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full sm:max-w-lg bg-zinc-900 border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[88vh] flex flex-col overflow-hidden"
+              className="w-full sm:max-w-lg glass-card border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[88vh] flex flex-col overflow-hidden"
             >
               {/* Header */}
               <div className="flex items-start gap-3 p-5 border-b border-white/10">

@@ -86,7 +86,7 @@ export default function ListingDetailClient({ listing, isOwner, userId, similare
       </Link>
 
       {/* Galería */}
-      <div className="rounded-2xl overflow-hidden bg-zinc-800 relative aspect-square">
+      <div className="rounded-2xl overflow-hidden glass-input relative aspect-square">
         {galeria[activoImg] ? (
           <img src={galeria[activoImg]} alt={listing.titulo} className="w-full h-full object-cover" />
         ) : (
@@ -110,7 +110,7 @@ export default function ListingDetailClient({ listing, isOwner, userId, similare
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-auto-600/15 text-auto-400">{listing.marca || "Auto"}</span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${listing.estado_item === "nuevo" ? "bg-emerald-500/10 text-emerald-400" : "bg-zinc-800 text-zinc-500"}`}>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${listing.estado_item === "nuevo" ? "bg-emerald-500/10 text-emerald-400" : "glass-input text-zinc-500"}`}>
                 {listing.estado_item === "nuevo" ? "Nuevo" : "Usado"}
               </span>
             </div>
@@ -136,25 +136,25 @@ export default function ListingDetailClient({ listing, isOwner, userId, similare
       {/* Datos técnicos */}
       <div className="grid grid-cols-2 gap-2">
         {listing.ciudad && (
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-3">
+          <div className="glass-card border border-white/10 rounded-2xl p-3">
             <p className="text-[10px] text-zinc-500 flex items-center gap-1"><MapPin className="w-3 h-3" /> Ubicación</p>
             <p className="text-sm font-bold text-zinc-200">{listing.ciudad}</p>
           </div>
         )}
         {listing.marca && (
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-3">
+          <div className="glass-card border border-white/10 rounded-2xl p-3">
             <p className="text-[10px] text-zinc-500">Marca / modelo</p>
             <p className="text-sm font-bold text-zinc-200">{listing.marca} {listing.modelo}</p>
           </div>
         )}
         {specs?.presion_neumaticos_delante && (
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-3">
+          <div className="glass-card border border-white/10 rounded-2xl p-3">
             <p className="text-[10px] text-zinc-500 flex items-center gap-1"><Gauge className="w-3 h-3" /> Presión delantera</p>
             <p className="text-sm font-bold text-zinc-200">{specs.presion_neumaticos_delante} PSI</p>
           </div>
         )}
         {specs?.presion_neumaticos_atras && (
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-3">
+          <div className="glass-card border border-white/10 rounded-2xl p-3">
             <p className="text-[10px] text-zinc-500 flex items-center gap-1"><Gauge className="w-3 h-3" /> Presión trasera</p>
             <p className="text-sm font-bold text-zinc-200">{specs.presion_neumaticos_atras} PSI</p>
           </div>
@@ -163,7 +163,7 @@ export default function ListingDetailClient({ listing, isOwner, userId, similare
 
       {/* Specs extra */}
       {specsRows.length > 0 && (
-        <div className="bg-zinc-900 border border-white/10 rounded-2xl p-4 space-y-2">
+        <div className="glass-card border border-white/10 rounded-2xl p-4 space-y-2">
           <h3 className="text-[11px] font-extrabold text-zinc-300 flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" /> Ficha técnica</h3>
           {specsRows.map((s) => (
             <div key={s.label} className="flex justify-between text-xs">
@@ -176,14 +176,14 @@ export default function ListingDetailClient({ listing, isOwner, userId, similare
 
       {/* Descripción */}
       {listing.descripcion && (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
           <h3 className="text-xs font-extrabold text-zinc-300 mb-2">Descripción</h3>
           <p className="text-sm text-zinc-500 leading-relaxed whitespace-pre-wrap">{listing.descripcion}</p>
         </div>
       )}
 
       {/* Vendedor */}
-      <div className="bg-zinc-900 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+      <div className="glass-card border border-white/10 rounded-2xl p-4 flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-auto-600/10 flex items-center justify-center">
           <span className="text-base font-black text-auto-500">{listing.profiles?.display_name?.charAt(0) || "V"}</span>
         </div>
@@ -201,12 +201,12 @@ export default function ListingDetailClient({ listing, isOwner, userId, similare
           <MessageCircle className="w-5 h-5" /> Contactar por WhatsApp
         </a>
       ) : (
-        <div className="w-full py-3.5 rounded-2xl bg-zinc-800 text-zinc-500 text-sm font-bold text-center">WhatsApp no disponible</div>
+        <div className="w-full py-3.5 rounded-2xl glass-input text-zinc-500 text-sm font-bold text-center">WhatsApp no disponible</div>
       )}
 
       {/* Acciones del dueño */}
       {isOwner && listing.vehicle_id && (
-        <div className="space-y-2 bg-zinc-900 border border-white/10 rounded-2xl p-4">
+        <div className="space-y-2 glass-card border border-white/10 rounded-2xl p-4">
           <p className="text-xs font-extrabold text-zinc-300 flex items-center gap-1"><Tag className="w-3.5 h-3.5" /> Acciones del vendedor</p>
           <div className="grid grid-cols-2 gap-2">
             <button type="button" disabled={busy} onClick={() => changeEstado("vendido")}
@@ -214,7 +214,7 @@ export default function ListingDetailClient({ listing, isOwner, userId, similare
               Marcar como vendido
             </button>
             <button type="button" disabled={busy} onClick={() => changeEstado("activo")}
-              className="py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-1">
+              className="py-2.5 rounded-xl glass-input text-zinc-300 text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-1">
               <EyeOff className="w-3.5 h-3.5" /> Quitar de venta
             </button>
           </div>
@@ -228,8 +228,8 @@ export default function ListingDetailClient({ listing, isOwner, userId, similare
           <div className="grid grid-cols-2 gap-2">
             {similares.map((s) => (
               <Link key={s.id} href={`/auto/app/marketplace/${s.slug}`}
-                className="bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
-                <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden">
+                className="glass-card border border-white/10 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+                <div className="aspect-square glass-input flex items-center justify-center overflow-hidden">
                   {s.fotos?.[0] ? <img src={s.fotos[0]} alt="" className="w-full h-full object-cover" /> : <span className="text-3xl">🚗</span>}
                 </div>
                 <div className="p-2 space-y-0.5">

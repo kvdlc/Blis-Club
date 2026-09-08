@@ -78,7 +78,7 @@ export function AutoSearchOverlay({ variant = "light" }: { variant?: "dark" | "l
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)}>
-          <div ref={ref} className={`w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden ${isDark ? "bg-zinc-900 border border-white/10" : "bg-white border border-zinc-200"}`} onClick={(e) => e.stopPropagation()}>
+          <div ref={ref} className={`w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden ${isDark ? "glass-card border border-white/10" : "bg-white border border-zinc-200"}`} onClick={(e) => e.stopPropagation()}>
             <div className={`flex items-center gap-3 px-5 py-4 border-b ${isDark ? "border-white/10" : "border-zinc-100"}`}>
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isDark ? "bg-auto-600/15" : "bg-auto-100"}`}>
                 <Search className={`w-4 h-4 ${isDark ? "text-auto-400" : "text-auto-600"}`} />
@@ -104,7 +104,7 @@ export function AutoSearchOverlay({ variant = "light" }: { variant?: "dark" | "l
               {displayItems.map((s, i) => (
                 <button key={i} onClick={() => navigate(s.href)} className={`w-full flex items-center gap-3 px-5 py-3 text-left transition-colors ${isDark ? "hover:bg-white/[0.06]" : "hover:bg-zinc-50"}`}>
                   {s.thumb ? (
-                    <img src={s.thumb} alt="" className="w-9 h-9 rounded-lg object-cover shrink-0 bg-zinc-800" />
+                    <img src={s.thumb} alt="" className="w-9 h-9 rounded-lg object-cover shrink-0 glass-input" />
                   ) : (
                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${isDark ? "bg-white/[0.06]" : "bg-zinc-100"}`}>
                       <s.icon className={`w-4 h-4 ${isDark ? "text-auto-400" : "text-zinc-500"}`} />

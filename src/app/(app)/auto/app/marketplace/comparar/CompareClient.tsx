@@ -35,13 +35,13 @@ export default function CompareClient({ autos }: { autos: MarketplaceListing[] }
         <h1 className="text-xl font-black text-zinc-100">Comparar autos</h1>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card border border-white/10 rounded-2xl overflow-hidden">
         {/* Cabecera: foto + nombre */}
         <div className="grid items-end" style={{ gridTemplateColumns: `110px repeat(${autos.length}, 1fr)` }}>
           <div />
           {autos.map((a, i) => (
             <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} className="p-2 text-center">
-              <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-800 relative">
+              <div className="aspect-square rounded-2xl overflow-hidden glass-input relative">
                 {a.fotos?.[0] ? <img src={a.fotos[0]} alt="" className="w-full h-full object-cover" /> : <Car className="w-10 h-10 m-auto text-zinc-600" />}
               </div>
               <p className="mt-2 text-xs font-black text-zinc-100 leading-tight line-clamp-2">{a.titulo}</p>

@@ -84,7 +84,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
       </div>
 
       {/* Inputs */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
         {/* Presión */}
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -101,10 +101,10 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
                 <input type="number" min="20" max="80" step="1" value={presionDelante}
                   onChange={(e) => setPresionDelante(e.target.value)}
                   placeholder="32"
-                  className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                  className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
                 {defaults.presionDelante && (
                   <button onClick={() => setPresionDelante(defaults.presionDelante!.toString())}
-                    className="px-2 py-2 rounded-lg bg-zinc-800 text-[10px] font-bold text-zinc-500 hover:bg-auto-600/15 hover:text-auto-500">
+                    className="px-2 py-2 rounded-lg glass-input text-[10px] font-bold text-zinc-500 hover:bg-auto-600/15 hover:text-auto-500">
                     {defaults.presionDelante}
                   </button>
                 )}
@@ -115,18 +115,18 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
               <span className="text-[10px] font-bold text-zinc-500">Atrás</span>
               <div className="flex gap-1 mt-0.5">
                 {usarMismaPresion ? (
-                  <div className="flex-1 px-2.5 py-2 rounded-lg bg-zinc-800 text-sm font-medium text-zinc-500 flex items-center">
+                  <div className="flex-1 px-2.5 py-2 rounded-lg glass-input text-sm font-medium text-zinc-500 flex items-center">
                     Igual que delante
                   </div>
                 ) : (
                   <input type="number" min="20" max="80" step="1" value={presionAtras}
                     onChange={(e) => setPresionAtras(e.target.value)}
                     placeholder="32"
-                    className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                    className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
                 )}
                 {defaults.presionAtras && (
                   <button onClick={() => { setUsarMismaPresion(false); setPresionAtras(defaults.presionAtras!.toString()); }}
-                    className="px-2 py-2 rounded-lg bg-zinc-800 text-[10px] font-bold text-zinc-500 hover:bg-auto-600/15 hover:text-auto-500">
+                    className="px-2 py-2 rounded-lg glass-input text-[10px] font-bold text-zinc-500 hover:bg-auto-600/15 hover:text-auto-500">
                     {defaults.presionAtras}
                   </button>
                 )}
@@ -150,14 +150,14 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
               <input type="number" min="0" max="6000" step="10" value={altitudOrigen}
                 onChange={(e) => setAltitudOrigen(e.target.value)}
                 placeholder="Ej: 3400"
-                className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             </label>
             <label className="block">
               <span className="text-[10px] font-bold text-zinc-500">Altitud de destino (msnm)</span>
               <input type="number" min="0" max="6000" step="10" value={altitudDestino}
                 onChange={(e) => setAltitudDestino(e.target.value)}
                 placeholder="Ej: 150"
-                className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 bg-zinc-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+                className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 glass-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
             </label>
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
                   else if (!altitudDestino) usarCiudad(c.altitud, "destino");
                   else usarCiudad(c.altitud, "destino");
                 }}
-                className="text-[9px] font-medium px-2 py-1 rounded-full bg-zinc-800 text-zinc-500 hover:bg-auto-600/15 hover:text-auto-500 transition-colors"
+                className="text-[9px] font-medium px-2 py-1 rounded-full glass-input text-zinc-500 hover:bg-auto-600/15 hover:text-auto-500 transition-colors"
               >
                 {c.nombre} ({c.altitud}m)
               </button>
@@ -222,19 +222,19 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
           </div>
 
           {/* Presiones ajustadas */}
-          <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+          <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
             <h3 className="text-xs font-extrabold text-zinc-300 flex items-center gap-1.5 mb-3">
               <Car className="w-3.5 h-3.5 text-auto-500" /> Presión ajustada
             </h3>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-zinc-800 rounded-xl p-3 text-center">
+              <div className="glass-input rounded-xl p-3 text-center">
                 <p className="text-[10px] text-zinc-500">Delante</p>
                 <p className="text-2xl font-black text-auto-500">
                   {resultados.nuevaDelante.toFixed(1)}
                 </p>
                 <p className="text-[10px] text-zinc-500 mt-0.5">PSI</p>
               </div>
-              <div className="bg-zinc-800 rounded-xl p-3 text-center">
+              <div className="glass-input rounded-xl p-3 text-center">
                 <p className="text-[10px] text-zinc-500">Atrás</p>
                 <p className="text-2xl font-black text-auto-500">
                   {resultados.nuevaAtras.toFixed(1)}
@@ -245,7 +245,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
           </div>
 
           {/* Recomendación */}
-          <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+          <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
             <div className="flex items-start gap-2">
               <Info className="w-4 h-4 text-auto-500 shrink-0 mt-0.5" />
               <div>
@@ -263,7 +263,7 @@ export default function PresionAltitudClient({ defaults }: { defaults: Defaults 
           </div>
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-6 text-center">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-6 text-center">
           <p className="text-sm text-zinc-500">Completa los campos para ver el ajuste</p>
           <p className="text-xs text-zinc-500 mt-1">Presión en frío y altitudes de origen y destino</p>
         </div>

@@ -105,7 +105,7 @@ function CartDrawer({
           <motion.aside
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 32 }}
-            className="fixed right-0 top-0 bottom-0 z-[85] w-full max-w-sm bg-zinc-950 border-l border-white/10 flex flex-col"
+            className="fixed right-0 top-0 bottom-0 z-[85] w-full max-w-sm glass-strong border-l border-white/10 flex flex-col"
           >
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ function CartDrawer({
                 const p = i.product;
                 return (
                   <div key={i.id} className="flex gap-3 bg-white/[0.04] border border-white/10 rounded-2xl p-2.5">
-                    <Link href={`/auto/app/marketplace/producto/${p.id}`} className="w-16 h-16 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
+                    <Link href={`/auto/app/marketplace/producto/${p.id}`} className="w-16 h-16 rounded-xl overflow-hidden glass-input shrink-0">
                       {p.imagen_url ? <img src={p.imagen_url} alt="" className="w-full h-full object-cover" /> : <ShoppingBag className="w-6 h-6 m-auto text-zinc-600" />}
                     </Link>
                     <div className="min-w-0 flex-1 space-y-1">

@@ -13,7 +13,7 @@ const estados: { value: VehicleEstado; label: string; desc: string; icon: any; c
   { value: "activo", label: "Activo", desc: "Vehículo en uso normal. Visible en tu perfil.", icon: Shield, color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
   { value: "en venta", label: "En venta", desc: "Visible públicamente en tu perfil y en Marketplace de Autos Usados.", icon: Tag, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
   { value: "robado", label: "Robado", desc: "Marca el vehículo como robado. Se mostrará una alerta en el perfil público.", icon: AlertTriangle, color: "bg-red-500/10 text-red-400 border-red-500/20" },
-  { value: "vendido", label: "Vendido", desc: "El vehículo ya no te pertenece. Se oculta de tu lista activa.", icon: EyeOff, color: "bg-zinc-800 text-zinc-500 border-white/10" },
+  { value: "vendido", label: "Vendido", desc: "El vehículo ya no te pertenece. Se oculta de tu lista activa.", icon: EyeOff, color: "glass-input text-zinc-500 border-white/10" },
 ];
 
 export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
@@ -42,7 +42,7 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
       </div>
 
       {/* Vista previa del perfil público */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Globe className="w-4 h-4 text-auto-500" />
           <h3 className="text-xs font-extrabold text-zinc-300">Vista previa</h3>
@@ -50,7 +50,7 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
             className="ml-auto text-[10px] font-bold text-auto-500 hover:underline">Ver perfil →</a>
         </div>
 
-        <div className="h-32 bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center mb-3">
+        <div className="h-32 glass-input rounded-xl overflow-hidden flex items-center justify-center mb-3">
           {vehicle.foto_url ? (
             <img src={vehicle.foto_url} alt="" className="w-full h-full object-cover" />
           ) : (
@@ -64,13 +64,13 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
             estado === "activo" ? "bg-emerald-500/10 text-emerald-400" :
             estado === "en venta" ? "bg-amber-500/10 text-amber-400" :
             estado === "robado" ? "bg-red-500/10 text-red-400" :
-            "bg-zinc-800 text-zinc-500"
+            "glass-input text-zinc-500"
           }`}>{estado === "en venta" ? "En venta" : estado === "robado" ? "Robado" : estado === "vendido" ? "Vendido" : "Activo"}</span>
         </div>
       </div>
 
       {/* Selector de estado */}
-      <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4">
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4">
         <h3 className="text-xs font-extrabold text-zinc-300 mb-3">Cambiar estado</h3>
         <div className="space-y-2">
           {estados.map((e) => {
@@ -81,7 +81,7 @@ export default function PublicVehicleClient({ vehicle }: { vehicle: Vehicle }) {
                 key={e.value}
                 onClick={() => setEstado(e.value)}
                 className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                  selected ? e.color : "border-transparent bg-zinc-800 hover:bg-zinc-800"
+                  selected ? e.color : "border-transparent glass-input hover:bg-white/10"
                 }`}
               >
                 <Icon className={`w-5 h-5 shrink-0 mt-0.5 ${

@@ -70,8 +70,8 @@ const warningLights = [
   { icon: RotateCw, name: "Control de Tracción / ESP", severity: "medio", color: "text-blue-400", bg: "bg-blue-500/10", desc: "Sistema de estabilidad o control de tracción activo o con falla.", action: "Si parpadea, está funcionando. Si queda fijo, requiere revisión." },
   { icon: OctagonAlert, name: "Airbag / SRS", severity: "alto", color: "text-red-400", bg: "bg-red-500/10", desc: "Falla en el sistema de bolsas de aire.", action: "Requiere revisión urgente. Los airbags podrían no activarse." },
   { icon: CircleOff, name: "Presión de llantas (TPMS)", severity: "medio", color: "text-amber-400", bg: "bg-amber-500/10", desc: "Presión baja en uno o más neumáticos.", action: "Verifica la presión de las llantas y llénalas según el manual." },
-  { icon: Lightbulb, name: "Dirección asistida", severity: "medio", color: "text-zinc-400", bg: "bg-zinc-800", desc: "Falla en el sistema de dirección asistida.", action: "La dirección puede sentirse dura. Revisa el nivel de líquido." },
-  { icon: Lock, name: "Inmovilizador / Seguridad", severity: "bajo", color: "text-zinc-500", bg: "bg-zinc-800", desc: "Sistema antirrobo activo o llave no reconocida.", action: "Usa la llave original." },
+  { icon: Lightbulb, name: "Dirección asistida", severity: "medio", color: "text-zinc-400", bg: "glass-input", desc: "Falla en el sistema de dirección asistida.", action: "La dirección puede sentirse dura. Revisa el nivel de líquido." },
+  { icon: Lock, name: "Inmovilizador / Seguridad", severity: "bajo", color: "text-zinc-500", bg: "glass-input", desc: "Sistema antirrobo activo o llave no reconocida.", action: "Usa la llave original." },
   { icon: Waves, name: "AdBlue (urea)", severity: "medio", color: "text-blue-300", bg: "bg-blue-500/10", desc: "Nivel bajo de AdBlue en vehículos diésel.", action: "Rellena el depósito de AdBlue para evitar limitación de potencia." },
   { icon: Sun, name: "Luces de carretera", severity: "bajo", color: "text-blue-300", bg: "bg-blue-500/10", desc: "Las luces de carretera están encendidas.", action: "Informativo. Apágalas al cruzar con otro vehículo." },
 ];
@@ -279,10 +279,10 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
       </div>
 
       {adding && (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
           <p className="text-[10px] font-bold text-auto-400">{editId ? "✏️ Editando documento" : "Nuevo documento"}</p>
           <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-            className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs font-medium bg-zinc-800 text-zinc-200">
+            className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs font-medium glass-input text-zinc-200">
             {documentTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
 
@@ -299,7 +299,7 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
           {/* Imagen / documento */}
           <label className="block">
             <span className="text-[10px] font-bold text-zinc-500">Imagen del documento</span>
-            <label className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-white/15 bg-zinc-900 cursor-pointer hover:bg-zinc-800/60 transition-colors mt-1 ${uploading ? "opacity-60" : ""}`}>
+            <label className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-white/15 glass-card cursor-pointer hover:bg-white/10/60 transition-colors mt-1 ${uploading ? "opacity-60" : ""}`}>
               <Upload className="w-4 h-4 text-zinc-400" />
               <span className="text-zinc-400 text-[10px]">{uploading ? "Subiendo..." : form.imagen_url ? "Imagen cargada ✓" : "Subir imagen (opcional)"}</span>
               <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" disabled={uploading} />
@@ -312,7 +312,7 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
             <button onClick={handleSave} disabled={saving || !form.fecha_vencimiento} className="flex-1 px-3 py-1.5 rounded-lg bg-auto-600 text-white text-xs font-bold">
               {saving ? "Guardando..." : editId ? "Guardar cambios" : "Guardar"}
             </button>
-            <button onClick={cancelForm} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs">
+            <button onClick={cancelForm} className="px-3 py-1.5 rounded-lg glass-input text-zinc-500 text-xs">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -328,7 +328,7 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
           const style = getUrgencyStyle(dias);
           const dt = documentTypes.find((t) => t.value === doc.tipo);
           return (
-            <div key={doc.id} className={`bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 border ${style.border} flex items-center gap-3`}>
+            <div key={doc.id} className={`glass-card border border-white/10 shadow-sm rounded-2xl p-4 border ${style.border} flex items-center gap-3`}>
               {/* Miniatura */}
               <button onClick={() => doc.imagen_url && setVerDoc(doc)} className={`w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-white/10 ${doc.imagen_url ? "" : "bg-auto-600/10 flex items-center justify-center"}`}>
                 {doc.imagen_url ? <img src={doc.imagen_url} alt="" className="w-full h-full object-cover" /> : <FileText className="w-5 h-5 text-auto-500" />}
@@ -364,7 +364,7 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
       {/* Modal ver documento */}
       {verDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => setVerDoc(null)}>
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-3 max-w-lg w-full max-h-[85vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="glass-card border border-white/10 rounded-2xl p-3 max-w-lg w-full max-h-[85vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
             <img src={verDoc.imagen_url || ""} alt="" className="w-full max-h-[70vh] object-contain rounded-xl bg-black/40" />
             <div className="flex items-center justify-between mt-3">
               <p className="text-xs font-bold text-zinc-300">{documentTypes.find((t) => t.value === verDoc.tipo)?.label || verDoc.tipo}</p>
@@ -516,7 +516,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
       </div>
 
       {adding && (
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
           <p className="text-[10px] font-bold text-auto-400">{editId ? "✏️ Editando contacto" : "Nuevo contacto"}</p>
 
           {/* Foto del taller (subida por archivo) */}
@@ -526,11 +526,11 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
               {form.foto_url ? (
                 <img src={form.foto_url} alt="" className="w-20 h-20 rounded-xl object-cover border border-white/10" />
               ) : (
-                <div className="w-20 h-20 rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-xl glass-input border border-white/10 flex items-center justify-center">
                   <Store className="w-6 h-6 text-zinc-600" />
                 </div>
               )}
-              <label className="flex-1 flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl border border-dashed border-white/15 bg-zinc-900 cursor-pointer hover:bg-zinc-800/60 transition-colors">
+              <label className="flex-1 flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl border border-dashed border-white/15 glass-card cursor-pointer hover:bg-white/10/60 transition-colors">
                 <Upload className="w-4 h-4 text-zinc-400" />
                 <span className="text-[10px] text-zinc-400">{uploadingPhoto ? "Subiendo..." : form.foto_url ? "Cambiar foto" : "Subir foto"}</span>
                 <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" disabled={uploadingPhoto} />
@@ -543,17 +543,17 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
             <label className="block">
               <span className="text-[10px] font-bold text-zinc-500">Nombre del taller / mecánica *</span>
               <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                placeholder="Ej: Taller García" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+                placeholder="Ej: Taller García" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
             </label>
             <label className="block">
               <span className="text-[10px] font-bold text-zinc-500">Mecánico dueño / encargado (opcional)</span>
               <input value={form.encargado} onChange={(e) => setForm({ ...form, encargado: e.target.value })}
-                placeholder="Ej: Juan García" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+                placeholder="Ej: Juan García" className="w-full mt-0.5 px-2.5 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
             </label>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-              className="px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
+              className="px-2.5 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200">
               {contactTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
@@ -563,11 +563,11 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
             <span className="text-[10px] font-bold text-zinc-500">Número principal (llamada / WhatsApp)</span>
             <div className="flex items-center gap-1.5 mt-1">
               <select value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })}
-                className="shrink-0 px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
+                className="shrink-0 px-2 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200">
                 {countryPrefixes.map((p) => <option key={p.code} value={p.code}>{p.flag} {p.prefix}</option>)}
               </select>
               <input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                placeholder="Ej: 987654321" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+                placeholder="Ej: 987654321" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
             </div>
           </div>
 
@@ -576,11 +576,11 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
             <span className="text-[10px] font-bold text-zinc-500">Número alternativo (opcional)</span>
             <div className="flex items-center gap-1.5 mt-1">
               <select value={form.pais_alt} onChange={(e) => setForm({ ...form, pais_alt: e.target.value })}
-                className="shrink-0 px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200">
+                className="shrink-0 px-2 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200">
                 {countryPrefixes.map((p) => <option key={p.code} value={p.code}>{p.flag} {p.prefix}</option>)}
               </select>
               <input value={form.telefono_alt} onChange={(e) => setForm({ ...form, telefono_alt: e.target.value })}
-                placeholder="Número alternativo" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+                placeholder="Número alternativo" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
             </div>
           </div>
 
@@ -602,12 +602,12 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
             <div className="flex items-center gap-1.5 mt-1">
               <MapPin className="w-4 h-4 text-zinc-500 shrink-0" />
               <input value={form.referencia} onChange={(e) => setForm({ ...form, referencia: e.target.value })}
-                placeholder="Ej: frente al grifo, segunda cuadra" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+                placeholder="Ej: frente al grifo, segunda cuadra" className="flex-1 px-2.5 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
             </div>
           </div>
 
           <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })}
-            placeholder="Notas" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+            placeholder="Notas" className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
 
           {/* Marcar como SOS / emergencia */}
           <label className="flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-red-500/20 bg-red-500/[0.05] px-3 py-2.5">
@@ -642,13 +642,13 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
           const Icon = tipo?.icon || Store;
           const principal = c.telefono || c.whatsapp;
           return (
-            <div key={c.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3">
+            <div key={c.id} className="glass-card border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3">
               {/* Foto a la izquierda */}
               <div className="relative w-16 h-16 shrink-0">
                 {c.foto_url ? (
                   <img src={c.foto_url} alt="" className="w-full h-full rounded-xl object-cover border border-white/10" />
                 ) : (
-                  <div className="w-full h-full rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center">
+                  <div className="w-full h-full rounded-xl glass-input border border-white/10 flex items-center justify-center">
                     <Icon className="w-6 h-6 text-auto-500/70" />
                   </div>
                 )}
@@ -726,7 +726,7 @@ function normalizePhone(num: string, pais: string): string | null {
 }
 
 /* ═══════════════════════════ 3. ADN del Vehículo ═══════════════════════ */
-const specsInputCls = "w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200";
+const specsInputCls = "w-full mt-0.5 px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200";
 
 /** Título de grupo con ícono (a nivel módulo para no remontar inputs). */
 function GroupTitle({ icon: GI, children }: { icon: any; children: React.ReactNode }) {
@@ -887,7 +887,7 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
 
   // Campo con etiqueta + ayuda (texto debajo explicando cómo encontrar el dato)
   const renderFields = (
-    <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+    <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
       {/* 🛢️ Motor y lubricación */}
       <div className="space-y-2">
         <GroupTitle icon={Droplets}>Motor y lubricación</GroupTitle>
@@ -992,7 +992,7 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
                       const next = sel ? cur.filter((v) => v !== o.value) : [...cur, o.value];
                       setForm({ ...form, octanaje_recomendado: next.join(",") });
                     }}
-                    className={`px-2 py-1 rounded-full text-[10px] font-bold border transition-colors ${sel ? "bg-auto-500 text-white border-auto-500" : "bg-zinc-800 text-zinc-400 border-white/10 hover:bg-zinc-700"}`}>
+                    className={`px-2 py-1 rounded-full text-[10px] font-bold border transition-colors ${sel ? "bg-auto-500 text-white border-auto-500" : "glass-input text-zinc-400 border-white/10 hover:bg-white/10"}`}>
                     {o.label.replace(/\(.*\)/, "").trim()}
                   </button>
                 );
@@ -1007,7 +1007,7 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
 
       <div className="flex gap-1.5 pt-2 border-t border-white/5">
         <button type="button" onClick={handleSave} disabled={saving} className="flex-1 px-3 py-2.5 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "Guardando..." : "Guardar ADN del vehículo"}</button>
-        <button type="button" onClick={() => setEditing(false)} className="px-3 py-2.5 rounded-lg bg-zinc-800 text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
+        <button type="button" onClick={() => setEditing(false)} className="px-3 py-2.5 rounded-lg glass-input text-zinc-500 text-xs"><X className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );
@@ -1033,7 +1033,7 @@ export function SpecsSection({ vehicleId, catalogSpecId, initialSpecs, defaultEd
       {editing ? renderFields : (
         <div className="grid grid-cols-3 gap-2">
           {specsCards.map((card) => (
-            <div key={card.label} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex flex-col items-center text-center gap-1.5">
+            <div key={card.label} className="glass-card border border-white/10 shadow-sm rounded-2xl p-3 flex flex-col items-center text-center gap-1.5">
               <card.icon className="w-4 h-4 text-auto-500" />
               <p className="text-[10px] text-zinc-500">{card.label}</p>
               <p className="text-xs font-bold text-zinc-100">{card.value}</p>
@@ -1062,7 +1062,7 @@ function WarningLightsSection() {
             <div key={i}>
               <button
                 onClick={() => setSelected(selected === i ? null : i)}
-                className={`w-full bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-2 text-left transition-all ${selected === i ? "border border-auto-600/20" : ""}`}
+                className={`w-full glass-card border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-2 text-left transition-all ${selected === i ? "border border-auto-600/20" : ""}`}
               >
                 <div className={`w-8 h-8 rounded-lg ${light.bg} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-4 h-4 ${light.color}`} />
@@ -1075,7 +1075,7 @@ function WarningLightsSection() {
                 </div>
               </button>
               {selected === i && (
-                <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 mt-1 border border-auto-600/20">
+                <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-3 mt-1 border border-auto-600/20">
                   <p className="text-xs text-zinc-300">{light.desc}</p>
                   <p className="text-[10px] text-auto-500 font-bold mt-1.5">Qué hacer: {light.action}</p>
                 </div>

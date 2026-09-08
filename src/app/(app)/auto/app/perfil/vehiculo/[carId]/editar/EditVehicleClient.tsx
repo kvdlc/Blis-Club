@@ -16,7 +16,7 @@ const estadoOptions: { value: VehicleEstado; label: string; desc: string; icon: 
   { value: "activo", label: "Activo", desc: "Vehículo en uso normal. Visible en tu perfil.", icon: Shield, color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
   { value: "en venta", label: "En venta", desc: "Visible en tu perfil y en Marketplace de Autos Usados.", icon: Tag, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
   { value: "robado", label: "Robado", desc: "Se mostrará una alerta en el perfil público.", icon: AlertTriangle, color: "bg-red-500/10 text-red-400 border-red-500/20" },
-  { value: "vendido", label: "Vendido", desc: "Se oculta de tu lista activa.", icon: EyeOff, color: "bg-zinc-800 text-zinc-500 border-white/10" },
+  { value: "vendido", label: "Vendido", desc: "Se oculta de tu lista activa.", icon: EyeOff, color: "glass-input text-zinc-500 border-white/10" },
 ];
 
 /** Botón ⓘ que despliega una ayuda en la misma línea (funciona con tap en móvil). */
@@ -109,12 +109,12 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
           <label className="block">
             <span className="text-xs font-bold text-zinc-500">Marca *</span>
             <input required value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-xs font-bold text-zinc-500">Modelo *</span>
             <input required value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
 
@@ -123,12 +123,12 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
             <span className="text-xs font-bold text-zinc-500">Año *</span>
             <input required type="number" min={1950} max={new Date().getFullYear() + 1} value={form.año}
               onChange={(e) => setForm({ ...form, año: parseInt(e.target.value) || 0 })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-xs font-bold text-zinc-500">Placa *</span>
             <input required value={form.placa} onChange={(e) => setForm({ ...form, placa: e.target.value.toUpperCase() })}
-              maxLength={10} className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              maxLength={10} className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
         </div>
 
@@ -137,19 +137,19 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
             <span className="text-xs font-bold text-zinc-500">Kilometraje</span>
             <input type="number" min={0} value={form.kilometraje}
               onChange={(e) => setForm({ ...form, kilometraje: parseInt(e.target.value) || 0 })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <label className="block">
             <span className="text-xs font-bold text-zinc-500">Color</span>
             <input value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </label>
           <div className="block">
             <div className="flex items-center gap-1 text-xs font-bold text-zinc-500">
               VIN <Tip text="Número de identificación del vehículo (chasis). Son 17 caracteres y suele estar en el tablero o en la documentación. Es opcional." />
             </div>
             <input value={form.vin} onChange={(e) => setForm({ ...form, vin: e.target.value.toUpperCase() })}
-              maxLength={17} placeholder="Opcional" className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              maxLength={17} placeholder="Opcional" className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm uppercase focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </div>
         </div>
 
@@ -162,21 +162,21 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-500">{symbol}</span>
             <input type="number" min={0} step="0.01" value={form.precio}
               onChange={(e) => setForm({ ...form, precio: e.target.value })}
-              placeholder="45000" className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
+              placeholder="45000" className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20" />
           </div>
         </div>
 
         <label className="block">
           <span className="text-xs font-bold text-zinc-500">Foto del vehículo</span>
           <div className="flex items-center gap-2 mt-1">
-            <label className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm cursor-pointer hover:bg-zinc-800/80 transition-colors">
+            <label className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm cursor-pointer hover:bg-white/10/80 transition-colors">
               <Upload className="w-4 h-4 text-zinc-500" />
               <span className="text-zinc-500">{uploadingPhoto ? "Subiendo..." : form.foto_url ? <>Foto cargada <Check className="w-3.5 h-3.5 inline text-emerald-400" /></> : "Seleccionar archivo"}</span>
               <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" disabled={uploadingPhoto} />
             </label>
           </div>
           {form.foto_url && (
-            <div className="h-40 mt-1 rounded-xl bg-zinc-800 overflow-hidden">
+            <div className="h-40 mt-1 rounded-xl glass-input overflow-hidden">
               <img src={form.foto_url} alt="" className="w-full h-full object-cover" />
             </div>
           )}
@@ -185,7 +185,7 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
         <SpecsSection vehicleId={vehicle.id} catalogSpecId={vehicle.catalog_spec_id} initialSpecs={initialSpecs} defaultEditing />
 
         {/* Estado del vehículo (antes separado en "Perfil público") */}
-        <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
+        <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
           <h3 className="text-xs font-extrabold text-zinc-300">Estado del vehículo</h3>
           <div className="space-y-1.5">
             {estadoOptions.map((e) => {
@@ -197,7 +197,7 @@ export default function EditVehicleClient({ userId, vehicle, initialSpecs }: { u
                   type="button"
                   onClick={() => setEstado(e.value)}
                   className={`w-full flex items-start gap-2 p-2.5 rounded-xl border text-left transition-all ${
-                    selected ? e.color : "border-transparent bg-zinc-800 hover:bg-zinc-800"
+                    selected ? e.color : "border-transparent glass-input hover:bg-white/10"
                   }`}
                 >
                   <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${
