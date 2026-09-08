@@ -89,12 +89,12 @@ export function ProductCheckout({ product }: { product: MarketplaceProduct }) {
       {/* CTA comprar */}
       <div className="flex gap-2">
         <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onAddToCart} disabled={adding}
-          className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-white/[0.06] border border-auto-500/30 text-auto-300 text-xs font-black hover:bg-white/[0.1] transition-colors disabled:opacity-60">
+          className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-white/[0.06] border border-violet-500/30 text-violet-300 text-xs font-black hover:bg-white/[0.1] transition-colors disabled:opacity-60">
           {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : added ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
           {added ? "Agregado" : "Agregar al carrito"}
         </motion.button>
         <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onBuy}
-          className="flex-[1.4] flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-auto-600 text-white font-black text-xs hover:bg-auto-500 transition-colors shadow-lg shadow-auto-600/20">
+          className="flex-[1.4] flex items-center justify-center gap-1.5 py-3 rounded-2xl grad-auto text-white font-black text-xs hover:opacity-95 transition-opacity shadow-glow-auto">
           <ShoppingCart className="w-4 h-4" /> Comprar ahora
         </motion.button>
       </div>

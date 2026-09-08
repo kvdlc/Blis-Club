@@ -33,7 +33,7 @@ export function MarketplaceSplash() {
             transition={{ type: "spring", stiffness: 200, damping: 16 }}
             className="relative"
           >
-            <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-auto-600 to-violet-600 flex items-center justify-center shadow-auto-glow">
+            <div className="w-20 h-20 rounded-[1.5rem] grad-auto flex items-center justify-center shadow-glow-auto">
               <Car className="w-10 h-10 text-white" strokeWidth={2} />
             </div>
           </motion.div>

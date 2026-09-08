@@ -161,7 +161,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
           <GlowOrb className="top-2/3 -right-24 bg-violet-600/[0.07]" size={360} float={2} delay={0.6} />
         </ScrollParallax>
         <ScrollParallax from={0} to={120}>
-          <GlowOrb className="bottom-10 left-1/3 bg-amber-500/[0.05]" size={280} float={1} delay={1.2} />
+          <GlowOrb className="bottom-10 left-1/3 bg-cyan-500/[0.06]" size={280} float={1} delay={1.2} />
         </ScrollParallax>
       </div>
 
@@ -456,22 +456,22 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
 
       {/* ── Ofertas CTA ── */}
       <div className="grid md:grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-auto-500/20 bg-gradient-to-br from-auto-600/20 to-transparent p-5 relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-auto-500/10 blur-3xl" />
-          <p className="text-[10px] font-bold text-auto-400 uppercase tracking-wider">Oferta del mes</p>
+        <div className="rounded-2xl border border-auto-500/25 bg-[linear-gradient(120deg,rgba(16,185,129,0.16),rgba(6,182,212,0.10))] p-5 relative overflow-hidden">
+          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-auto-500/15 blur-3xl" />
+          <p className="text-[10px] font-bold text-auto-300 uppercase tracking-wider">Oferta del mes</p>
           <h3 className="text-2xl font-black text-zinc-50 mt-1">Vende tu auto <span className="text-auto-400">hoy</span></h3>
           <p className="text-xs text-zinc-400 mt-1">Publica tu vehículo y llega a compradores reales.</p>
-          <Link href="/auto/app/marketplace/publicar" className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-xl bg-auto-600 text-white text-xs font-bold hover:bg-auto-500 transition-colors">
+          <Link href="/auto/app/marketplace/publicar" className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-xl grad-auto text-white text-xs font-bold hover:opacity-95 transition-opacity">
             Vender <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-        <div className="rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-600/20 to-transparent p-5 relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-violet-500/10 blur-3xl" />
+        <div className="rounded-2xl border border-violet-500/25 bg-[linear-gradient(120deg,rgba(139,92,246,0.16),rgba(6,182,212,0.10))] p-5 relative overflow-hidden">
+          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-violet-500/15 blur-3xl" />
           <p className="text-[10px] font-bold text-violet-300 uppercase tracking-wider">Accesorios</p>
-          <h3 className="text-2xl font-black text-zinc-50 mt-1">Equipa tu <span className="text-violet-400">máquina</span></h3>
+          <h3 className="text-2xl font-black text-zinc-50 mt-1">Equipa tu <span className="text-violet-300">máquina</span></h3>
           <p className="text-xs text-zinc-400 mt-1">Explora accesorios y repuestos seleccionados para tu auto.</p>
           <button type="button" onClick={() => document.getElementById("productos")?.scrollIntoView({ behavior: "smooth" })}
-            className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-xl bg-white/[0.08] border border-white/10 text-zinc-200 text-xs font-bold hover:bg-white/[0.12] transition-colors">
+            className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-xl grad-cyan text-white text-xs font-bold hover:opacity-95 transition-opacity">
             Explorar <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>

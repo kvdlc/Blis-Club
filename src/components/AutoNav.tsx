@@ -56,13 +56,13 @@ export default function AutoNav() {
                 title={tab.label}
                 className={`group relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 ${
                   active
-                    ? "bg-auto-600/15 text-auto-400"
+                    ? "bg-white/[0.08] text-auto-400"
                     : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
                 }`}
               >
                 {/* Indicador activo */}
                 <span
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-full bg-auto-500 transition-all duration-300 ${
+                  className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-full grad-auto transition-all duration-300 ${
                     active ? "opacity-100" : "opacity-0 group-hover:opacity-40"
                   }`}
                   style={{ left: -8 }}
@@ -87,7 +87,7 @@ export default function AutoNav() {
                   aria-label={tab.label}
                   className="relative -mt-8 flex flex-col items-center justify-center"
                 >
-                  <div className="w-16 h-16 rounded-full bg-auto-600 text-white flex items-center justify-center shadow-auto-glow border-4 border-zinc-950 transition-transform active:scale-95">
+                  <div className="w-16 h-16 rounded-full grad-auto text-white flex items-center justify-center shadow-glow-auto border-4 border-zinc-950 transition-transform active:scale-95">
                     <tab.icon className="w-7 h-7" strokeWidth={2.2} />
                   </div>
                 </button>

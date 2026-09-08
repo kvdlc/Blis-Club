@@ -201,9 +201,10 @@ export function DailyDeals({ products }: { products: MarketplaceProduct[] }) {
 
   return (
     <Reveal>
-      <div className="rounded-2xl border border-auto-500/25 bg-gradient-to-br from-[#0d0d16] to-[#0a0a0c] p-5 relative overflow-hidden">
-        <GlowOrb className="-top-16 -right-16 bg-auto-500/15" size={220} float={1.5} />
-        <GlowOrb className="-bottom-24 -left-16 bg-violet-500/10" size={240} float={2} delay={0.8} />
+      <div className="rounded-2xl border border-auto-500/30 bg-[linear-gradient(120deg,rgba(16,185,129,0.12),rgba(6,182,212,0.08),rgba(139,92,246,0.12))] p-5 relative overflow-hidden">
+        <GlowOrb className="-top-16 -right-16 bg-auto-500/20" size={220} float={1.5} />
+        <GlowOrb className="-bottom-24 -left-16 bg-violet-500/15" size={240} float={2} delay={0.8} />
+        <GlowOrb className="top-1/2 -right-8 bg-cyan-500/10" size={160} float={1.6} delay={0.4} />
         <motion.div
           animate={{ opacity: [0.4, 0.7, 0.4] }}
           transition={{ duration: 4, repeat: Infinity }}

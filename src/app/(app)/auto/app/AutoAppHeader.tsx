@@ -21,7 +21,7 @@ export function AutoAppHeader() {
           aria-label="Ir al inicio"
           className="hidden md:flex items-center gap-2"
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-auto-600 to-auto-500 flex items-center justify-center shadow-auto-glow">
+          <div className="w-9 h-9 rounded-xl grad-auto flex items-center justify-center shadow-glow-auto">
             <span className="text-white font-black text-sm">B</span>
           </div>
         </button>

@@ -55,14 +55,17 @@ export function MarketplaceHero3D() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-[#0d0d16]/90 to-[#0a0a0c]/95"
+      className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-auto-gradient"
     >
-      {/* Glow decorativo */}
+      {/* Glow decorativo aurora */}
       <div className="absolute inset-0 pointer-events-none">
         <motion.div animate={{ x: [0, 20, 0], y: [0, -16, 0] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-auto-500/10 blur-3xl" />
+          className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-auto-500/15 blur-3xl" />
         <motion.div animate={{ x: [0, -24, 0], y: [0, 18, 0] }} transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute -bottom-32 -right-24 w-80 h-80 rounded-full bg-violet-500/10 blur-3xl" />
+          className="absolute -bottom-32 -right-24 w-80 h-80 rounded-full bg-violet-600/15 blur-3xl" />
+        <motion.div animate={{ x: [0, 26, 0], y: [0, -12, 0] }} transition={{ duration: 13, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute top-1/3 -right-20 w-72 h-72 rounded-full bg-cyan-500/12 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_10%,rgba(139,92,246,0.10),transparent_55%)]" />
       </div>
 
       <div className="relative grid md:grid-cols-2 gap-4 items-center p-6 md:p-10">
@@ -72,7 +75,7 @@ export function MarketplaceHero3D() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 text-[11px] font-bold text-auto-400 bg-auto-600/10 border border-auto-600/20 px-3 py-1.5 rounded-full uppercase tracking-wider"
+            className="inline-flex items-center gap-2 text-[11px] font-bold text-white bg-[linear-gradient(120deg,#10b981,#8b5cf6)] px-3 py-1.5 rounded-full uppercase tracking-wider shadow-glow-auto"
           >
             <Car className="w-3.5 h-3.5" /> Marketplace Blis Club
           </motion.span>
@@ -105,7 +108,7 @@ export function MarketplaceHero3D() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => router.push("/auto/app/marketplace/publicar")}
-              className="px-5 py-3 rounded-2xl bg-auto-600 text-white font-bold text-sm hover:bg-auto-500 transition-colors shadow-auto-glow active:scale-[0.98]"
+              className="px-5 py-3 rounded-2xl grad-auto text-white font-bold text-sm hover:opacity-95 transition-opacity shadow-glow-auto active:scale-[0.98]"
             >
               Vender mi vehículo
             </motion.button>
@@ -114,7 +117,7 @@ export function MarketplaceHero3D() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => document.getElementById("autos")?.scrollIntoView({ behavior: "smooth" })}
-              className="px-5 py-3 rounded-2xl bg-white/[0.06] border border-white/10 text-zinc-200 font-bold text-sm hover:bg-white/[0.1] transition-colors"
+              className="px-5 py-3 rounded-2xl bg-white/[0.06] border border-violet-500/25 text-zinc-100 font-bold text-sm hover:bg-white/[0.1] transition-colors"
             >
               Explorar autos
             </motion.button>
