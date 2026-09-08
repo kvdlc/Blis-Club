@@ -10,6 +10,7 @@ import {
 } from "@/lib/catalog";
 import type { CatalogMake, CatalogModel, CatalogSpec, VehicleType } from "@/types/database";
 import { ArrowLeft, Upload, Check, Database, Search } from "lucide-react";
+import { useMoney } from "@/lib/money";
 import Link from "next/link";
 
 interface Props {
@@ -26,6 +27,7 @@ const TIPO_LABELS: Record<VehicleType, string> = {
 
 export default function NewVehicleClient({ userId }: Props) {
   const router = useRouter();
+  const { symbol } = useMoney();
   const [saving, setSaving] = useState(false);
 
   // Catálogo
@@ -45,6 +47,7 @@ export default function NewVehicleClient({ userId }: Props) {
     color: "",
     vin: "",
     foto_url: "",
+    precio: "",
     tipo_vehiculo: "auto" as VehicleType,
   });
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -95,6 +98,7 @@ export default function NewVehicleClient({ userId }: Props) {
         color: form.color || null,
         vin: form.vin || null,
         foto_url: form.foto_url || null,
+        precio: form.precio ? parseFloat(form.precio) : null,
         estado: "activo",
         tipo_vehiculo: form.tipo_vehiculo,
         catalog_spec_id: specId || null,
@@ -326,6 +330,19 @@ export default function NewVehicleClient({ userId }: Props) {
             />
           </label>
         </div>
+
+        <label className="block">
+          <span className="text-xs font-bold text-zinc-500">Precio de compra ({symbol})</span>
+          <input
+            type="number"
+            min={0}
+            step="0.01"
+            value={form.precio}
+            onChange={(e) => setForm({ ...form, precio: e.target.value })}
+            placeholder={`Ej: 45000`}
+            className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+          />
+        </label>
 
         <div className="grid grid-cols-2 gap-3">
           <label className="block">

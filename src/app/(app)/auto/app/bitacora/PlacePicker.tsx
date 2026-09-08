@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getCurrentCountryCode } from "@/lib/countries";
+import { uploadContactPhoto } from "@/lib/storage";
 import type { VehicleContact } from "@/types/database";
-import { Store, Fuel, Wrench, Anchor, Building2, Pin, Plus, ChevronDown, Zap, ShoppingBag, MapPin, Phone } from "lucide-react";
+import { Store, Fuel, Wrench, Anchor, Building2, Pin, Plus, ChevronDown, Zap, ShoppingBag, MapPin, Phone, Upload, X, Search } from "lucide-react";
 
 export const CONTACT_TYPES_META: { value: string; label: string; icon: any }[] = [
   { value: "mecanico", label: "Mecánico", icon: Wrench },
@@ -26,20 +27,21 @@ const countryPrefixes = [
 
 interface Props {
   vehicleId: string;
-  tipos: string[];                 // tipos de establecimiento que aplican a este formulario
-  value: string | null;            // contacto_id seleccionado
+  tipos: string[];
+  value: string | null;
   onSelect: (contacto: { id: string; nombre: string } | null) => void;
   placeholder?: string;
 }
 
-/** Selector de centro/establecimiento desde el directorio (vehicle_contacts). Incluye '+' para crear al instante. */
+/** Selector de centro/establecimiento desde el directorio (vehicle_contacts) con buscador y alta completa. */
 export function PlacePicker({ vehicleId, tipos, value, onSelect, placeholder }: Props) {
   const [contacts, setContacts] = useState<VehicleContact[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [showList, setShowList] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const [savingAdd, setSavingAdd] = useState(false);
-  const [addForm, setAddForm] = useState({ nombre: "", tipo: tipos[0] || "otro", telefono: "", pais: "PE" });
-  const [error, setError] = useState<string | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const allowed = CONTACT_TYPES_META.filter((c) => tipos.includes(c.value));
 
@@ -55,133 +57,252 @@ export function PlacePicker({ vehicleId, tipos, value, onSelect, placeholder }: 
     setLoading(false);
   };
 
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [vehicleId, tipos.join(",")]);
+
+  // Cerrar la lista al hacer clic afuera
   useEffect(() => {
-    getCurrentCountryCode().then((c) => {
-      if (c) setAddForm((f) => ({ ...f, pais: c }));
-    });
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vehicleId, tipos.join(",")]);
+    const h = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setShowList(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
 
   const selected = contacts.find((c) => c.id === value) ?? null;
 
-  const handleAdd = async () => {
-    if (!addForm.nombre.trim()) return;
-    setSavingAdd(true);
-    setError(null);
-    const prefijo = countryPrefixes.find((p) => p.code === addForm.pais)?.prefix || "+51";
-    const telefono = addForm.telefono ? `${prefijo}${addForm.telefono.replace(/[^0-9]/g, "")}` : null;
-    const supabase = createClient();
-    const { data, error: err } = await supabase
-      .from("vehicle_contacts")
-      .insert({
-        vehicle_id: vehicleId,
-        nombre: addForm.nombre.trim(),
-        tipo: addForm.tipo,
-        telefono,
-        whatsapp: telefono,
-        pais_telefono: addForm.pais,
-      })
-      .select()
-      .single();
-    setSavingAdd(false);
-    if (err || !data) { setError("No se pudo crear el centro. Intenta de nuevo."); return; }
-    const nuevo = data as VehicleContact;
-    setContacts((prev) => [...prev.filter((c) => c.id !== nuevo.id), nuevo].sort((a, b) => a.nombre.localeCompare(b.nombre)));
-    onSelect({ id: nuevo.id, nombre: nuevo.nombre });
-    setShowAdd(false);
-    setAddForm((f) => ({ ...f, nombre: "", telefono: "" }));
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return contacts;
+    return contacts.filter((c) => c.nombre.toLowerCase().includes(q));
+  }, [contacts, query]);
+
+  const pick = (c: VehicleContact) => {
+    onSelect({ id: c.id, nombre: c.nombre });
+    setQuery("");
+    setShowList(false);
   };
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5" ref={rootRef}>
       <div className="flex items-center gap-1.5">
+        {/* Buscador + lista */}
         <div className="relative flex-1 min-w-0">
-          <select
-            value={selected?.id ?? ""}
-            onChange={(e) => {
-              const id = e.target.value;
-              const c = contacts.find((x) => x.id === id);
-              onSelect(c ? { id: c.id, nombre: c.nombre } : null);
-            }}
-            className="w-full px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 appearance-none pr-8 min-w-0"
-          >
-            <option value="">— {placeholder || "Sin lugar / otro"} —</option>
-            {contacts.map((c) => (
-              <option key={c.id} value={c.id}>{c.nombre}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+          <input
+            value={selected ? selected.nombre : query}
+            readOnly={!!selected}
+            placeholder={placeholder || "Busca el lugar (taller, grifo, tienda…)"}
+            onChange={(e) => { setQuery(e.target.value); setShowList(true); }}
+            onFocus={() => { if (!selected) setShowList(true); }}
+            className="w-full pl-8 pr-8 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200"
+          />
+          {selected ? (
+            <button type="button" onClick={() => onSelect(null)} className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-zinc-500 hover:text-zinc-200">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+          )}
+
+          {showList && !selected && (
+            <div ref={listRef} className="absolute z-30 mt-1 left-0 right-0 max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 p-1.5 space-y-0.5 shadow-xl">
+              {loading && <p className="text-[10px] text-zinc-500 px-2 py-2">Cargando centros…</p>}
+              {!loading && filtered.length === 0 && (
+                <p className="text-[10px] text-zinc-500 px-2 py-2">No hay lugares registrados de este tipo.</p>
+              )}
+              {filtered.map((c) => {
+                const meta = CONTACT_TYPES_META.find((t) => t.value === c.tipo);
+                const Icon = meta?.icon || Pin;
+                return (
+                  <button key={c.id} type="button"
+                    onClick={() => pick(c)}
+                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.06] text-left">
+                    <Icon className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-zinc-200 truncate">{c.nombre}</p>
+                      {c.encargado && <p className="text-[9px] text-zinc-500 truncate">{c.encargado}</p>}
+                    </div>
+                    {c.telefono && <span className="text-[9px] text-zinc-500 shrink-0">{c.telefono}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
+
+        {/* Botón + (alta completa) */}
         <button
           type="button"
           onClick={() => setShowAdd((v) => !v)}
-          className="shrink-0 w-9 h-9 rounded-lg bg-auto-600/10 border border-auto-600/25 flex items-center justify-center text-auto-400 hover:bg-auto-600/20 transition-colors"
-          title="Agregar centro nuevo"
+          className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border transition-colors ${showAdd ? "bg-auto-600/20 border-auto-500/40 text-auto-300" : "bg-auto-600/10 border-auto-600/25 text-auto-400 hover:bg-auto-600/20"}`}
+          title="Agregar lugar nuevo"
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
 
       {showAdd && (
-        <div className="rounded-xl bg-zinc-800/60 border border-white/10 p-2.5 space-y-1.5">
-          <p className="text-[10px] font-bold text-auto-400">➕ Nuevo centro</p>
-          <input
-            value={addForm.nombre}
-            onChange={(e) => setAddForm({ ...addForm, nombre: e.target.value })}
-            placeholder="Nombre del lugar *"
-            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200"
-          />
-          <div className="grid grid-cols-2 gap-1.5">
-            {allowed.length > 1 ? (
-              <select value={addForm.tipo} onChange={(e) => setAddForm({ ...addForm, tipo: e.target.value })}
-                className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200 min-w-0">
-                {allowed.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
-            ) : (
-              (() => {
-                const Icon0 = allowed[0]?.icon;
-                return (
-                  <div className="px-2 py-1.5 text-[10px] text-zinc-400 truncate flex items-center gap-1 min-w-0">
-                    {Icon0 ? <Icon0 className="w-3 h-3" /> : null} {allowed[0]?.label}
-                  </div>
-                );
-              })()
-            )}
-            <div className="flex items-center gap-1 min-w-0">
-              <span className="text-xs text-zinc-500 px-0.5 shrink-0">
-                {countryPrefixes.find((p) => p.code === addForm.pais)?.prefix || "+51"}
-              </span>
-              <input
-                value={addForm.telefono}
-                onChange={(e) => setAddForm({ ...addForm, telefono: e.target.value })}
-                placeholder="Teléfono"
-                className="flex-1 min-w-0 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200"
-              />
-            </div>
-          </div>
-          {error && <p className="text-[10px] text-red-400">{error}</p>}
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={savingAdd || !addForm.nombre.trim()}
-            className="w-full py-1.5 rounded-lg bg-auto-600 text-white text-[11px] font-bold disabled:opacity-50"
-          >
-            {savingAdd ? "Guardando…" : "Crear y usar este lugar"}
-          </button>
-        </div>
+        <QuickContactForm
+          vehicleId={vehicleId}
+          defaultTipos={allowed}
+          onDone={(c) => { pick(c); setShowAdd(false); }}
+          onCancel={() => setShowAdd(false)}
+        />
       )}
 
       {selected && (
         <p className="text-[10px] text-zinc-500 flex items-center gap-1">
           <MapPin className="w-3 h-3 text-auto-400" /> {selected.nombre}
-          {selected.telefono && (
-            <span className="flex items-center gap-0.5 text-zinc-500">
-              <Phone className="w-2.5 h-2.5" /> {selected.telefono}
-            </span>
-          )}
+          {selected.encargado && <span className="text-zinc-500">· {selected.encargado}</span>}
+          {selected.telefono && <span className="flex items-center gap-0.5 text-zinc-500"><Phone className="w-2.5 h-2.5" />{selected.telefono}</span>}
         </p>
       )}
+    </div>
+  );
+}
+
+/** Alta completa de un centro (similar al formulario del directorio de talleres), con foto. */
+function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
+  vehicleId: string;
+  defaultTipos: { value: string; label: string; icon: any }[];
+  onDone: (c: VehicleContact) => void;
+  onCancel: () => void;
+}) {
+  const [form, setForm] = useState({
+    nombre: "", encargado: "", tipo: defaultTipos[0]?.value || "otro",
+    telefono: "", whatsapp: "", pais: "PE", notas: "", foto_url: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getCurrentCountryCode().then((c) => { if (c) setForm((f) => ({ ...f, pais: c })); });
+  }, []);
+
+  const prefijo = countryPrefixes.find((p) => p.code === form.pais)?.prefix || "+51";
+
+  const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true); setError(null);
+    const url = await uploadContactPhoto(file, vehicleId);
+    if (url) setForm((f) => ({ ...f, foto_url: url }));
+    else setError("No se pudo subir la foto. Intenta con otra imagen.");
+    setUploading(false);
+    e.target.value = "";
+  };
+
+  const save = async () => {
+    if (!form.nombre.trim()) { setError("El nombre del lugar es obligatorio."); return; }
+    setSaving(true); setError(null);
+    const supabase = createClient();
+    const tel = form.telefono ? `${prefijo}${form.telefono.replace(/[^0-9]/g, "")}` : null;
+    const wa = form.whatsapp ? `${prefijo}${form.whatsapp.replace(/[^0-9]/g, "")}` : tel;
+    const { data, error: err } = await supabase
+      .from("vehicle_contacts")
+      .insert({
+        vehicle_id: vehicleId,
+        nombre: form.nombre.trim(),
+        encargado: form.encargado.trim() || null,
+        tipo: form.tipo,
+        telefono: tel,
+        whatsapp: wa,
+        pais_telefono: form.pais,
+        notas: form.notas.trim() || null,
+        foto_url: form.foto_url || null,
+      })
+      .select()
+      .single();
+    setSaving(false);
+    if (err || !data) { setError("No se pudo guardar el lugar."); return; }
+    onDone(data as VehicleContact);
+  };
+
+  const tipoOptions = defaultTipos.length > 1 ? defaultTipos : CONTACT_TYPES_META;
+
+  return (
+    <div className="rounded-2xl bg-zinc-800/60 border border-auto-500/30 p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-bold text-auto-400">➕ Registrar lugar nuevo</p>
+        <button type="button" onClick={onCancel} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500"><X className="w-3.5 h-3.5" /></button>
+      </div>
+
+      {/* Foto del lugar */}
+      <div className="flex items-center gap-2.5">
+        {form.foto_url ? (
+          <img src={form.foto_url} alt="" className="w-16 h-16 rounded-xl object-cover border border-white/10" />
+        ) : (
+          <div className="w-16 h-16 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center">
+            <Store className="w-6 h-6 text-zinc-600" />
+          </div>
+        )}
+        <label className="flex-1 flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl border border-dashed border-white/15 bg-zinc-900 cursor-pointer hover:bg-zinc-800/60 transition-colors">
+          <Upload className="w-4 h-4 text-zinc-400" />
+          <span className="text-[10px] text-zinc-400">{uploading ? "Subiendo…" : form.foto_url ? "Cambiar foto" : "Subir foto"}</span>
+          <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" disabled={uploading} />
+        </label>
+      </div>
+
+      <div className="grid grid-cols-2 gap-1.5">
+        <label className="block min-w-0">
+          <span className="text-[9px] font-bold text-zinc-500">Nombre del lugar *</span>
+          <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+            placeholder="Ej: Grifo Primax" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200 mt-0.5" />
+        </label>
+        <label className="block min-w-0">
+          <span className="text-[9px] font-bold text-zinc-500">Encargado (opcional)</span>
+          <input value={form.encargado} onChange={(e) => setForm({ ...form, encargado: e.target.value })}
+            placeholder="Ej: Juan Pérez" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200 mt-0.5" />
+        </label>
+      </div>
+
+      <div className="grid grid-cols-2 gap-1.5">
+        <label className="block min-w-0">
+          <span className="text-[9px] font-bold text-zinc-500">Tipo</span>
+          <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
+            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200 mt-0.5 min-w-0">
+            {tipoOptions.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+        </label>
+        <label className="block min-w-0">
+          <span className="text-[9px] font-bold text-zinc-500">País</span>
+          <select value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })}
+            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200 mt-0.5 min-w-0">
+            {countryPrefixes.map((p) => <option key={p.code} value={p.code}>{p.code} {p.prefix}</option>)}
+          </select>
+        </label>
+      </div>
+
+      <div className="grid grid-cols-2 gap-1.5">
+        <label className="block min-w-0">
+          <span className="text-[9px] font-bold text-zinc-500">Teléfono</span>
+          <div className="flex items-center gap-1 mt-0.5 min-w-0">
+            <span className="text-xs text-zinc-500 px-0.5 shrink-0">{prefijo}</span>
+            <input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+              placeholder="999 888 777" className="flex-1 min-w-0 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200" />
+          </div>
+        </label>
+        <label className="block min-w-0">
+          <span className="text-[9px] font-bold text-zinc-500">WhatsApp</span>
+          <div className="flex items-center gap-1 mt-0.5 min-w-0">
+            <span className="text-xs text-zinc-500 px-0.5 shrink-0">{prefijo}</span>
+            <input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+              placeholder="999 888 777" className="flex-1 min-w-0 px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200" />
+          </div>
+        </label>
+      </div>
+
+      <input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} placeholder="Notas (opcional)" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-900 text-zinc-200" />
+
+      {error && <p className="text-[10px] text-red-400">{error}</p>}
+
+      <div className="flex gap-1.5">
+        <button type="button" onClick={save} disabled={saving || uploading}
+          className="flex-1 py-2 rounded-lg bg-auto-600 text-white text-[11px] font-bold disabled:opacity-50">
+          {saving ? "Guardando…" : "Guardar y usar este lugar"}
+        </button>
+      </div>
     </div>
   );
 }
