@@ -161,6 +161,17 @@ body {
   position: relative;
 }
 
+/* Panel/card con el fondo aurora (sin min-height, para hero y tarjetas) */
+.bg-auto-panel {
+  background-color: rgba(7,10,24,0.85);
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(16,185,129,0.12) 0%, transparent 45%),
+    radial-gradient(ellipse at 100% 15%, rgba(139,92,246,0.16) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 100%, rgba(34,211,238,0.12) 0%, transparent 45%),
+    radial-gradient(ellipse at 10% 100%, rgba(59,130,246,0.08) 0%, transparent 50%);
+  position: relative;
+}
+
 /* Obsidian Glass: ultra-premium dark glassmorphism */
 .card-auto-dark {
   background: rgba(255, 255, 255, 0.03);

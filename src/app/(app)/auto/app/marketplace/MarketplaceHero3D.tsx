@@ -55,7 +55,7 @@ export function MarketplaceHero3D() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-auto-gradient"
+      className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-auto-panel"
     >
       {/* Glow decorativo aurora */}
       <div className="absolute inset-0 pointer-events-none">
@@ -85,7 +85,7 @@ export function MarketplaceHero3D() {
             transition={{ delay: 0.2 }}
             className="text-4xl md:text-5xl font-black tracking-tight text-zinc-50 leading-[1.05]"
           >
-            Tu próximo auto
+            Tu próximo auto{" "}
             <br />
             <span className="text-auto-400 drop-shadow-[0_0_25px_rgba(16,185,129,0.4)]">empieza aquí.</span>
           </motion.h1>
