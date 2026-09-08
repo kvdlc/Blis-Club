@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Laptop, Smartphone, Headphones, Watch, Tablet, Shirt, Home, Gamepad2,
   TrendingUp, Flame, Star, ShoppingBag, BadgePercent, ArrowRight, Car,
   Quote, ShieldCheck, Truck, BadgeCheck, Headset, PenTool, Zap, Wrench,
+  X, CheckCircle2, Sparkles, Lightbulb,
 } from "lucide-react";
 import type { MarketplaceProduct } from "@/types/database";
 import { useMoney } from "@/lib/money";
@@ -304,26 +305,92 @@ export function Testimonials() {
 }
 
 /* ─────────── GUÍAS / INSIGHTS ─────────── */
-const guides = [
-  { icon: PenTool, tag: "Guía rápida", title: "¿Cómo elegir tu próximo auto?", desc: "Claves para comprar un usado sin sorpresas." },
-  { icon: Zap, tag: "Tips & Tendencias", title: "10 formas de equipar tu auto", desc: "Los accesorios que más se venden esta temporada." },
-  { icon: Wrench, tag: "Mantenimiento", title: "¿Qué es un video-revisión y cómo hacerlo?", desc: "Aprende a valorar el estado real del vehículo." },
-  { icon: Flame, tag: "Guía rápida", title: "Prepara tu auto para vender más rápido", desc: "Pequeños detalles que elevan el precio de venta." },
+interface Guide {
+  icon: any; tag: string; title: string; desc: string; body: string;
+  points: string[]; tip: string;
+}
+
+const guides: Guide[] = [
+  {
+    icon: PenTool, tag: "Guía rápida", title: "¿Cómo elegir tu próximo auto?", desc: "Claves para comprar un usado sin sorpresas.",
+    body: "Comprar un auto usado puede ser una gran decisión si sabes qué revisar. El objetivo es encontrar un vehículo que te sirva por años sin dolores de cabeza ni costos ocultos.",
+    points: [
+      "Define tu presupuesto real: no solo el precio del auto, sino seguro, mantenimiento y combustible.",
+      "Revisa el kilometraje y exige el historial de mantenimiento del vendedor.",
+      "Haz una prueba de manejo en ciudad y carretera; escucha ruidos raros.",
+      "Verifica el número de chasis (VIN) y que coincida con los papeles.",
+      "Pide un video-revisión o una inspección mecánica independiente antes de cerrar.",
+    ],
+    tip: "Nunca pagues sin antes ver el vehículo en persona y verificar sus documentos.",
+  },
+  {
+    icon: Zap, tag: "Tips & Tendencias", title: "10 formas de equipar tu auto", desc: "Los accesorios que más se venden esta temporada.",
+    body: "Equipar tu auto mejora tu comodidad, seguridad y hasta su valor de reventa. Estas son las mejoras con mejor relación costo-beneficio.",
+    points: [
+      "Soporte de celular con carga rápida: imprescindible para navegar.",
+      "Cámara de reversa o sensor de estacionamiento: evita golpes.",
+      "Aspiradora portátil para mantenerlo impecable.",
+      "Iluminación LED interior para más visibilidad y estilo.",
+      "Organizador de maletero y ganchos de asiento.",
+      "Cubierta de volante y asientos para protegerlos.",
+      "Cargador inalámbrico integrado.",
+      "Kit de emergencia con linterna y primeros auxilios.",
+      "Calcomanías reflectantes para mayor visibilidad nocturna.",
+      "Ambientador con clip de ventilación: detalle que se nota.",
+    ],
+    tip: "Empieza por seguridad y comodidad; después invierte en estética.",
+  },
+  {
+    icon: Wrench, tag: "Mantenimiento", title: "¿Qué es un video-revisión y cómo hacerlo?", desc: "Aprende a valorar el estado real del vehículo.",
+    body: "Un video-revisión es un recorrido grabado por el auto mostrando sus puntos clave. Es la mejor herramienta para vender o comprar a distancia con confianza.",
+    points: [
+      "Graba con buena luz: exterior completo, llantas y frenos.",
+      "Muestra el interior: tablero, asientos, maletero.",
+      "Enciende el motor y muéstralo en frío y caliente.",
+      "Abre el capó: nivel de aceite, correas, estado general.",
+      "Enfoca documentos y número de chasis (sin exponer datos sensibles).",
+      "Sube el video sin cortes para dar confianza.",
+    ],
+    tip: "Un video claro y honesto acelera la venta y reduce el regateo.",
+  },
+  {
+    icon: Flame, tag: "Guía rápida", title: "Prepara tu auto para vender más rápido", desc: "Pequeños detalles que elevan el precio de venta.",
+    body: "La primera impresión lo es todo. Con poco tiempo y dinero puedes hacer que tu auto se vea y sienta mucho más valioso.",
+    points: [
+      "Lava y aspira a fondo; un auto limpio vende más rápido.",
+      "Fotografías con luz natural y ángulos que favorezcan.",
+      "Repara detalles visibles: focos, plásticos, pequeñas rayas.",
+      "Ten a la mano el historial de mantenimiento.",
+      "Precio realista con base en el mercado, deja margen para negociar.",
+      "Publica en horario con mayor tráfico y con título claro.",
+    ],
+    tip: "Cada pequeño arreglo suma: un auto cuidado transmite confianza.",
+  },
 ];
 
 export function Guides() {
+  const [open, setOpen] = useState<Guide | null>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(null); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
     <div className="relative space-y-3">
       <GlowOrb className="-bottom-10 right-10 bg-violet-500/10" size={220} float={1.8} />
-      <Reveal><SectionHeader icon={PenTool} title="Guías y consejos" viewAll /></Reveal>
-      <Stagger className="grid grid-cols-1 md:grid-cols-4 gap-2">
+      <Reveal><SectionHeader icon={PenTool} title="Guías y consejos" /></Reveal>
+      <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         {guides.map((g) => (
           <StaggerItem key={g.title}>
             <TiltCard intensity={7}>
-              <motion.article
+              <motion.button
+                type="button"
                 whileHover={{ y: -4 }}
-                transition={{ type: "spring", stiffness: 250, damping: 20 }}
-                className="h-full bg-white/[0.04] border border-white/10 rounded-2xl p-4 hover:border-auto-500/30 hover:bg-white/[0.06] hover:shadow-[0_10px_30px_rgba(16,185,129,0.1)] transition-all duration-300"
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setOpen(g)}
+                className="w-full text-left h-full bg-white/[0.04] border border-white/10 rounded-2xl p-4 hover:border-auto-500/30 hover:bg-white/[0.06] hover:shadow-[0_10px_30px_rgba(16,185,129,0.1)] transition-all duration-300 cursor-pointer"
               >
                 <motion.span animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                   className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-full bg-auto-600/15 text-auto-300">
@@ -331,14 +398,75 @@ export function Guides() {
                 </motion.span>
                 <h4 className="mt-2 text-sm font-bold text-zinc-100 leading-tight">{g.title}</h4>
                 <p className="mt-1 text-[11px] text-zinc-400 leading-relaxed">{g.desc}</p>
-                <Link href="/auto/app/marketplace" className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold text-auto-400 hover:text-auto-300 group/lnk">
-                  Leer más <ArrowRight className="w-3 h-3 group-hover/lnk:translate-x-0.5 transition-transform" />
-                </Link>
-              </motion.article>
+                <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold text-auto-400 group-hover:text-auto-300">
+                  Leer más <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </motion.button>
             </TiltCard>
           </StaggerItem>
         ))}
       </Stagger>
+
+      {/* Modal de guía */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[95] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+            onClick={() => setOpen(null)}
+          >
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full sm:max-w-lg bg-zinc-900 border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[88vh] flex flex-col overflow-hidden"
+            >
+              {/* Header */}
+              <div className="flex items-start gap-3 p-5 border-b border-white/10">
+                <div className="w-11 h-11 rounded-2xl bg-auto-600/15 flex items-center justify-center shrink-0">
+                  <open.icon className="w-5 h-5 text-auto-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-[10px] font-bold text-auto-300">{open.tag}</span>
+                  <h3 className="text-lg font-black text-zinc-50 leading-tight">{open.title}</h3>
+                </div>
+                <button onClick={() => setOpen(null)} className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center text-zinc-400 hover:bg-white/[0.12] hover:text-zinc-100">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                <p className="text-sm text-zinc-300 leading-relaxed">{open.body}</p>
+                <div className="space-y-2">
+                  {open.points.map((pt, i) => (
+                    <div key={i} className="flex items-start gap-2.5 text-[13px] text-zinc-400 leading-relaxed">
+                      <CheckCircle2 className="w-4 h-4 text-auto-400 shrink-0 mt-0.5" />
+                      {pt}
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-auto-600/10 border border-auto-500/20 rounded-2xl p-3.5 flex items-start gap-2.5">
+                  <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-zinc-300 leading-relaxed"><span className="font-black text-auto-300">Tip: </span>{open.tip}</p>
+                </div>
+              </div>
+
+              {/* Footer CTA */}
+              <div className="p-4 border-t border-white/10">
+                <button onClick={() => { setOpen(null); document.getElementById("productos")?.scrollIntoView({ behavior: "smooth" }); }}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-auto-600 text-white text-sm font-black hover:bg-auto-500 transition-colors">
+                  <Sparkles className="w-4 h-4" /> Explorar productos
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -382,7 +510,7 @@ export function TrustBar() {
 }
 
 /* ─────────── HEADER DE SECCIÓN ─────────── */
-function SectionHeader({ icon: Icon, title, viewAll }: { icon: any; title: string; viewAll?: boolean }) {
+function SectionHeader({ icon: Icon, title, viewAll, viewAllTo }: { icon: any; title: string; viewAll?: boolean; viewAllTo?: string }) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
@@ -390,9 +518,13 @@ function SectionHeader({ icon: Icon, title, viewAll }: { icon: any; title: strin
         <h2 className="text-lg font-black text-zinc-100">{title}</h2>
       </div>
       {viewAll && (
-        <Link href="/auto/app/marketplace" className="inline-flex items-center gap-1 text-[11px] font-bold text-auto-400 hover:text-auto-300">
+        <button
+          type="button"
+          onClick={() => document.getElementById(viewAllTo || "productos")?.scrollIntoView({ behavior: "smooth" })}
+          className="inline-flex items-center gap-1 text-[11px] font-bold text-auto-400 hover:text-auto-300"
+        >
           Ver todo <ArrowRight className="w-3 h-3" />
-        </Link>
+        </button>
       )}
     </div>
   );
