@@ -18,7 +18,7 @@ import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/t
 import {
   FileText, Phone, Wrench, AlertTriangle, Plus, Trash2, X, Upload, Eye, Pencil, MapPin, HelpCircle,
   BadgeCheck, Settings, Circle, Droplet, Droplets, Battery, BatteryCharging, Thermometer, OctagonAlert, Fuel, RotateCw, Lock, Cog, Sun,
-  Shield, ClipboardList, Anchor, Store, Building2, Pin, Zap,
+  Shield, ClipboardList, Anchor, Store, Building2, Pin, Zap, ShoppingBag,
   Calendar, Gauge, FlaskConical, Ruler, Layers, CircleDot, RefreshCcw, CircleOff, Lightbulb, Waves,
 } from "lucide-react";
 
@@ -53,7 +53,9 @@ const contactTypes = [
   { value: "electromecanico", label: "Electromecánico", icon: Zap },
   { value: "grua", label: "Grúa", icon: Anchor },
   { value: "tienda_repuestos", label: "Tienda de Repuestos", icon: Store },
+  { value: "tienda_accesorios", label: "Tienda de Accesorios", icon: ShoppingBag },
   { value: "aseguradora", label: "Aseguradora", icon: Building2 },
+  { value: "grifo", label: "Grifo / Estación de servicio", icon: Fuel },
   { value: "otro", label: "Otro", icon: Pin },
 ];
 

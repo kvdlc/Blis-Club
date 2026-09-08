@@ -117,6 +117,8 @@ export interface FuelLog {
   litros: number;
   precio_por_galon: number;
   tipo_combustible: string;
+  contacto_id: string | null;
+  grifo: string | null;
   created_at: string;
 }
 
@@ -137,7 +139,7 @@ export interface VehicleContact {
   vehicle_id: string | null;
   nombre: string;
   encargado: string | null;
-  tipo: "mecanico" | "electromecanico" | "grua" | "tienda_repuestos" | "aseguradora" | "otro";
+  tipo: "mecanico" | "electromecanico" | "grua" | "tienda_repuestos" | "tienda_accesorios" | "aseguradora" | "grifo" | "otro";
   telefono: string | null;
   whatsapp: string | null;
   pais_telefono: string | null;
@@ -193,6 +195,7 @@ export interface MaintenanceLog {
   factura_url: string | null;
   garantia: boolean;
   km_proximo: number | null;
+  contacto_id: string | null;
   created_at: string;
 }
 
@@ -211,6 +214,7 @@ export interface VehicleUpgrade {
   tipo_componente: string | null;     // catálogo de repuestos (ej. bateria, llantas, filtro_aceite)
   marca: string | null;
   proveedor: string | null;
+  contacto_id: string | null;
   odometro: number | null;            // km al momento de la compra
   notas: string | null;
   foto_url: string | null;

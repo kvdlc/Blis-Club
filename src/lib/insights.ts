@@ -288,3 +288,56 @@ export function serieKm(fuelLogs: FuelLog[], start: string, end: string): SerieP
   return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]))
     .map(([k, v]) => ({ label: labelFor(k, g), combustible: Math.round(v.combustible), mantenimiento: Math.round(v.mantenimiento), mejoras: Math.round(v.mejoras) }));
 }
+
+/* ═══════════ Métricas por grifo/estación ═══════════ */
+
+export interface GrifoMetric {
+  grifo: string;
+  cargas: number;
+  litros: number;
+  gasto: number;
+  kmTramo: number;
+  rendimientoKmGal: number | null; // km por galón real medido por tramos
+  precioPromedioPorGalon: number | null;
+}
+
+/**
+ * Analiza el rendimiento REAL por grifo/estación usando tramos entre cargas consecutivas
+ * (odómetro). Sirve para detectar estaciones que despachan menos combustible del que cobran:
+ * si una estación marca km/galón muy inferior al promedio, conviene sospechar.
+ */
+export function metricasPorGrifo(fuelLogs: FuelLog[]): GrifoMetric[] {
+  const sorted = [...fuelLogs].sort((a, b) => a.odometro - b.odometro);
+  const map = new Map<string, { cargas: number; litros: number; gasto: number; kmTramo: number; precioSum: number; tramosValidos: number }>();
+
+  const key = (f: FuelLog) => (f.grifo || "").trim() || "Sin registrar";
+  for (let i = 0; i < sorted.length; i++) {
+    const f = sorted[i];
+    const g = map.get(key(f)) ?? { cargas: 0, litros: 0, gasto: 0, kmTramo: 0, precioSum: 0, tramosValidos: 0 };
+    g.cargas += 1;
+    g.litros += f.litros;
+    g.gasto += (f.litros / GAL) * f.precio_por_galon;
+    g.precioSum += f.precio_por_galon;
+    // El combustible de la carga i se consume en el tramo i -> i+1
+    if (i + 1 < sorted.length) {
+      const km = sorted[i + 1].odometro - f.odometro;
+      if (km > 0) { g.kmTramo += km; g.tramosValidos += 1; }
+    }
+    map.set(key(f), g);
+  }
+
+  const out: GrifoMetric[] = [];
+  for (const [grifo, g] of map) {
+    const rendimientoKmGal = g.kmTramo > 0 && g.litros > 0 ? Math.round((g.kmTramo / (g.litros / GAL)) * 10) / 10 : null;
+    out.push({
+      grifo,
+      cargas: g.cargas,
+      litros: Math.round(g.litros * 10) / 10,
+      gasto: Math.round(g.gasto),
+      kmTramo: g.kmTramo,
+      rendimientoKmGal,
+      precioPromedioPorGalon: g.cargas > 0 ? Math.round((g.precioSum / g.cargas) * 100) / 100 : null,
+    });
+  }
+  return out.sort((a, b) => b.gasto - a.gasto);
+}

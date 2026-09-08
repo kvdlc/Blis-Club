@@ -122,6 +122,7 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
                   <th className="px-3 py-2 font-bold text-zinc-500">Odom.</th>
                   <th className="px-3 py-2 font-bold text-zinc-500">Litros</th>
                   <th className="px-3 py-2 font-bold text-zinc-500">{symbol} gal</th>
+                  <th className="px-3 py-2 font-bold text-zinc-500">Grifo</th>
                   <th className="px-3 py-2 font-bold text-zinc-500 text-right">Total</th>
                 </tr>
               </thead>
@@ -132,6 +133,7 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
                     <td className="px-3 py-2">{f.odometro.toLocaleString("es-PE")}</td>
                     <td className="px-3 py-2">{f.litros}</td>
                     <td className="px-3 py-2">{money(f.precio_por_galon)}</td>
+                    <td className="px-3 py-2">{f.grifo || "—"}</td>
                     <td className="px-3 py-2 text-right font-bold">{money(Math.round(f.precio_por_galon * (f.litros / 3.78541)))}</td>
                   </tr>
                 ))}

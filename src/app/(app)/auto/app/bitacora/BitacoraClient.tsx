@@ -11,6 +11,7 @@ import {
   MoreVertical, Pencil, Search,
 } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
+import { PlacePicker } from "./PlacePicker";
 import { BitacoraCharts } from "./BitacoraCharts";
 import { useMoney } from "@/lib/money";
 import { formatoRestante } from "@/lib/dates";
@@ -346,6 +347,13 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
               <ChevronDown className="w-3.5 h-3.5" /> Ver más ({timeline.length - totalVisible} restantes)
             </button>
           )}
+
+          {visible > 3 && (
+            <button type="button" onClick={() => setVisible(3)}
+              className="w-full py-2 rounded-xl text-[11px] font-bold text-zinc-500 hover:text-zinc-300 transition-colors">
+              ▲ Ver menos
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -379,6 +387,7 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
   if (item.type === "fuel") {
     const f = item.data as FuelLog;
     detail = `${f.odometro.toLocaleString("es-PE")} km`;
+    if (f.grifo) detail += ` · ${f.grifo}`;
   } else if (item.type === "maintenance") {
     const m = item.data as MaintenanceLog;
     detail = m.odometro != null ? `${m.odometro.toLocaleString("es-PE")} km` : "";
@@ -437,7 +446,7 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
 /* ═══════════════════════════ Forms ═══════════════════════ */
 function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editItem?: FuelLog | null; onDone: (f: FuelLog | null) => void }) {
   const [countryCode, setCountryCode] = useState<string | null>(null);
-  const [form, setForm] = useState({ cantidad: "", precio_por_galon: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "90" });
+  const [form, setForm] = useState({ cantidad: "", precio_por_galon: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "90", grifo: "", contacto_id: null as string | null });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -452,6 +461,8 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
           odometro: String(editItem.odometro || ""),
           fecha: editItem.fecha,
           tipo: editItem.tipo_combustible || (cfg.fuelTypes[0]?.value || "90"),
+          grifo: editItem.grifo || "",
+          contacto_id: editItem.contacto_id || null,
         });
       } else {
         setForm((f) => ({ ...f, tipo: cfg.fuelTypes[0]?.value || "90" }));
@@ -479,12 +490,12 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
     let data: FuelLog | null = null;
     if (editItem) {
       const { data: d } = await supabase.from("fuel_logs").update({
-        litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo,
+        litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo, grifo: form.grifo || null, contacto_id: form.contacto_id || null,
       }).eq("id", editItem.id).select().single();
       data = d as FuelLog | null;
     } else {
       const { data: d } = await supabase.from("fuel_logs").insert({
-        vehicle_id: vehicleId, litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo,
+        vehicle_id: vehicleId, litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo, grifo: form.grifo || null, contacto_id: form.contacto_id || null,
       }).select().single();
       data = d as FuelLog | null;
     }
@@ -504,6 +515,18 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
           {cfg.fuelTypes.map((ft) => <option key={ft.value} value={ft.value}>{ft.label}</option>)}
         </select>
       </div>
+      <div>
+        <span className="text-[10px] font-bold text-zinc-500">Grifo / estación donde cargaste</span>
+        <div className="mt-0.5">
+          <PlacePicker
+            vehicleId={vehicleId}
+            tipos={["grifo", "otro"]}
+            value={form.contacto_id}
+            onSelect={(c) => setForm((f) => ({ ...f, contacto_id: c ? c.id : null, grifo: c ? c.nombre : f.grifo }))}
+            placeholder="Sin grifo definido"
+          />
+        </div>
+      </div>
       <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
       <div className="flex gap-1.5">
         <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-2 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : editItem ? "Guardar cambios" : "Guardar"}</button>
@@ -514,7 +537,7 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
 
 function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; editItem?: MaintenanceLog | null; onDone: (m: MaintenanceLog | null) => void }) {
   const { symbol } = useMoney();
-  const [form, setForm] = useState({ tipo: "preventivo", titulo: "", costo: "", odometro: "", km_proximo: "", taller: "", fecha: new Date().toISOString().split("T")[0] });
+  const [form, setForm] = useState({ tipo: "preventivo", titulo: "", costo: "", odometro: "", km_proximo: "", taller: "", contacto_id: null as string | null, fecha: new Date().toISOString().split("T")[0] });
   const [saving, setSaving] = useState(false);
 
   const esAceite = form.tipo === "cambio_aceite";
@@ -528,6 +551,7 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
         odometro: editItem.odometro != null ? String(editItem.odometro) : "",
         km_proximo: editItem.km_proximo != null ? String(editItem.km_proximo) : "",
         taller: editItem.taller || "",
+        contacto_id: editItem.contacto_id || null,
         fecha: editItem.fecha,
       });
     }
@@ -551,7 +575,7 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
       costo: form.costo ? parseFloat(form.costo) : null,
       odometro: form.odometro ? parseInt(form.odometro) : null,
       km_proximo: form.km_proximo ? parseInt(form.km_proximo) : null,
-      taller: form.taller || null, fecha: form.fecha,
+      taller: form.taller || null, contacto_id: form.contacto_id || null, fecha: form.fecha,
     };
     let data: MaintenanceLog | null = null;
     if (editItem) {
@@ -596,9 +620,17 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
       ) : (
         <>
           <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-          <div className="grid grid-cols-2 gap-1.5">
-            <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
-            <input value={form.taller} onChange={(e) => setForm({ ...form, taller: e.target.value })} placeholder="Taller" className="px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+          <div>
+            <span className="text-[10px] font-bold text-zinc-500">Taller / dónde lo hiciste</span>
+            <div className="mt-0.5">
+              <PlacePicker
+                vehicleId={vehicleId}
+                tipos={["mecanico", "electromecanico", "grua", "tienda_repuestos", "otro"]}
+                value={form.contacto_id}
+                onSelect={(c) => setForm((f) => ({ ...f, contacto_id: c ? c.id : null, taller: c ? c.nombre : f.taller }))}
+              />
+            </div>
           </div>
           <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
         </>
@@ -631,6 +663,7 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
     categoria: editItem?.categoria || "estetico",
     marca: editItem?.marca || "",
     proveedor: editItem?.proveedor || "",
+    contacto_id: editItem?.contacto_id || null as string | null,
     costo: editItem?.costo != null ? String(editItem.costo) : "",
     fecha: editItem?.fecha || new Date().toISOString().split("T")[0],
     odometro: editItem?.odometro != null ? String(editItem.odometro) : "",
@@ -695,6 +728,7 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
       categoria: form.categoria,
       marca: form.marca || null,
       proveedor: form.proveedor || null,
+      contacto_id: form.contacto_id || null,
       costo: form.costo ? parseFloat(form.costo) : null,
       fecha: form.fecha,
       odometro: form.odometro ? parseInt(form.odometro) : null,
@@ -785,9 +819,19 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
 
       <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre del repuesto / accesorio" className="w-full px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
 
-      <div className="grid grid-cols-2 gap-1.5">
-        <input value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} placeholder="Marca (ej: BOSCH)" className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0" />
-        <input value={form.proveedor} onChange={(e) => setForm({ ...form, proveedor: e.target.value })} placeholder="Proveedor / tienda" className="px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200 min-w-0" />
+      <div>
+        <input value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} placeholder="Marca (ej: BOSCH)" className="w-full px-2 py-2 rounded-lg border border-white/10 text-xs bg-zinc-800 text-zinc-200" />
+      </div>
+      <div>
+        <span className="text-[10px] font-bold text-zinc-500">Dónde lo compraste</span>
+        <div className="mt-0.5">
+          <PlacePicker
+            vehicleId={vehicleId}
+            tipos={["tienda_repuestos", "tienda_accesorios", "grifo", "otro"]}
+            value={form.contacto_id}
+            onSelect={(c) => setForm((f) => ({ ...f, contacto_id: c ? c.id : null, proveedor: c ? c.nombre : f.proveedor }))}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-1.5">
