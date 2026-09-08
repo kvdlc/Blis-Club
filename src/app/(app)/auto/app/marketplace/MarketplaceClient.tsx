@@ -8,10 +8,14 @@ import { createClient } from "@/lib/supabase/client";
 import type { MarketplaceListing, MarketplaceProduct, Vehicle } from "@/types/database";
 import {
   ShoppingBag, Search, Plus, MapPin, Tag, Heart, Car, Wrench,
-  Package, Star, ShieldCheck, BadgeCheck, Truck, Headset, ChevronRight,
+  Package, Star, ChevronRight,
 } from "lucide-react";
 import { useMoney } from "@/lib/money";
 import { MarketplaceHero3D } from "./MarketplaceHero3D";
+import { MarketplaceSplash } from "./MarketplaceSplash";
+import {
+  CategoryGrid, Trending, Featured, DailyDeals, Testimonials, Guides, TrustBar,
+} from "./MarketplaceSections";
 
 const vehicleTypes = [
   { key: "todas", label: "Todos", icon: "🚗" },
@@ -20,13 +24,6 @@ const vehicleTypes = [
   { key: "pickup", label: "Pickup", icon: "🛻" },
   { key: "moto", label: "Motos", icon: "🏍️" },
   { key: "furgoneta", label: "Furgoneta", icon: "🚐" },
-];
-
-const beneficios = [
-  { icon: ShieldCheck, label: "Compra segura", desc: "Vehículos verificados" },
-  { icon: BadgeCheck, label: "Vendedores reales", desc: "Perfiles de propietarios" },
-  { icon: Truck, label: "Envío / entrega", desc: "Coordina directo" },
-  { icon: Headset, label: "Soporte", desc: "Te ayudamos" },
 ];
 
 const productCats: Record<string, string> = {
@@ -110,27 +107,17 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
 
   return (
     <div className="space-y-6">
+      {/* Splash de carga de marca */}
+      <MarketplaceSplash />
+
       {/* Hero 3D */}
       <MarketplaceHero3D />
 
-      {/* Barra de beneficios */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {beneficios.map((b) => (
-          <motion.div
-            key={b.label}
-            whileHover={{ y: -2 }}
-            className="bg-white/[0.04] border border-white/10 rounded-2xl p-3 flex items-center gap-2.5"
-          >
-            <div className="w-9 h-9 rounded-xl bg-auto-600/10 flex items-center justify-center shrink-0">
-              <b.icon className="w-4 h-4 text-auto-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold text-zinc-200 leading-tight">{b.label}</p>
-              <p className="text-[9px] text-zinc-500 truncate">{b.desc}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {/* Trust badges */}
+      <TrustBar />
+
+      {/* Tiendas por categoría */}
+      <CategoryGrid products={products} />
 
       {/* Buscar */}
       <div className="flex gap-2">
@@ -237,7 +224,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
       </div>
 
       {/* ── PRODUCTOS / ACCESORIOS (anti admin) ── */}
-      <div className="space-y-3">
+      <div id="productos" className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Wrench className="w-4 h-4 text-violet-400" />
@@ -298,6 +285,21 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
         )}
       </div>
 
+      {/* Tendencias + Featured */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <Trending products={products} />
+        <Featured products={products} />
+      </div>
+
+      {/* Ofertas del día + temporizador */}
+      <DailyDeals products={products} />
+
+      {/* Clientes / testimonios */}
+      <Testimonials />
+
+      {/* Guías */}
+      <Guides />
+
       {/* ── Ofertas CTA ── */}
       <div className="grid md:grid-cols-2 gap-3">
         <div className="rounded-2xl border border-auto-500/20 bg-gradient-to-br from-auto-600/20 to-transparent p-5 relative overflow-hidden">
@@ -314,7 +316,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
           <p className="text-[10px] font-bold text-violet-300 uppercase tracking-wider">Accesorios</p>
           <h3 className="text-2xl font-black text-zinc-50 mt-1">Equipa tu <span className="text-violet-400">máquina</span></h3>
           <p className="text-xs text-zinc-400 mt-1">Explora accesorios y repuestos seleccionados para tu auto.</p>
-          <button type="button" onClick={() => document.getElementById("autos")?.scrollIntoView({ behavior: "smooth" })}
+          <button type="button" onClick={() => document.getElementById("productos")?.scrollIntoView({ behavior: "smooth" })}
             className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-xl bg-white/[0.08] border border-white/10 text-zinc-200 text-xs font-bold hover:bg-white/[0.12] transition-colors">
             Explorar <ChevronRight className="w-3.5 h-3.5" />
           </button>
@@ -338,7 +340,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
       {/* Footer */}
       <div className="border-t border-white/5 pt-4 pb-6 text-[10px] text-zinc-600 text-center">
         <p>Blis Club · Marketplace de autos · Compra y vende con seguridad</p>
-        <p className="mt-1">Los accesorios y repuestos son referencias externas (Temu).</p>
+        <p className="mt-1">Los accesorios y repuestos son referencias externas (CJ Dropshipping).</p>
       </div>
     </div>
   );
