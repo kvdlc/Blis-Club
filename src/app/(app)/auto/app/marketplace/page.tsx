@@ -1,25 +1,46 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { MarketplaceListing } from "@/types/database";
+import type { MarketplaceListing, MarketplaceProduct, Vehicle } from "@/types/database";
 import MarketplaceClient from "./MarketplaceClient";
 
-async function getListings(categoria?: string, marca?: string) {
+async function getMarketplaceData(userId: string) {
   const supabase = await createClient();
-  let query = supabase.from("marketplace_listings").select("*").eq("activo", true).order("created_at", { ascending: false }).limit(40);
 
-  if (categoria && categoria !== "todas") query = query.eq("categoria", categoria);
-  if (marca) query = query.ilike("marca", `%${marca}%`);
+  const [listingsRes, productsRes, myVehiclesRes] = await Promise.all([
+    supabase
+      .from("marketplace_listings")
+      .select("*")
+      .eq("activo", true)
+      .eq("categoria", "autos_usados")
+      .order("created_at", { ascending: false })
+      .limit(40),
+    supabase
+      .from("marketplace_products")
+      .select("*")
+      .eq("activo", true)
+      .order("destacado", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(60),
+    supabase
+      .from("vehicles")
+      .select("*")
+      .eq("owner_id", userId)
+      .order("created_at", { ascending: true }),
+  ]);
 
-  const { data } = await query;
-  return (data as MarketplaceListing[] | null) ?? [];
+  return {
+    listings: (listingsRes.data as MarketplaceListing[] | null) ?? [],
+    products: (productsRes.data as MarketplaceProduct[] | null) ?? [],
+    myVehicles: (myVehiclesRes.data as Vehicle[] | null) ?? [],
+  };
 }
 
-export default async function MarketplacePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ cat?: string; marca?: string }>;
-}) {
-  const sp = await searchParams;
-  const listings = await getListings(sp.cat, sp.marca);
+export default async function MarketplacePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/");
 
-  return <MarketplaceClient listings={listings} activeCat={sp.cat || "todas"} searchMarca={sp.marca || ""} />;
+  const data = await getMarketplaceData(user.id);
+
+  return <MarketplaceClient {...data} userId={user.id} />;
 }

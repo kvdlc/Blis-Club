@@ -26,7 +26,7 @@ interface Props {
   autoStart: boolean;
 }
 
-const TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType; duration: number }> = {
+const TYPE_CONFIG: Record<string, { label: string; icon: React.ComponentType<any>; duration: number }> = {
   theory: { label: "Teoría", icon: BookOpen, duration: 2 },
   minigame_reflejos: { label: "Reflejos", icon: Zap, duration: 3 },
   minigame_diccionario: { label: "Diccionario", icon: BookOpen, duration: 3 },
@@ -425,8 +425,8 @@ function getDefaultMaterials(type: string): Array<{ title: string; description: 
   }
 }
 
-function getMaterialIcon(iconName: string | undefined, idx: number): React.ElementType {
-  const map: Record<string, React.ElementType> = {
+function getMaterialIcon(iconName: string | undefined, idx: number): React.ComponentType<any> {
+  const map: Record<string, React.ComponentType<any>> = {
     book: BookOpen,
     practice: Zap,
     quiz: Award,

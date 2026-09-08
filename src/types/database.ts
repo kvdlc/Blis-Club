@@ -225,6 +225,7 @@ export interface VehicleUpgrade {
 export interface MarketplaceListing {
   id: string;
   user_id: string;
+  vehicle_id: string | null;
   slug: string;
   titulo: string;
   categoria: "repuestos" | "accesorios" | "servicios" | "cupones" | "autos_usados";
@@ -236,6 +237,21 @@ export interface MarketplaceListing {
   fotos: string[];
   whatsapp: string;
   ciudad: string | null;
+  activo: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MarketplaceProduct {
+  id: string;
+  titulo: string;
+  categoria: string | null;
+  descripcion: string | null;
+  imagen_url: string | null;
+  precio: number | null;
+  precio_original: number | null;
+  url_temu: string | null;
+  destacado: boolean;
   activo: boolean;
   created_at: string;
   updated_at: string;

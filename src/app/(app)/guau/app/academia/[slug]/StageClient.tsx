@@ -293,8 +293,8 @@ export default function StageClient({ stage, modules, allStageLessons, stageProg
   );
 }
 
-function getHeroIcon(iconName: string): React.ElementType {
-  const map: Record<string, React.ElementType> = {
+function getHeroIcon(iconName: string): React.ComponentType<any> {
+  const map: Record<string, React.ComponentType<any>> = {
     target: Target, shield: Shield, heart: Heart, brain: Brain,
     zap: Zap, star: Star, trophy: Award, theory: BookOpen,
     minigame_reflejos: Zap, minigame_diccionario: BookOpen, practice_timer: Timer,
