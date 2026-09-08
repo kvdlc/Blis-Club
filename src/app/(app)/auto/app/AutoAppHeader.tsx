@@ -14,7 +14,19 @@ export function AutoAppHeader() {
   const router = useRouter();
   return (
     <div className="flex items-center justify-between mb-4 h-10 relative z-20 text-zinc-300">
-      <CarSwitcher variant="dark" />
+      <div className="flex items-center gap-2.5 min-w-0">
+        {/* Logo → inicio */}
+        <button
+          onClick={() => router.push("/auto/app")}
+          aria-label="Ir al inicio"
+          className="hidden md:flex items-center gap-2"
+        >
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-auto-600 to-auto-500 flex items-center justify-center shadow-auto-glow">
+            <span className="text-white font-black text-sm">B</span>
+          </div>
+        </button>
+        <CarSwitcher variant="dark" />
+      </div>
       <div className="flex items-center gap-2">
         <AutoSearchOverlay variant="dark" />
         {/* Carrito */}

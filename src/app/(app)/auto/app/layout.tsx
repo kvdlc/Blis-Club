@@ -25,7 +25,7 @@ export default async function AutoAppLayout({ children }: { children: React.Reac
   if (trial.isExpired) redirect("/auto/app/suscripcion");
 
   return (
-    <div className="min-h-screen md:pl-60 bg-auto-gradient bg-[#0a0a0c] text-zinc-200">
+    <div className="min-h-screen md:pl-20 bg-auto-gradient bg-[#0a0a0c] text-zinc-200">
       <CarProvider>
         <ReferralTracker />
         <ScrollToTop />
