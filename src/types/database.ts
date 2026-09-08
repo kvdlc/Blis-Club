@@ -255,6 +255,8 @@ export interface MarketplaceProduct {
   activo: boolean;
   galeria: string[] | null;
   video_url: string | null;
+  stock: number | null;
+  ventas: number | null;
   created_at: string;
   updated_at: string;
 }

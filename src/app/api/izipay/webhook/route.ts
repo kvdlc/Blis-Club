@@ -143,6 +143,58 @@ export async function POST(request: Request) {
 
     console.log(`[Izipay Webhook] Buscando orden: ${referenceOrderId}, isTokenization: ${isTokenizationOnly}`);
 
+    // ═══ PRODUCT ORDER FLOW (compra de producto del marketplace) ═══
+    let productOrder: Record<string, unknown> | null = null;
+    {
+      const { data: po } = await supabase
+        .from("product_orders")
+        .select("id, user_id, product_id, quantity, total_price_cents, status, metadata")
+        .eq("id", referenceOrderId)
+        .maybeSingle();
+      productOrder = po as Record<string, unknown> | null;
+    }
+
+    if (productOrder) {
+      if (orderStatus === "PAID" || orderStatus === "AUTHORISED") {
+        const { error: updErr } = await supabase
+          .from("product_orders")
+          .update({
+            status: "paid",
+            izipay_transaction_id: tx?.uuid || `${orderId}_${Date.now()}`,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", productOrder.id);
+
+        if (updErr) console.error("[Izipay Webhook] Error pagando product_order:", updErr);
+
+        // Decrementar stock + incrementar ventas del producto
+        if (productOrder.product_id) {
+          try {
+            await supabase.rpc("decrement_product_stock", {
+              p_product_id: productOrder.product_id,
+              p_qty: Number(productOrder.quantity) || 1,
+            });
+          } catch (e) {
+            console.error("[Izipay Webhook] decrement_product_stock error:", e);
+          }
+        }
+
+        // Vincular usuario si la orden era guest
+        if (!productOrder.user_id && customer?.email) {
+          const custRef = (customer.reference as string) || "";
+          if (custRef.includes("@")) {
+            const uid = await ensureUserByEmail(supabase, String(customer.email));
+            if (uid) {
+              await supabase.from("product_orders").update({ user_id: uid }).eq("id", productOrder.id);
+            }
+          }
+        }
+      } else {
+        await supabase.from("product_orders").update({ status: "failed" }).eq("id", productOrder.id);
+      }
+      return NextResponse.json({ received: true });
+    }
+
     // ═══ TOKENIZATION-ONLY FLOW (add card, $0 verification) ═══
     if (isTokenizationOnly) {
       let userId: string | null = null;
