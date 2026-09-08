@@ -195,6 +195,63 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true });
     }
 
+    // ═══ PRODUCT CHECKOUT FLOW (carrito: un pago para varias líneas) ═══
+    {
+      const { data: checkout } = await supabase
+        .from("product_checkouts")
+        .select("id, user_id, total_price_cents, status")
+        .eq("id", referenceOrderId)
+        .maybeSingle();
+
+      if (checkout) {
+        if (orderStatus === "PAID" || orderStatus === "AUTHORISED") {
+          const txId = tx?.uuid || `${orderId}_${Date.now()}`;
+          await supabase.from("product_checkouts").update({
+            status: "paid",
+            izipay_transaction_id: txId,
+            updated_at: new Date().toISOString(),
+          }).eq("id", checkout.id);
+
+          // Pagar todas las líneas del checkout + descontar stock
+          const { data: lines } = await supabase
+            .from("product_orders")
+            .select("id, product_id, quantity")
+            .eq("checkout_id", checkout.id);
+
+          for (const line of (lines as Array<{ id: string; product_id: string; quantity: number }> | null) ?? []) {
+            await supabase.from("product_orders").update({
+              status: "paid", izipay_transaction_id: txId, updated_at: new Date().toISOString(),
+            }).eq("id", line.id);
+
+            if (line.product_id) {
+              try {
+                await supabase.rpc("decrement_product_stock", {
+                  p_product_id: line.product_id,
+                  p_qty: Number(line.quantity) || 1,
+                });
+              } catch (e) { console.error("[Izipay Webhook] decrement stock (cart):", e); }
+            }
+          }
+
+          // Vincular usuario si la cabecera era guest
+          if (!checkout.user_id && customer?.email) {
+            const custRef = (customer.reference as string) || "";
+            if (custRef.includes("@")) {
+              const uid = await ensureUserByEmail(supabase, String(customer.email));
+              if (uid) {
+                await supabase.from("product_checkouts").update({ user_id: uid }).eq("id", checkout.id);
+                await supabase.from("product_orders").update({ user_id: uid }).eq("checkout_id", checkout.id);
+              }
+            }
+          }
+        } else {
+          await supabase.from("product_checkouts").update({ status: "failed" }).eq("id", checkout.id);
+          await supabase.from("product_orders").update({ status: "failed" }).eq("checkout_id", checkout.id);
+        }
+        return NextResponse.json({ received: true });
+      }
+    }
+
     // ═══ TOKENIZATION-ONLY FLOW (add card, $0 verification) ═══
     if (isTokenizationOnly) {
       let userId: string | null = null;

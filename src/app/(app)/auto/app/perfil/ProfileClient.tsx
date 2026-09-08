@@ -1,23 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { COUNTRIES, getCountryConfig } from "@/lib/countries";
 import { useMoney } from "@/lib/money";
 import type { Profile, Vehicle } from "@/types/database";
-import { User, Plus, Pencil, Trash2, Car } from "lucide-react";
+import { User, Plus, Pencil, Trash2, Car, ShoppingBag, ReceiptText, Package } from "lucide-react";
 
 interface Props {
   userId: string;
   profile: Profile | null;
   vehicles: Vehicle[];
+  checkouts: any[];
+  orders: any[];
 }
 
-export default function ProfileClient({ userId, profile, vehicles: initialVehicles }: Props) {
+export default function ProfileClient({ userId, profile, vehicles: initialVehicles, checkouts: initialCheckouts, orders: initialOrders }: Props) {
   const router = useRouter();
   const { money } = useMoney();
+  const searchParams = useSearchParams();
   const [vehicles, setVehicles] = useState(initialVehicles);
   const [editingProfile, setEditingProfile] = useState(false);
   const [form, setForm] = useState({
@@ -28,6 +31,13 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
     country: profile?.country || "PE",
   });
   const [saving, setSaving] = useState(false);
+  const scrollToCompras = searchParams.get("tab") === "compras";
+
+  useEffect(() => {
+    if (scrollToCompras) {
+      setTimeout(() => document.getElementById("compras")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+    }
+  }, [scrollToCompras]);
 
   const countryConfig = getCountryConfig(form.country);
 
@@ -190,6 +200,53 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* Mis compras */}
+      <div id="compras" className="scroll-mt-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-auto-600/15 flex items-center justify-center">
+            <ReceiptText className="w-4 h-4 text-auto-400" />
+          </div>
+          <h3 className="text-sm font-extrabold text-zinc-300 flex-1">Mis compras</h3>
+          <span className="text-[10px] font-bold text-zinc-500 bg-white/[0.06] px-2 py-0.5 rounded-full">{initialOrders.length}</span>
+        </div>
+
+        {initialOrders.length === 0 ? (
+          <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-6 text-center">
+            <ShoppingBag className="w-8 h-8 mx-auto text-zinc-600 mb-2" />
+            <p className="text-xs text-zinc-500">Todavía no has comprado nada.</p>
+            <Link href="/auto/app/marketplace" className="inline-block mt-2 text-[11px] font-bold text-auto-400">Explorar productos</Link>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {initialOrders.slice(0, 10).map((o) => {
+              const prod = o.product as any;
+              const paid = o.status === "paid";
+              return (
+                <div key={o.id} className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3">
+                  {prod?.imagen_url ? (
+                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
+                      <img src={prod.imagen_url} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+                      <Package className="w-5 h-5 text-zinc-600" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-zinc-200 line-clamp-1">{prod?.titulo || "Producto"}</p>
+                    <p className="text-[10px] text-zinc-500">Cant. {o.quantity} · {new Date(o.created_at).toLocaleDateString("es-PE")}</p>
+                    <p className={`text-[10px] font-bold mt-0.5 ${paid ? "text-emerald-400" : "text-amber-400"}`}>
+                      {paid ? "✓ Pagado" : "Pendiente"}
+                    </p>
+                  </div>
+                  <span className="text-sm font-black text-auto-500">{money((o.total_price_cents || 0) / 100)}</span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

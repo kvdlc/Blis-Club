@@ -238,6 +238,55 @@ export interface MarketplaceListing {
   whatsapp: string;
   ciudad: string | null;
   activo: boolean;
+  anio: number | null;
+  kilometraje: number | null;
+  combustible: string | null;
+  transmision: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CartItem {
+  id: string;
+  user_id: string;
+  product_id: string;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CartItemWithProduct extends CartItem {
+  product: MarketplaceProduct;
+}
+
+export interface ProductCheckout {
+  id: string;
+  user_id: string | null;
+  total_price_cents: number;
+  currency: string;
+  status: string;
+  payment_method: string | null;
+  izipay_transaction_id: string | null;
+  shipping_address: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductOrder {
+  id: string;
+  user_id: string | null;
+  product_id: string;
+  quantity: number;
+  unit_price_cents: number;
+  total_price_cents: number;
+  currency: string | null;
+  status: string | null;
+  payment_method: string | null;
+  izipay_transaction_id: string | null;
+  shipping_address: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
+  checkout_id: string | null;
   created_at: string;
   updated_at: string;
 }

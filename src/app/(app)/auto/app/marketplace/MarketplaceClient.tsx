@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import type { MarketplaceListing, MarketplaceProduct, Vehicle } from "@/types/database";
 import {
   ShoppingBag, Search, Plus, MapPin, Tag, Heart, Car, Wrench,
-  Package, Star, ChevronRight,
+  Package, Star, ChevronRight, Columns2, X,
 } from "lucide-react";
 import { useMoney } from "@/lib/money";
 import { MarketplaceHero3D } from "./MarketplaceHero3D";
@@ -17,6 +17,7 @@ import {
   CategoryGrid, Trending, Featured, DailyDeals, Testimonials, Guides, TrustBar, TrustMarquee,
 } from "./MarketplaceSections";
 import { Stagger, StaggerItem, Reveal, GlowOrb, ScrollParallax } from "./MarketplaceMotion";
+import { ActivityToasts } from "./ActivityToasts";
 
 const vehicleTypes = [
   { key: "todas", label: "Todos", icon: "🚗" },
@@ -66,6 +67,45 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
   const [visibleAutos, setVisibleAutos] = useState(6);
   const [visibleProducts, setVisibleProducts] = useState(8);
   const [typeFilter, setTypeFilter] = useState("todas");
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [productCat, setProductCat] = useState("todas");
+  const [productSort, setProductSort] = useState("destacados");
+  const [autoSort, setAutoSort] = useState("recientes");
+
+  // Autos filtrados por búsqueda
+  const autos = useMemo(() => {
+    const q = marca.trim().toLowerCase();
+    return listings.filter((l) => {
+      if (!q) return true;
+      return (l.marca || "").toLowerCase().includes(q) || (l.modelo || "").toLowerCase().includes(q) || (l.titulo || "").toLowerCase().includes(q);
+    });
+  }, [listings, marca]);
+
+  // Productos filtrados y ordenados (cliente)
+  const shownProducts = useMemo(() => {
+    let list = [...products];
+    if (productCat !== "todas") list = list.filter((p) => p.categoria === productCat);
+    switch (productSort) {
+      case "precioAsc": list.sort((a, b) => (a.precio ?? 0) - (b.precio ?? 0)); break;
+      case "precioDesc": list.sort((a, b) => (b.precio ?? 0) - (a.precio ?? 0)); break;
+      case "ventas": list.sort((a, b) => (b.ventas ?? 0) - (a.ventas ?? 0)); break;
+      case "nuevos": list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); break;
+      default: list.sort((a, b) => Number(b.destacado) - Number(a.destacado));
+    }
+    return list;
+  }, [products, productCat, productSort]);
+
+  // Autos ordenados
+  const autosSorted = useMemo(() => {
+    const list = [...autos];
+    switch (autoSort) {
+      case "precioAsc": list.sort((a, b) => a.precio - b.precio); break;
+      case "precioDesc": list.sort((a, b) => b.precio - a.precio); break;
+      case "anio": list.sort((a, b) => (b.anio ?? 0) - (a.anio ?? 0)); break;
+      default: list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+    return list;
+  }, [autos, autoSort]);
 
   // Cargar favoritos del usuario
   useEffect(() => {
@@ -92,19 +132,23 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
     else await supabase.from("marketplace_favorites").insert({ user_id: userId, listing_id: listingId });
   };
 
+  const toggleCompare = (id: string) => {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= 3) return prev;
+      return [...prev, id];
+    });
+  };
+
+  const goCompare = () => {
+    if (compareIds.length >= 2) router.push(`/auto/app/marketplace/comparar?ids=${compareIds.join(",")}`);
+  };
+
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (marca.trim()) params.set("marca", marca.trim());
     router.replace(`/auto/app/marketplace?${params.toString()}`);
   };
-
-  const autos = useMemo(() => {
-    const q = marca.trim().toLowerCase();
-    return listings.filter((l) => {
-      if (!q) return true;
-      return (l.marca || "").toLowerCase().includes(q) || (l.modelo || "").toLowerCase().includes(q) || (l.titulo || "").toLowerCase().includes(q);
-    });
-  }, [listings, marca]);
 
   return (
     <div className="space-y-6 relative">
@@ -123,6 +167,9 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
 
       {/* Splash de carga de marca */}
       <MarketplaceSplash />
+
+      {/* Toasts de actividad (ficticios) */}
+      {products.length > 0 && <ActivityToasts products={products} />}
 
       {/* Hero 3D */}
       <MarketplaceHero3D />
@@ -168,14 +215,23 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
           </Link>
         </div>
 
-        {/* Chips tipo de vehículo */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-          {vehicleTypes.map((t) => (
-            <button key={t.key} type="button" onClick={() => setTypeFilter(t.key)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${typeFilter === t.key ? "bg-auto-600 text-white shadow-md" : "bg-zinc-800 text-zinc-500 hover:bg-zinc-700"}`}>
-              <span>{t.icon}</span> {t.label}
-            </button>
-          ))}
+        {/* Chips tipo de vehículo + orden */}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide flex-1">
+            {vehicleTypes.map((t) => (
+              <button key={t.key} type="button" onClick={() => setTypeFilter(t.key)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${typeFilter === t.key ? "bg-auto-600 text-white shadow-md" : "bg-zinc-800 text-zinc-500 hover:bg-zinc-700"}`}>
+                <span>{t.icon}</span> {t.label}
+              </button>
+            ))}
+          </div>
+          <select value={autoSort} onChange={(e) => setAutoSort(e.target.value)}
+            className="shrink-0 text-[11px] font-bold px-2.5 py-2 rounded-xl bg-zinc-800 border border-white/10 text-zinc-300 focus:outline-none">
+            <option value="recientes">Recientes</option>
+            <option value="precioAsc">Precio ↑</option>
+            <option value="precioDesc">Precio ↓</option>
+            <option value="anio">Año</option>
+          </select>
         </div>
 
         {autos.length === 0 ? (
@@ -190,7 +246,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
         ) : (
           <>
             <Stagger className="grid grid-cols-2 md:grid-cols-3 gap-2" stagger={0.06}>
-              {autos.slice(0, visibleAutos).map((listing) => {
+              {autosSorted.slice(0, visibleAutos).map((listing) => {
                 const r = ratingFor(listing.id);
                 const fav = favoritos.has(listing.id);
                 return (
@@ -234,6 +290,13 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
                         className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur flex items-center justify-center active:scale-90">
                         <Heart className={`w-4 h-4 ${fav ? "text-red-500 fill-red-500" : "text-white"}`} />
                       </motion.button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); toggleCompare(listing.id); }}
+                        aria-label="Comparar"
+                        className={`absolute top-2 left-2 w-8 h-8 rounded-full backdrop-blur flex items-center justify-center text-[9px] font-black transition-colors ${compareIds.includes(listing.id) ? "bg-auto-500 text-white shadow-md shadow-auto-500/30" : "bg-black/50 text-zinc-300 hover:bg-black/70"}`}>
+                        <Columns2 className="w-3.5 h-3.5" />
+                      </button>
                     </motion.div>
                   </StaggerItem>
                 );
@@ -245,6 +308,39 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
                 Ver más autos ({autos.length - visibleAutos})
               </button>
             )}
+            {/* Barra flotante de comparar */}
+            <AnimatePresence>
+              {compareIds.length > 0 && (
+                <motion.div
+                  initial={{ y: 80, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 80, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 24 }}
+                  className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-[70] w-[calc(100%-2rem)] max-w-sm"
+                >
+                  <div className="bg-zinc-900/95 backdrop-blur-xl border border-auto-500/30 rounded-2xl shadow-2xl shadow-auto-600/20 p-3 flex items-center gap-3">
+                    <div className="flex -space-x-2">
+                      {compareIds.map((id) => (
+                        <div key={id} className="w-9 h-9 rounded-xl border-2 border-zinc-900 bg-zinc-800 flex items-center justify-center">
+                          <Car className="w-4 h-4 text-auto-400" />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-black text-zinc-100">{compareIds.length}/3 seleccionados</p>
+                      <p className="text-[9px] text-zinc-500 truncate">{compareIds.map((id) => autos.find((a) => a.id === id)?.marca).filter(Boolean).join(" · ")}</p>
+                    </div>
+                    <button onClick={goCompare} disabled={compareIds.length < 2}
+                      className="px-4 py-2.5 rounded-xl bg-auto-600 text-white text-xs font-black hover:bg-auto-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                      Comparar
+                    </button>
+                    <button onClick={() => setCompareIds([])} aria-label="Limpiar" className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-zinc-400 hover:text-zinc-100">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </>
         )}
       </div>
@@ -255,22 +351,37 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
           <div className="flex items-center gap-2">
             <Wrench className="w-4 h-4 text-violet-400" />
             <h2 className="text-lg font-black text-zinc-100">Accesorios y repuestos</h2>
-            <span className="text-[10px] font-bold text-zinc-500 bg-white/[0.06] px-2 py-0.5 rounded-full">{products.length}</span>
+            <span className="text-[10px] font-bold text-zinc-500 bg-white/[0.06] px-2 py-0.5 rounded-full">{shownProducts.length}</span>
           </div>
-          <span className="text-[10px] font-bold text-zinc-600 flex items-center gap-1">
-            Selección <Tag className="w-3 h-3" />
-          </span>
+          <select value={productSort} onChange={(e) => setProductSort(e.target.value)}
+            className="text-[11px] font-bold px-2.5 py-2 rounded-xl bg-zinc-800 border border-white/10 text-zinc-300 focus:outline-none">
+            <option value="destacados">Destacados</option>
+            <option value="ventas">Más vendidos</option>
+            <option value="precioAsc">Precio ↑</option>
+            <option value="precioDesc">Precio ↓</option>
+            <option value="nuevos">Nuevos</option>
+          </select>
         </div>
 
-        {products.length === 0 ? (
+        {/* Filtro por categoría de producto */}
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+          {["todas", "accesorios", "electronica", "confort", "seguridad", "repuestos"].map((c) => (
+            <button key={c} type="button" onClick={() => { setProductCat(c); setVisibleProducts(8); }}
+              className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-colors capitalize ${productCat === c ? "bg-violet-600 text-white shadow-md" : "bg-zinc-800 text-zinc-500 hover:bg-zinc-700"}`}>
+              {c === "todas" ? "Todos" : productCats[c] || c}
+            </button>
+          ))}
+        </div>
+
+        {shownProducts.length === 0 ? (
           <div className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl p-8 text-center">
             <ShoppingBag className="w-12 h-12 mx-auto text-zinc-500 mb-3" />
-            <p className="text-sm text-zinc-500">Pronto agregaremos accesorios seleccionados.</p>
+            <p className="text-sm text-zinc-500">No hay productos con ese filtro.</p>
           </div>
         ) : (
           <>
             <Stagger className="grid grid-cols-2 md:grid-cols-3 gap-2" stagger={0.05}>
-              {products.slice(0, visibleProducts).map((p) => (
+              {shownProducts.slice(0, visibleProducts).map((p) => (
                 <StaggerItem key={p.id}>
                   <motion.div
                     whileHover={{ y: -4 }}
@@ -278,12 +389,30 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
                     className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden hover:border-auto-500/30 hover:shadow-[0_10px_40px_rgba(16,185,129,0.12)] transition-all duration-300"
                   >
                     <Link href={`/auto/app/marketplace/producto/${p.id}`} className="block group">
-                      <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden">
+                      <div className="aspect-square bg-zinc-800 flex items-center justify-center overflow-hidden relative">
                         {p.imagen_url ? (
                           <motion.img src={p.imagen_url} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                         ) : (
                           <ShoppingBag className="w-10 h-10 text-zinc-600" />
                         )}
+                        {/* Badges dinámicos */}
+                        <div className="absolute top-1.5 left-1.5 flex flex-col gap-1 items-start pointer-events-none">
+                          {p.destacado && (
+                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-auto-600 text-white shadow">TOP</span>
+                          )}
+                          {((p.precio_original ?? 0) > (p.precio ?? 0) * 1.12) && (
+                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-amber-500 text-white shadow">-{Math.round((1 - (p.precio ?? 0) / (p.precio_original ?? p.precio ?? 1)) * 100)}%</span>
+                          )}
+                          {(p.ventas ?? 0) >= 30 && (
+                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-violet-500 text-white shadow">🔥 Popular</span>
+                          )}
+                          {(p.stock ?? 99) <= 8 && (
+                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-500 text-white shadow">¡Quedan {p.stock}!</span>
+                          )}
+                          {new Date(p.created_at).getTime() > Date.now() - 7 * 86400000 && (
+                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-emerald-500 text-white shadow">Nuevo</span>
+                          )}
+                        </div>
                       </div>
                       <div className="p-3 space-y-1">
                         <p className="text-xs font-bold text-zinc-200 line-clamp-2 leading-tight group-hover:text-auto-300">{p.titulo}</p>
@@ -300,10 +429,10 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
                 </StaggerItem>
               ))}
             </Stagger>
-            {products.length > visibleProducts && (
+            {shownProducts.length > visibleProducts && (
               <button type="button" onClick={() => setVisibleProducts((v) => v + 8)}
                 className="w-full py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-[11px] font-bold text-violet-300 hover:bg-white/[0.08] transition-colors">
-                Ver más productos ({products.length - visibleProducts})
+                Ver más productos ({shownProducts.length - visibleProducts})
               </button>
             )}
           </>

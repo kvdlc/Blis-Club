@@ -5,6 +5,7 @@ import { CarProvider } from "@/components/CarSwitcher";
 import TrialWarningToast from "@/components/TrialWarningToast";
 import ReferralTracker from "@/components/ReferralTracker";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { MarketplaceCartProvider } from "@/components/MarketplaceCart";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { AutoAppHeader } from "./AutoAppHeader";
@@ -28,14 +29,16 @@ export default async function AutoAppLayout({ children }: { children: React.Reac
       <CarProvider>
         <ReferralTracker />
         <ScrollToTop />
-        <AutoNav />
-        <main className="relative z-10 pb-28 md:pb-8 px-4 pt-3 max-w-3xl mx-auto">
-          <AutoAppHeader />
-          {trial.isWarning && (
-            <TrialWarningToast daysLeft={trial.daysLeft} appSlug="auto" />
-          )}
-          {children}
-        </main>
+        <MarketplaceCartProvider userId={user.id}>
+          <AutoNav />
+          <main className="relative z-10 pb-28 md:pb-8 px-4 pt-3 max-w-3xl mx-auto">
+            <AutoAppHeader />
+            {trial.isWarning && (
+              <TrialWarningToast daysLeft={trial.daysLeft} appSlug="auto" />
+            )}
+            {children}
+          </main>
+        </MarketplaceCartProvider>
       </CarProvider>
     </div>
   );

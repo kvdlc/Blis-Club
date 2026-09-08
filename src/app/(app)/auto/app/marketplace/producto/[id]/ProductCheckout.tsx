@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Minus, Plus, ShoppingCart, Lock, BadgePercent } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Lock, BadgePercent, Loader2, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { MarketplaceProduct } from "@/types/database";
 import { useMoney } from "@/lib/money";
+import { useCart } from "@/components/MarketplaceCart";
 import { VOLUME_TIERS, tierFor } from "@/lib/volumeTiers";
 
 export function ProductCheckout({ product }: { product: MarketplaceProduct }) {
   const { money } = useMoney();
   const router = useRouter();
+  const { add } = useCart();
   const [qty, setQty] = useState(1);
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
 
   const tier = tierFor(qty);
   const base = product.precio ?? 0;
@@ -20,6 +24,16 @@ export function ProductCheckout({ product }: { product: MarketplaceProduct }) {
 
   const onBuy = () => {
     router.push(`/auto/app/marketplace/producto/${product.id}/pago?product=${product.id}&qty=${qty}`);
+  };
+
+  const onAddToCart = async () => {
+    setAdding(true);
+    setAdded(false);
+    try {
+      await add(product.id, qty);
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1800);
+    } finally { setAdding(false); }
   };
 
   return (
@@ -73,10 +87,17 @@ export function ProductCheckout({ product }: { product: MarketplaceProduct }) {
       </div>
 
       {/* CTA comprar */}
-      <motion.button type="button" whileTap={{ scale: 0.98 }} onClick={onBuy}
-        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-auto-600 text-white font-black text-sm hover:bg-auto-500 transition-colors shadow-lg shadow-auto-600/20">
-        <ShoppingCart className="w-5 h-5" /> Comprar ahora
-      </motion.button>
+      <div className="flex gap-2">
+        <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onAddToCart} disabled={adding}
+          className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-white/[0.06] border border-auto-500/30 text-auto-300 text-xs font-black hover:bg-white/[0.1] transition-colors disabled:opacity-60">
+          {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : added ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+          {added ? "Agregado" : "Agregar al carrito"}
+        </motion.button>
+        <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onBuy}
+          className="flex-[1.4] flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-auto-600 text-white font-black text-xs hover:bg-auto-500 transition-colors shadow-lg shadow-auto-600/20">
+          <ShoppingCart className="w-4 h-4" /> Comprar ahora
+        </motion.button>
+      </div>
       <p className="text-[10px] text-zinc-600 text-center flex items-center justify-center gap-1">
         <Lock className="w-3 h-3" /> Pago seguro con tarjeta vía Izipay
       </p>
