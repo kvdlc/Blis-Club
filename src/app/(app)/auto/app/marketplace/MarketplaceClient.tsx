@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { MarketplaceListing, MarketplaceProduct, Vehicle } from "@/types/database";
 import {
   ShoppingBag, Search, Plus, MapPin, Tag, Heart, Car, Wrench,
-  Package, Star, ShieldCheck, BadgeCheck, Truck, Headset, ExternalLink, ChevronRight,
+  Package, Star, ShieldCheck, BadgeCheck, Truck, Headset, ChevronRight,
 } from "lucide-react";
 import { useMoney } from "@/lib/money";
 import { MarketplaceHero3D } from "./MarketplaceHero3D";
@@ -266,29 +266,25 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
                   transition={{ delay: Math.min(idx * 0.03, 0.2) }}
                   className="bg-zinc-900 border border-white/10 shadow-sm rounded-2xl overflow-hidden"
                 >
-                  <div className="h-32 bg-zinc-800 flex items-center justify-center overflow-hidden">
-                    {p.imagen_url ? (
-                      <img src={p.imagen_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <ShoppingBag className="w-10 h-10 text-zinc-600" />
-                    )}
-                  </div>
-                  <div className="p-3 space-y-1">
-                    <p className="text-xs font-bold text-zinc-200 line-clamp-2 leading-tight">{p.titulo}</p>
-                    <p className="text-[9px] text-zinc-500">{p.categoria ? productCats[p.categoria] || p.categoria : "Accesorio"}</p>
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-black text-auto-500">{p.precio != null && p.precio > 0 ? money(p.precio) : "—"}</p>
-                      {p.precio_original != null && p.precio_original > (p.precio || 0) && (
-                        <span className="text-[10px] text-zinc-600 line-through">{money(p.precio_original)}</span>
+                  <Link href={`/auto/app/marketplace/producto/${p.id}`} className="block group">
+                    <div className="h-32 bg-zinc-800 flex items-center justify-center overflow-hidden">
+                      {p.imagen_url ? (
+                        <img src={p.imagen_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <ShoppingBag className="w-10 h-10 text-zinc-600" />
                       )}
                     </div>
-                    {p.url_temu && (
-                      <a href={p.url_temu} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[9px] font-bold text-violet-400 hover:text-violet-300">
-                        Ver en Temu <ExternalLink className="w-2.5 h-2.5" />
-                      </a>
-                    )}
-                  </div>
+                    <div className="p-3 space-y-1">
+                      <p className="text-xs font-bold text-zinc-200 line-clamp-2 leading-tight">{p.titulo}</p>
+                      <p className="text-[9px] text-zinc-500">{p.categoria ? productCats[p.categoria] || p.categoria : "Accesorio"}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-black text-auto-500">{p.precio != null && p.precio > 0 ? money(p.precio) : "—"}</p>
+                        {p.precio_original != null && p.precio_original > (p.precio || 0) && (
+                          <span className="text-[10px] text-zinc-600 line-through">{money(p.precio_original)}</span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
                 </motion.div>
               ))}
             </div>

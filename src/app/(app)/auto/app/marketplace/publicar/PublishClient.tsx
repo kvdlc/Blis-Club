@@ -94,16 +94,23 @@ export default function PublishClient({ userId, myVehicles, profile }: Props) {
       .eq("vehicle_id", selected.id)
       .maybeSingle();
 
-    const { error } = existing
-      ? await supabase.from("marketplace_listings").update(listingPayload).eq("id", existing.id)
-      : await supabase.from("marketplace_listings").insert(listingPayload);
+    let finalSlug = existing?.slug || slug;
+    let insertError: string | null = null;
+    if (existing) {
+      const { error } = await supabase.from("marketplace_listings").update(listingPayload).eq("id", existing.id);
+      insertError = error ? error.message : null;
+    } else {
+      const { data: created, error } = await supabase.from("marketplace_listings").insert(listingPayload).select("slug").single();
+      insertError = error ? error.message : null;
+      if (created?.slug) finalSlug = created.slug;
+    }
 
     setSaving(false);
 
-    if (error) {
-      alert("Error al publicar: " + error.message);
+    if (insertError) {
+      alert("Error al publicar: " + insertError);
     } else {
-      router.push(`/auto/app/marketplace/${existing?.slug || slug}`);
+      router.push(`/auto/app/marketplace/${finalSlug}`);
       router.refresh();
     }
   };

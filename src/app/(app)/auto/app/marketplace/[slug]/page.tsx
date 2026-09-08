@@ -14,14 +14,23 @@ export default async function ListingDetailPage({
 
   const { data } = await supabase
     .from("marketplace_listings")
-    .select("*, profiles:user_id (display_name, avatar_url, whatsapp)")
+    .select("*")
     .eq("slug", slug)
     .eq("activo", true)
     .single();
 
   if (!data) notFound();
 
-  const listing = data as unknown as MarketplaceListing & { profiles?: { display_name?: string; avatar_url?: string; whatsapp?: string } | null };
+  const listing = data as MarketplaceListing;
+
+  // Perfil del vendedor por separado (la tabla no tiene FK para join embebido)
+  let seller: { display_name?: string; avatar_url?: string; whatsapp?: string } | null = null;
+  const { data: p } = await supabase
+    .from("profiles")
+    .select("display_name, avatar_url, whatsapp")
+    .eq("id", listing.user_id)
+    .maybeSingle();
+  seller = p as typeof seller;
 
   // Similares: otros autos usados activos (excluyendo el actual)
   const { data: similaresRaw } = await supabase
@@ -39,13 +48,11 @@ export default async function ListingDetailPage({
   if (listing.vehicle_id) {
     const { data: s } = await supabase.from("vehicle_specs").select("*").eq("vehicle_id", listing.vehicle_id).maybeSingle();
     specs = s as VehicleSpecs | null;
-  } else if (listing.categoria === "autos_usados") {
-    // intentar por catálogo si hay catalog_spec_id? No aplica sin vehicle; omitir.
   }
 
   return (
     <ListingDetailClient
-      listing={listing}
+      listing={{ ...listing, profiles: seller }}
       isOwner={!!user && listing.user_id === user.id}
       userId={user?.id ?? null}
       similares={similares}
