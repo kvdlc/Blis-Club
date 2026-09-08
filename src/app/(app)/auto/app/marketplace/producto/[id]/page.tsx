@@ -12,6 +12,7 @@ export default async function ProductDetailPage({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id || "";
+  const userEmail = user?.email || "";
 
   const { data } = await supabase.from("marketplace_products").select("*").eq("id", id).eq("activo", true).single();
   if (!data) notFound();
@@ -23,5 +24,5 @@ export default async function ProductDetailPage({
     : { data: null };
   const similares = (sim as MarketplaceProduct[] | null) ?? [];
 
-  return <ProductDetailClient product={product} similares={similares} userId={userId} />;
+  return <ProductDetailClient product={product} similares={similares} userId={userId} userEmail={userEmail} />;
 }

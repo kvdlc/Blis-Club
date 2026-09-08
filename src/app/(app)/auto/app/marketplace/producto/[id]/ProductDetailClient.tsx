@@ -49,9 +49,10 @@ interface Props {
   product: MarketplaceProduct;
   similares: MarketplaceProduct[];
   userId?: string;
+  userEmail?: string;
 }
 
-export default function ProductDetailClient({ product, similares, userId }: Props) {
+export default function ProductDetailClient({ product, similares, userId, userEmail }: Props) {
   const { money } = useMoney();
   const r = ratingFor(product.id);
   const g = product.galeria || [];
@@ -235,7 +236,7 @@ export default function ProductDetailClient({ product, similares, userId }: Prop
           </div>
 
           {/* Checkout */}
-          <ProductCheckout product={product} />
+          <ProductCheckout product={product} userEmail={userEmail} />
 
           {/* Garantías */}
           <div className="grid grid-cols-3 gap-2">
