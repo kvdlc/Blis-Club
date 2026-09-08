@@ -97,7 +97,7 @@ export function DashboardWidgets({ vehicle, fuelLogs, documents, maintenances, u
       {/* ── Hero stat: Eficiencia ── */}
       <div className="bg-white/[0.05] border border-white/10 rounded-2xl p-4">
         <div className="flex items-center gap-4">
-          <GaugeRing value={eficiencia} label="de 100" size={120} color={CHART.emerald} color2={CHART.teal} />
+          <GaugeRing value={eficiencia} label="de 100" size={120} color={CHART.violet} color2={CHART.emerald} />
           <div className="flex-1 space-y-2">
             <p className="text-sm font-bold text-zinc-100">{vehicle.marca} {vehicle.modelo}</p>
             <div className="space-y-1">
@@ -111,7 +111,7 @@ export function DashboardWidgets({ vehicle, fuelLogs, documents, maintenances, u
 
       {/* ── Área de gasto ── */}
       <ChartCard title="Gasto en combustible" icon={<DollarSign className="w-3.5 h-3.5" />} accent={CHART.amber}>
-        {gastoSerie.length ? <AreaTrend data={gastoSerie} color={CHART.amber} color2={CHART.orange} suffix="" /> : <EmptyPrompt emoji="⛽" texto="Registra cargas en Bitácora para ver tu gasto en el tiempo." cta="Ir a Bitácora" href="/auto/app/bitacora" />}
+        {gastoSerie.length ? <AreaTrend data={gastoSerie} color={CHART.amber} color2={CHART.orange} suffix="" aurora={false} /> : <EmptyPrompt emoji="⛽" texto="Registra cargas en Bitácora para ver tu gasto en el tiempo." cta="Ir a Bitácora" href="/auto/app/bitacora" />}
       </ChartCard>
 
       {/* ── Rendimiento ── */}

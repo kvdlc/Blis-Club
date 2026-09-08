@@ -12,19 +12,31 @@ interface Props {
   color2?: string;
   height?: number;
   suffix?: string;
+  // Cuando es true, el gradiente del área va de violeta→cián→emerald (aurora)
+  aurora?: boolean;
   valueFormat?: (v: number) => string;
 }
 
-export function AreaTrend({ data, dataKey = "value", color = CHART.emerald, color2 = CHART.teal, height = 130, suffix = "", valueFormat }: Props) {
+export function AreaTrend({ data, dataKey = "value", color = CHART.emerald, color2 = CHART.teal, height = 130, suffix = "", aurora = true, valueFormat }: Props) {
   const fmt = (v: number) => valueFormat ? valueFormat(v) : `${v.toLocaleString("es-PE")}${suffix}`;
+  const gid = `area-${dataKey}-${aurora ? "aurora" : color}`;
+  const stops = aurora
+    ? [
+        { offset: "0%", c: CHART.violet },
+        { offset: "45%", c: CHART.cyan },
+        { offset: "100%", c: CHART.emerald },
+      ]
+    : [
+        { offset: "0%", c: color },
+        { offset: "100%", c: color2 },
+      ];
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -16 }}>
           <defs>
-            <linearGradient id={`area-${color}-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.5} />
-              <stop offset="100%" stopColor={color} stopOpacity={0} />
+            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+              {stops.map((s, i) => <stop key={i} offset={s.offset} stopColor={s.c} stopOpacity={aurora ? 0.42 : 0.5} />)}
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} vertical={false} />
@@ -35,8 +47,8 @@ export function AreaTrend({ data, dataKey = "value", color = CHART.emerald, colo
             contentStyle={{ background: "#18181b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 11 }}
             formatter={(v: number) => [fmt(v), ""]}
           />
-          <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2}
-            fill={`url(#area-${color}-${dataKey})`} />
+          <Area type="monotone" dataKey={dataKey} stroke={aurora ? CHART.cyan : color} strokeWidth={2}
+            fill={`url(#${gid})`} />
         </AreaChart>
       </ResponsiveContainer>
     </div>

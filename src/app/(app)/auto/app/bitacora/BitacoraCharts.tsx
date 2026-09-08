@@ -53,7 +53,7 @@ export function BitacoraCharts({ fuelLogs, maintenances, upgrades }: Props) {
       </div>
 
       <ChartCard title="Gasto en combustible" icon={<DollarSign className="w-3.5 h-3.5" />} accent={CHART.amber}>
-        {gastoSerie.length ? <AreaTrend data={gastoSerie} color={CHART.amber} color2={CHART.orange} /> : <EmptyPrompt emoji="⛽" texto="Registra cargas para ver tu gasto en el tiempo." cta="Ir a Bitácora" href="/auto/app/bitacora" />}
+        {gastoSerie.length ? <AreaTrend data={gastoSerie} color={CHART.amber} color2={CHART.orange} aurora={false} /> : <EmptyPrompt emoji="⛽" texto="Registra cargas para ver tu gasto en el tiempo." cta="Ir a Bitácora" href="/auto/app/bitacora" />}
       </ChartCard>
 
       <ChartCard title="Rendimiento" icon={<Droplets className="w-3.5 h-3.5" />} accent={CHART.teal}>

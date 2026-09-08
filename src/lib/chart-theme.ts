@@ -7,6 +7,8 @@ export const CHART = {
   tealSoft: "rgba(13,148,136,0.18)",
   violet: "#8b5cf6",
   violetSoft: "rgba(139,92,246,0.18)",
+  cyan: "#06b6d4",
+  cyanSoft: "rgba(6,182,212,0.18)",
   blue: "#3b82f6",
   blueSoft: "rgba(59,130,246,0.18)",
   orange: "#fb923c",
