@@ -102,7 +102,7 @@ export function DashboardWidgets({ vehicle, fuelLogs, documents, maintenances, u
             <p className="text-sm font-bold text-zinc-100">{vehicle.marca} {vehicle.modelo}</p>
             <div className="space-y-1">
               <StatLine label="Rendimiento" value={rendKmGal != null ? `${rendKmGal} km/gal` : "—"} color={CHART.teal} />
-              <StatLine label="Última carga" value={ins.diasSinCargar != null ? `hace ${ins.diasSinCargar} días` : "—"} color={CHART.amber} />
+              <StatLine label="Última carga" value={ins.diasSinCargar != null ? `hace ${ins.diasSinCargar} días` : "—"} color={CHART.cyan} />
               <StatLine label="Prox. servicio" value={ins.kmProximoServicio != null ? `${ins.kmProximoServicio.toLocaleString("es-PE")} km` : "—"} color={CHART.violet} />
             </div>
           </div>
@@ -110,8 +110,8 @@ export function DashboardWidgets({ vehicle, fuelLogs, documents, maintenances, u
       </div>
 
       {/* ── Área de gasto ── */}
-      <ChartCard title="Gasto en combustible" icon={<DollarSign className="w-3.5 h-3.5" />} accent={CHART.amber}>
-        {gastoSerie.length ? <AreaTrend data={gastoSerie} color={CHART.amber} color2={CHART.orange} suffix="" aurora={false} /> : <EmptyPrompt emoji="⛽" texto="Registra cargas en Bitácora para ver tu gasto en el tiempo." cta="Ir a Bitácora" href="/auto/app/bitacora" />}
+      <ChartCard title="Gasto en combustible" icon={<DollarSign className="w-3.5 h-3.5" />} accent={CHART.cyan}>
+        {gastoSerie.length ? <AreaTrend data={gastoSerie} color={CHART.cyan} color2={CHART.violet} suffix="" aurora={false} /> : <EmptyPrompt emoji="⛽" texto="Registra cargas en Bitácora para ver tu gasto en el tiempo." cta="Ir a Bitácora" href="/auto/app/bitacora" />}
       </ChartCard>
 
       {/* ── Rendimiento ── */}
@@ -138,15 +138,15 @@ export function DashboardWidgets({ vehicle, fuelLogs, documents, maintenances, u
       {/* ── Chips de score ── */}
       {hasData && (
         <div className="grid grid-cols-2 gap-2">
-          <KpiChip icon={<DollarSign className="w-3.5 h-3.5" />} label="Gasto 30d" value={money(Math.round(ins.gasto30d))} color={CHART.amber} soft={CHART.amberSoft} spark={gastoSerie.map((p) => p.value)} href="/auto/app/bitacora" />
+          <KpiChip icon={<DollarSign className="w-3.5 h-3.5" />} label="Gasto 30d" value={money(Math.round(ins.gasto30d))} color={CHART.cyan} soft={CHART.cyanSoft} spark={gastoSerie.map((p) => p.value)} href="/auto/app/bitacora" />
           <KpiChip icon={<Fuel className="w-3.5 h-3.5" />} label="Autonomía" value={ins.autonomiaKm ? `${ins.autonomiaKm.toLocaleString("es-PE")} km` : "—"} color={CHART.teal} soft={CHART.tealSoft} href="/auto/app/herramientas/autonomia" />
           <KpiChip icon={<Wrench className="w-3.5 h-3.5" />} label="Servicio" value={ins.kmProximoServicio != null ? `${ins.kmProximoServicio.toLocaleString("es-PE")} km` : "—"} color={CHART.violet} soft={CHART.violetSoft} href="/auto/app/bitacora" />
-          <KpiChip icon={<ShieldCheck className="w-3.5 h-3.5" />} label="Documentos" value={`${documents.length}`} color={CHART.orange} soft={CHART.orangeSoft} href="/auto/app/guantera" />
+          <KpiChip icon={<ShieldCheck className="w-3.5 h-3.5" />} label="Documentos" value={`${documents.length}`} color={CHART.teal} soft={CHART.tealSoft} href="/auto/app/guantera" />
         </div>
       )}
 
       {/* ── Trámites próximos ── */}
-      <ChartCard title="Trámites por vencer" icon={<ShieldCheck className="w-3.5 h-3.5" />} accent={CHART.orange}>
+      <ChartCard title="Trámites por vencer" icon={<ShieldCheck className="w-3.5 h-3.5" />} accent={CHART.cyan}>
         {nextDocExpiry ? (
           <DocRow doc={nextDocExpiry} />
         ) : (
@@ -156,7 +156,7 @@ export function DashboardWidgets({ vehicle, fuelLogs, documents, maintenances, u
 
       {/* ── Logros ── */}
       {badges.length > 0 && (
-        <ChartCard title={`Logros (${badges.length})`} icon={<Trophy className="w-3.5 h-3.5" />} accent={CHART.amber} collapsible open={false}>
+        <ChartCard title={`Logros (${badges.length})`} icon={<Trophy className="w-3.5 h-3.5" />} accent={CHART.violet} collapsible open={false}>
           <div className="flex flex-wrap gap-1.5">
             {badges.map((key) => (
               <span key={key} className="text-[9px] font-bold bg-auto-500/10 text-auto-400 px-2 py-1 rounded-full border border-auto-500/20">
@@ -182,7 +182,7 @@ function StatLine({ label, value, color }: { label: string; value: string; color
 function DocRow({ doc }: { doc: VehicleDocument }) {
   const dias = diasHasta(doc.fecha_vencimiento);
   const etiqueta = doc.tipo === "seguro_obligatorio" ? "Seguro Obligatorio" : doc.tipo === "revision_tecnica" ? "Revisión Técnica" : doc.tipo === "poliza_seguro" ? "Póliza" : doc.tipo;
-  const color = dias <= 15 ? "#ef4444" : dias <= 30 ? CHART.orange : CHART.emerald;
+  const color = dias <= 15 ? "#ef4444" : dias <= 30 ? CHART.cyan : CHART.emerald;
   return (
     <div className="flex items-center justify-between rounded-xl p-3 border border-white/10 bg-white/[0.04]">
       <div>

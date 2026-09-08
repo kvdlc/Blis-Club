@@ -136,7 +136,7 @@ function GuanteraInsights({ docs, contacts }: { docs: VehicleDocument[]; contact
 
   const donut = [
     { name: "Vigentes", value: vigentes, color: CHART.emerald },
-    { name: "Próximos", value: proximos, color: CHART.orange },
+    { name: "Próximos", value: proximos, color: CHART.cyan },
     { name: "Vencidos", value: vencidos, color: "#ef4444" },
   ];
   const total = docs.length;
@@ -155,7 +155,7 @@ function GuanteraInsights({ docs, contacts }: { docs: VehicleDocument[]; contact
             <KpiChip icon={<ShieldCheck className="w-3.5 h-3.5" />} label="Vigentes" value={`${vigentes}`} color={CHART.emerald} soft={CHART.emeraldSoft} href="/auto/app/guantera" />
             <KpiChip icon={<BadgeAlert className="w-3.5 h-3.5" />} label="Vencidos" value={`${vencidos}`} color="#ef4444" soft="rgba(239,68,68,0.15)" href="/auto/app/guantera" />
             <KpiChip icon={<Phone className="w-3.5 h-3.5" />} label="Contactos" value={`${contacts.length}`} color={CHART.teal} soft={CHART.tealSoft} href="/auto/app/guantera" />
-            <KpiChip icon={<Wrench className="w-3.5 h-3.5" />} label="Por vencer" value={proximos > 0 ? `${proximos}` : "—"} color={CHART.orange} soft={CHART.orangeSoft} href="/auto/app/guantera" />
+            <KpiChip icon={<Wrench className="w-3.5 h-3.5" />} label="Por vencer" value={proximos > 0 ? `${proximos}` : "—"} color={CHART.cyan} soft={CHART.cyanSoft} href="/auto/app/guantera" />
           </div>
         </div>
       )}

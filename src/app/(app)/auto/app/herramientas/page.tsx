@@ -11,7 +11,7 @@ const tools = [
   { slug: "consumo-aceite", icon: Droplets, label: "Consumo de aceite", desc: "Desgaste interno del motor", size: "small", color: "bg-amber-500/10 border-amber-500/20 text-amber-400" },
   // Row 3: Two medium + one small
   { slug: "depreciacion", icon: Scale, label: "Depreciación", desc: "Proyecta el valor actual de tu vehículo", size: "medium", color: "bg-violet-500/10 border-violet-500/20 text-violet-400" },
-  { slug: "equivalencia-llantas", icon: DollarSign, label: "Equivalencia de llantas", desc: "Verifica si el cambio de aros es seguro", size: "medium", color: "bg-orange-500/10 border-orange-500/20 text-orange-400" },
+  { slug: "equivalencia-llantas", icon: DollarSign, label: "Equivalencia de llantas", desc: "Verifica si el cambio de aros es seguro", size: "medium", color: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" },
   { slug: "checklist-previaje", icon: ClipboardCheck, label: "Checklist", desc: "Verifica fluidos, llantas y extintor", size: "small", color: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" },
   // Row 4: One wide + one small
   { slug: "costo-km-real", icon: Car, label: "Costo por kilómetro real", desc: "Combustible + mantenimiento + depreciación", size: "wide", color: "bg-violet-500/10 border-violet-500/20 text-violet-400" },

@@ -71,11 +71,11 @@ function itemLabel(item: TimelineItem): string {
 }
 
 function itemIcon(item: TimelineItem) {
-  if (item.type === "fuel") return { icon: <Fuel className="w-5 h-5 text-amber-400" />, chip: "bg-amber-500/10 border border-amber-500/20", border: "border-l-amber-500" };
+  if (item.type === "fuel") return { icon: <Fuel className="w-5 h-5 text-cyan-400" />, chip: "bg-cyan-500/10 border border-cyan-500/20", border: "border-l-cyan-500" };
   if (item.type === "maintenance") {
     const m = item.data as MaintenanceLog;
     const esAceite = m.tipo === "cambio_aceite";
-    return { icon: esAceite ? <Droplets className="w-5 h-5 text-amber-400" /> : <Wrench className="w-5 h-5 text-blue-400" />, chip: esAceite ? "bg-amber-500/10 border border-amber-500/20" : "bg-blue-500/10 border border-blue-500/20", border: esAceite ? "border-l-amber-500" : "border-l-blue-500" };
+    return { icon: esAceite ? <Droplets className="w-5 h-5 text-violet-400" /> : <Wrench className="w-5 h-5 text-blue-400" />, chip: esAceite ? "bg-violet-500/10 border border-violet-500/20" : "bg-blue-500/10 border border-blue-500/20", border: esAceite ? "border-l-violet-500" : "border-l-blue-500" };
   }
   return { icon: <ShoppingBag className="w-5 h-5 text-violet-400" />, chip: "bg-violet-500/10 border border-violet-500/20", border: "border-l-violet-500" };
 }
@@ -241,8 +241,8 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
       <div className="grid grid-cols-3 gap-2">
         <button type="button"
           onClick={() => { setEditingKey(null); setAddType(addType === "fuel" ? null : "fuel"); }}
-          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addType === "fuel" ? "bg-amber-500/20 border-amber-500/40" : "bg-amber-500/10 border-amber-500/25 hover:bg-amber-500/20"}`}>
-          <Fuel className="w-5 h-5 text-amber-400" />
+          className={`flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border transition-all active:scale-[0.98] ${addType === "fuel" ? "bg-cyan-500/20 border-cyan-500/40" : "bg-cyan-500/10 border-cyan-500/25 hover:bg-cyan-500/20"}`}>
+          <Fuel className="w-5 h-5 text-cyan-400" />
           <span className="text-[10px] font-extrabold text-zinc-100 text-center leading-tight">Cargar combustible</span>
         </button>
         <button type="button"
@@ -600,8 +600,8 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
       </div>
 
       {esAceite ? (
-        <div className="rounded-xl bg-zinc-800/60 border border-amber-500/20 p-2.5 space-y-2">
-          <p className="text-[10px] font-bold text-amber-400 flex items-center gap-1"><Droplets className="w-3 h-3" /> Cambio de aceite</p>
+        <div className="rounded-xl bg-zinc-800/60 border border-violet-500/20 p-2.5 space-y-2">
+          <p className="text-[10px] font-bold text-violet-300 flex items-center gap-1"><Droplets className="w-3 h-3" /> Cambio de aceite</p>
           <div className="grid grid-cols-2 gap-1.5">
             <label className="block"><span className="text-[9px] font-bold text-zinc-500">Fecha del cambio</span>
               <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
@@ -1035,7 +1035,7 @@ function CarfaxExportSection({ vehicle, fuelLogs, maintenances, upgrades }: {
         <p className="text-xs text-zinc-500">Genera un reporte PDF con todo el historial de mantenimientos, cargas, repuestos y mejoras.</p>
         <div className="grid grid-cols-3 gap-2">
           <div className="bg-zinc-800 rounded-xl p-2 text-center">
-            <p className="text-lg font-black text-amber-400">{fuelLogs.length}</p>
+            <p className="text-lg font-black text-cyan-400">{fuelLogs.length}</p>
             <p className="text-[9px] text-zinc-500">Cargas</p>
           </div>
           <div className="bg-zinc-800 rounded-xl p-2 text-center">

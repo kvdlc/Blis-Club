@@ -48,12 +48,12 @@ export function BitacoraCharts({ fuelLogs, maintenances, upgrades }: Props) {
       </ChartCard>
 
       <div className="grid grid-cols-2 gap-2">
-        <KpiChip icon={<DollarSign className="w-3.5 h-3.5" />} label="Total del período" value={money(Math.round(totalGasto))} color={CHART.amber} soft={CHART.amberSoft} spark={gastoSerie.map((p) => p.value)} href="/auto/app/bitacora" />
+        <KpiChip icon={<DollarSign className="w-3.5 h-3.5" />} label="Total del período" value={money(Math.round(totalGasto))} color={CHART.cyan} soft={CHART.cyanSoft} spark={gastoSerie.map((p) => p.value)} href="/auto/app/bitacora" />
         <KpiChip icon={<Wrench className="w-3.5 h-3.5" />} label="Gastos registrados" value={`${fuelLogs.length + maintenances.length + upgrades.length}`} color={CHART.violet} soft={CHART.violetSoft} href="/auto/app/bitacora" />
       </div>
 
-      <ChartCard title="Gasto en combustible" icon={<DollarSign className="w-3.5 h-3.5" />} accent={CHART.amber}>
-        {gastoSerie.length ? <AreaTrend data={gastoSerie} color={CHART.amber} color2={CHART.orange} aurora={false} /> : <EmptyPrompt emoji="⛽" texto="Registra cargas para ver tu gasto en el tiempo." cta="Ir a Bitácora" href="/auto/app/bitacora" />}
+      <ChartCard title="Gasto en combustible" icon={<DollarSign className="w-3.5 h-3.5" />} accent={CHART.cyan}>
+        {gastoSerie.length ? <AreaTrend data={gastoSerie} color={CHART.cyan} color2={CHART.violet} aurora={false} /> : <EmptyPrompt emoji="⛽" texto="Registra cargas para ver tu gasto en el tiempo." cta="Ir a Bitácora" href="/auto/app/bitacora" />}
       </ChartCard>
 
       <ChartCard title="Rendimiento" icon={<Droplets className="w-3.5 h-3.5" />} accent={CHART.teal}>
@@ -67,7 +67,7 @@ export function BitacoraCharts({ fuelLogs, maintenances, upgrades }: Props) {
       <ChartCard title="Comparativo por período" icon={<Wrench className="w-3.5 h-3.5" />} accent={CHART.violet}>
         {mensual.length ? (
           <BarCompare stacked data={mensual} series={[
-            { key: "combustible", label: "Combustible", color: CHART.amber },
+            { key: "combustible", label: "Combustible", color: CHART.cyan },
             { key: "mantenimiento", label: "Mantenimiento", color: CHART.violet },
             { key: "mejoras", label: "Repuestos/Accesorios", color: CHART.blue },
           ]} />
@@ -77,7 +77,7 @@ export function BitacoraCharts({ fuelLogs, maintenances, upgrades }: Props) {
       </ChartCard>
 
       {/* Consumo por estación / grifo */}
-      <ChartCard title="Consumo por estación / grifo" icon={<Fuel className="w-3.5 h-3.5" />} accent={CHART.orange}>
+      <ChartCard title="Consumo por estación / grifo" icon={<Fuel className="w-3.5 h-3.5" />} accent={CHART.cyan}>
         {grifos.length === 0 ? (
           <EmptyPrompt emoji="⛽" texto="Al cargar combustible selecciona el grifo para comparar estaciones y detectar despachos cortos." />
         ) : (
