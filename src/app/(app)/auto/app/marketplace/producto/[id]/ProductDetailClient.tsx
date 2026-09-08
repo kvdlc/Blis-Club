@@ -37,9 +37,11 @@ function useCountdown() {
       s: Math.floor((diff % 60000) / 1000),
     };
   };
-  const [t, setT] = useState(calc);
+  const [t, setT] = useState({ h: 0, m: 0, s: 0 });
   useEffect(() => {
-    const id = setInterval(() => setT(calc()), 1000);
+    const tick = () => setT(calc());
+    tick();
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
   return t;

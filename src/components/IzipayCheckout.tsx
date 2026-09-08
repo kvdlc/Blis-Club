@@ -126,16 +126,27 @@ export default function IzipayCheckout({
           return true;
         });
 
-        // Fallback: si onFormReady no dispara en 15s
+        // Fallback: si onFormReady no dispara, mostrar estado listo a los 8s
         setTimeout(() => {
           setFormState(prev => {
             if (prev === 'loading') {
-              addLog('Fallback: onFormReady no disparó en 15s');
+              addLog('Fallback: onFormReady no disparó en 8s');
               return 'ready';
             }
             return prev;
           });
-        }, 15000);
+        }, 8000);
+
+        // Timeout de seguridad: si a los 25s seguimos sin formulario listo, mostrar error recuperable
+        setTimeout(() => {
+          setFormState(prev => {
+            if (prev === 'loading') {
+              setErrorMsg('La pasarela de pago tardó demasiado en responder. Reintenta.');
+              return 'error';
+            }
+            return prev;
+          });
+        }, 25000);
 
       } catch (err: any) {
         addLog(`Error de inicialización: ${err?.message || err}`);
