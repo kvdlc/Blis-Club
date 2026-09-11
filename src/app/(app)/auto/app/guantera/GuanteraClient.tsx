@@ -12,6 +12,7 @@ import { getCountryConfig, getCurrentCountryCode } from "@/lib/countries";
 import { uploadDocumentPhoto, uploadContactPhoto } from "@/lib/storage";
 import { DatePicker } from "@/components/DatePicker";
 import { MapLocationPicker } from "@/components/MapLocationPicker";
+import { ImageViewer } from "@/components/ImageViewer";
 import { formatoRestante, diasHasta } from "@/lib/dates";
 import { ShieldCheck, BadgeAlert, MessageCircle } from "lucide-react";
 import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/types/database";
@@ -388,6 +389,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const [viewer, setViewer] = useState<{ images: string[]; index: number; title?: string } | null>(null);
   const [form, setForm] = useState({
     nombre: "", encargado: "", tipo: "mecanico", telefono: "", telefono_alt: "",
     pais: "PE", pais_alt: "PE", foto_url: "", lat: null as number | null,
@@ -646,7 +648,9 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
               {/* Foto a la izquierda */}
               <div className="relative w-16 h-16 shrink-0">
                 {c.foto_url ? (
-                  <img src={c.foto_url} alt="" className="w-full h-full rounded-xl object-cover border border-white/10" />
+                  <button type="button" onClick={() => setViewer({ images: [c.foto_url as string], index: 0, title: c.nombre })} className="w-full h-full" title="Ampliar foto">
+                    <img src={c.foto_url} alt="" className="w-full h-full rounded-xl object-cover border border-white/10" />
+                  </button>
                 ) : (
                   <div className="w-full h-full rounded-xl glass-input border border-white/10 flex items-center justify-center">
                     <Icon className="w-6 h-6 text-auto-500/70" />
@@ -700,6 +704,10 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
           );
         })}
       </div>
+
+      {viewer && (
+        <ImageViewer images={viewer.images} index={viewer.index} title={viewer.title} onClose={() => setViewer(null)} />
+      )}
     </div>
   );
 }

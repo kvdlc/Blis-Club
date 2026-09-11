@@ -8,14 +8,16 @@ import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade, VehicleSpecs } f
 import {
   ChevronDown, Gauge, Droplets, Wrench, ShoppingBag, Shield, FileDown,
   Trash2, X, RotateCw, Fuel, ScrollText, CheckCircle2, AlertTriangle, Calendar,
-  MoreVertical, Pencil, Search,
+  MoreVertical, Pencil, Search, Camera, Loader2,
 } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { PlacePicker } from "./PlacePicker";
 import { BitacoraCharts } from "./BitacoraCharts";
+import { ImageViewer } from "@/components/ImageViewer";
 import { useMoney } from "@/lib/money";
 import { formatoRestante } from "@/lib/dates";
 import { partProduct, PART_CATEGORIA_LABEL, searchProducts, type PartProduct } from "@/lib/auto-parts";
+import { uploadUpgradePhoto } from "@/lib/storage";
 
 /* ═══════════════════════════ Tipos y datos ═══════════════════════ */
 const maintTypes = [
@@ -372,6 +374,7 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [viewer, setViewer] = useState<{ images: string[]; index: number } | null>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -404,6 +407,9 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
   const part = item.type === "part" ? partLife(item.data as VehicleUpgrade, currentKm) : null;
   const lifeColor = part?.nivel === "vencido" ? "text-red-400" : part?.nivel === "aviso" ? "text-amber-400" : "text-emerald-400";
   const lifeText = part ? [part.km, part.fecha].filter(Boolean).join(" · ") : null;
+  const fotos = item.type === "part"
+    ? (((item.data as VehicleUpgrade).fotos || []).filter(Boolean))
+    : [];
 
   return (
     <div className={`glass-card border border-white/10 shadow-sm rounded-2xl p-3 flex items-center gap-3 border-l-2 ${st.border}`}>
@@ -424,6 +430,15 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
           {detail && <span className="truncate"> · {detail}</span>}
         </p>
         {part && lifeText && <p className={`text-[9px] font-bold mt-0.5 truncate ${lifeColor}`}>⏳ {lifeText}</p>}
+        {fotos.length > 0 && (
+          <div className="flex items-center gap-1.5 mt-1.5">
+            {fotos.map((url, k) => (
+              <button key={k} type="button" onClick={() => setViewer({ images: fotos, index: k })} className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0">
+                <img src={url} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <span className="text-xs font-bold text-zinc-300 shrink-0">{money(Math.round(eventCost(item)))}</span>
       <div className="relative shrink-0" ref={menuRef}>
@@ -444,6 +459,10 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
           </div>
         )}
       </div>
+
+      {viewer && (
+        <ImageViewer images={viewer.images} index={viewer.index} onClose={() => setViewer(null)} />
+      )}
     </div>
   );
 }
@@ -713,8 +732,27 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
     conVencimiento: !!editItem?.fecha_vencimiento,
     fecha_vencimiento: editItem?.fecha_vencimiento || "",
     notas: editItem?.notas || "",
+    fotos: (editItem?.fotos && editItem.fotos.length ? editItem.fotos : (editItem?.foto_url ? [editItem.foto_url] : [])) as string[],
     adn: {} as Record<string, string>,
   });
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [fotoError, setFotoError] = useState<string | null>(null);
+  const [viewer, setViewer] = useState<{ images: string[]; index: number } | null>(null);
+
+  const addFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (form.fotos.length >= 3) { setFotoError("Máximo 3 fotos."); return; }
+    setUploadingFoto(true);
+    setFotoError(null);
+    const url = await uploadUpgradePhoto(file, vehicleId);
+    if (url) setForm((f) => ({ ...f, fotos: [...f.fotos, url].slice(0, 3) }));
+    else setFotoError("No se pudo subir la foto. Intenta con otra imagen (JPG/PNG).");
+    setUploadingFoto(false);
+  };
+
+  const removeFoto = (url: string) => setForm((f) => ({ ...f, fotos: f.fotos.filter((u) => u !== url) }));
 
   const picked = partProduct(form.tipo_componente);
   const results = searchProducts(query);
@@ -778,6 +816,8 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
       ciclo: form.conKm ? "km" : (form.conVencimiento ? "tiempo" : null),
       duracion_km: form.conKm && form.duracion_km ? parseInt(form.duracion_km) : null,
       notas: form.notas || null,
+      fotos: form.fotos,
+      foto_url: form.fotos[0] || null,
     };
     let data: VehicleUpgrade | null = null;
     if (editItem) {
@@ -875,6 +915,32 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
         </div>
       </div>
 
+      {/* Fotos del repuesto (hasta 3) */}
+      <div>
+        <span className="text-[10px] font-bold text-zinc-500">Fotos del repuesto ({form.fotos.length}/3)</span>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          {form.fotos.map((url, idx) => (
+            <div key={url} className="relative w-16 h-16">
+              <button type="button" onClick={() => setViewer({ images: form.fotos, index: idx })} className="w-full h-full">
+                <img src={url} alt="" className="w-full h-full object-cover rounded-xl border border-white/10" />
+              </button>
+              <button type="button" onClick={() => removeFoto(url)} aria-label="Quitar foto"
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 border-2 border-zinc-900 flex items-center justify-center text-white">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+          {form.fotos.length < 3 && (
+            <label className="w-16 h-16 rounded-xl border border-dashed border-white/20 glass-card flex flex-col items-center justify-center gap-0.5 cursor-pointer hover:border-auto-500/40 transition-colors">
+              {uploadingFoto ? <Loader2 className="w-4 h-4 text-auto-400 animate-spin" /> : <Camera className="w-4 h-4 text-zinc-400" />}
+              <span className="text-[8px] text-zinc-500">{uploadingFoto ? "..." : "Agregar"}</span>
+              <input type="file" accept="image/*" onChange={addFoto} className="hidden" disabled={uploadingFoto} />
+            </label>
+          )}
+        </div>
+        {fotoError && <p className="text-[10px] text-red-400 mt-1">{fotoError}</p>}
+      </div>
+
       <div className="grid grid-cols-2 gap-1.5">
         <label className="block min-w-0"><span className="text-[9px] font-bold text-zinc-500">Costo ({symbol})</span>
           <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="Ej: 450" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
@@ -956,6 +1022,10 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
       <div className="flex gap-1.5">
         <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-2.5 rounded-lg bg-auto-600 text-white text-sm font-bold">{saving ? "..." : editItem ? "Guardar cambios" : "Registrar repuesto"}</button>
       </div>
+
+      {viewer && (
+        <ImageViewer images={viewer.images} index={viewer.index} onClose={() => setViewer(null)} title={form.nombre} />
+      )}
     </div>
   );
 }

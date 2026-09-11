@@ -161,3 +161,31 @@ export async function uploadContactPhoto(file: File, vehicleId: string): Promise
   const { data: urlData } = supabase.storage.from("auto-photos").getPublicUrl(data.path);
   return urlData.publicUrl;
 }
+
+/** Fotos del repuesto/accesorio comprado (Bitácora → Repuestos). Subida por archivo. */
+export async function uploadUpgradePhoto(file: File, vehicleId: string): Promise<string | null> {
+  const supabase = createClient();
+  let blob: Blob;
+  let contentType: string;
+  try {
+    blob = await compressImage(file);
+    contentType = blob.type || file.type || "image/jpeg";
+  } catch {
+    blob = file;
+    contentType = file.type || "image/jpeg";
+  }
+  const ext = contentType.includes("png") ? "png" : "jpg";
+  const fileName = `repuestos/${vehicleId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
+
+  const { data, error } = await supabase.storage
+    .from("auto-photos")
+    .upload(fileName, blob, { upsert: true, contentType });
+
+  if (error) {
+    console.error("Upload upgrade photo error:", error.message);
+    return null;
+  }
+
+  const { data: urlData } = supabase.storage.from("auto-photos").getPublicUrl(data.path);
+  return urlData.publicUrl;
+}

@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/client";
 import { getCurrentCountryCode } from "@/lib/countries";
 import { uploadContactPhoto } from "@/lib/storage";
 import type { VehicleContact } from "@/types/database";
-import { Store, Fuel, Wrench, Anchor, Building2, Pin, Plus, ChevronDown, Zap, ShoppingBag, MapPin, Phone, Upload, X, Search, Siren } from "lucide-react";
+import { Store, Fuel, Wrench, Anchor, Building2, Pin, Plus, ChevronDown, Zap, ShoppingBag, MapPin, Phone, Upload, X, Search, Siren, Maximize2 } from "lucide-react";
+import { ImageViewer } from "@/components/ImageViewer";
 
 export const CONTACT_TYPES_META: { value: string; label: string; icon: any }[] = [
   { value: "mecanico", label: "Mecánico", icon: Wrench },
@@ -42,6 +43,7 @@ export function PlacePicker({ vehicleId, tipos, value, onSelect, placeholder }: 
   const [showAdd, setShowAdd] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const [viewer, setViewer] = useState<{ images: string[]; index: number; title?: string } | null>(null);
 
   const allowed = CONTACT_TYPES_META.filter((c) => tipos.includes(c.value));
 
@@ -118,7 +120,13 @@ export function PlacePicker({ vehicleId, tipos, value, onSelect, placeholder }: 
                     onClick={() => pick(c)}
                     className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.06] text-left">
                     <div className="relative shrink-0">
-                      <Icon className="w-4 h-4 text-zinc-400" />
+                      {c.foto_url ? (
+                        <img src={c.foto_url} alt="" className="w-7 h-7 rounded-lg object-cover border border-white/10" />
+                      ) : (
+                        <div className="w-7 h-7 rounded-lg glass-input border border-white/10 flex items-center justify-center">
+                          <Icon className="w-4 h-4 text-zinc-400" />
+                        </div>
+                      )}
                       {c.es_emergencia && <Siren className="w-2.5 h-2.5 text-red-500 absolute -top-1.5 -right-1.5" />}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -127,6 +135,13 @@ export function PlacePicker({ vehicleId, tipos, value, onSelect, placeholder }: 
                     </div>
                     {c.es_emergencia && <span className="text-[8px] font-bold text-red-400 shrink-0">SOS</span>}
                     {c.telefono && <span className="text-[9px] text-zinc-500 shrink-0">{c.telefono}</span>}
+                    {c.foto_url && (
+                      <span role="button" tabIndex={0} title="Ver foto"
+                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); setViewer({ images: [c.foto_url as string], index: 0, title: c.nombre }); }}
+                        className="shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-auto-300 hover:bg-white/[0.06]">
+                        <Maximize2 className="w-3.5 h-3.5" />
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -155,11 +170,22 @@ export function PlacePicker({ vehicleId, tipos, value, onSelect, placeholder }: 
       )}
 
       {selected && (
-        <p className="text-[10px] text-zinc-500 flex items-center gap-1">
-          <MapPin className="w-3 h-3 text-auto-400" /> {selected.nombre}
-          {selected.encargado && <span className="text-zinc-500">· {selected.encargado}</span>}
-          {selected.telefono && <span className="flex items-center gap-0.5 text-zinc-500"><Phone className="w-2.5 h-2.5" />{selected.telefono}</span>}
-        </p>
+        <div className="text-[10px] text-zinc-500 flex items-center gap-1.5">
+          {selected.foto_url && (
+            <button type="button" onClick={() => setViewer({ images: [selected.foto_url as string], index: 0, title: selected.nombre })} title="Ver foto" className="shrink-0">
+              <img src={selected.foto_url} alt="" className="w-8 h-8 rounded-lg object-cover border border-white/10" />
+            </button>
+          )}
+          <p className="flex items-center gap-1 min-w-0 truncate">
+            <MapPin className="w-3 h-3 text-auto-400 shrink-0" /> {selected.nombre}
+            {selected.encargado && <span className="text-zinc-500">· {selected.encargado}</span>}
+            {selected.telefono && <span className="flex items-center gap-0.5 text-zinc-500"><Phone className="w-2.5 h-2.5" />{selected.telefono}</span>}
+          </p>
+        </div>
+      )}
+
+      {viewer && (
+        <ImageViewer images={viewer.images} index={viewer.index} title={viewer.title} onClose={() => setViewer(null)} />
       )}
     </div>
   );

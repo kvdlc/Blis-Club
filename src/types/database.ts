@@ -219,6 +219,7 @@ export interface VehicleUpgrade {
   odometro: number | null;            // km al momento de la compra
   notas: string | null;
   foto_url: string | null;
+  fotos: string[] | null;
   created_at: string;
 }
 
