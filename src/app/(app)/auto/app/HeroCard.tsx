@@ -89,7 +89,7 @@ export function HeroCard({ vehicle, fuelLogs }: Props) {
         <div className="mt-3 flex items-end justify-between rounded-xl bg-black/40 border border-white/10 px-3 py-2">
           <div className="flex items-center gap-2 text-zinc-500">
             <Gauge className="w-4 h-4 text-auto-400" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">Odómetro</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Kilometraje</span>
           </div>
           <div className="flex items-baseline gap-1">
             <span className="font-digit text-2xl font-black text-white tabular-nums">{kmDisplay.toLocaleString("es-PE")}</span>

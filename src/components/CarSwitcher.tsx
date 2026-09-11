@@ -44,7 +44,13 @@ export function CarProvider({ children }: { children: React.ReactNode }) {
       setCars(loadedCars);
 
       const savedId = typeof window !== "undefined" ? localStorage.getItem("blis_current_car") : null;
-      const selected = savedId ? loadedCars.find((c) => c.id === savedId) : loadedCars[0];
+      let selected = savedId ? loadedCars.find((c) => c.id === savedId) : loadedCars[0];
+      // Si el id guardado ya no existe (auto eliminado), limpiar y usar el primero
+      if (!selected && savedId) {
+        localStorage.removeItem("blis_current_car");
+        document.cookie = "blis_current_car=;path=/;max-age=0;SameSite=Lax";
+        selected = loadedCars[0];
+      }
       setCurrentCar(selected ?? null);
       setLoading(false);
     };

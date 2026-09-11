@@ -119,7 +119,7 @@ export default function CarfaxPrintClient({ vehicle, fuelLogs, maintenances, upg
               <thead>
                 <tr className="border-b border-zinc-200 text-left">
                   <th className="px-3 py-2 font-bold text-zinc-500">Fecha</th>
-                  <th className="px-3 py-2 font-bold text-zinc-500">Odom.</th>
+                  <th className="px-3 py-2 font-bold text-zinc-500">Kilometraje</th>
                   <th className="px-3 py-2 font-bold text-zinc-500">Litros</th>
                   <th className="px-3 py-2 font-bold text-zinc-500">{symbol} gal</th>
                   <th className="px-3 py-2 font-bold text-zinc-500">Grifo</th>

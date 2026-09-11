@@ -226,7 +226,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
             ))}
           </div>
           <select value={autoSort} onChange={(e) => setAutoSort(e.target.value)}
-            className="shrink-0 text-[11px] font-bold px-2.5 py-2 rounded-xl glass-input border border-white/10 text-zinc-300 focus:outline-none">
+            className="shrink-0 text-[11px] font-bold px-2.5 py-2 rounded-xl border border-white/10 text-zinc-300 focus:outline-none select-dark">
             <option value="recientes">Recientes</option>
             <option value="precioAsc">Precio ↑</option>
             <option value="precioDesc">Precio ↓</option>
@@ -354,7 +354,7 @@ export default function MarketplaceClient({ userId, listings, products, myVehicl
             <span className="text-[10px] font-bold text-zinc-500 bg-white/[0.06] px-2 py-0.5 rounded-full">{shownProducts.length}</span>
           </div>
           <select value={productSort} onChange={(e) => setProductSort(e.target.value)}
-            className="text-[11px] font-bold px-2.5 py-2 rounded-xl glass-input border border-white/10 text-zinc-300 focus:outline-none">
+            className="text-[11px] font-bold px-2.5 py-2 rounded-xl border border-white/10 text-zinc-300 focus:outline-none select-dark">
             <option value="destacados">Destacados</option>
             <option value="ventas">Más vendidos</option>
             <option value="precioAsc">Precio ↑</option>

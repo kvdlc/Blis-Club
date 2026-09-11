@@ -105,7 +105,7 @@ export function PlacePicker({ vehicleId, tipos, value, onSelect, placeholder }: 
           )}
 
           {showList && !selected && (
-            <div ref={listRef} className="absolute z-30 mt-1 left-0 right-0 max-h-56 overflow-y-auto rounded-xl border border-white/10 glass-card p-1.5 space-y-0.5 shadow-xl">
+            <div ref={listRef} className="absolute z-30 mt-1 left-0 right-0 max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-zinc-900/97 backdrop-blur-xl p-1.5 space-y-0.5 shadow-2xl">
               {loading && <p className="text-[10px] text-zinc-500 px-2 py-2">Cargando centros…</p>}
               {!loading && filtered.length === 0 && (
                 <p className="text-[10px] text-zinc-500 px-2 py-2">No hay lugares registrados de este tipo.</p>
@@ -275,14 +275,14 @@ function QuickContactForm({ vehicleId, defaultTipos, onDone, onCancel }: {
         <label className="block min-w-0">
           <span className="text-[9px] font-bold text-zinc-500">Tipo</span>
           <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-card text-zinc-200 mt-0.5 min-w-0">
+            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs text-zinc-200 mt-0.5 min-w-0 select-dark">
             {tipoOptions.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </label>
         <label className="block min-w-0">
           <span className="text-[9px] font-bold text-zinc-500">País</span>
           <select value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })}
-            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-card text-zinc-200 mt-0.5 min-w-0">
+            className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs text-zinc-200 mt-0.5 min-w-0 select-dark">
             {countryPrefixes.map((p) => <option key={p.code} value={p.code}>{p.code} {p.prefix}</option>)}
           </select>
         </label>

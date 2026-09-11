@@ -140,7 +140,7 @@ export default function PublishClient({ userId, myVehicles, profile }: Props) {
           <label className="block">
             <span className="text-xs font-bold text-zinc-500">Mi vehículo *</span>
             <select required value={selectedId || ""} onChange={(e) => setSelectedId(e.target.value)}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20">
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-auto-600/20 select-dark">
               <option value="">— Selecciona tu auto —</option>
               {myVehicles.map((v) => (
                 <option key={v.id} value={v.id}>{v.marca} {v.modelo} {v.año} · {v.placa}{v.estado === "en venta" ? " (en venta)" : ""}</option>

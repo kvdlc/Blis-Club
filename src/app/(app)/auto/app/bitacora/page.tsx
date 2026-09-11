@@ -2,16 +2,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade } from "@/types/database";
+import { resolveCurrentCarId } from "@/lib/currentVehicle";
 import BitacoraClient from "./BitacoraClient";
 
 async function getBitacoraData(userId: string, carId: string | null) {
   const supabase = await createClient();
-  if (!carId) {
-    const fallback = await supabase
-      .from("vehicles").select("id").eq("owner_id", userId).order("created_at").limit(1).single();
-    carId = (fallback.data as { id: string } | null)?.id ?? null;
-  }
-  if (!carId) return { vehicle: null, fuelLogs: [], maintenances: [], upgrades: [] };
+  const resolvedId = await resolveCurrentCarId(supabase, userId, carId);
+  if (!resolvedId) return { vehicle: null, fuelLogs: [], maintenances: [], upgrades: [] };
+  carId = resolvedId;
 
   const [vehRes, fuelRes, maintRes, upgRes] = await Promise.all([
     supabase.from("vehicles").select("*").eq("id", carId).single(),

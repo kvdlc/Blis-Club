@@ -411,7 +411,12 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
       <div className="flex-1 min-w-0">
         <p className="text-xs font-bold text-zinc-100">
           {itemLabel(item)}
-          {item.type === "fuel" && <> · {volLabel((item.data as FuelLog).litros)} {esGalon ? `/gal @ ${precioLabel((item.data as FuelLog).precio_por_galon)}` : ` @ ${precioLabel((item.data as FuelLog).precio_por_galon)}/L`}</>}
+          {item.type === "fuel" && (() => {
+            const f = item.data as FuelLog;
+            const precioUnidad = esGalon ? f.precio_por_galon : f.precio_por_galon / GAL;
+            const total = f.precio_por_galon * (f.litros / GAL);
+            return <> · {volLabel(f.litros)} @ {money(Math.round(precioUnidad * 100) / 100)}/{esGalon ? "gal" : "L"} · {money(Math.round(total * 100) / 100)}</>;
+          })()}
         </p>
         <p className="text-[10px] text-zinc-500 flex items-center gap-1 truncate">
           <Calendar className="w-3 h-3 shrink-0" />
@@ -427,7 +432,7 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
           <MoreVertical className="w-4 h-4" />
         </button>
         {menuOpen && (
-          <div className="absolute z-30 right-0 mt-1 w-32 glass-input border border-white/10 rounded-xl shadow-xl overflow-hidden">
+          <div className="absolute z-30 right-0 mt-1 w-32 bg-zinc-900/97 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden">
             <button type="button" onClick={() => { setMenuOpen(false); onEdit(); }}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-zinc-200 hover:bg-white/[0.06] transition-colors">
               <Pencil className="w-3.5 h-3.5" /> Editar
@@ -445,9 +450,11 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
 
 /* ═══════════════════════════ Forms ═══════════════════════ */
 function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editItem?: FuelLog | null; onDone: (f: FuelLog | null) => void }) {
+  const { money } = useMoney();
   const [countryCode, setCountryCode] = useState<string | null>(null);
-  const [form, setForm] = useState({ cantidad: "", precio_por_galon: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "90", grifo: "", contacto_id: null as string | null });
+  const [form, setForm] = useState({ cantidad: "", monto: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "90", grifo: "", contacto_id: null as string | null });
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getCurrentCountryCode().then((code) => {
@@ -455,9 +462,11 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
       const cfg = getCountryConfig(code);
       const esGalon = cfg.fuelUnit === "galon";
       if (editItem) {
+        // Reverse: total pagado = precio_por_galon × (litros / GAL)
+        const total = editItem.precio_por_galon * (editItem.litros / GAL);
         setForm({
           cantidad: String(esGalon ? editItem.litros / GAL : editItem.litros),
-          precio_por_galon: String(esGalon ? editItem.precio_por_galon : editItem.precio_por_galon / GAL),
+          monto: String(Math.round(total * 100) / 100),
           odometro: String(editItem.odometro || ""),
           fecha: editItem.fecha,
           tipo: editItem.tipo_combustible || (cfg.fuelTypes[0]?.value || "90"),
@@ -477,13 +486,21 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
   const unidadShort = esGalon ? "gal" : "L";
   const precioUnit = esGalon ? "galón" : "litro";
 
+  // Precio por unidad calculado (referencia en vivo)
+  const cantNum = parseFloat(form.cantidad);
+  const montoNum = parseFloat(form.monto);
+  const precioCalculado = cantNum > 0 && montoNum > 0 ? montoNum / cantNum : null;
+
   const handleSubmit = async () => {
     const cant = parseFloat(form.cantidad);
-    const precioLocal = parseFloat(form.precio_por_galon);
+    const monto = parseFloat(form.monto);
     const o = parseInt(form.odometro);
-    if (!cant || !precioLocal || !o) return;
+    if (!cant || cant <= 0) { setError(`Ingresa la cantidad de ${unidadLabel}.`); return; }
+    if (!monto || monto <= 0) { setError("Ingresa el monto total pagado."); return; }
+    if (!o || o <= 0) { setError("Ingresa el kilometraje del vehículo."); return; }
+    setError(null);
     const litros = esGalon ? cant * GAL : cant;
-    const precioPorGalon = esGalon ? precioLocal : precioLocal * GAL;
+    const precioPorGalon = esGalon ? (monto / cant) : ((monto / cant) * GAL);
 
     setSaving(true);
     const supabase = createClient();
@@ -502,19 +519,40 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
     if (data) await supabase.from("vehicles").update({ kilometraje: o }).eq("id", vehicleId);
     setSaving(false);
     if (data) onDone(data);
+    else setError("No se pudo guardar la carga. Intenta de nuevo.");
   };
 
   return (
     <div className="space-y-2">
-      <p className="text-[10px] font-bold text-zinc-400">Unidad: {esGalon ? "galones" : "litros"} · el precio es por {precioUnit}</p>
-      <div className="grid grid-cols-4 gap-1.5">
-        <input type="number" step="0.1" value={form.cantidad} onChange={(e) => setForm({ ...form, cantidad: e.target.value })} placeholder={unidadShort} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200 min-w-0" />
-        <input type="number" step="0.01" value={form.precio_por_galon} onChange={(e) => setForm({ ...form, precio_por_galon: e.target.value })} placeholder={`${cfg.currency}/${unidadShort}`} className="px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200 min-w-0" />
-        <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odom." className="px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200 min-w-0" />
-        <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="px-1 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200 min-w-0">
-          {cfg.fuelTypes.map((ft) => <option key={ft.value} value={ft.value}>{ft.label}</option>)}
-        </select>
+      <div className="grid grid-cols-2 gap-1.5">
+        <label className="block min-w-0">
+          <span className="text-[10px] font-bold text-zinc-500">Cantidad ({unidadShort})</span>
+          <input type="number" inputMode="decimal" step="0.01" value={form.cantidad} onChange={(e) => setForm({ ...form, cantidad: e.target.value })} placeholder={`Ej: ${esGalon ? "13.5" : "50"}`} className="mt-0.5 w-full px-2.5 py-2 rounded-lg border border-white/10 text-sm glass-input text-zinc-100 min-w-0" />
+        </label>
+        <label className="block min-w-0">
+          <span className="text-[10px] font-bold text-zinc-500">Monto pagado ({cfg.currency})</span>
+          <input type="number" inputMode="decimal" step="0.01" value={form.monto} onChange={(e) => setForm({ ...form, monto: e.target.value })} placeholder="Ej: 44.00" className="mt-0.5 w-full px-2.5 py-2 rounded-lg border border-white/10 text-sm glass-input text-zinc-100 min-w-0" />
+        </label>
       </div>
+      <div className="grid grid-cols-2 gap-1.5">
+        <label className="block min-w-0">
+          <span className="text-[10px] font-bold text-zinc-500">Kilometraje</span>
+          <input type="number" inputMode="numeric" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Ej: 89098" className="mt-0.5 w-full px-2.5 py-2 rounded-lg border border-white/10 text-sm glass-input text-zinc-100 min-w-0" />
+        </label>
+        <label className="block min-w-0">
+          <span className="text-[10px] font-bold text-zinc-500">Tipo de combustible</span>
+          <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="mt-0.5 w-full px-2.5 py-2 rounded-lg border border-white/10 text-sm select-dark min-w-0">
+            {cfg.fuelTypes.map((ft) => <option key={ft.value} value={ft.value}>{ft.label}</option>)}
+          </select>
+        </label>
+      </div>
+
+      {precioCalculado != null && (
+        <p className="text-[11px] text-zinc-400">
+          Precio calculado: <span className="font-bold text-auto-400">{money(Math.round(precioCalculado * 100) / 100)}/{unidadShort}</span>
+        </p>
+      )}
+
       <div>
         <span className="text-[10px] font-bold text-zinc-500">Grifo / estación donde cargaste</span>
         <div className="mt-0.5">
@@ -528,8 +566,11 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
         </div>
       </div>
       <DatePicker colorTheme="auto" value={form.fecha} onChange={(d) => setForm({ ...form, fecha: d })} />
+
+      {error && <p className="text-[11px] text-red-400 font-semibold">{error}</p>}
+
       <div className="flex gap-1.5">
-        <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-2 rounded-lg bg-auto-600 text-white text-xs font-bold">{saving ? "..." : editItem ? "Guardar cambios" : "Guardar"}</button>
+        <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-3 py-2 rounded-lg bg-auto-600 text-white text-xs font-bold disabled:opacity-60">{saving ? "Guardando…" : editItem ? "Guardar cambios" : "Guardar carga"}</button>
       </div>
     </div>
   );
@@ -593,7 +634,7 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-2 gap-1.5">
-        <select value={form.tipo} onChange={(e) => handleTipo(e.target.value)} className="px-2 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200">
+        <select value={form.tipo} onChange={(e) => handleTipo(e.target.value)} className="px-2 py-2 rounded-lg border border-white/10 text-xs text-zinc-200 select-dark">
           {maintTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
         <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder={`${symbol} costo`} className="px-2 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
@@ -620,7 +661,7 @@ function AddMaintForm({ vehicleId, editItem, onDone }: { vehicleId: string; edit
       ) : (
         <>
           <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título del mantenimiento" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
-          <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Odómetro" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
+          <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Kilometraje" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
           <div>
             <span className="text-[10px] font-bold text-zinc-500">Taller / dónde lo hiciste</span>
             <div className="mt-0.5">
@@ -838,7 +879,7 @@ function AddPartForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
         <label className="block min-w-0"><span className="text-[9px] font-bold text-zinc-500">Costo ({symbol})</span>
           <input type="number" step="0.01" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="Ej: 450" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
         </label>
-        <label className="block min-w-0"><span className="text-[9px] font-bold text-zinc-500">Odómetro al comprar</span>
+        <label className="block min-w-0"><span className="text-[9px] font-bold text-zinc-500">Kilometraje al comprar</span>
           <input type="number" value={form.odometro} onChange={(e) => setForm({ ...form, odometro: e.target.value })} placeholder="Ej: 45000" className="w-full px-2 py-1.5 rounded-lg border border-white/10 text-xs glass-input text-zinc-200" />
         </label>
       </div>

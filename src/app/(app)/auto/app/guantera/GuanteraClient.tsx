@@ -282,7 +282,7 @@ function DocumentsSection({ vehicleId, initialDocs }: { vehicleId: string; initi
         <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
           <p className="text-[10px] font-bold text-auto-400">{editId ? "✏️ Editando documento" : "Nuevo documento"}</p>
           <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-            className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs font-medium glass-input text-zinc-200">
+            className="w-full px-2.5 py-2 rounded-lg border border-white/10 text-xs font-medium text-zinc-200 select-dark">
             {documentTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
 
@@ -553,7 +553,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-              className="px-2.5 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200">
+              className="px-2.5 py-2 rounded-lg border border-white/10 text-xs text-zinc-200 select-dark">
               {contactTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
@@ -563,7 +563,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
             <span className="text-[10px] font-bold text-zinc-500">Número principal (llamada / WhatsApp)</span>
             <div className="flex items-center gap-1.5 mt-1">
               <select value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })}
-                className="shrink-0 px-2 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200">
+                className="shrink-0 px-2 py-2 rounded-lg border border-white/10 text-xs text-zinc-200 select-dark">
                 {countryPrefixes.map((p) => <option key={p.code} value={p.code}>{p.flag} {p.prefix}</option>)}
               </select>
               <input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })}
@@ -576,7 +576,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
             <span className="text-[10px] font-bold text-zinc-500">Número alternativo (opcional)</span>
             <div className="flex items-center gap-1.5 mt-1">
               <select value={form.pais_alt} onChange={(e) => setForm({ ...form, pais_alt: e.target.value })}
-                className="shrink-0 px-2 py-2 rounded-lg border border-white/10 text-xs glass-input text-zinc-200">
+                className="shrink-0 px-2 py-2 rounded-lg border border-white/10 text-xs text-zinc-200 select-dark">
                 {countryPrefixes.map((p) => <option key={p.code} value={p.code}>{p.flag} {p.prefix}</option>)}
               </select>
               <input value={form.telefono_alt} onChange={(e) => setForm({ ...form, telefono_alt: e.target.value })}

@@ -4,20 +4,13 @@ import { checkTrialServer } from "@/lib/trial";
 import { cookies } from "next/headers";
 import type { Vehicle, FuelLog, VehicleDocument, MaintenanceLog, VehicleSpecs, VehicleUpgrade } from "@/types/database";
 import { AUTO_BADGES } from "@/lib/auto-badges";
+import { resolveCurrentCarId } from "@/lib/currentVehicle";
 import DashboardContent from "./DashboardContent";
 
 async function getDashboardData(userId: string, carId: string | null) {
   const supabase = await createClient();
-  if (!carId) {
-    const fallback = await supabase
-      .from("vehicles")
-      .select("id")
-      .eq("owner_id", userId)
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .single();
-    carId = (fallback.data as { id: string } | null)?.id ?? null;
-  }
+  const resolvedId = await resolveCurrentCarId(supabase, userId, carId);
+  carId = resolvedId;
   if (!carId) return { vehicle: null, fuelLogs: [], documents: [], ecoScore: 0, nextDocExpiry: null, maintenances: [], upgrades: [], specs: null };
 
   // Fetch vehicle, fuel logs (last 30), documents, maintenances, upgrades, and specs in parallel

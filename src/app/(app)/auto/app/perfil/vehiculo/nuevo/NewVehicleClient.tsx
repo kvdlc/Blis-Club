@@ -172,7 +172,7 @@ export default function NewVehicleClient({ userId }: Props) {
                   setForm({ ...form, marca: "" });
                 }
               }}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20 select-dark"
             >
               <option value="">Escribir marca manualmente...</option>
               {makes.map((m) => (
@@ -196,7 +196,7 @@ export default function NewVehicleClient({ userId }: Props) {
                     setForm({ ...form, modelo: "" });
                   }
                 }}
-                className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+                className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20 select-dark"
               >
                 <option value="">Escribir modelo manualmente...</option>
                 {models.map((m) => (
@@ -219,7 +219,7 @@ export default function NewVehicleClient({ userId }: Props) {
                     if (s?.año) setForm({ ...form, año: s.año });
                   }
                 }}
-                className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+                className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20 select-dark"
               >
                 <option value="">Versión propia (sin specs automáticas)</option>
                 {specs.map((s) => (
@@ -312,7 +312,7 @@ export default function NewVehicleClient({ userId }: Props) {
             <select
               value={form.tipo_vehiculo}
               onChange={(e) => setForm({ ...form, tipo_vehiculo: e.target.value as VehicleType })}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 glass-input text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl border border-white/10 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-auto-600/20 select-dark"
             >
               {(Object.keys(TIPO_LABELS) as VehicleType[]).map((t) => (
                 <option key={t} value={t}>{TIPO_LABELS[t]}</option>

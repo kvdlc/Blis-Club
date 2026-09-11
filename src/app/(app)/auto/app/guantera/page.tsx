@@ -2,21 +2,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/types/database";
+import { resolveCurrentCarId } from "@/lib/currentVehicle";
 import GuanteraClient from "./GuanteraClient";
 
 async function getGuanteraData(userId: string, carId: string | null) {
   const supabase = await createClient();
-  if (!carId) {
-    const fallback = await supabase
-      .from("vehicles")
-      .select("id")
-      .eq("owner_id", userId)
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .single();
-    carId = (fallback.data as { id: string } | null)?.id ?? null;
-  }
-  if (!carId) return { vehicle: null, documents: [], contacts: [], specs: null };
+  const resolvedId = await resolveCurrentCarId(supabase, userId, carId);
+  if (!resolvedId) return { vehicle: null, documents: [], contacts: [], specs: null };
+  carId = resolvedId;
 
   const [vehRes, docsRes, contactsRes, specsRes] = await Promise.all([
     supabase.from("vehicles").select("*").eq("id", carId).single(),
