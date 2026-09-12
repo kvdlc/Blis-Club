@@ -103,7 +103,7 @@ export default async function OgImage({
 
           {encargado ? (
             <div style={{ color: "#a1a1aa", fontSize: 26, marginTop: 8 }}>
-              Atiende: {encargado}
+              {`Atiende: ${encargado}`}
             </div>
           ) : null}
         </div>
