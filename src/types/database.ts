@@ -117,6 +117,7 @@ export interface FuelLog {
   litros: number;
   precio_por_galon: number;
   tipo_combustible: string;
+  tipo_carga: "tanqueado" | "parcial" | null;
   contacto_id: string | null;
   grifo: string | null;
   created_at: string;

@@ -8,7 +8,7 @@ import type { Vehicle, FuelLog, MaintenanceLog, VehicleUpgrade, VehicleSpecs } f
 import {
   ChevronDown, Gauge, Droplets, Wrench, ShoppingBag, Shield, FileDown,
   Trash2, X, RotateCw, Fuel, ScrollText, CheckCircle2, AlertTriangle, Calendar,
-  MoreVertical, Pencil, Search, Camera, Loader2,
+  MoreVertical, Pencil, Search, Camera, Loader2, TrendingUp,
 } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { PlacePicker } from "./PlacePicker";
@@ -151,6 +151,105 @@ export default function BitacoraClient({ userId, vehicle, fuelLogs, maintenances
 }
 
 /* ═══════════════════════════ 1. Línea de Tiempo (única) ═══════════════════════ */
+/* Consumo real (tanque a tanque) */
+function FuelConsumption({ logs, esGalon, money }: { logs: FuelLog[]; esGalon: boolean; money: (n: number) => string }) {
+  const tanked = logs.filter((l) => l.tipo_carga === "tanqueado").length;
+  const partial = logs.filter((l) => l.tipo_carga === "parcial").length;
+
+  // Consumo tanque a tanque: solo tramos entre llenados completos;
+  // los llenados parciales intermedios se suman al tramo.
+  const sorted = [...logs].sort((a, b) => a.odometro - b.odometro);
+  const segments: { km: number; gal: number; kmPerGal: number }[] = [];
+  let prevFull = -1;
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i].tipo_carga === "parcial") continue;
+    if (prevFull >= 0) {
+      const km = sorted[i].odometro - sorted[prevFull].odometro;
+      let gal = 0;
+      for (let j = prevFull + 1; j <= i; j++) gal += sorted[j].litros / GAL;
+      if (km > 0 && gal > 0) segments.push({ km, gal, kmPerGal: km / gal });
+    }
+    prevFull = i;
+  }
+  const avg = segments.length ? segments.reduce((s, x) => s + x.kmPerGal, 0) / segments.length : null;
+
+  // Consumo por grifo
+  const byStation = new Map<string, { count: number; gal: number; spend: number }>();
+  for (const l of logs) {
+    const key = l.grifo || "Sin grifo";
+    const g = byStation.get(key) || { count: 0, gal: 0, spend: 0 };
+    g.count += 1;
+    g.gal += l.litros / GAL;
+    g.spend += l.precio_por_galon * (l.litros / GAL);
+    byStation.set(key, g);
+  }
+  const stations = Array.from(byStation.entries()).sort((a, b) => b[1].count - a[1].count).slice(0, 3);
+
+  if (logs.length === 0) return null;
+
+  const unidad = esGalon ? "gal" : "L";
+  const avgDisplay = avg == null ? "—" : esGalon ? `${avg.toFixed(1)} km/gal` : `${(avg * GAL).toFixed(1)} km/L`;
+
+  return (
+    <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-extrabold text-zinc-300 flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-emerald-400" /> Consumo real
+        </h3>
+        <span className="text-[9px] text-zinc-500">tanque a tanque</span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-xl bg-white/[0.04] border border-white/10 p-2.5 text-center">
+          <p className="text-lg font-black text-emerald-400 tabular-nums">{avgDisplay}</p>
+          <p className="text-[9px] text-zinc-500 font-semibold uppercase">Promedio</p>
+        </div>
+        <div className="rounded-xl bg-white/[0.04] border border-white/10 p-2.5 text-center">
+          <p className="text-lg font-black text-zinc-100 tabular-nums">{tanked}</p>
+          <p className="text-[9px] text-zinc-500 font-semibold uppercase">⛽ Tanqueados</p>
+        </div>
+        <div className="rounded-xl bg-white/[0.04] border border-white/10 p-2.5 text-center">
+          <p className="text-lg font-black text-amber-400 tabular-nums">{partial}</p>
+          <p className="text-[9px] text-zinc-500 font-semibold uppercase">◑ Parciales</p>
+        </div>
+      </div>
+
+      {segments.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold text-zinc-500 mb-1">Últimos tramos (lleno → lleno)</p>
+          <div className="space-y-1">
+            {segments.slice(-3).reverse().map((s, i) => (
+              <div key={i} className="flex items-center justify-between text-[11px]">
+                <span className="text-zinc-400">{s.km.toLocaleString("es-PE")} km · {s.gal.toFixed(1)} gal</span>
+                <span className="font-bold text-zinc-200 tabular-nums">{esGalon ? `${s.kmPerGal.toFixed(1)} km/gal` : `${(s.kmPerGal * GAL).toFixed(1)} km/L`}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {stations.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold text-zinc-500 mb-1">Por grifo</p>
+          <div className="space-y-1">
+            {stations.map(([name, s]) => (
+              <div key={name} className="flex items-center justify-between text-[11px] gap-2">
+                <span className="text-zinc-300 truncate">{name}</span>
+                <span className="text-zinc-500 shrink-0">{s.count} cargas · {s.gal.toFixed(0)} gal</span>
+                <span className="font-bold text-zinc-200 tabular-nums shrink-0">{money(Math.round((s.spend / s.gal) * 100) / 100)}/{unidad}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {avg == null && partial + tanked > 0 && (
+        <p className="text-[10px] text-amber-400/80">Marca al menos 2 cargas como “tanqueado” para calcular tu consumo real.</p>
+      )}
+    </div>
+  );
+}
+
 function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentKm }: {
   fuelLogs: FuelLog[]; maintenances: MaintenanceLog[]; upgrades: VehicleUpgrade[]; vehicleId: string; currentKm: number;
 }) {
@@ -276,6 +375,8 @@ function TimelineSection({ fuelLogs, maintenances, upgrades, vehicleId, currentK
         </div>
       )}
 
+      <FuelConsumption logs={fuelLogsState} esGalon={esGalon} money={money} />
+
       {timeline.length === 0 ? (
         <p className="text-xs text-zinc-500 text-center py-4">Sin eventos registrados. Agrega tu primera carga, servicio o repuesto.</p>
       ) : (
@@ -390,6 +491,8 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
   if (item.type === "fuel") {
     const f = item.data as FuelLog;
     detail = `${f.odometro.toLocaleString("es-PE")} km`;
+    if (f.tipo_carga === "parcial") detail += " · ◑ llenado parcial";
+    else if (f.tipo_carga === "tanqueado") detail += " · ⛽ tanqueado";
     if (f.grifo) detail += ` · ${f.grifo}`;
   } else if (item.type === "maintenance") {
     const m = item.data as MaintenanceLog;
@@ -471,7 +574,7 @@ function TimelineItemCard({ item, esGalon, volLabel, precioLabel, money, current
 function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editItem?: FuelLog | null; onDone: (f: FuelLog | null) => void }) {
   const { money } = useMoney();
   const [countryCode, setCountryCode] = useState<string | null>(null);
-  const [form, setForm] = useState({ cantidad: "", monto: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "90", grifo: "", contacto_id: null as string | null });
+  const [form, setForm] = useState({ cantidad: "", monto: "", odometro: "", fecha: new Date().toISOString().split("T")[0], tipo: "90", tipoCarga: "tanqueado" as "tanqueado" | "parcial", grifo: "", contacto_id: null as string | null });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -489,6 +592,7 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
           odometro: String(editItem.odometro || ""),
           fecha: editItem.fecha,
           tipo: editItem.tipo_combustible || (cfg.fuelTypes[0]?.value || "90"),
+          tipoCarga: editItem.tipo_carga || "tanqueado",
           grifo: editItem.grifo || "",
           contacto_id: editItem.contacto_id || null,
         });
@@ -526,12 +630,12 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
     let data: FuelLog | null = null;
     if (editItem) {
       const { data: d } = await supabase.from("fuel_logs").update({
-        litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo, grifo: form.grifo || null, contacto_id: form.contacto_id || null,
+        litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo, tipo_carga: form.tipoCarga, grifo: form.grifo || null, contacto_id: form.contacto_id || null,
       }).eq("id", editItem.id).select().single();
       data = d as FuelLog | null;
     } else {
       const { data: d } = await supabase.from("fuel_logs").insert({
-        vehicle_id: vehicleId, litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo, grifo: form.grifo || null, contacto_id: form.contacto_id || null,
+        vehicle_id: vehicleId, litros, precio_por_galon: precioPorGalon, odometro: o, fecha: form.fecha, tipo_combustible: form.tipo, tipo_carga: form.tipoCarga, grifo: form.grifo || null, contacto_id: form.contacto_id || null,
       }).select().single();
       data = d as FuelLog | null;
     }
@@ -564,6 +668,22 @@ function AddFuelForm({ vehicleId, editItem, onDone }: { vehicleId: string; editI
             {cfg.fuelTypes.map((ft) => <option key={ft.value} value={ft.value}>{ft.label}</option>)}
           </select>
         </label>
+      </div>
+
+      {/* Tipo de carga: tanqueado vs llenado parcial */}
+      <div>
+        <span className="text-[10px] font-bold text-zinc-500">Tipo de carga</span>
+        <div className="mt-0.5 grid grid-cols-2 gap-1.5">
+          <button type="button" onClick={() => setForm({ ...form, tipoCarga: "tanqueado" })}
+            className={`px-2.5 py-2 rounded-lg text-xs font-bold border transition-colors ${form.tipoCarga === "tanqueado" ? "bg-auto-600/20 border-auto-500/50 text-auto-300" : "border-white/10 text-zinc-400 hover:bg-white/5"}`}>
+            ⛽ Tanqueado (lleno)
+          </button>
+          <button type="button" onClick={() => setForm({ ...form, tipoCarga: "parcial" })}
+            className={`px-2.5 py-2 rounded-lg text-xs font-bold border transition-colors ${form.tipoCarga === "parcial" ? "bg-amber-500/20 border-amber-500/50 text-amber-300" : "border-white/10 text-zinc-400 hover:bg-white/5"}`}>
+            ◑ Llenado parcial
+          </button>
+        </div>
+        <p className="text-[9px] text-zinc-500 mt-1">Márcalo para calcular tu consumo real (de tanque lleno a tanque lleno).</p>
       </div>
 
       {precioCalculado != null && (
