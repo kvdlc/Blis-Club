@@ -926,3 +926,18 @@ export interface ApiKey {
   created_at: string;
   updated_at: string;
 }
+
+export interface AdminNotification {
+  id: string;
+  type: string;
+  user_id: string | null;
+  app_slug: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  title: string | null;
+  body: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  read?: boolean;
+}

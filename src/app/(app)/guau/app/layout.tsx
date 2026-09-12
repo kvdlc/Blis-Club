@@ -7,9 +7,10 @@ import { SearchOverlay } from "@/components/SearchOverlay";
 import TrialWarningToast from "@/components/TrialWarningToast";
 import ReferralTracker from "@/components/ReferralTracker";
 import { BackgroundPaws } from "@/components/BackgroundPaws";
-import { Bell } from "lucide-react";
+import { AdminNotificationsBell } from "@/components/admin/AdminNotificationsBell";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
+import { getAdminFeed } from "@/lib/admin-notifications";
 import { cookies } from "next/headers";
 import { getCachedDog, getCachedMetabolicProfile, getCachedMealSlots, getCachedRecipes, getCachedWalks, getCachedWeightLatest, getCachedMealSchedule } from "@/lib/data-cache";
 
@@ -27,6 +28,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Trial check
   const trial = await checkTrialServer(supabase, user.id, "guau");
   if (trial.isExpired) redirect("/guau/app/suscripcion");
+
+  const adminFeed = await getAdminFeed(user.id);
 
   // Precargar datos del perro actual en cache compartido
   // Las páginas hijas reutilizan estos datos sin llamar a Supabase de nuevo
@@ -50,9 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <DogSwitcher />
             <div className="flex items-center gap-1.5">
               <SearchOverlay />
-              <button className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm border border-zinc-100 flex items-center justify-center text-zinc-600 transition-all hover:scale-105 active:scale-95">
-                <Bell className="w-4 h-4" />
-              </button>
+              <AdminNotificationsBell feed={adminFeed} dark={false} />
               <UserPill />
             </div>
           </div>

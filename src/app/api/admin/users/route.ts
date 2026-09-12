@@ -135,3 +135,35 @@ export async function PUT(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ data });
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const supabase = createServiceClient();
+    const body = await request.json().catch(() => ({}));
+    const ids: string[] = Array.isArray(body?.ids) ? body.ids.filter(Boolean) : [];
+
+    if (ids.length === 0) {
+      return NextResponse.json({ error: "ids requeridos" }, { status: 400 });
+    }
+
+    // Limpiar datos relacionados en bloque
+    await supabase.from("subscriptions").delete().in("user_id", ids);
+    await supabase.from("user_apps").delete().in("user_id", ids);
+    await supabase.from("referrals").delete().in("referrer_user_id", ids);
+    await supabase.from("referrals").delete().in("referred_user_id", ids);
+    await supabase.from("referral_commissions").delete().in("user_id", ids);
+    await supabase.from("payment_tokens").delete().in("user_id", ids);
+    await supabase.from("profiles").delete().in("id", ids);
+
+    // Eliminar usuarios de auth (la API admin borra de a uno)
+    const results = await Promise.all(ids.map((id) => supabase.auth.admin.deleteUser(id)));
+    const failed = results
+      .map((r, i) => (r.error ? { id: ids[i], error: r.error.message } : null))
+      .filter(Boolean);
+
+    return NextResponse.json({ success: true, deleted: ids.length - failed.length, failed });
+  } catch (error) {
+    console.error("[Admin Bulk Delete] Error:", error);
+    return NextResponse.json({ error: "Error interno al eliminar usuarios" }, { status: 500 });
+  }
+}

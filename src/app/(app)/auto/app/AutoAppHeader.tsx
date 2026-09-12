@@ -4,12 +4,14 @@ import { CarSwitcher } from "@/components/CarSwitcher";
 import { UserPill } from "@/components/UserPill";
 import { SearchOverlay } from "@/components/SearchOverlay";
 import { AutoSearchOverlay } from "@/components/AutoSearchOverlay";
+import { AdminNotificationsBell } from "@/components/admin/AdminNotificationsBell";
+import type { AdminFeed } from "@/lib/admin-notifications-shared";
 import { Bell, ShoppingCart } from "lucide-react";
 import { useCart } from "@/components/MarketplaceCart";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
-export function AutoAppHeader() {
+export function AutoAppHeader({ feed }: { feed?: AdminFeed | null }) {
   const { count, openCart } = useCart();
   const router = useRouter();
   return (
@@ -29,6 +31,7 @@ export function AutoAppHeader() {
       </div>
       <div className="flex items-center gap-2">
         <AutoSearchOverlay variant="dark" />
+        <AdminNotificationsBell feed={feed ?? null} dark />
         {/* Carrito */}
         <button
           onClick={openCart}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { Settings, Search, X, Clock, Smartphone, Users, UserCheck, UserPlus, TrendingUp, Filter, Ban, CreditCard, History, Save, AlertTriangle, Trash2, Play, CalendarDays } from "lucide-react";
 
@@ -103,6 +104,10 @@ export default function UsersPage() {
   const [actionError, setActionError] = useState("");
   const [userApps, setUserApps] = useState<string[]>([]);
   const [availableApps, setAvailableApps] = useState<{ slug: string; name: string }[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const searchParams = useSearchParams();
+  const pendingUserId = useRef<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -113,6 +118,22 @@ export default function UsersPage() {
   };
 
   useEffect(() => { load(); }, []);
+
+  // Deep-link: /superadmin/usuarios?user=<id> abre el modal de gestión de ese usuario
+  useEffect(() => {
+    const target = searchParams.get("user");
+    if (target) pendingUserId.current = target;
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!pendingUserId.current || users.length === 0) return;
+    const target = users.find((u) => u.id === pendingUserId.current);
+    if (target) {
+      pendingUserId.current = null;
+      openManage(target);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [users]);
 
   const openManage = async (u: User) => {
     setManageUser(u);
@@ -175,6 +196,56 @@ export default function UsersPage() {
     setSubscription(null);
     setConfirmAction(null);
     setActionError("");
+  };
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    setSelected((prev) => {
+      const allSelected = filtered.length > 0 && filtered.every((u) => prev.has(u.id));
+      const next = new Set(prev);
+      if (allSelected) filtered.forEach((u) => next.delete(u.id));
+      else filtered.forEach((u) => next.add(u.id));
+      return next;
+    });
+  };
+
+  const bulkDelete = async (ids: string[]) => {
+    setBulkDeleting(true);
+    try {
+      await fetch("/api/admin/users", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      setSelected(new Set());
+      load();
+    } catch {
+      /* noop */
+    }
+    setBulkDeleting(false);
+  };
+
+  const askBulkDelete = () => {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    setConfirmAction({
+      title: `Eliminar ${ids.length} usuario(s)`,
+      message: `⚠️ ESTA ACCIÓN NO SE PUEDE DESHACER.\n\n¿Eliminar permanentemente a ${ids.length} usuario(s) seleccionado(s)? Se borrarán sus datos, suscripciones y pagos.`,
+      confirmText: `Eliminar ${ids.length}`,
+      confirmColor: "bg-red-700 hover:bg-red-800",
+      onConfirm: () => {
+        bulkDelete(ids);
+        setConfirmAction(null);
+      },
+    });
   };
 
   const saveRole = async () => {
@@ -411,6 +482,27 @@ export default function UsersPage() {
           </div>
         </div>
 
+        {selected.size > 0 && (
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+            <span className="text-sm font-semibold text-red-700">{selected.size} seleccionado(s)</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSelected(new Set())}
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-zinc-200 text-zinc-600 hover:bg-white transition-colors"
+              >
+                Limpiar
+              </button>
+              <button
+                onClick={askBulkDelete}
+                disabled={bulkDeleting}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> {bulkDeleting ? "Eliminando..." : "Eliminar seleccionados"}
+              </button>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <div className="text-center py-12 text-zinc-500">Cargando...</div>
         ) : (
@@ -419,6 +511,15 @@ export default function UsersPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-100">
+                    <th className="px-4 py-3 w-10">
+                      <input
+                        type="checkbox"
+                        checked={filtered.length > 0 && filtered.every((u) => selected.has(u.id))}
+                        onChange={toggleAll}
+                        className="w-4 h-4 rounded accent-primary-600 cursor-pointer"
+                        aria-label="Seleccionar todos"
+                      />
+                    </th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600">Usuario</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600">Email</th>
                     <th className="text-left px-4 py-3 font-semibold text-zinc-600">Plan</th>
@@ -439,7 +540,16 @@ export default function UsersPage() {
                 </thead>
                 <tbody>
                   {filtered.map((u) => (
-                    <tr key={u.id} className="border-b border-zinc-50 hover:bg-zinc-50/50">
+                    <tr key={u.id} className={`border-b border-zinc-50 ${selected.has(u.id) ? "bg-red-50/40" : "hover:bg-zinc-50/50"}`}>
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(u.id)}
+                          onChange={() => toggleOne(u.id)}
+                          className="w-4 h-4 rounded accent-primary-600 cursor-pointer"
+                          aria-label={`Seleccionar ${u.display_name || u.email}`}
+                        />
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center text-zinc-500 text-xs font-bold">

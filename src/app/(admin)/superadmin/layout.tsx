@@ -1,7 +1,9 @@
 import type { Viewport } from "next";
 import { redirect } from "next/navigation";
 import AdminNav from "@/components/admin/AdminNav";
+import { AdminNotificationsBell } from "@/components/admin/AdminNotificationsBell";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminFeed } from "@/lib/admin-notifications";
 
 export const viewport: Viewport = {
   themeColor: "#18181b",
@@ -55,6 +57,8 @@ export default async function SuperAdminLayout({ children }: { children: React.R
     }
   }
 
+  const adminFeed = await getAdminFeed(user.id);
+
   return (
     <div className="min-h-screen md:pl-60 bg-zinc-100">
       <AdminNav
@@ -64,6 +68,9 @@ export default async function SuperAdminLayout({ children }: { children: React.R
         adminModules={adminModules}
       />
       <main className="pb-28 md:pb-8 px-4 md:px-8 pt-6 max-w-7xl mx-auto">
+        <div className="flex justify-end mb-2">
+          <AdminNotificationsBell feed={adminFeed} dark={false} />
+        </div>
         {children}
       </main>
     </div>

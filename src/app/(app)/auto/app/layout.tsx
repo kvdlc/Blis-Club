@@ -8,6 +8,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { MarketplaceCartProvider } from "@/components/MarketplaceCart";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
+import { getAdminFeed } from "@/lib/admin-notifications";
 import { AutoAppHeader } from "./AutoAppHeader";
 
 export const viewport: Viewport = {
@@ -24,6 +25,8 @@ export default async function AutoAppLayout({ children }: { children: React.Reac
   const trial = await checkTrialServer(supabase, user.id, "auto");
   if (trial.isExpired) redirect("/auto/app/suscripcion");
 
+  const adminFeed = await getAdminFeed(user.id);
+
   return (
     <div className="min-h-screen md:pl-20 bg-auto-gradient bg-[#0a0a0c] text-zinc-200">
       <CarProvider>
@@ -32,7 +35,7 @@ export default async function AutoAppLayout({ children }: { children: React.Reac
         <MarketplaceCartProvider userId={user.id}>
           <AutoNav />
           <main className="relative z-10 pb-28 md:pb-8 px-4 pt-3 max-w-3xl mx-auto">
-            <AutoAppHeader />
+            <AutoAppHeader feed={adminFeed} />
             {trial.isWarning && (
               <TrialWarningToast daysLeft={trial.daysLeft} appSlug="auto" />
             )}
