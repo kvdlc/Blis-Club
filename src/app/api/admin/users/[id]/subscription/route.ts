@@ -63,7 +63,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     // 2. Construir datos de actualización
-    const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const updateData: Record<string, unknown> = {};
     if (status) updateData.status = status;
     if (plan_type) updateData.plan_type = plan_type;
     if (expires_at !== undefined) updateData.expires_at = expires_at;
