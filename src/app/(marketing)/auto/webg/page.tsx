@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -14,11 +13,23 @@ import {
 import {
   Reveal, Stagger, StaggerItem, TiltCard, GlowOrb, Marquee, ScrollParallax,
 } from "@/app/(app)/auto/app/marketplace/MarketplaceMotion";
+import { createClient } from "@/lib/supabase/client";
+import { createTrial } from "@/lib/trial";
 import {
   FuelWidget, TripWidget, ChartsWidget, DocsWidget, MarketplaceWidget,
   CompareWidget, SpecsWidget, ShareTallerWidget, PhoneMock, StatFlip,
   OgPreviewMock, QrMock,
 } from "./WebGWidgets";
+
+function translateSignupError(msg: string): string {
+  const m = (msg || "").toLowerCase();
+  if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already exists"))
+    return "Ese correo ya tiene una cuenta. Inicia sesión con tu contraseña.";
+  if (m.includes("password should be at least")) return "La contraseña debe tener al menos 6 caracteres.";
+  if (m.includes("invalid email")) return "El correo no es válido.";
+  if (m.includes("too many requests") || m.includes("rate limit")) return "Demasiados intentos. Espera un momento e inténtalo de nuevo.";
+  return msg;
+}
 
 function SectionHeading({
   eyebrow, title, subtitle, icon,
@@ -39,8 +50,8 @@ function SectionHeading({
 }
 
 export default function AutoWebGPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,6 +60,7 @@ export default function AutoWebGPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [cycle, setCycle] = useState<"mensual" | "anual">("mensual");
+  const supabase = createClient();
 
   const goToForm = () => {
     setMenuOpen(false);
@@ -61,14 +73,44 @@ export default function AutoWebGPage() {
       setError("Ingresa tu correo electrónico.");
       return;
     }
+    if (password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
     setLoading(true);
-    const params = new URLSearchParams({
-      ...(email.trim() ? { email: email.trim().toLowerCase() } : {}),
-      ...(firstName.trim() ? { firstName: firstName.trim() } : {}),
-      ...(lastName.trim() ? { lastName: lastName.trim() } : {}),
+    setError("");
+
+    const fullName = `${firstName} ${lastName}`.trim();
+    const { data, error: signErr } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: {
+        data: {
+          display_name: fullName,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          app_category: "auto",
+        },
+      },
     });
+
+    if (signErr) {
+      setError(translateSignupError(signErr.message));
+      setLoading(false);
+      return;
+    }
+
+    const user = data.user;
+    if (data.session && user) {
+      // Cuenta creada y sesión iniciada: dar acceso al app Auto y entrar
+      await createTrial(user.id, "auto");
+      window.location.assign("/auto/app");
+      return;
+    }
+
+    // Requiere confirmar el correo (si la confirmación por email está activada)
     setSent(true);
-    router.push(`/auto/app?${params.toString()}`);
+    setLoading(false);
   };
 
   const problems = [
@@ -587,8 +629,8 @@ export default function AutoWebGPage() {
                 <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                   <Check className="w-7 h-7 text-emerald-400" />
                 </div>
-                <h4 className="text-lg font-bold text-zinc-100">¡Cuenta lista!</h4>
-                <p className="text-sm text-zinc-400 mt-1">Redirigiendo...</p>
+                <h4 className="text-lg font-bold text-zinc-100">Revisa tu correo</h4>
+                <p className="text-sm text-zinc-400 mt-1">Te enviamos un enlace a {email} para confirmar tu cuenta.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-3">
@@ -597,13 +639,26 @@ export default function AutoWebGPage() {
                   <input type="text" required placeholder="Nombre" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/40 transition-all" />
                   <input type="text" required placeholder="Apellido" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/40 transition-all" />
                 </div>
+                <input type="password" required autoComplete="new-password" placeholder="Contraseña (mínimo 6 caracteres)" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/40 transition-all" />
                 {error && <p className="text-xs text-red-400 bg-red-500/10 rounded-xl p-2.5">{error}</p>}
                 <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 rounded-xl bg-auto-600 hover:bg-auto-500 text-white py-3.5 font-bold text-sm shadow-auto-glow transition-all active:scale-[0.98] disabled:opacity-50">
-                  <Zap className="w-4 h-4" /> Crear cuenta gratis <ArrowRight className="w-4 h-4" />
+                  {loading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Creando cuenta...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4" /> Crear cuenta gratis <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
                 <div className="flex items-center justify-center gap-1 text-[10px] text-zinc-500">
                   <Lock className="w-3 h-3" /> Sin tarjeta. Cancela cuando quieras.
                 </div>
+                <p className="text-center text-xs text-zinc-400">
+                  ¿Ya tienes cuenta?{" "}
+                  <Link href="/" className="font-semibold text-emerald-400 hover:underline">Inicia sesión</Link>
+                </p>
               </form>
             )}
           </div>
