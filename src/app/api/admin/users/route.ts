@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { isAdmin, isSuperAdmin } from "@/lib/admin";
 
 export async function GET() {
   const supabase = createServiceClient();
@@ -113,6 +114,10 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
   const supabase = createServiceClient();
   const body = await request.json();
   const { id, ...updates } = body;
@@ -120,9 +125,15 @@ export async function PUT(request: Request) {
   if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
   const validFields: Record<string, unknown> = {};
-  const allowed = ["email", "display_name", "role", "avatar_url"];
-  for (const key of allowed) {
+  for (const key of ["email", "display_name", "avatar_url"]) {
     if (updates[key] !== undefined) validFields[key] = updates[key];
+  }
+  // Cambiar el rol solo lo puede hacer un superadmin (evita escalada de privilegios)
+  if (updates.role !== undefined) {
+    if (!(await isSuperAdmin())) {
+      return NextResponse.json({ error: "Solo un superadmin puede cambiar roles" }, { status: 403 });
+    }
+    validFields.role = updates.role;
   }
 
   const { data, error } = await supabase
@@ -138,6 +149,10 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
+
     const supabase = createServiceClient();
     const body = await request.json().catch(() => ({}));
     const ids: string[] = Array.isArray(body?.ids) ? body.ids.filter(Boolean) : [];

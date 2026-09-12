@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
+import { getActiveAppSlug, resolveApplicationId } from "@/lib/active-app";
 import { Plus, Edit, Trash2, DollarSign, Save, X, Eye, EyeOff, GripVertical, Globe, Tag, Mail } from "lucide-react";
 
 interface Plan {
@@ -29,11 +30,11 @@ const BILLING_INTERVALS = [
   { value: "year", label: "Anual" },
 ];
 
-const LANDING_SLUGS = [
+const landingSlugsFor = (appSlug: string) => [
   { value: "", label: "No mostrar en landing" },
-  { value: "guau-web", label: "Guau — Web (pago)" },
-  { value: "guau-webg", label: "Guau — Web Gratis" },
-  { value: "guau-app", label: "Guau — App (suscripción)" },
+  { value: `${appSlug}-web`, label: `${appSlug} — Web (pago)` },
+  { value: `${appSlug}-webg`, label: `${appSlug} — Web Gratis` },
+  { value: `${appSlug}-app`, label: `${appSlug} — App (suscripción)` },
   { value: "cafecito", label: "Cafecito" },
 ];
 
@@ -67,10 +68,11 @@ export default function PlanesPage() {
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
+  const appSlug = getActiveAppSlug();
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/plans?app=guau");
+    const res = await fetch(`/api/admin/plans?app=${encodeURIComponent(getActiveAppSlug())}`);
     const json = await res.json();
     setPlans(json.data || []);
     setLoading(false);
@@ -107,11 +109,7 @@ export default function PlanesPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    const appSlug = localStorage.getItem("blis_active_app_slug") || "guau";
-    const appsRes = await fetch("/api/admin/applications");
-    const appsJson = await appsRes.json();
-    const app = appsJson.data?.find((a: Record<string, unknown>) => a.slug === appSlug);
-    const appId = app?.id;
+    const appId = await resolveApplicationId(getActiveAppSlug());
 
     const payload = {
       name: form.name,
@@ -166,7 +164,7 @@ export default function PlanesPage() {
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`;
   const intervalLabel = (bi: string) => bi === "month" ? "mes" : bi === "quarter" ? "trimestre" : "año";
-  const slugLabel = (slug: string | null) => LANDING_SLUGS.find(s => s.value === slug)?.label || (slug || "—");
+  const slugLabel = (slug: string | null) => landingSlugsFor(appSlug).find(s => s.value === slug)?.label || (slug || "—");
 
   return (
     <AdminGuard>
@@ -264,7 +262,7 @@ export default function PlanesPage() {
                   <label className="block text-sm font-semibold text-zinc-600 mb-1.5">Landing page</label>
                   <select value={form.landing_slug} onChange={(e) => setForm({ ...form, landing_slug: e.target.value, landing_visible: !!e.target.value })}
                     className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20">
-                    {LANDING_SLUGS.map((s) => (
+                    {landingSlugsFor(appSlug).map((s) => (
                       <option key={s.value} value={s.value}>{s.label}</option>
                     ))}
                   </select>

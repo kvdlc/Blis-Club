@@ -31,7 +31,7 @@ export async function PUT(request: Request) {
   const allowed = [
     "referral_commission_pct", "referral_free_months",
     "max_dogs_usuario", "max_dogs_institucion", "max_dogs_admin", "max_dogs_superadmin",
-    "enabled_features", "security_config",
+    "enabled_features", "security_config", "admin_modules",
   ];
   for (const key of allowed) {
     if (updates[key] !== undefined) validFields[key] = updates[key];

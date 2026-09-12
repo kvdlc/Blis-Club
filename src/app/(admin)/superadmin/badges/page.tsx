@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
+import { getActiveAppSlug, resolveApplicationId } from "@/lib/active-app";
 import { Plus, Edit, Trash2, BadgeCheck, Save, X } from "lucide-react";
 
 interface Badge {
@@ -23,7 +24,7 @@ export default function BadgesPage() {
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/badges?app=guau");
+    const res = await fetch(`/api/admin/badges?app=${encodeURIComponent(getActiveAppSlug())}`);
     const json = await res.json();
     setBadges(json.data || []);
     setLoading(false);
@@ -32,11 +33,7 @@ export default function BadgesPage() {
   useEffect(() => { load(); }, []);
 
   const handleSave = async () => {
-    const appSlug = localStorage.getItem("blis_active_app_slug") || "guau";
-    const appsRes = await fetch(`/api/admin/applications`);
-    const appsJson = await appsRes.json();
-    const app = appsJson.data?.find((a: any) => a.slug === appSlug);
-    const appId = app?.id;
+    const appId = await resolveApplicationId(getActiveAppSlug());
 
     if (!appId) return;
 

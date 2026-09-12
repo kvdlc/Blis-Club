@@ -52,6 +52,11 @@ export async function DELETE(request: Request) {
   const supabase = createServiceClient();
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
+  const recipeId = searchParams.get("recipe_id");
+  if (recipeId) {
+    await supabase.from("recipe_ingredients").delete().eq("recipe_id", recipeId);
+    return NextResponse.json({ success: true });
+  }
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
   await supabase.from("recipe_ingredients").delete().eq("id", id);
   return NextResponse.json({ success: true });

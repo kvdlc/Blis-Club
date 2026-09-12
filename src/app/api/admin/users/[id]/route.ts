@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { isAdmin } from "@/lib/admin";
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
     const supabase = createServiceClient();
     const { id: userId } = await params;
 

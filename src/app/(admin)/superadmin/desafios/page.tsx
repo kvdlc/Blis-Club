@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
+import { getActiveAppSlug, resolveApplicationId } from "@/lib/active-app";
 import { Plus, Edit, Trash2, Trophy, Save, X } from "lucide-react";
 
 interface Challenge {
@@ -22,7 +23,7 @@ export default function DesafiosPage() {
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/challenges?app=guau");
+    const res = await fetch(`/api/admin/challenges?app=${encodeURIComponent(getActiveAppSlug())}`);
     const json = await res.json();
     setChallenges(json.data || []);
     setLoading(false);
@@ -31,11 +32,7 @@ export default function DesafiosPage() {
   useEffect(() => { load(); }, []);
 
   const handleSave = async () => {
-    const appSlug = localStorage.getItem("blis_active_app_slug") || "guau";
-    const appsRes = await fetch(`/api/admin/applications`);
-    const appsJson = await appsRes.json();
-    const app = appsJson.data?.find((a: any) => a.slug === appSlug);
-    const appId = app?.id;
+    const appId = await resolveApplicationId(getActiveAppSlug());
 
     if (!appId) return;
 

@@ -67,7 +67,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
         userApps={userApps}
         adminModules={adminModules}
       />
-      <main className="pb-28 md:pb-8 px-4 md:px-8 pt-6 max-w-7xl mx-auto">
+      <main className="pb-28 md:pb-8 px-4 md:px-8 pt-20 md:pt-6 max-w-7xl mx-auto">
         <div className="flex justify-end mb-2">
           <AdminNotificationsBell feed={adminFeed} dark={false} />
         </div>

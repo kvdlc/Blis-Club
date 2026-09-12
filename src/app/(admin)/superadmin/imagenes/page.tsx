@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
+import { getActiveAppSlug } from "@/lib/active-app";
 import { Image, Plus, Upload } from "lucide-react";
 
 const BREED_PLACEHOLDERS = [
@@ -15,7 +16,7 @@ export default function ImagenesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/stats?app=guau")
+      fetch(`/api/admin/stats?app=${encodeURIComponent(getActiveAppSlug())}`)
       .then((r) => r.json())
       .then((j) => { setStats(j.data || j); setLoading(false); })
       .catch(() => setLoading(false));

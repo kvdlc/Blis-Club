@@ -32,11 +32,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Crear app_settings por defecto para la nueva app
+  // Crear app_settings por defecto para la nueva app (genérico, sin features de otra app)
   if (data) {
     await supabase.from("app_settings").insert({
       application_id: data.id,
-      enabled_features: ["academia", "nutricion", "tracker"],
+      enabled_features: [],
+      admin_modules: {
+        dashboard: true, usuarios: true, productos: true, compras: true,
+        email: false, referidos: false, marketplace: false, proveedores: false, configuracion: false,
+      },
     });
   }
 

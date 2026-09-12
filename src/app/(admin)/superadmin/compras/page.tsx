@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { Search, CreditCard, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 
@@ -35,11 +36,14 @@ export default function PurchasesPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(50);
   const [count, setCount] = useState(0);
+  const searchParams = useSearchParams();
+  const userIdFilter = searchParams.get("userId") || "";
 
   const load = async () => {
     setLoading(true);
     const params = new URLSearchParams();
     if (statusFilter) params.set("status", statusFilter);
+    if (userIdFilter) params.set("userId", userIdFilter);
     params.set("page", page.toString());
     params.set("limit", limit.toString());
     
@@ -50,7 +54,7 @@ export default function PurchasesPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [page, statusFilter]);
+  useEffect(() => { load(); }, [page, statusFilter, userIdFilter]);
 
   const formatPrice = (cents: number, currency: string) => {
     const symbol = currency === "USD" ? "$" : "S/";

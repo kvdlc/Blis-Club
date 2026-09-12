@@ -2,6 +2,7 @@
 
 import { useState, useEffect, createElement } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
+import { getActiveAppSlug } from "@/lib/active-app";
 import {
   Plus, Edit, Trash2, GraduationCap, Save, X,
   ChevronDown, ChevronRight, BookOpen, Layers,
@@ -94,7 +95,7 @@ export default function AcademiaPage() {
   const [lessonForm, setLessonForm] = useState<LessonForm | null>(null);
   const [showLessonAIModal, setShowLessonAIModal] = useState(false);
 
-  const appSlug = typeof window !== "undefined" ? (localStorage.getItem("blis_active_app_slug") || "guau") : "guau";
+  const appSlug = getActiveAppSlug();
 
   const resolveAppId = async (): Promise<string | null> => {
     const appsRes = await fetch("/api/admin/applications");

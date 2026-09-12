@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
+import { getActiveAppSlug, resolveApplicationId } from "@/lib/active-app";
 import { Plus, Edit, Trash2, Syringe, Save, X, ToggleLeft, ToggleRight } from "lucide-react";
 
 interface Vaccine {
@@ -49,7 +50,7 @@ export default function VacunasPage() {
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/vaccines?app=guau");
+    const res = await fetch(`/api/admin/vaccines?app=${encodeURIComponent(getActiveAppSlug())}`);
     const json = await res.json();
     setVaccines(json.data || []);
     setLoading(false);
@@ -58,11 +59,7 @@ export default function VacunasPage() {
   useEffect(() => { load(); }, []);
 
   const handleSave = async () => {
-    const appSlug = localStorage.getItem("blis_active_app_slug") || "guau";
-    const appsRes = await fetch("/api/admin/applications");
-    const appsJson = await appsRes.json();
-    const app = appsJson.data?.find((a: any) => a.slug === appSlug);
-    const appId = app?.id;
+    const appId = await resolveApplicationId(getActiveAppSlug());
 
     if (!appId) return;
 

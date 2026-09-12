@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
+import { getActiveAppSlug, resolveApplicationId } from "@/lib/active-app";
 import { Plus, Edit, Trash2, Save, X, Package, DollarSign, ImageIcon, ToggleLeft, ToggleRight } from "lucide-react";
 
 interface Product {
@@ -45,8 +46,9 @@ export default function ProductsPage() {
 
   const load = async () => {
     setLoading(true);
+    const appId = await resolveApplicationId(getActiveAppSlug());
     const [productsRes, appsRes] = await Promise.all([
-      fetch("/api/admin/products"),
+      fetch(`/api/admin/products${appId ? `?appId=${appId}` : ""}`),
       fetch("/api/admin/applications"),
     ]);
     const productsJson = await productsRes.json();

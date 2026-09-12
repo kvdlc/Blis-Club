@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
+import { getActiveAppSlug } from "@/lib/active-app";
 import { Plus, Edit, Trash2, UtensilsCrossed, Save, X, ChevronDown, ChevronUp, Sparkles, Camera, Image as ImageIcon, Loader2, Search, Filter, Check } from "lucide-react";
 import AIGenerateModal from "@/components/admin/AIGenerateModal";
 import { ImageEditor } from "@/components/ImageEditor";
@@ -56,7 +57,7 @@ export default function NutricionPage() {
   const [filterProtein, setFilterProtein] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "az" | "therapeutic">("recent");
 
-  const appSlug = () => { try { return localStorage.getItem("blis_active_app_slug") || "guau"; } catch { return "guau"; } };
+  const appSlug = () => getActiveAppSlug();
 
   const existingProteinTypes = useMemo(() => {
     const types = [...new Set(recipes.map((r) => r.protein_type).filter(Boolean))];
@@ -97,24 +98,24 @@ export default function NutricionPage() {
 
     const data = recipeData ? { ...emptyRecipe, ...recipeData } : form;
 
+    let recipeId = editing?.id || null;
     if (editing) {
       await fetch("/api/admin/recipes", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editing.id, ...data }) });
     } else {
       const r = await fetch("/api/admin/recipes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...data, application_id: appId }) });
       const j = await r.json();
       if (j.data) {
+        recipeId = j.data.id;
         setEditing(j.data);
         setForm(j.data);
-        loadSubEntities(j.data.id);
       }
     }
-    // Parse ingredients_text into recipe_ingredients for croquetas
-    const recipeId = editing?.id || (data as any).id;
+    // Parse ingredients_text into recipe_ingredients for croquetas (reemplaza los existentes)
     const ingText = (data as any).ingredients_text || "";
     if (ingText && recipeId) {
+      await fetch(`/api/admin/recipe-ingredients?recipe_id=${recipeId}`, { method: "DELETE" });
       const names = ingText.split(/[,\n]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-      // Clear existing and add new ones (only if user explicitly changed the text)
-        for (const name of names) {
+      for (const name of names) {
         await fetch("/api/admin/recipe-ingredients", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -129,7 +130,7 @@ export default function NutricionPage() {
           })
         });
       }
-      if (editing) loadSubEntities(recipeId);
+      loadSubEntities(recipeId);
     }
 
     setIsSaving(false);

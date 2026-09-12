@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { isAdmin } from "@/lib/admin";
 
 export async function GET(request: Request) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
   const { searchParams } = new URL(request.url);
   const keyName = searchParams.get("key");
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
+import { getActiveAppSlug } from "@/lib/active-app";
 import { Shield, Plus, Edit, Trash2, Save, X } from "lucide-react";
 
 const HEADERS_DEFAULTS: Record<string, { habilitado: boolean; valor: string }> = {
@@ -60,7 +61,7 @@ export default function SeguridadPage() {
   const [alertaForm, setAlertaForm] = useState({ nombre: "", tipo: "intentos_fallidos", nivel: "warning", umbral: 10, ventana_minutos: 5, habilitado: true });
 
   useEffect(() => {
-    fetch("/api/admin/app-settings?app=guau")
+      fetch(`/api/admin/app-settings?app=${encodeURIComponent(getActiveAppSlug())}`)
       .then((r) => r.json())
       .then((j) => {
         const data = j.data || {};
