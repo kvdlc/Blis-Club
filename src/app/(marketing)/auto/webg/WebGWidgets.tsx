@@ -492,3 +492,58 @@ export function StatFlip({ value, label, suffix = "" }: { value: number; label: 
     </div>
   );
 }
+
+/* ═══════════ Vista previa del enlace compartido (WhatsApp) ═══════════ */
+export function OgPreviewMock() {
+  return (
+    <div className="max-w-sm mx-auto">
+      <div className="rounded-2xl overflow-hidden border border-white/12 bg-[#0b1020] shadow-2xl">
+        <div className="h-32 sm:h-36 grad-auto relative flex items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-black/30 border border-white/20 flex items-center justify-center">
+            <Wrench className="w-7 h-7 text-white" />
+          </div>
+          <span className="absolute top-2 left-2 text-[9px] font-bold text-red-200 bg-red-500/30 border border-red-400/40 px-2 py-0.5 rounded-full">SOS · Emergencia</span>
+        </div>
+        <div className="p-3">
+          <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wide">www.blis.club</p>
+          <p className="text-sm font-extrabold text-zinc-100 mt-0.5">Blis Club - Fadicars Automotriz</p>
+          <p className="text-[11px] text-zinc-400 mt-0.5">Mecánico · Fausto · Frente al hotel Bronx</p>
+        </div>
+      </div>
+      <p className="text-center text-[10px] text-zinc-500 mt-3">Así se ve tu enlace al compartirlo por WhatsApp.</p>
+    </div>
+  );
+}
+
+/* ═══════════ Código QR del perfil público ═══════════ */
+export function QrMock() {
+  const N = 21;
+  const cells: boolean[] = [];
+  const finder = (r: number, c: number, br: number, bc: number) => {
+    const dr = r - br, dc = c - bc;
+    if (dr < 0 || dr > 6 || dc < 0 || dc > 6) return null;
+    const edge = dr === 0 || dr === 6 || dc === 0 || dc === 6;
+    const center = dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4;
+    return edge || center;
+  };
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const f = finder(r, c, 0, 0) ?? finder(r, c, 0, N - 7) ?? finder(r, c, N - 7, 0);
+      if (f !== null) { cells.push(f); continue; }
+      cells.push((r * 7 + c * 13 + ((r * c) % 5)) % 3 === 0);
+    }
+  }
+  return (
+    <div className="flex flex-col items-center">
+      <div className="p-3 rounded-2xl bg-white">
+        <div className="grid" style={{ gridTemplateColumns: `repeat(${N}, 8px)` }}>
+          {cells.map((on, i) => (
+            <span key={i} style={{ width: 8, height: 8, background: on ? "#0b1020" : "transparent" }} />
+          ))}
+        </div>
+      </div>
+      <p className="text-[10px] text-zinc-500 mt-3 text-center">Escanea y abre el perfil público de tu auto.</p>
+    </div>
+  );
+}
+
