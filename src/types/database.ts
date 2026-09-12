@@ -151,6 +151,7 @@ export interface VehicleContact {
   ubicacion: string | null;
   direccion: string | null;
   notas: string | null;
+  share_slug: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -6,6 +6,7 @@ const quicksand = Quicksand({ subsets: ["latin"], weight: ["400", "600", "700"],
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "700", "900"], variable: "--font-nunito" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.blis.club"),
   title: "Blis Club",
   description: "Tu ecosistema de apps inteligentes: mascotas, autos, eventos y más. Todo en un solo lugar.",
   manifest: "/manifest.json",

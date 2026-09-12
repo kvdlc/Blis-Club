@@ -700,8 +700,8 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
                     <MapPin className="w-4 h-4" />
                   </a>
                   <ShareButton
-                    url={`/auto/taller/${c.id}`}
-                    title={c.nombre}
+                    url={c.share_slug ? `/t/${c.share_slug}` : `/auto/taller/${c.id}`}
+                    title={`Blis Club - ${c.nombre}`}
                     text={`${c.nombre}${c.encargado ? ` (${c.encargado})` : ""}${principal ? ` · ${principal}` : ""} · Guardado en Blis Club Auto`}
                     className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/25 flex items-center justify-center text-violet-400 hover:bg-violet-500/20 transition-colors"
                   />
