@@ -9,7 +9,6 @@ import {
   Globe, Settings, Shield, ChevronDown, LogOut, Mail, ArrowUpCircle,
   Key, ShoppingCart, Package, Car, ShoppingBag, Database, Coins, Menu, X,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { getActiveAppSlug, setActiveAppSlug } from "@/lib/active-app";
 
 /* ═══════════════════════════ App Info ═══════════════════════ */
@@ -94,18 +93,17 @@ export default function AdminNav({ userRole, userName, userApps }: Props) {
 
   useEffect(() => {
     const load = async () => {
-      const supabase = createClient();
-      const { data } = await supabase.from("applications").select("id, name, slug, is_active").order("name");
-      if (data) {
-        const filtered = isEmpleado
-          ? data.filter((a: AppInfo) => userApps.includes(a.slug))
-          : data;
-        setApps(filtered);
-        const stored = getActiveAppSlug();
-        const slug = isEmpleado ? userApps[0] : stored;
-        const found = filtered.find((a: AppInfo) => a.slug === slug);
-        setActiveApp(found || filtered[0] || null);
-      }
+      const res = await fetch("/api/admin/applications");
+      const json = await res.json().catch(() => ({}));
+      const data: AppInfo[] = json.data || [];
+      const filtered = isEmpleado
+        ? data.filter((a) => userApps.includes(a.slug))
+        : data;
+      setApps(filtered);
+      const stored = getActiveAppSlug();
+      const slug = isEmpleado ? userApps[0] : stored;
+      const found = filtered.find((a) => a.slug === slug);
+      setActiveApp(found || filtered[0] || null);
     };
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
