@@ -35,9 +35,10 @@ export function ShareButton({
         await navigator.share({ title, text: shareText, url: shareUrl });
         return;
       }
-    } catch {
-      // El usuario canceló el panel nativo: no hacer nada más.
-      return;
+    } catch (err) {
+      // Si el usuario cerró el panel nativo, no hacer nada más.
+      // Ante cualquier otro fallo (ej. sin destinos), usar el respaldo.
+      if (err instanceof DOMException && err.name === "AbortError") return;
     }
 
     try {
