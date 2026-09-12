@@ -13,6 +13,7 @@ import { uploadDocumentPhoto, uploadContactPhoto } from "@/lib/storage";
 import { DatePicker } from "@/components/DatePicker";
 import { MapLocationPicker } from "@/components/MapLocationPicker";
 import { ImageViewer } from "@/components/ImageViewer";
+import { ShareButton } from "@/components/ShareButton";
 import { formatoRestante, diasHasta } from "@/lib/dates";
 import { ShieldCheck, BadgeAlert, MessageCircle } from "lucide-react";
 import type { Vehicle, VehicleDocument, VehicleContact, VehicleSpecs } from "@/types/database";
@@ -416,16 +417,23 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
 
   const startEditContact = (c: VehicleContact) => {
     setEditId(c.id);
-    // Quitar el prefijo guardado para mostrarlo por separado
-    const strip = (num: string | null) => num ? num.replace(/^\+\d+/, "") : "";
+    const pais = c.pais_telefono || "PE";
+    // Quitar SOLO el prefijo del país para mostrarlo por separado (no todos los dígitos)
+    const strip = (num: string | null) => {
+      if (!num) return "";
+      const prefixDigits = CountryPrefixOnly(pais);
+      let d = num.replace(/[^0-9]/g, "");
+      if (prefixDigits && d.startsWith(prefixDigits)) d = d.slice(prefixDigits.length);
+      return d;
+    };
     setForm({
       nombre: c.nombre,
       encargado: c.encargado || "",
       tipo: c.tipo,
       telefono: strip(c.telefono),
-      telefono_alt: strip(c.telefono_alt) || strip(c.whatsapp),
-      pais: c.pais_telefono || "PE",
-      pais_alt: c.pais_telefono || "PE",
+      telefono_alt: strip(c.telefono_alt) || (c.whatsapp && c.whatsapp !== c.telefono ? strip(c.whatsapp) : ""),
+      pais,
+      pais_alt: pais,
       foto_url: c.foto_url || "",
       lat: c.lat ?? null,
       lng: c.lng ?? null,
@@ -672,6 +680,7 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
                 {c.encargado && <p className="text-[10px] text-zinc-300 truncate leading-tight">{c.encargado}</p>}
                 <p className="text-[10px] text-zinc-500 truncate">{tipo?.label}</p>
                 {principal && <p className="text-[11px] font-bold text-zinc-300 mt-0.5 tabular-nums truncate">{principal}</p>}
+                {c.telefono_alt && c.telefono_alt !== principal && <p className="text-[10px] text-zinc-400 tabular-nums truncate">{c.telefono_alt}</p>}
                 {c.ubicacion && <p className="text-[9px] text-zinc-500 truncate">{c.ubicacion}</p>}
               </div>
 
@@ -690,6 +699,12 @@ function ContactsSection({ vehicleId, initialContacts }: { vehicleId: string; in
                     className="w-9 h-9 rounded-xl bg-auto-500/10 border border-auto-500/25 flex items-center justify-center text-auto-400 hover:bg-auto-500/20 transition-colors">
                     <MapPin className="w-4 h-4" />
                   </a>
+                  <ShareButton
+                    url={`/auto/taller/${c.id}`}
+                    title={c.nombre}
+                    text={`${c.nombre}${c.encargado ? ` (${c.encargado})` : ""}${principal ? ` · ${principal}` : ""} · Guardado en Blis Club Auto`}
+                    className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/25 flex items-center justify-center text-violet-400 hover:bg-violet-500/20 transition-colors"
+                  />
                 </div>
                 <div className="flex items-center gap-0.5">
                   <button type="button" onClick={() => startEditContact(c)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-auto-300" title="Editar">
