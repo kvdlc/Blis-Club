@@ -483,6 +483,35 @@ export async function POST(request: Request) {
           : []),
       ]);
 
+      // Otorgar acceso real a la app del plan (user_apps) — de aquí lee la app
+      if (subscription.user_id && subscription.plan_id) {
+        try {
+          const { data: planApp } = await supabase
+            .from("plans")
+            .select("application_id")
+            .eq("id", subscription.plan_id)
+            .maybeSingle();
+          if (planApp?.application_id) {
+            const { data: appRow } = await supabase
+              .from("applications")
+              .select("slug")
+              .eq("id", planApp.application_id)
+              .maybeSingle();
+            if (appRow?.slug) {
+              await supabase.from("user_apps").upsert({
+                user_id: subscription.user_id,
+                app_slug: appRow.slug,
+                status: "active",
+                current_period_end: periodEnd.toISOString(),
+                trial_ends_at: periodEnd.toISOString(),
+              }, { onConflict: "user_id,app_slug" });
+            }
+          }
+        } catch (e) {
+          console.error("[Izipay Webhook] user_apps sync error:", e);
+        }
+      }
+
       try {
         await supabase
           .from("subscriptions")
