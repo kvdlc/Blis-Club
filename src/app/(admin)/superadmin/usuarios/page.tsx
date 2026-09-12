@@ -295,6 +295,22 @@ export default function UsersPage() {
     await updatePlan({ [field]: new Date(editDate).toISOString() });
   };
 
+  // Extiende el tiempo desde la fecha de fin actual (si es futura) o desde hoy
+  const extendDays = async (days: number) => {
+    if (!manageUser) return;
+    const base = subscription
+      ? (subscription.plan_type === "temporal" ? subscription.expires_at : subscription.current_period_end)
+      : null;
+    const baseMs = base && new Date(base).getTime() > Date.now() ? new Date(base).getTime() : Date.now();
+    const end = new Date(baseMs + days * 864e5).toISOString();
+    await updatePlan({ plan_type: "premium", status: "active", current_period_end: end });
+  };
+
+  const setPermanent = async () => {
+    if (!manageUser) return;
+    await updatePlan({ plan_type: "permanente", status: "active" });
+  };
+
   const toggleSuspend = async () => {
     if (!manageUser) return;
     setActionLoading(true);
@@ -761,6 +777,31 @@ export default function UsersPage() {
                           </button>
                         ))}
                       </div>
+                    </div>
+
+                    {/* Extender tiempo */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-zinc-700">Agregar tiempo</label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[{ d: 7, l: "+7d" }, { d: 30, l: "+30d" }, { d: 90, l: "+90d" }, { d: 365, l: "+1 año" }].map((x) => (
+                          <button
+                            key={x.d}
+                            onClick={() => extendDays(x.d)}
+                            disabled={actionLoading}
+                            className="px-2 py-2.5 rounded-xl text-xs font-semibold border border-emerald-200 text-emerald-700 hover:bg-emerald-50 disabled:opacity-40 transition-colors"
+                          >
+                            {x.l}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={setPermanent}
+                        disabled={actionLoading}
+                        className="w-full px-3 py-2.5 rounded-xl text-xs font-bold border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-40 transition-colors"
+                      >
+                        ♾️ Premium permanente (sin vencimiento)
+                      </button>
+                      <p className="text-[10px] text-zinc-400">Extiende desde el vencimiento actual si aún es futuro; si no, desde hoy.</p>
                     </div>
 
                     {/* Acciones principales */}

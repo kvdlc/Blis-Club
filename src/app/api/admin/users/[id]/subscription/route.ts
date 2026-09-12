@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { isAdmin } from "@/lib/admin";
+
+const PERMANENT_END = "2099-12-31T23:59:59.000Z";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -27,12 +30,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
+
     const supabase = createServiceClient();
     const { id: userId } = await params;
     const body = await request.json();
-    const { status, plan_type, expires_at } = body;
-
-    console.log(`[Admin PUT Subscription] userId=${userId}, status=${status}, plan_type=${plan_type}`);
+    const { status, plan_type, expires_at, current_period_end } = body;
 
     const validStatuses = ["active", "canceled", "past_due", "paused", "pending"];
     if (status && !validStatuses.includes(status)) {
@@ -44,7 +49,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Tipo de plan inválido" }, { status: 400 });
     }
 
-    // 1. Buscar la suscripción más reciente del usuario
+    // 1. Suscripción más reciente
     const { data: latestSub, error: findError } = await supabase
       .from("subscriptions")
       .select("id, status, plan_type, expires_at, current_period_end, created_at")
@@ -54,110 +59,97 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       .maybeSingle();
 
     if (findError) {
-      console.error("[Admin PUT] Find error:", findError);
       return NextResponse.json({ error: findError.message }, { status: 500 });
     }
 
-    console.log("[Admin PUT] Found subscription:", latestSub);
+    // 2. Construir datos de actualización
+    const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (status) updateData.status = status;
+    if (plan_type) updateData.plan_type = plan_type;
+    if (expires_at !== undefined) updateData.expires_at = expires_at;
+    if (current_period_end !== undefined) updateData.current_period_end = current_period_end;
 
+    const finalPlan = plan_type || latestSub?.plan_type || "temporal";
+
+    // Permanente: sin expiración
+    if (finalPlan === "permanente") {
+      updateData.expires_at = null;
+      updateData.current_period_end = null;
+    }
+
+    // 3. Fecha efectiva de fin (para suscripción y para user_apps)
+    let effectiveEnd: string | null = null;
+    if (finalPlan === "permanente") {
+      effectiveEnd = PERMANENT_END;
+    } else {
+      effectiveEnd =
+        current_period_end || expires_at ||
+        (updateData.current_period_end as string) || (updateData.expires_at as string) ||
+        (latestSub?.current_period_end as string) || (latestSub?.expires_at as string) || null;
+    }
+
+    // 4. Defaults si faltan fechas
+    if (finalPlan === "temporal" && !effectiveEnd) {
+      effectiveEnd = new Date(Date.now() + 60 * 864e5).toISOString();
+    }
+    if (finalPlan === "premium" && !effectiveEnd) {
+      effectiveEnd = new Date(Date.now() + 30 * 864e5).toISOString();
+    }
+    // Reflejar la fecha efectiva en la suscripción
+    if (finalPlan === "temporal") updateData.expires_at = effectiveEnd;
+    if (finalPlan === "premium") updateData.current_period_end = effectiveEnd;
+
+    // 5. Actualizar o crear suscripción
     let updatedSub: any = null;
-
     if (latestSub) {
-      // 2. Construir datos de actualización
-      const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
-      if (status) updateData.status = status;
-      if (plan_type) updateData.plan_type = plan_type;
-      if (expires_at !== undefined) updateData.expires_at = expires_at;
-
-      // Si se asigna permanente, quitar expiración
-      if (plan_type === "permanente") updateData.expires_at = null;
-      // Si se asigna temporal y no tiene expires_at, poner 60 días
-      if (plan_type === "temporal" && !latestSub.expires_at && !expires_at) {
-        const sixtyDays = new Date();
-        sixtyDays.setDate(sixtyDays.getDate() + 60);
-        updateData.expires_at = sixtyDays.toISOString();
-      }
-      // Si se activa premium y no tiene current_period_end, poner 30 días
-      if (plan_type === "premium" && !latestSub.current_period_end) {
-        const thirtyDays = new Date();
-        thirtyDays.setDate(thirtyDays.getDate() + 30);
-        updateData.current_period_end = thirtyDays.toISOString();
-      }
-
-      console.log("[Admin PUT] Updating subscription", latestSub.id, "with:", updateData);
-
-      // 3. Actualizar
-      const { error: updateError } = await supabase
-        .from("subscriptions")
-        .update(updateData)
-        .eq("id", latestSub.id);
-
-      if (updateError) {
-        console.error("[Admin PUT] Update error:", updateError);
-        return NextResponse.json({ error: updateError.message }, { status: 500 });
-      }
-
-      // 4. Volver a leer la suscripción actualizada para devolverla
-      const { data: refreshed, error: refreshError } = await supabase
+      const { error: updateError } = await supabase.from("subscriptions").update(updateData).eq("id", latestSub.id);
+      if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
+      const { data: refreshed } = await supabase
         .from("subscriptions")
         .select("id, status, plan_type, current_period_start, current_period_end, expires_at, created_at")
         .eq("id", latestSub.id)
         .single();
-
-      if (refreshError) {
-        console.error("[Admin PUT] Refresh error:", refreshError);
-        return NextResponse.json({ error: refreshError.message }, { status: 500 });
-      }
-
       updatedSub = refreshed;
-      console.log("[Admin PUT] Refreshed subscription:", updatedSub);
     } else {
-      // No hay suscripción: crear una nueva
-      console.log("[Admin PUT] No subscription found, creating new one");
       const newSub: Record<string, unknown> = {
         user_id: userId,
         status: status || "active",
-        plan_type: plan_type || "temporal",
+        plan_type: finalPlan,
         current_period_start: new Date().toISOString(),
         metadata: { created_via: "admin_panel" },
       };
-      if (plan_type === "temporal") {
-        const sixtyDays = new Date();
-        sixtyDays.setDate(sixtyDays.getDate() + 60);
-        newSub.expires_at = sixtyDays.toISOString();
-        newSub.current_period_end = sixtyDays.toISOString();
-      } else if (plan_type === "premium") {
-        const thirtyDays = new Date();
-        thirtyDays.setDate(thirtyDays.getDate() + 30);
-        newSub.current_period_end = thirtyDays.toISOString();
-      }
-
-      const { data: created, error: createError } = await supabase
-        .from("subscriptions")
-        .insert(newSub)
-        .select()
-        .single();
-
-      if (createError) {
-        console.error("[Admin PUT] Create error:", createError);
-        return NextResponse.json({ error: createError.message }, { status: 500 });
-      }
+      if (finalPlan === "temporal") newSub.expires_at = effectiveEnd;
+      if (finalPlan === "premium") newSub.current_period_end = effectiveEnd;
+      const { data: created, error: createError } = await supabase.from("subscriptions").insert(newSub).select().single();
+      if (createError) return NextResponse.json({ error: createError.message }, { status: 500 });
       updatedSub = created;
     }
 
-    // Actualizar is_lead según el plan
-    if (status === "canceled") {
+    // 6. SINCRONIZAR user_apps (de aquí lee el acceso real de la app)
+    const revoked = status === "canceled";
+    const appEnd = revoked
+      ? new Date(Date.now() - 864e5).toISOString()
+      : (effectiveEnd || new Date(Date.now() + 30 * 864e5).toISOString());
+
+    await supabase
+      .from("user_apps")
+      .update({
+        status: revoked ? "expired" : "active",
+        current_period_end: revoked ? null : appEnd,
+        trial_ends_at: appEnd,
+      })
+      .eq("user_id", userId);
+
+    // 7. is_lead según el plan
+    if (revoked) {
       await supabase.from("profiles").update({ is_lead: true }).eq("id", userId);
-    } else if (plan_type === "premium" || plan_type === "permanente") {
+    } else if (finalPlan === "premium" || finalPlan === "permanente") {
       await supabase.from("profiles").update({ is_lead: false }).eq("id", userId);
-    } else if (plan_type === "temporal") {
-      await supabase.from("profiles").update({ is_lead: true }).eq("id", userId);
-    } else if (expires_at && new Date(expires_at) < new Date()) {
+    } else if (finalPlan === "temporal") {
       await supabase.from("profiles").update({ is_lead: true }).eq("id", userId);
     }
 
-    console.log("[Admin PUT] Success, returning:", updatedSub);
-    return NextResponse.json({ success: true, subscription: updatedSub });
+    return NextResponse.json({ success: true, subscription: updatedSub, user_apps_updated: !revoked, effective_end: appEnd });
   } catch (error) {
     console.error("[Admin Update Subscription] Error:", error);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
