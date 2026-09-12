@@ -1,5 +1,6 @@
 import type { Viewport } from "next";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import SpartanNav from "@/components/SpartanNav";
 import TrialWarningToast from "@/components/TrialWarningToast";
 import ReferralTracker from "@/components/ReferralTracker";
@@ -20,7 +21,8 @@ export default async function SpartanAppLayout({ children }: { children: React.R
   if (!user) redirect("/");
 
   const trial = await checkTrialServer(supabase, user.id, "Spartan");
-  if (trial.isExpired) redirect("/Spartan/app/suscripcion");
+  const pathname = (await headers()).get("x-pathname") || "";
+  if (trial.isExpired && !pathname.includes("/suscripcion")) redirect("/Spartan/app/suscripcion");
 
   const adminFeed = await getAdminFeed(user.id);
 

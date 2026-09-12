@@ -11,7 +11,7 @@ import { AdminNotificationsBell } from "@/components/admin/AdminNotificationsBel
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
 import { getAdminFeed } from "@/lib/admin-notifications";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { getCachedDog, getCachedMetabolicProfile, getCachedMealSlots, getCachedRecipes, getCachedWalks, getCachedWeightLatest, getCachedMealSchedule } from "@/lib/data-cache";
 
 export const viewport: Viewport = {
@@ -27,7 +27,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   // Trial check
   const trial = await checkTrialServer(supabase, user.id, "guau");
-  if (trial.isExpired) redirect("/guau/app/suscripcion");
+  const pathname = (await headers()).get("x-pathname") || "";
+  if (trial.isExpired && !pathname.includes("/suscripcion")) redirect("/guau/app/suscripcion");
 
   const adminFeed = await getAdminFeed(user.id);
 

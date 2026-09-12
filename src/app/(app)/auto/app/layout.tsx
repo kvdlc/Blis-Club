@@ -1,5 +1,6 @@
 import type { Viewport } from "next";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import AutoNav from "@/components/AutoNav";
 import { CarProvider } from "@/components/CarSwitcher";
 import TrialWarningToast from "@/components/TrialWarningToast";
@@ -23,7 +24,8 @@ export default async function AutoAppLayout({ children }: { children: React.Reac
   if (!user) redirect("/");
 
   const trial = await checkTrialServer(supabase, user.id, "auto");
-  if (trial.isExpired) redirect("/auto/app/suscripcion");
+  const pathname = (await headers()).get("x-pathname") || "";
+  if (trial.isExpired && !pathname.includes("/suscripcion")) redirect("/auto/app/suscripcion");
 
   const adminFeed = await getAdminFeed(user.id);
 
