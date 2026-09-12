@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types/database";
-import { User, Settings, Save } from "lucide-react";
+import { User, Settings, Save, Crown, Shield } from "lucide-react";
 
 interface Props {
   userId: string;
   profile: Profile | null;
+  isAdmin?: boolean;
 }
 
-export default function ProfileClient({ userId, profile }: Props) {
+export default function ProfileClient({ userId, profile, isAdmin = false }: Props) {
   const router = useRouter();
   const [editingProfile, setEditingProfile] = useState(false);
   const [form, setForm] = useState({
@@ -117,6 +119,22 @@ export default function ProfileClient({ userId, profile }: Props) {
             <p className="text-[10px] font-medium text-blue-400/70">Recursos guardados</p>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-5 space-y-2">
+        <h3 className="text-sm font-bold text-zinc-300 mb-2">Más</h3>
+        <Link href="/Spartan/web"
+          className="flex items-center justify-between rounded-xl bg-white/[0.04] border border-white/10 p-3 hover:bg-white/[0.08] transition-colors">
+          <span className="text-xs font-semibold text-zinc-200 flex items-center gap-2"><Crown className="w-4 h-4 text-spartan-400" /> Conoce los planes</span>
+          <span className="text-xs font-bold text-spartan-400">→</span>
+        </Link>
+        {isAdmin && (
+          <Link href="/superadmin"
+            className="flex items-center justify-between rounded-xl bg-violet-500/10 border border-violet-500/25 p-3 hover:bg-violet-500/20 transition-colors">
+            <span className="text-xs font-semibold text-violet-300 flex items-center gap-2"><Shield className="w-4 h-4" /> Panel de administración</span>
+            <span className="text-xs font-bold text-violet-300">→</span>
+          </Link>
+        )}
       </div>
     </div>
   );

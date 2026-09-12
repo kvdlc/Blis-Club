@@ -25,9 +25,10 @@ interface Props {
     available_cash_usd: number;
     default_reward_mode: string;
   } | null;
+  isAdmin?: boolean;
 }
 
-export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, challenges, userChallenges, subscription, userId, daysLeft = 0, referralCode = "", rewards = null }: Props) {
+export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, challenges, userChallenges, subscription, userId, daysLeft = 0, referralCode = "", rewards = null, isAdmin = false }: Props) {
   const [copied, setCopied] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [cardLast4, setCardLast4] = useState<string | null>(null);
@@ -303,6 +304,38 @@ export function ProfileClient({ profile, dogs, metabolicProfiles, userBadges, ch
         </div>
         <ChevronRight className="w-4 h-4 text-zinc-400" />
       </button>
+
+      {/* ═══ PLANES ═══ */}
+      <Link href="/guau/web"
+        className="flex items-center justify-between card-soft rounded-[1.25rem] p-4 hover:bg-primary-50 transition-colors">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
+            <Crown className="w-5 h-5 text-primary-600" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold text-zinc-800">Conoce los planes</p>
+            <p className="text-[10px] text-zinc-500">Desbloquea todo el potencial de Blis Club</p>
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-zinc-400" />
+      </Link>
+
+      {/* ═══ ADMIN ═══ */}
+      {isAdmin && (
+        <Link href="/superadmin"
+          className="flex items-center justify-between card-soft rounded-[1.25rem] p-4 hover:bg-zinc-100 transition-colors border border-zinc-300">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-bold text-zinc-800">Panel de administración</p>
+              <p className="text-[10px] text-zinc-500">Acceso exclusivo de administradores</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-zinc-400" />
+        </Link>
+      )}
 
       {/* ═══ LOGOUT ═══ */}
       <button onClick={handleLogout}

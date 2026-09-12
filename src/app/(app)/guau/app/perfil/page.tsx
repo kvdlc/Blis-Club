@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
+import { isAdmin } from "@/lib/admin";
 import { ProfileClient } from "./ProfileClient";
 import type { Dog, UserBadge, Badge, WeeklyChallenge, UserChallenge, DogMetabolicProfile, Subscription, Plan, DogMealSlot, Profile } from "@/types/database";
 import { generateReferralCode } from "@/lib/referrals";
@@ -59,6 +60,7 @@ export default async function PerfilPage() {
   }
 
   const referralCode = generateReferralCode(user.id);
+  const admin = await isAdmin();
 
   return (
     <ProfileClient
@@ -73,6 +75,7 @@ export default async function PerfilPage() {
       daysLeft={daysLeft}
       referralCode={referralCode}
       rewards={userRewards as any}
+      isAdmin={admin}
     />
   );
 }

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/admin";
 import type { Profile } from "@/types/database";
 import ProfileClient from "./ProfileClient";
 
@@ -15,6 +16,7 @@ export default async function PerfilPage() {
   if (!user) redirect("/");
 
   const { profile } = await getProfileData(user.id);
+  const admin = await isAdmin();
 
-  return <ProfileClient userId={user.id} profile={profile} />;
+  return <ProfileClient userId={user.id} profile={profile} isAdmin={admin} />;
 }

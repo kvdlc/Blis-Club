@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { COUNTRIES, getCountryConfig } from "@/lib/countries";
 import { useMoney } from "@/lib/money";
 import type { Profile, Vehicle } from "@/types/database";
-import { User, Plus, Pencil, Trash2, Car, ShoppingBag, ReceiptText, Package } from "lucide-react";
+import { User, Plus, Pencil, Trash2, Car, ShoppingBag, ReceiptText, Package, Sparkles, ShieldCheck } from "lucide-react";
 
 interface Props {
   userId: string;
@@ -15,9 +15,10 @@ interface Props {
   vehicles: Vehicle[];
   checkouts: any[];
   orders: any[];
+  isAdmin?: boolean;
 }
 
-export default function ProfileClient({ userId, profile, vehicles: initialVehicles, checkouts: initialCheckouts, orders: initialOrders }: Props) {
+export default function ProfileClient({ userId, profile, vehicles: initialVehicles, checkouts: initialCheckouts, orders: initialOrders, isAdmin = false }: Props) {
   const router = useRouter();
   const { money } = useMoney();
   const searchParams = useSearchParams();
@@ -259,6 +260,23 @@ export default function ProfileClient({ userId, profile, vehicles: initialVehicl
           <span className="text-xs text-zinc-500">Ver mi plan actual</span>
           <span className="text-xs font-bold text-auto-500">→</span>
         </Link>
+      </div>
+
+      {/* Accesos rápidos */}
+      <div className="glass-card border border-white/10 shadow-sm rounded-2xl p-4 space-y-2">
+        <h3 className="text-sm font-extrabold text-zinc-300 mb-1">Más</h3>
+        <Link href="/auto/web"
+          className="flex items-center justify-between glass-input rounded-xl p-3 hover:bg-white/10 transition-colors">
+          <span className="text-xs text-zinc-300 flex items-center gap-2"><Sparkles className="w-4 h-4 text-auto-400" /> Conoce los planes</span>
+          <span className="text-xs font-bold text-auto-500">→</span>
+        </Link>
+        {isAdmin && (
+          <Link href="/superadmin"
+            className="flex items-center justify-between rounded-xl p-3 bg-violet-500/10 border border-violet-500/25 hover:bg-violet-500/20 transition-colors">
+            <span className="text-xs font-semibold text-violet-300 flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Panel de administración</span>
+            <span className="text-xs font-bold text-violet-300">→</span>
+          </Link>
+        )}
       </div>
     </div>
   );
