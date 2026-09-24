@@ -8,6 +8,7 @@ import { Countdown } from "./Countdown";
 import {
   Palette, Puzzle, BookOpen, Printer, Sparkles, Star, ShieldCheck, Heart, ArrowRight,
   Check, X, Clock, Wallet, Frown, BatteryLow, Smartphone, Users, Download, Wand2, Gift, Crown, BadgeCheck, CreditCard,
+  Hand, Brain, Languages, Target, Home as HomeIcon, Compass,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -15,6 +16,22 @@ export const metadata: Metadata = {
   description:
     "Colorear, crucigramas, laberintos, sopa de letras, unir puntos y cuentos. Material nuevo cada semana. Deja de comprar cuadernos: imprímelos ilimitados.",
 };
+
+const LEARNING = [
+  { icon: Hand, title: "Motricidad fina", text: "Al colorear y trazar, los niños fortalecen la mano y la coordinación para escribir." },
+  { icon: Brain, title: "Lógica y memoria", text: "Crucigramas, sudoku y laberintos entrenan el razonamiento y la atención." },
+  { icon: Languages, title: "Vocabulario", text: "Con las sopas de letras y los puzzles aprenden palabras nuevas sin darse cuenta." },
+  { icon: BookOpen, title: "Amor por la lectura", text: "Los cuentos ilustrados y con voz despiertan el gusto por leer desde pequeños." },
+  { icon: Palette, title: "Creatividad", text: "Elegir colores y crear libremente desarrolla la imaginación y la confianza." },
+  { icon: Target, title: "Concentración", text: "Resolver un reto completo les enseña a enfocarse y a terminar lo que empiezan." },
+];
+
+const AGES = [
+  { range: "3 a 5 años", title: "Primeros trazos y colores", text: "Láminas grandes para colorear, unir puntos sencillos y cuentos con voz para los que aún no leen solos.", icon: Palette, tone: "from-rose-100 to-orange-100" },
+  { range: "6 a 8 años", title: "Palabras y lógica", text: "Crucigramas, sopa de letras, laberintos y lecturas cortas que amplían vocabulario y pensamiento.", icon: Puzzle, tone: "from-emerald-100 to-sky-100" },
+  { range: "9 a 10 años", title: "Retos de verdad", text: "Puzzles más difíciles, sudoku, sopas grandes y cuentos largos para seguir creciendo con desafíos.", icon: BookOpen, tone: "from-violet-100 to-fuchsia-100" },
+];
+
 
 const PAINS = [
   { icon: Wallet, title: "Compras cuadernos que duran un día", text: "Gastas en libros para colorear que el niño termina en una tarde y a la semana toca comprar otro." },
@@ -68,14 +85,19 @@ const FAQS = [
 
 export default async function KidsSitePage() {
   const supabase = await createClient();
-  const [{ data: categories }, { data: app }, { count: actCount }, { count: printCount }, { count: bookCount }] = await Promise.all([
+  const [{ data: categories }, { data: app }, { count: actCount }, { count: printCount }, { count: bookCount }, { data: impBooks }] = await Promise.all([
     supabase.from("kids_categories").select("*").eq("is_active", true).order("sort_order", { ascending: true }),
     supabase.from("applications").select("id").eq("slug", "kids").maybeSingle(),
     supabase.from("kids_activities").select("*", { count: "exact", head: true }).eq("is_published", true),
     supabase.from("kids_printables").select("*", { count: "exact", head: true }).eq("is_published", true),
     supabase.from("kids_activities").select("*", { count: "exact", head: true }).eq("is_published", true).eq("data->>section", "imprimible"),
+    supabase.from("kids_activities").select("id,title,cover_url,data").eq("is_published", true).eq("data->>section", "imprimible").limit(6),
   ]);
   const downloadables = (printCount ?? 0) + (bookCount ?? 0);
+  const bookCovers = (impBooks ?? []).map((b: any) => {
+    const pages = Array.isArray(b.data?.pages) ? b.data.pages : [];
+    return pages.find((p: any) => p?.image_url)?.image_url ?? b.cover_url;
+  }).filter(Boolean).slice(0, 6);
 
   let plans: any[] = [];
   if (app?.id) {
@@ -285,6 +307,91 @@ export default async function KidsSitePage() {
               </div>
               <h3 className="mt-4 text-base font-black text-zinc-800">{f.title}</h3>
               <p className="mt-1 text-sm text-zinc-600">{f.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* GALLERY */}
+      <section className="relative z-10 mx-auto max-w-6xl px-5 py-12">
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+          Míralo en acción
+        </h2>
+        <p className="mx-auto mt-3 max-w-xl text-center text-zinc-500">
+          Una app colorida y sencilla, pensada para que los niños naveguen solos y con seguridad.
+        </p>
+        <div className="mt-10 flex flex-wrap items-start justify-center gap-6 sm:gap-8">
+          {[
+            { label: "Inicio · elige y juega", imgs: cats.slice(0, 6).map((c) => c.cover_url).filter(Boolean) as string[] },
+            { label: "Juegos · puzzles a su nivel", imgs: cats.filter((c) => ["crucigrama", "laberinto", "sopa_letras", "unir_puntos", "sudoku", "contar"].includes(c.slug)).map((c) => c.cover_url).filter(Boolean).slice(0, 6) as string[] },
+            { label: "Imprimibles · descarga en PDF", imgs: bookCovers as string[] },
+          ].map((p) => (
+            <div key={p.label} className="w-[220px]">
+              <div className="relative rounded-[2.2rem] border-[10px] border-zinc-900 bg-zinc-900 shadow-2xl">
+                <div className="overflow-hidden rounded-[1.5rem] bg-kids-gradient">
+                  <div className="flex items-center justify-between px-3 pb-2 pt-3">
+                    <span className="text-[10px] font-black text-violet-700">Kids Club</span>
+                    <span className="h-4 w-4 rounded-full bg-white/70" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5 px-2.5 pb-3">
+                    {p.imgs.slice(0, 6).map((src, i) => (
+                      <div key={i} className="aspect-square overflow-hidden rounded-lg bg-white shadow-sm">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt="" className="h-full w-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-around border-t border-white/50 bg-white/70 px-2 py-1.5 text-violet-500">
+                    <HomeIcon className="h-4 w-4" /><Compass className="h-4 w-4" /><Puzzle className="h-4 w-4" /><Download className="h-4 w-4" />
+                  </div>
+                </div>
+              </div>
+              <p className="mt-3 text-center text-xs font-black text-zinc-600">{p.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* AGES */}
+      <section className="relative z-10 mx-auto max-w-6xl px-5 py-12">
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+          Para cada edad
+        </h2>
+        <p className="mx-auto mt-3 max-w-xl text-center text-zinc-500">
+          Desde los primeros trazos hasta los retos más difíciles. Contenido que crece con tus hijos.
+        </p>
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          {AGES.map((a) => (
+            <div key={a.range} className={`kids-card bg-gradient-to-br ${a.tone} p-6`}>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 text-violet-600">
+                <a.icon className="h-6 w-6" />
+              </div>
+              <p className="mt-4 text-xs font-black uppercase tracking-widest text-violet-600">{a.range}</p>
+              <h3 className="mt-1 text-lg font-black text-zinc-800">{a.title}</h3>
+              <p className="mt-1 text-sm text-zinc-600">{a.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* LEARNING */}
+      <section className="relative z-10 mx-auto max-w-6xl px-5 py-12">
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+          Aprender jugando (de verdad)
+        </h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-zinc-500">
+          No es solo entretenimiento: cada actividad desarrolla habilidades que les sirven en el colegio y en la vida.
+        </p>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {LEARNING.map((l) => (
+            <div key={l.title} className="kids-card flex items-start gap-4 p-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white">
+                <l.icon className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-zinc-800">{l.title}</h3>
+                <p className="mt-1 text-sm text-zinc-600">{l.text}</p>
+              </div>
             </div>
           ))}
         </div>
