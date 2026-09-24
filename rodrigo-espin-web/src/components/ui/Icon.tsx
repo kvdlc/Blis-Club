@@ -1,0 +1,92 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  Accessibility,
+  Award,
+  Briefcase,
+  Building,
+  Building2,
+  Bus,
+  CalendarDays,
+  Check,
+  Clock,
+  Droplets,
+  Flag,
+  GraduationCap,
+  HandHeart,
+  HeartPulse,
+  Leaf,
+  Lightbulb,
+  Mail,
+  MapPin,
+  Megaphone,
+  MonitorSmartphone,
+  Mountain,
+  Palette,
+  Phone,
+  Quote,
+  RadioTower,
+  Scale,
+  ShieldCheck,
+  Sparkles,
+  Store,
+  Target,
+  TrendingUp,
+  Trophy,
+  Users,
+  UsersRound,
+  Wifi,
+  Zap,
+} from "lucide-react";
+import type { IconName } from "@/data/campaign";
+
+const iconMap: Record<IconName, LucideIcon> = {
+  wifi: Wifi,
+  shield: ShieldCheck,
+  building: Building,
+  building2: Building2,
+  bus: Bus,
+  graduation: GraduationCap,
+  heartPulse: HeartPulse,
+  briefcase: Briefcase,
+  mountain: Mountain,
+  users: Users,
+  users2: UsersRound,
+  accessibility: Accessibility,
+  leaf: Leaf,
+  palette: Palette,
+  droplets: Droplets,
+  store: Store,
+  radioTower: RadioTower,
+  trophy: Trophy,
+  scale: Scale,
+  monitor: MonitorSmartphone,
+  check: Check,
+  sparkles: Sparkles,
+  target: Target,
+  trending: TrendingUp,
+  lightbulb: Lightbulb,
+  award: Award,
+  flag: Flag,
+  handHeart: HandHeart,
+  megaphone: Megaphone,
+  mapPin: MapPin,
+  clock: Clock,
+  phone: Phone,
+  mail: Mail,
+  quote: Quote,
+  zap: Zap,
+  calendar: CalendarDays,
+};
+
+export function Icon({
+  name,
+  className,
+  strokeWidth = 1.75,
+}: {
+  name: IconName;
+  className?: string;
+  strokeWidth?: number;
+}) {
+  const Cmp = iconMap[name];
+  return <Cmp className={className} strokeWidth={strokeWidth} aria-hidden="true" />;
+}

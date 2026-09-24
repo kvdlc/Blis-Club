@@ -4,5 +4,15 @@
       "path": "/api/cron/keep-alive",
       "schedule": "0 0 */2 * *"
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/arqui",
+      "destination": "https://arqui-six.vercel.app/arqui"
+    },
+    {
+      "source": "/arqui/:path*",
+      "destination": "https://arqui-six.vercel.app/arqui/:path*"
+    }
   ]
 }
