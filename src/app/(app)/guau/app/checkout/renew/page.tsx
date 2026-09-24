@@ -107,15 +107,23 @@ export default function RenewCheckoutPage() {
     );
   }
 
-  if (error && mode === "full") {
+  if (mode === "full") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
-        <p className="text-sm text-danger-600 font-semibold text-center">{error}</p>
+        {error ? (
+          <p className="text-sm text-danger-600 font-semibold text-center">{error}</p>
+        ) : (
+          <p className="text-sm text-zinc-600 font-semibold text-center">
+            No tienes una tarjeta guardada.
+          </p>
+        )}
         <p className="text-xs text-zinc-500 text-center">Puedes pagar con una nueva tarjeta:</p>
         <button
           onClick={handleFullCheckout}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-primary-500/25 transition-all"
+          disabled={loading}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-primary-500/25 transition-all disabled:opacity-50"
         >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           Pagar con nueva tarjeta
         </button>
         <button

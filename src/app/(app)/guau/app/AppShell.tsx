@@ -77,7 +77,7 @@ function PerfilTab({ userId, preloaded }: { userId: string; preloaded?: any }) {
         supabase.from("user_badges").select("*, badges(*)").eq("user_id", userId),
         supabase.from("weekly_challenges").select("*").order("fecha_inicio", { ascending: false }).limit(5),
         supabase.from("user_challenges").select("*").eq("user_id", userId),
-        supabase.from("subscriptions").select("*, plans(*)").eq("user_id", userId).maybeSingle(),
+        supabase.from("subscriptions").select("*, plans(*)").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
       setData({ profile: p.data, dogs: d.data ?? [], metabolicProfiles: mp.data ?? [], userBadges: b.data ?? [], challenges: c.data ?? [], userChallenges: uc.data ?? [], subscription: s.data ?? null });
       setLoading(false);

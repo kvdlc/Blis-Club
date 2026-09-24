@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
@@ -21,50 +22,42 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, claimed: false, reason: "No hay código de referido" });
     }
 
-    // Buscar quién tiene ese código (el referrer)
-    const { data: referrer } = await supabase
-      .from("profiles")
+    const code = referralCode.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const service = createServiceClient();
+
+    // Evitar autoreferido o doble reclamo
+    const { data: existing } = await service
+      .from("referrals")
       .select("id")
-      .eq("id", referralCode.toLowerCase())
+      .eq("referred_user_id", user.id)
       .maybeSingle();
+    if (existing) {
+      return NextResponse.json({ success: true, claimed: false, reason: "Ya reclamado" });
+    }
+
+    // Buscar quién tiene ese código (los primeros 6 chars del UUID, sin guiones)
+    const { data: allProfiles } = await service.from("profiles").select("id");
+    const referrer = (allProfiles || []).find(
+      (p: any) => p.id.replace(/-/g, "").slice(0, 6).toUpperCase() === code
+    );
 
     if (!referrer) {
-      // Intentar buscar por los primeros 6 chars del UUID
-      const { data: allProfiles } = await supabase
-        .from("profiles")
-        .select("id");
-      
-      const matchingProfile = (allProfiles || []).find(
-        (p: any) => p.id.replace(/-/g, "").slice(0, 6).toUpperCase() === referralCode.toUpperCase()
-      );
+      return NextResponse.json({ success: true, claimed: false, reason: "Código no válido" });
+    }
 
-      if (!matchingProfile) {
-        return NextResponse.json({ success: true, claimed: false, reason: "Código no válido" });
-      }
+    if (referrer.id === user.id) {
+      return NextResponse.json({ success: true, claimed: false, reason: "No puedes referirte a ti mismo" });
+    }
 
-      // Crear referral
-      const { error } = await supabase.from("referrals").insert({
-        referrer_user_id: matchingProfile.id,
-        referred_user_id: user.id,
-        referral_code: referralCode.toUpperCase(),
-        status: "pending",
-      });
+    const { error } = await service.from("referrals").insert({
+      referrer_user_id: referrer.id,
+      referred_user_id: user.id,
+      referral_code: code,
+      status: "pending",
+    });
 
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
-    } else {
-      // Crear referral directo
-      const { error } = await supabase.from("referrals").insert({
-        referrer_user_id: referrer.id,
-        referred_user_id: user.id,
-        referral_code: referralCode.toUpperCase(),
-        status: "pending",
-      });
-
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     // Limpiar cookie

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/client";
+import { createServiceClient } from "@/lib/supabase/service";
 import { getWithdrawalFee } from "./billing";
 
 /* ─── Constants ─── */
@@ -14,7 +14,7 @@ export async function recordTransaction(params: {
   referenceTable?: string;
   description?: string;
 }) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   // Get current available balance
   const { data: rewards } = await supabase
@@ -41,7 +41,7 @@ export async function reserveWithdrawalBalance(
   userId: string,
   amountCents: number
 ): Promise<boolean> {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   const { data: rewards } = await supabase
     .from("user_rewards")
@@ -68,7 +68,7 @@ export async function releaseWithdrawalBalance(
   reason: string,
   withdrawalId: string
 ): Promise<void> {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   const { data: rewards } = await supabase
     .from("user_rewards")
@@ -99,7 +99,7 @@ export async function completeWithdrawal(
   withdrawalId: string,
   amountCents: number
 ): Promise<void> {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   const { data: rewards } = await supabase
     .from("user_rewards")
@@ -133,7 +133,7 @@ export function calculateWithdrawalBreakdown(amountCents: number, method: string
 
 /* ─── Get user's ledger / transaction history ─── */
 export async function getUserLedger(userId: string, limit = 50) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   const { data, error } = await supabase
     .from("user_reward_transactions")
@@ -148,7 +148,7 @@ export async function getUserLedger(userId: string, limit = 50) {
 
 /* ─── Get user commissions with hold info ─── */
 export async function getUserCommissions(userId: string) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   const { data, error } = await supabase
     .from("referral_commissions")
@@ -185,7 +185,7 @@ export async function getUserCommissions(userId: string) {
 
 /* ─── Mature pending commissions (called on page load or cron) ─── */
 export async function maturePendingCommissions(userId?: string) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   let query = supabase
     .from("referral_commissions")

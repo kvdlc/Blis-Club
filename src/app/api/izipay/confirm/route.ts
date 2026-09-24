@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
     const { data: subscription } = await serviceSupabase
       .from("subscriptions")
-      .select("id, user_id, plan_id, status, plan_type")
+      .select("id, user_id, plan_id, status, plan_type, metadata")
       .eq("id", orderId)
       .single();
 

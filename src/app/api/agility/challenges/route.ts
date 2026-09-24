@@ -10,8 +10,8 @@ export async function GET() {
 
     const today = new Date().toISOString().slice(0, 10);
 
-    // Get active challenges for guau app
-    const { data: app } = await supabase.from("applications").select("id").eq("slug", "guau").single();
+    // weekly_challenges.application_id existe en la DB real: filtrar por app guau
+    const { data: app } = await supabase.from("applications").select("id").eq("slug", "guau").maybeSingle();
     const appId = app?.id;
 
     let query = supabase

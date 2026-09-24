@@ -42,9 +42,10 @@ function getClientIP(request: NextRequest): string {
 }
 
 export async function middleware(request: NextRequest) {
-  // Exponer el pathname actual para los layouts del servidor (evita bucles de redirección)
+  const path = request.nextUrl.pathname;
+
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  requestHeaders.set("x-pathname", path);
 
   let supabaseResponse = NextResponse.next({ request: { headers: requestHeaders } });
 
@@ -65,13 +66,12 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const path = request.nextUrl.pathname;
   const method = request.method;
   const ip = getClientIP(request);
   const ua = request.headers.get("user-agent") || "";
 
   const isAuthCallback = path.startsWith("/auth/callback");
-  const isAppRoute = path.startsWith("/guau/app") || path.startsWith("/auto/app") || path.startsWith("/Spartan/app");
+  const isAppRoute = path.startsWith("/guau/app") || path.startsWith("/auto/app") || path.startsWith("/Spartan/app") || path.startsWith("/kids/app");
   const isAdminRoute = path.startsWith("/superadmin");
   const isAdminApi = path.startsWith("/api/admin/");
   const isProtected = isAppRoute || isAdminRoute || isAdminApi;
@@ -186,7 +186,11 @@ export async function middleware(request: NextRequest) {
         await supabase.from("profiles").update({ is_lead: true }).eq("id", user.id);
         await supabase.from("subscriptions").update({ status: "canceled" }).eq("id", sub.id);
         const url = request.nextUrl.clone();
-        url.pathname = "/guau/web";
+        if (path.startsWith("/kids/app")) {
+          url.pathname = "/kids/webg";
+        } else {
+          url.pathname = "/guau/web";
+        }
         url.search = "?expired=true";
         return NextResponse.redirect(url);
       }

@@ -10,6 +10,7 @@ import {
 
 type MainPhase = "selecting" | "active" | "evaluating" | "done";
 type EvalStep = "traffic" | "triggers" | "digestive";
+type EvalMap = Record<string, { traffic: string | null; triggers: string[]; stool: number | null }>;
 
 const TRIGGER_OPTIONS = [
   { tag: "Otros Perros", emoji: "🐕" },
@@ -65,8 +66,10 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
   const [showCustomTrigger, setShowCustomTrigger] = useState(false);
 
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pendingEvalsRef = useRef<EvalMap | null>(null);
 
   // Restore from localStorage
   useEffect(() => {
@@ -141,6 +144,7 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
     const time = nowISO();
     setPipiCounts((prev) => {
       const next = { ...prev, [dogId]: (prev[dogId] || 0) + 1 };
+      persist({ pipiCounts: next });
       return next;
     });
     setPipiTimes((prev) => {
@@ -148,13 +152,13 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
       persist({ pipiTimes: next });
       return next;
     });
-    persist({ pipiCounts: { ...pipiCounts, [dogId]: (pipiCounts[dogId] || 0) + 1 } });
   };
 
   const addPopo = (dogId: string) => {
     const time = nowISO();
     setPopoCounts((prev) => {
       const next = { ...prev, [dogId]: (prev[dogId] || 0) + 1 };
+      persist({ popoCounts: next });
       return next;
     });
     setPopoTimes((prev) => {
@@ -162,7 +166,6 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
       persist({ popoTimes: next });
       return next;
     });
-    persist({ popoCounts: { ...popoCounts, [dogId]: (popoCounts[dogId] || 0) + 1 } });
   };
 
   // ─── ACTIVE → EVALUATING ───
@@ -185,14 +188,15 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
   const hasPopo = (popoCounts[currentDogId] || 0) > 0;
 
   const handleEvalTraffic = (light: string) => {
-    setEvals((prev) => ({ ...prev, [currentDogId]: { ...prev[currentDogId], traffic: light } }));
+    const nextEvals: EvalMap = { ...evals, [currentDogId]: { ...evals[currentDogId], traffic: light } };
+    setEvals(nextEvals);
     if (light !== "green") {
       setTriggers([]);
       setEvalStep("triggers");
     } else if (hasPopo) {
       setEvalStep("digestive");
     } else {
-      advanceEval();
+      advanceEval(nextEvals);
     }
   };
 
@@ -208,41 +212,44 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
   };
 
   const handleEvalTriggersDone = () => {
-    setEvals((prev) => ({ ...prev, [currentDogId]: { ...prev[currentDogId], triggers } }));
+    const nextEvals: EvalMap = { ...evals, [currentDogId]: { ...evals[currentDogId], triggers } };
+    setEvals(nextEvals);
     if (hasPopo) {
       setEvalStep("digestive");
     } else {
-      advanceEval();
+      advanceEval(nextEvals);
     }
   };
 
   const handleEvalStool = (rating: number) => {
-    setEvals((prev) => ({ ...prev, [currentDogId]: { ...prev[currentDogId], stool: rating } }));
-    advanceEval();
+    const nextEvals: EvalMap = { ...evals, [currentDogId]: { ...evals[currentDogId], stool: rating } };
+    setEvals(nextEvals);
+    advanceEval(nextEvals);
   };
 
-  const advanceEval = () => {
+  const advanceEval = (currentEvals: EvalMap) => {
     if (evalIndex + 1 < selectedDogIds.length) {
       setEvalIndex((prev) => prev + 1);
       setEvalStep("traffic");
       setTriggers([]);
     } else {
       // All dogs evaluated → save
-      saveAllWalks();
+      saveAllWalks(currentEvals);
     }
   };
 
   // ─── SAVE ───
-  const saveAllWalks = async () => {
+  const saveAllWalks = async (finalEvals: EvalMap) => {
     setSaving(true);
     const endTime = new Date();
     const endTimeStr = endTime.toISOString();
     const startTime = new Date(walkStartTime);
     const durationSec = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
 
+    let hadError = false;
     for (const dogId of selectedDogIds) {
-      const e = evals[dogId] || { traffic: null, triggers: [], stool: null };
-      await supabase.from("walks").insert({
+      const e = finalEvals[dogId] || { traffic: null, triggers: [], stool: null };
+      const { error } = await supabase.from("walks").insert({
         dog_id: dogId,
         start_time: walkStartTime,
         end_time: endTimeStr,
@@ -253,13 +260,15 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
         trigger_tags: e.triggers,
         stool_rating: e.stool,
       });
+      if (error) { hadError = true; console.error("[WalkSession] Error al guardar paseo:", error); }
 
       if (e.stool) {
-        await supabase.from("digestive_logs").insert({
+        const { error: dErr } = await supabase.from("digestive_logs").insert({
           dog_id: dogId,
           fecha: getTodayLocal(),
           stool_type: e.stool,
         });
+        if (dErr) console.error("[WalkSession] Error al guardar log digestivo:", dErr);
       }
     }
 
@@ -292,9 +301,22 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
     // Notificar a los componentes que se registró un paseo (para refrescar racha)
     window.dispatchEvent(new CustomEvent("walk-saved", { detail: { streak: newStreak } }));
 
+    if (hadError) {
+      pendingEvalsRef.current = finalEvals;
+      setSaveError("No se pudieron guardar todos los paseos. Revisa tu conexión e inténtalo de nuevo.");
+      setSaving(false);
+      return;
+    }
+
     localStorage.removeItem(STORAGE_KEY);
     setMainPhase("done");
     setSaving(false);
+  };
+
+  const retrySave = () => {
+    if (!pendingEvalsRef.current) return;
+    setSaveError(null);
+    saveAllWalks(pendingEvalsRef.current);
   };
 
   const mins = Math.floor(elapsedSeconds / 60);
@@ -316,6 +338,22 @@ export function WalkSession({ allDogs, userId, onDone, onClose }: Props) {
       <div className="card-soft rounded-[1.5rem] p-8 flex flex-col items-center gap-4 border-2 border-primary-200">
         <Loader2 className="w-10 h-10 text-primary-500 animate-spin" />
         <p className="text-sm font-semibold text-zinc-600">Guardando paseo{selectedDogIds.length > 1 ? "s" : ""}...</p>
+      </div>
+    );
+  }
+
+  if (saveError) {
+    return (
+      <div className="card-soft rounded-[1.5rem] p-6 flex flex-col items-center gap-4 border-2 border-danger-200 text-center">
+        <p className="text-sm font-semibold text-danger-600">{saveError}</p>
+        <div className="flex gap-2 w-full">
+          <button onClick={retrySave} className="flex-1 bg-primary-600 hover:bg-primary-700 text-white rounded-2xl py-3 font-bold text-sm active:scale-[0.98] transition-all">
+            Reintentar
+          </button>
+          <button onClick={onClose} className="flex-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-2xl py-3 font-bold text-sm active:scale-[0.98] transition-all">
+            Cerrar
+          </button>
+        </div>
       </div>
     );
   }

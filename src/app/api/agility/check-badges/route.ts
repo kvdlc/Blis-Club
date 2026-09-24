@@ -44,8 +44,7 @@ export async function POST(request: Request) {
           .from("badges")
           .select("id")
           .eq("name", badgeName)
-          .eq("badge_type", "agility")
-          .single();
+          .maybeSingle();
 
         if (badge) {
           await supabase.from("user_badges").insert({

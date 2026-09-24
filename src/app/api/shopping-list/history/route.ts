@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const supabase = createServiceClient();
   try {
+    const authClient = await createClient();
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("user_id");
+    const userId = user.id;
     const ingredient = searchParams.get("ingredient");
     const storeId = searchParams.get("store_id");
     const startDate = searchParams.get("start_date");
     const endDate = searchParams.get("end_date");
-
-    if (!userId) return NextResponse.json({ error: "user_id required" }, { status: 400 });
 
     let query = supabase.from("shopping_purchases").select("*, store:purchase_stores(*)").eq("user_id", userId).order("purchase_date", { ascending: false });
 

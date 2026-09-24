@@ -48,6 +48,7 @@ export function LessonPlayer({
   const [reflexShowed, setReflexShowed] = useState(false);
   const [reflexScore, setReflexScore] = useState<number | null>(null);
   const reflexTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reflexShownAt = useRef<number>(0);
 
   // Dictionary game states
   const [dictRound, setDictRound] = useState(0);
@@ -108,6 +109,25 @@ export function LessonPlayer({
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [timerRunning, minigameConfig.duration_minutes]);
 
+  // Render badge celebration (módulo completado)
+  if (showBadge) {
+    return (
+      <div className="flex flex-col min-h-[70vh] items-center justify-center text-center space-y-5 px-4">
+        <Trophy className="w-20 h-20 text-accent-500" />
+        <h3 className="text-xl font-bold text-accent-700">¡Módulo completado!</h3>
+        <p className="text-zinc-500 text-sm max-w-xs">
+          Terminaste todas las lecciones de este módulo. ¡Buen trabajo!
+        </p>
+        <button
+          onClick={() => { setShowBadge(false); setPhase(nextLessonId ? "complete" : "done"); }}
+          className="rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 font-semibold transition-colors"
+        >
+          Continuar
+        </button>
+      </div>
+    );
+  }
+
   // Render theory phase (swipe cards)
   if (phase === "theory" && lesson.type === "theory") {
     return (
@@ -123,7 +143,7 @@ export function LessonPlayer({
               <VideoEmbed url={lesson.video_url} />
             </div>
           )}
-          <div className="w-full max-w-sm" onClick={() => cardIdx < cards.length - 1 ? setCardIdx(cardIdx + 1) : setPhase("check")}>
+          <div className="w-full max-w-sm" onClick={() => cardIdx < cards.length - 1 ? setCardIdx(cardIdx + 1) : (check ? setPhase("check") : handleComplete())}>
             <div className="bg-primary-50 rounded-3xl p-8 min-h-[280px] flex flex-col items-center justify-center">
               <p className="text-lg text-primary-900 leading-relaxed">
                 {cards[cardIdx]?.content ?? ""}
@@ -211,14 +231,15 @@ export function LessonPlayer({
     const handleReflexStart = () => {
       setReflexStarted(true);
       reflexTimeout.current = setTimeout(() => {
+        reflexShownAt.current = performance.now();
         setReflexShowed(true);
       }, Math.random() * 3000 + 1000);
     };
 
     const handleReflexTap = () => {
       if (reflexShowed) {
-        const time = performance.now();
-        setReflexScore(Math.round(time % 1000));
+        const reactionMs = Math.max(0, Math.round(performance.now() - reflexShownAt.current));
+        setReflexScore(reactionMs);
         setReflexShowed(false);
         if (reflexTimeout.current) clearTimeout(reflexTimeout.current);
       }

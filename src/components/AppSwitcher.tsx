@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { checkTrial } from "@/lib/trial";
-import { Dog, Car, Shield, Loader2, ArrowRight, BadgeCheck, Clock, LogOut, User, ChevronRight } from "lucide-react";
+import { Dog, Car, Shield, Loader2, ArrowRight, BadgeCheck, Clock, LogOut, User, ChevronRight, Palette } from "lucide-react";
 
 interface AppInfo {
   app_slug: string;
@@ -51,6 +51,17 @@ const APP_REGISTRY: Record<string, AppInfo> = {
     gradient: "from-spartan-600 via-spartan-500 to-orange-600",
     bgGradient: "from-spartan-50 via-white to-orange-50",
     accentColor: "bg-spartan-600",
+  },
+  kids: {
+    app_slug: "kids",
+    status: "active",
+    name: "Kids Club",
+    description: "Biblioteca creativa para niños",
+    tagline: "Colorear, puzzles, cuentos y más",
+    icon: <Palette className="w-10 h-10" />,
+    gradient: "from-amber-500 via-orange-500 to-pink-500",
+    bgGradient: "from-orange-50 via-white to-pink-50",
+    accentColor: "bg-kids-500",
   },
 };
 

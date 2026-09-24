@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Walk, Dog, DogVaccine } from "@/types/database";
 import { getTodayLocal, toLocalDateStr } from "@/lib/dates";
 import { Pause, Flame, ChevronLeft, ChevronRight, Clock, Droplets, BadgeCheck, Footprints, CalendarDays } from "lucide-react";
@@ -22,6 +23,7 @@ const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
 export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays, vaccines, userId }: Props) {
+  const router = useRouter();
   const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
   const [calYear, setCalYear] = useState(() => new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState(getTodayLocal());
@@ -31,6 +33,13 @@ export function TrackerClient({ walks, dog, allDogs, agilitySessions, streakDays
     }
     return false;
   });
+
+  // Refrescar datos del servidor cuando se guarda un paseo
+  useEffect(() => {
+    const handler = () => router.refresh();
+    window.addEventListener("walk-saved", handler);
+    return () => window.removeEventListener("walk-saved", handler);
+  }, [router]);
 
   const walkByDate = useMemo(() => {
     const map: Record<string, Walk[]> = {};

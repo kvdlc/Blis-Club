@@ -82,7 +82,6 @@ export async function POST(request: Request) {
         .update({
           obstacles,
           difficulty_level: difficulty_level || null,
-          updated_at: new Date().toISOString(),
         })
         .eq("id", existing.id)
         .select()

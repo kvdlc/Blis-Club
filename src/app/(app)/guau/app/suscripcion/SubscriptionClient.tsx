@@ -257,7 +257,7 @@ export function SubscriptionClient({ plans }: Props) {
                 )}
 
                 <Link
-                  href={`/guau/app/checkout?plan=${quarterly?.id ?? monthly?.id ?? "quarterly"}`}
+                  href={`/guau/app/checkout?plan=${quarterly?.id ?? monthly?.id ?? activePlanId}`}
                   className="flex items-center justify-center gap-2 w-full rounded-xl bg-zinc-900 text-white py-3.5 font-bold text-sm transition-all active:scale-[0.98] hover:bg-zinc-800"
                 >
                   Suscribirse ahora
@@ -295,7 +295,7 @@ export function SubscriptionClient({ plans }: Props) {
                 )}
 
                 <Link
-                  href={`/guau/app/checkout?plan=${annual?.id ?? "annual"}`}
+                  href={`/guau/app/checkout?plan=${annual?.id ?? quarterly?.id ?? activePlanId}`}
                   className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white py-3.5 font-bold text-sm shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98] relative overflow-hidden group/btn animate-glow-brand"
                 >
                   <Zap className="w-4 h-4" />

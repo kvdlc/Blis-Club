@@ -217,7 +217,11 @@ export default function EmergencyProfile({ dog, shareUrl, shortUrl }: Props) {
           {dog.poster_contact && (
             <FadeIn delay={500}>
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`Hola, vi a ${dog.nombre}`)}`}
+                href={(() => {
+                  const digits = (dog.poster_contact || "").replace(/\D/g, "");
+                  const text = encodeURIComponent(`Hola, vi a ${dog.nombre}`);
+                  return digits.length >= 7 ? `https://wa.me/${digits}?text=${text}` : `https://wa.me/?text=${text}`;
+                })()}
                 target="_blank"
                 rel="noopener"
                 className="group card-elevated rounded-2xl p-5 flex items-center gap-4 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98] border-l-[5px] border-green-400"

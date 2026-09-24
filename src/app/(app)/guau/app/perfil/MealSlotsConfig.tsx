@@ -19,6 +19,7 @@ export function MealSlotsConfig({ dog, initialSlots }: Props) {
   ]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const activeCount = slots.filter((s) => s.active).length;
 
@@ -51,17 +52,31 @@ export function MealSlotsConfig({ dog, initialSlots }: Props) {
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveError("");
     // Delete existing slots for this dog and re-insert
-    await supabase.from("dog_meal_slots").delete().eq("dog_id", dog.id);
+    const { error: delError } = await supabase.from("dog_meal_slots").delete().eq("dog_id", dog.id);
+    if (delError) {
+      setSaveError(delError.message);
+      setSaving(false);
+      return;
+    }
+    const inserted: DogMealSlot[] = [];
     for (const slot of slots) {
-      await supabase.from("dog_meal_slots").insert({
+      const { data, error } = await supabase.from("dog_meal_slots").insert({
         dog_id: dog.id,
         slot_index: slot.slot_index,
         label: slot.label,
         time_of_day: slot.time_of_day,
         active: slot.active,
-      });
+      }).select("*").single();
+      if (error) {
+        setSaveError(error.message);
+        setSaving(false);
+        return;
+      }
+      inserted.push(data as DogMealSlot);
     }
+    if (inserted.length > 0) setSlots(inserted);
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -128,6 +143,10 @@ export function MealSlotsConfig({ dog, initialSlots }: Props) {
           </div>
         ))}
       </div>
+
+      {saveError && (
+        <p className="text-xs text-danger-600 text-center bg-danger-50 rounded-xl py-2 px-3">{saveError}</p>
+      )}
 
       <button
         onClick={handleSave}

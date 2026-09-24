@@ -7,7 +7,7 @@ import {
   LayoutDashboard, GraduationCap, UtensilsCrossed, BadgeCheck,
   DollarSign, Trophy, Image, Syringe, Users,
   Globe, Settings, Shield, ChevronDown, LogOut, Mail, ArrowUpCircle,
-  Key, ShoppingCart, Package, Car, ShoppingBag, Database, Coins, Menu, X,
+  Key, ShoppingCart, Package, Car, ShoppingBag, Database, Coins, Palette, Sparkles, FileDown, Menu, X,
 } from "lucide-react";
 import { getActiveAppSlug, setActiveAppSlug } from "@/lib/active-app";
 
@@ -51,6 +51,12 @@ const autoItems: NavItem[] = [
   { href: "/superadmin/catalogo-vehiculos", icon: Database, label: "Catálogo" },
 ];
 
+const kidsItems: NavItem[] = [
+  { href: "/superadmin/kids/actividades", icon: Palette, label: "Kids · Actividades" },
+  { href: "/superadmin/kids/imprimibles", icon: FileDown, label: "Kids · Imprimibles" },
+  { href: "/superadmin/kids/categorias", icon: Sparkles, label: "Kids · Categorías" },
+];
+
 const advancedItems: NavItem[] = [
   { href: "/superadmin/planes", icon: DollarSign, label: "Planes" },
   { href: "/superadmin/monedas", icon: Coins, label: "Monedas" },
@@ -69,6 +75,7 @@ const advancedItems: NavItem[] = [
 const APP_ITEMS: Record<string, NavItem[]> = {
   guau: guauItems,
   auto: autoItems,
+  kids: kidsItems,
   Spartan: [],
 };
 
@@ -143,6 +150,7 @@ export default function AdminNav({ userRole, userName, userApps }: Props) {
     if (isEmpleado) {
       if (userApps.includes("guau")) sections.push(...guauItems);
       if (userApps.includes("auto")) sections.push(...autoItems);
+      if (userApps.includes("kids")) sections.push(...kidsItems);
       sections.push({ divider: true });
     } else {
       // Admin/superadmin: solo las secciones de la app activa

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/client";
+import { createServiceClient } from "@/lib/supabase/service";
 
 /* ─── Constants ─── */
 export const PLAN_PRICE_CENTS = 1000; // $10.00 real (público $9.99)
@@ -16,7 +16,7 @@ export function generateReferralCode(userId: string): string {
 
 /* ─── Wallet ─── */
 export async function getOrCreateUserRewards(userId: string) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
   const { data: existing } = await supabase
     .from("user_rewards")
     .select("*")
@@ -43,7 +43,7 @@ async function recordTransaction(params: {
   referenceTable?: string;
   description?: string;
 }) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   const { data: rewards } = await supabase
     .from("user_rewards")
@@ -66,7 +66,7 @@ async function recordTransaction(params: {
 
 /* ─── Credit wallet with commission (HOLD: adds to total, NOT available yet) ─── */
 async function creditPendingCommission(userId: string, commissionCents: number, commissionId: string) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
   const rewards = await getOrCreateUserRewards(userId);
 
   // Only add to total_cash_usd (historical earnings)
@@ -139,7 +139,7 @@ export async function processMultiLevelCommissions(
   planPriceCents: number,
   options?: { subscriptionPaymentId?: string; periodStart?: string; periodEnd?: string }
 ) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
   const applied: number[] = [];
 
   const availableAfter = new Date();
@@ -200,7 +200,7 @@ export async function processMultiLevelCommissions(
 
 /* ─── Mature pending commissions (call on page load or via cron) ─── */
 export async function maturePendingCommissions(userId?: string) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   let query = supabase
     .from("referral_commissions")
@@ -257,7 +257,7 @@ export async function maturePendingCommissions(userId?: string) {
 
 /* ─── Fetch referral tree for a user ─── */
 export async function getReferralTree(userId: string) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   // Get all referrals where user is the root referrer
   const { data: directReferrals } = await supabase
@@ -319,7 +319,7 @@ export async function getReferralTree(userId: string) {
 
 /* ─── Calculate total earned per level ─── */
 export async function getCommissionsSummary(userId: string) {
-  const supabase = createClient();
+  const supabase = createServiceClient();
 
   const { data: commissions } = await supabase
     .from("referral_commissions")

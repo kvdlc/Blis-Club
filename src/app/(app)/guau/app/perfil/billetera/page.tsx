@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import BilleteraClient from "./BilleteraClient";
-import { generateReferralCode, getCommissionsSummary, getReferralTree, maturePendingCommissions } from "@/lib/referrals";
+import { generateReferralCode, getCommissionsSummary, getReferralTree, maturePendingCommissions, getOrCreateUserRewards } from "@/lib/referrals";
 import type { ReferralNode, CommissionsSummary } from "@/types/database";
 
 export default async function BilleteraPage() {
@@ -10,27 +10,15 @@ export default async function BilleteraPage() {
   if (!user) redirect("/");
 
   // Obtener o crear recompensas
-  const { data: rewardsData } = await supabase
-    .from("user_rewards")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  let rewards = rewardsData;
-  if (!rewards) {
-    const { data: created } = await supabase
-      .from("user_rewards")
-      .insert({ user_id: user.id })
-      .select()
-      .single();
-    rewards = created;
-  }
+  const rewards = await getOrCreateUserRewards(user.id);
 
   // Obtener suscripción para verificar estado activo
   const { data: subscription } = await supabase
     .from("subscriptions")
     .select("status")
     .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   const isSubscriptionActive = subscription?.status === "active";

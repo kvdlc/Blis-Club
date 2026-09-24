@@ -1,22 +1,33 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   const supabase = createServiceClient();
   try {
-    const body = await request.json();
-    const { user_id, ingredient_name, store_id, quantity, quantity_unit, currency, price_total, purchase_date, notes } = body;
+    const authClient = await createClient();
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!user_id || !ingredient_name || !price_total || !quantity) {
-      return NextResponse.json({ error: "user_id, ingredient_name, quantity, price_total required" }, { status: 400 });
+    const body = await request.json();
+    const { ingredient_name, store_id, quantity, quantity_unit, unit_weight_g, currency, price_total, purchase_date, notes } = body;
+    const user_id = user.id;
+
+    if (!ingredient_name || !price_total || !quantity) {
+      return NextResponse.json({ error: "ingredient_name, quantity, price_total required" }, { status: 400 });
     }
 
     // Convert quantity to kg for price_per_kg calculation
     let qtyKg = Number(quantity);
     const unit = quantity_unit || 'kg';
-    if (unit === 'g') qtyKg = qtyKg / 1000;
-    else if (unit === 'unidad' || unit === 'pieza') qtyKg = qtyKg; // assume quantity already in kg-ish? no, need unit_weight
-    
+    if (unit === 'g') {
+      qtyKg = qtyKg / 1000;
+    } else if (unit === 'unidad' || unit === 'pieza' || unit === 'docena') {
+      const unitWeight = Number(unit_weight_g) || 0;
+      const units = unit === 'docena' ? qtyKg * 12 : qtyKg;
+      qtyKg = unitWeight > 0 ? (units * unitWeight) / 1000 : 0;
+    }
+
     const pricePerKg = qtyKg > 0 ? Number(price_total) / qtyKg : null;
 
     const { data, error } = await supabase.from("shopping_purchases").insert({

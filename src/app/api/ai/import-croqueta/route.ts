@@ -96,7 +96,7 @@ ${query}
         ? j.ingredients_text.split(",").map((name: string) => ({
             ingredient_name: name.trim(),
             quantity_per_serving_g: 0,
-            ingredient_type: "croqueta",
+            ingredient_type: "otro",
             unit_type: "g",
             unit_weight_g: 1,
             display_unit: "g"

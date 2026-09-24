@@ -19,6 +19,7 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const [weight, setWeight] = useState(initialWeight);
+  const [currentWeight, setCurrentWeight] = useState(dog.peso_kg);
   const [formDate, setFormDate] = useState(getTodayLocal());
   const [uploading, setUploading] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -42,19 +43,32 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
     e.target.value = "";
   };
 
+  // Mantiene dogs.peso_kg sincronizado con el registro más reciente
+  const syncDogWeight = async (list: DogWeightHistory[]) => {
+    if (list.length === 0) return;
+    const latest = [...list].sort((a, b) => (a.fecha < b.fecha ? 1 : -1))[0];
+    setCurrentWeight(latest.peso_kg);
+    await supabase.from("dogs").update({ peso_kg: latest.peso_kg }).eq("id", dog.id);
+  };
+
   const addWeight = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setUploading(true);
     const form = e.currentTarget;
     const formData = new FormData(form);
+    const newWeight = parseFloat(formData.get("peso_kg") as string);
     const { data } = await supabase.from("dog_weight_history").insert({
       dog_id: dog.id,
-      peso_kg: parseFloat(formData.get("peso_kg") as string),
+      peso_kg: newWeight,
       fecha: formDate,
       notas: (formData.get("notas") as string) || null,
       foto_url: photoUrl || null,
     }).select("*").single();
-    if (data) setWeight((prev) => [data as DogWeightHistory, ...prev]);
+    if (data) {
+      const next = [data as DogWeightHistory, ...weight];
+      setWeight(next);
+      await syncDogWeight(next);
+    }
     setUploading(false);
     form.reset();
     resetForm();
@@ -62,7 +76,9 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
 
   const deleteWeight = async (id: string) => {
     await supabase.from("dog_weight_history").delete().eq("id", id);
-    setWeight((prev) => prev.filter((w) => w.id !== id));
+    const next = weight.filter((w) => w.id !== id);
+    setWeight(next);
+    await syncDogWeight(next);
   };
 
   const startEdit = (w: DogWeightHistory) => {
@@ -76,7 +92,11 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
       fecha: editForm.fecha,
       notas: editForm.notas || null,
     }).eq("id", id).select("*").single();
-    if (data) setWeight((prev) => prev.map((w) => (w.id === id ? (data as DogWeightHistory) : w)));
+    if (data) {
+      const next = weight.map((w) => (w.id === id ? (data as DogWeightHistory) : w));
+      setWeight(next);
+      await syncDogWeight(next);
+    }
     setEditing(null);
   };
 
@@ -102,7 +122,7 @@ export function PesoClient({ dog, weightHistory: initialWeight }: Props) {
 
       <div className="card-soft rounded-[1.25rem] p-4 flex items-center justify-between bg-gradient-to-r from-accent-50 to-primary-50">
         <span className="text-sm font-semibold text-zinc-700">⚖️ Peso actual</span>
-        <span className="text-xl font-extrabold text-accent-600">{dog.peso_kg} kg</span>
+        <span className="text-xl font-extrabold text-accent-600">{currentWeight} kg</span>
       </div>
 
       <div className="space-y-2">

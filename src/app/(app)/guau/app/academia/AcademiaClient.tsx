@@ -18,8 +18,19 @@ function getOverallProgress(completedCount: number, totalLessons: number) {
   return Math.round((completedCount / Math.max(totalLessons, 1)) * 100);
 }
 
+const ROUTE_STYLES = [
+  { color: "#5956E9", img: "/icons/entrenador bc.png" },
+  { color: "#2EC4A8", img: "/icons/obediencia bc.png" },
+  { color: "#F97316", img: "/icons/agilidad bc.png" },
+  { color: "#A855F7", img: "/icons/seguridad-bc.png" },
+  { color: "#0EA5E9", img: "/icons/badge educativo.png" },
+  { color: "#EF4444", img: "/icons/badge educativo.png" },
+];
+
 export default function AcademiaClient({ stages, modules, lessons, progress, streak }: Props) {
   const router = useRouter();
+
+  const orderedStages = [...stages].sort((a, b) => a.order - b.order);
 
   const completedLessonIds = new Set(
     progress.filter((p) => p.completed).map((p) => p.lesson_id)
@@ -115,33 +126,28 @@ export default function AcademiaClient({ stages, modules, lessons, progress, str
         </div>
       )}
 
-      {/* Learning Paths - Fixed 4 Routes */}
+      {/* Learning Paths — basadas en las etapas reales de la Academia */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-zinc-900 text-sm">Rutas de aprendizaje</h3>
           <Link href="/guau/app/academia" className="text-xs font-semibold text-primary-600">Ver todo</Link>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {[
-            { title: "Entrenador", color: "#5956E9", img: "/icons/entrenador bc.png", stageIdx: 0 },
-            { title: "Obediencia básica", color: "#2EC4A8", img: "/icons/obediencia bc.png", stageIdx: 1 },
-            { title: "Agilidad", color: "#F97316", img: "/icons/agilidad bc.png", stageIdx: 2 },
-            { title: "Seguridad", color: "#A855F7", img: "/icons/seguridad-bc.png", stageIdx: 3 },
-          ].map((route) => {
-            const stage = stages[route.stageIdx];
-            const stageMods = stage ? stageModulesMap.get(stage.id) ?? [] : [];
-            const stageLessons = stage ? lessons.filter((l) => stageMods.some((m) => m.id === l.module_id)) : [];
+          {orderedStages.map((stage, idx) => {
+            const style = ROUTE_STYLES[idx % ROUTE_STYLES.length];
+            const stageMods = stageModulesMap.get(stage.id) ?? [];
+            const stageLessons = lessons.filter((l) => stageMods.some((m) => m.id === l.module_id));
             const done = stageLessons.filter((l) => completedLessonIds.has(l.id)).length;
             const total = stageLessons.length;
             return (
               <Link
-                key={route.title}
-                href={`/guau/app/academia/${titleToSlug(route.title)}`}
+                key={stage.id}
+                href={`/guau/app/academia/${titleToSlug(stage.title)}`}
                 className="flex flex-col items-center gap-2 p-4 rounded-[1.5rem] transition-all active:scale-95 bg-white shadow-sm border border-zinc-100"
               >
-                <img src={route.img} alt={route.title} className="w-24 h-24 object-contain drop-shadow-md" />
+                <img src={style.img} alt={stage.title} className="w-24 h-24 object-contain drop-shadow-md" />
                 <span className="text-xs font-bold text-center leading-tight text-zinc-800">
-                  {route.title}
+                  {stage.title}
                 </span>
                 <div className="w-full">
                   <div className="relative bg-zinc-200 rounded-full h-5 overflow-hidden">
@@ -149,7 +155,7 @@ export default function AcademiaClient({ stages, modules, lessons, progress, str
                       className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
                       style={{
                         width: `${Math.round((done / Math.max(total || 1, 1)) * 100)}%`,
-                        background: `linear-gradient(90deg, ${route.color}, ${route.color}dd)`,
+                        background: `linear-gradient(90deg, ${style.color}, ${style.color}dd)`,
                       }}
                     />
                     <span className="absolute inset-0 flex items-center justify-center text-[10px] font-extrabold text-white drop-shadow-[0_0_3px_rgba(0,0,0,0.6)] tracking-wide">

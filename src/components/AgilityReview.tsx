@@ -16,9 +16,10 @@ interface Props {
   runData: RunData;
   onSaved: () => void;
   onClose: () => void;
+  lessonId?: string | null;
 }
 
-export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props) {
+export function AgilityReview({ dog, userId, runData, onSaved, onClose, lessonId }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const [fouls, setFouls] = useState(runData.fouls);
@@ -124,6 +125,7 @@ export function AgilityReview({ dog, userId, runData, onSaved, onClose }: Props)
       circuit_time_seconds: rawTime,
       notes: `${lapTimes.length} vueltas. ${fouls.length} faltas totales.`,
       session_type_id: config.sessionTypeId,
+      lesson_id: lessonId ?? null,
       difficulty_level: config.difficulty,
       fouls_total: fouls.length,
       clean_run: isCleanRun,

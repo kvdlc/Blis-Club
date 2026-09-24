@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   const supabase = createServiceClient();
   try {
-    const body = await request.json();
-    const { userId, startDate, endDate } = body;
+    const authClient = await createClient();
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!userId || !startDate || !endDate) {
-      return NextResponse.json({ error: "userId, startDate, endDate required" }, { status: 400 });
+    const body = await request.json();
+    const { startDate, endDate } = body;
+    const userId = user.id;
+
+    if (!startDate || !endDate) {
+      return NextResponse.json({ error: "startDate, endDate required" }, { status: 400 });
     }
 
     // 1. Get user's dogs

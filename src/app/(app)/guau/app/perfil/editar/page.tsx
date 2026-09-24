@@ -53,7 +53,7 @@ function EditProfilePage() {
       if (!user) { router.push("/"); return; }
       const [{ data: p }, { data: sub }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).single(),
-        supabase.from("subscriptions").select("*, plans(*)").eq("user_id", user.id).maybeSingle(),
+        supabase.from("subscriptions").select("*, plans(*)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
       const pr = p as Profile | null;
       if (pr) {
@@ -90,7 +90,11 @@ function EditProfilePage() {
       console.error("Update error:", updateErr);
       // Fallback: try upsert
       const { error: upsertErr } = await supabase.from("profiles").upsert({ id: user.id, ...payload, email: profile?.email, display_name: profile?.display_name }, { onConflict: "id" });
-      if (upsertErr) console.error("Upsert error:", upsertErr);
+      if (upsertErr) {
+        console.error("Upsert error:", upsertErr);
+        alert("No se pudo guardar el perfil: " + upsertErr.message);
+        return;
+      }
     }
 
     setSaved(true);

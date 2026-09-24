@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AgilityForm } from "@/components/AgilityForm";
 import { AgilityChallenges } from "@/components/AgilityChallenges";
 import { TrainingAssistant } from "@/components/TrainingAssistant";
@@ -24,6 +24,8 @@ interface Props {
 
 export function AgilidadClient({ sessions, dog, userId }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const lessonId = searchParams.get("lessonId");
   const [wizardStep, setWizardStep] = useState<null | "setup" | "run" | "review">(null);
   const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(null);
   const [runData, setRunData] = useState<RunData | null>(null);
@@ -41,14 +43,21 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
   const [selectedCircuit, setSelectedCircuit] = useState<AgilityCircuit | AgilityCustomCircuit | null>(null);
   const [showSessions, setShowSessions] = useState(false);
 
-  // Load circuits
-  useMemo(() => {
+  // Load circuits + session types
+  useEffect(() => {
     fetch("/api/agility/circuits")
       .then((r) => r.json())
       .then((j) => {
         if (j.circuits) setCircuits(j.circuits);
         if (j.customCircuits) setCustomCircuits(j.customCircuits);
-      });
+      })
+      .catch(() => {});
+    fetch("/api/agility/session-types")
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.sessionTypes) setSessionTypes(j.sessionTypes);
+      })
+      .catch(() => {});
   }, []);
 
   const filteredSessions = useMemo(() => {
@@ -87,6 +96,10 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
       .then((r) => r.json())
       .then((j) => { if (j.sessions) setSessionList(j.sessions); });
     router.refresh();
+    if (lessonId) {
+      // Se completó una lección desde agilidad: volver a la Academia
+      router.push("/guau/app?tab=academia");
+    }
   };
 
   const loadSessionObstacles = async (sessionId: string) => {
@@ -314,6 +327,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
           {wizardStep === "setup" && dog && (
             <AgilitySetup
               dog={dog}
+              initialConfig={sessionConfig}
               onStart={(config) => { setSessionConfig(config); setWizardStep("run"); }}
               onClose={() => { setWizardStep(null); setSessionConfig(null); }}
               onQuickStart={(config) => { setSessionConfig(config); setWizardStep("run"); }}
@@ -333,6 +347,7 @@ export function AgilidadClient({ sessions, dog, userId }: Props) {
               dog={dog}
               userId={userId}
               runData={runData}
+              lessonId={lessonId}
               onSaved={handleSaved}
               onClose={handleSaved}
             />

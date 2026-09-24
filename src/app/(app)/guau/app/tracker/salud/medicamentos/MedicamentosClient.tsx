@@ -121,7 +121,10 @@ export function MedicamentosClient({ dog, medications: initialMeds, initialLogs 
   const markDose = async (med: DogMedication, taken: boolean) => {
     const now = new Date();
     const time = doseTime[med.id] || med.dose_hours?.[0]?.slice(0, 5) || "08:00";
-    const scheduledTime = `${now.toISOString().slice(0, 10)}T${time}:00`;
+    // Construir la hora local y guardarla como instante ISO (evita desfase UTC)
+    const [hh, mm] = time.split(":").map((n) => Number(n) || 0);
+    const local = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+    const scheduledTime = local.toISOString();
     const payload: any = {
       medication_id: med.id,
       scheduled_time: scheduledTime,

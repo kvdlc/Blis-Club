@@ -123,7 +123,7 @@ export default function NutricionPage() {
             recipe_id: recipeId,
             ingredient_name: name,
             quantity_per_serving_g: 0,
-            ingredient_type: "croqueta",
+            ingredient_type: "otro",
             unit_type: "g",
             unit_weight_g: 1,
             display_unit: name,

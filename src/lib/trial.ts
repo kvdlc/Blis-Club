@@ -179,6 +179,30 @@ export async function checkTemporalPlanExpiry(supabase: any, userId: string): Pr
  * Verifica tanto user_apps como subscriptions (plan temporal).
  */
 export async function checkTrialServer(supabase: any, userId: string, appSlug: string): Promise<TrialStatus> {
+  const now = Date.now();
+
+  // 1) Una suscripción premium/permanente activa da acceso, aunque user_apps
+  //    siga en "trialing" (los pagos no actualizan user_apps).
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("status, plan_type, current_period_end, expires_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (sub && sub.status === "active" && (sub.plan_type === "premium" || sub.plan_type === "permanente")) {
+    const endMs = sub.current_period_end
+      ? new Date(sub.current_period_end).getTime()
+      : sub.expires_at
+        ? new Date(sub.expires_at).getTime()
+        : now + 30 * 24 * 60 * 60 * 1000;
+    const daysLeft = Math.max(0, Math.ceil((endMs - now) / (1000 * 60 * 60 * 24)));
+    if (daysLeft > 0) {
+      return { status: "active", daysLeft, isWarning: daysLeft <= WARNING_DAYS, isExpired: false };
+    }
+  }
+
   const { data } = await supabase
     .from("user_apps")
     .select("status, trial_ends_at, current_period_end")
@@ -198,7 +222,6 @@ export async function checkTrialServer(supabase: any, userId: string, appSlug: s
   }
 
   const record = data as any;
-  const now = Date.now();
 
   if (record.status === "active" && record.current_period_end) {
     const end = new Date(record.current_period_end).getTime();

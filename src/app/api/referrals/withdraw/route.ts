@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { calculateWithdrawalBreakdown, reserveWithdrawalBalance, recordTransaction } from "@/lib/withdrawals";
 import { getWithdrawalFee } from "@/lib/billing";
 
@@ -11,6 +12,10 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
+
+    // Las escrituras en user_rewards/withdrawal_requests requieren service_role
+    // (RLS solo permite SELECT al usuario).
+    const service = createServiceClient();
 
     const body = await request.json();
     const { amountUsd, method } = body;
@@ -88,42 +93,46 @@ export async function POST(request: Request) {
       account_info: withdrawalDetails, // legacy column that stores payment details
     };
 
-    // Try insert with new columns first
+    // Try insert with new columns first; si la DB no tiene esas columnas,
+    // supabase-js DEVUELVE el error (no lanza), así que reintentamos con el payload legacy.
     let withdrawal: any = null;
     let withdrawalError: any = null;
 
-    try {
-      const result = await supabase
+    const fullPayload = {
+      ...basePayload,
+      withdrawal_method: method,
+      billing_profile_id: billingProfile.id,
+      fee_cents: feeCents,
+      net_amount_cents: netCents,
+    };
+
+    let result = await service
+      .from("withdrawal_requests")
+      .insert(fullPayload)
+      .select()
+      .single();
+
+    const missingColumn =
+      result.error &&
+      (result.error.code === "PGRST204" ||
+        result.error.code === "42703" ||
+        result.error.message?.toLowerCase().includes("does not exist") ||
+        result.error.message?.toLowerCase().includes("column"));
+
+    if (missingColumn) {
+      result = await service
         .from("withdrawal_requests")
-        .insert({
-          ...basePayload,
-          withdrawal_method: method,
-          billing_profile_id: billingProfile.id,
-          fee_cents: feeCents,
-          net_amount_cents: netCents,
-        })
+        .insert(basePayload)
         .select()
         .single();
-      withdrawal = result.data;
-      withdrawalError = result.error;
-    } catch (e: any) {
-      // If new columns don't exist, fallback to legacy insert
-      if (e.message?.includes("does not exist") || e.message?.includes("column")) {
-        const result = await supabase
-          .from("withdrawal_requests")
-          .insert(basePayload)
-          .select()
-          .single();
-        withdrawal = result.data;
-        withdrawalError = result.error;
-      } else {
-        throw e;
-      }
     }
+
+    withdrawal = result.data;
+    withdrawalError = result.error;
 
     if (withdrawalError) {
       // Rollback: return the reserved balance
-      await supabase
+      await service
         .from("user_rewards")
         .update({ available_cash_usd: available })
         .eq("user_id", user.id);

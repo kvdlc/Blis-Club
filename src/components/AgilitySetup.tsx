@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AgilityObstaclePicker } from "@/components/AgilityObstaclePicker";
 import type { Dog, AgilityObstacle, AgilityFoulType, AgilitySessionType } from "@/types/database";
 import { Play, Zap, X, Settings } from "lucide-react";
@@ -10,6 +10,7 @@ interface Props {
   onStart: (config: SessionConfig) => void;
   onClose: () => void;
   onQuickStart?: (config: SessionConfig) => void;
+  initialConfig?: SessionConfig | null;
 }
 
 export interface SessionConfig {
@@ -20,17 +21,19 @@ export interface SessionConfig {
   sessionTypeName?: string;
 }
 
-export function AgilitySetup({ dog, onStart, onClose, onQuickStart }: Props) {
-  const [sessionTypeId, setSessionTypeId] = useState<string | null>(null);
-  const [difficulty, setDifficulty] = useState("principiante");
+export function AgilitySetup({ dog, onStart, onClose, onQuickStart, initialConfig }: Props) {
+  const [sessionTypeId, setSessionTypeId] = useState<string | null>(initialConfig?.sessionTypeId ?? null);
+  const [difficulty, setDifficulty] = useState(initialConfig?.difficulty ?? "principiante");
   const [sessionTypes, setSessionTypes] = useState<AgilitySessionType[]>([]);
   const [foulTypes, setFoulTypes] = useState<AgilityFoulType[]>([]);
-  const [penaltySettings, setPenaltySettings] = useState<Record<string, number>>({});
+  const [penaltySettings, setPenaltySettings] = useState<Record<string, number>>(initialConfig?.penaltySettings ?? {});
   const [showPenaltyConfig, setShowPenaltyConfig] = useState(false);
-  const [selectedObstacles, setSelectedObstacles] = useState<AgilityObstacle[]>([]);
+  const [selectedObstacles, setSelectedObstacles] = useState<AgilityObstacle[]>(initialConfig?.selectedObstacles ?? []);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [hasPreset, setHasPreset] = useState(false);
-  const [presetLoading, setPresetLoading] = useState(true);
+  const [hasPreset, setHasPreset] = useState(!!initialConfig);
+  const [presetLoading, setPresetLoading] = useState(!initialConfig);
+  // Si venimos con una configuración precargada (circuito), no consultar el preset
+  const skipInitialPreset = useRef(!!initialConfig?.sessionTypeId);
 
   // Load session types and foul types
   useEffect(() => {
@@ -57,6 +60,11 @@ export function AgilitySetup({ dog, onStart, onClose, onQuickStart }: Props) {
 
   // Check for preset when sessionTypeId changes
   useEffect(() => {
+    if (skipInitialPreset.current) {
+      skipInitialPreset.current = false;
+      setPresetLoading(false);
+      return;
+    }
     if (!sessionTypeId || !dog?.id) {
       setHasPreset(false);
       setPresetLoading(false);

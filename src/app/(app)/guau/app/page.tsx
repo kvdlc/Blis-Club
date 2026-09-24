@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { checkTrialServer } from "@/lib/trial";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Suspense } from "react";
 import { Dog, Walk, DogVaccine, DogMedication, DogMedicationLog, Lesson, UserProgress } from "@/types/database";
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
@@ -67,8 +67,15 @@ export default async function DashboardPage({
   const referralCookie = cookieStore.get("blis_referral_code")?.value;
   if (referralCookie) {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      await fetch(`${baseUrl}/api/referrals/claim`, { method: "POST", headers: { "Content-Type": "application/json" } });
+      const hdrs = await headers();
+      const host = hdrs.get("host");
+      const proto = hdrs.get("x-forwarded-proto") || "http";
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (host ? `${proto}://${host}` : "http://localhost:3000");
+      const cookieHeader = cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
+      await fetch(`${baseUrl}/api/referrals/claim`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", cookie: cookieHeader },
+      });
     } catch {}
   }
 

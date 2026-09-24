@@ -51,6 +51,8 @@ export function NewDogClient({ userId }: Props) {
   const [uploading, setUploading] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSrc, setEditorSrc] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
 
   // Step 2: Configuración de alimentación
   const [activity, setActivity] = useState<ActivityLevel>("moderado");
@@ -101,9 +103,6 @@ export function NewDogClient({ userId }: Props) {
     const pesoKg = getWeight();
     if (dietType === "mixta") {
       const ajusteGlobal = feedingPct / 100;
-      const { BARF_PCT_BY_STAGE, CROQUETAS_PCT_BY_STAGE, ACTIVITY_MULTIPLIER } = require("@/lib/feeding-standards");
-      // ... no, can't use require in client component
-      // I'll compute pcts manually
       const result = calcularRacionMixta({
         peso_kg: pesoKg,
         life_stage: lifeStage,
@@ -176,7 +175,9 @@ export function NewDogClient({ userId }: Props) {
   };
 
   const handleCreate = async () => {
-    if (!name || !breed) return;
+    if (!name || !breed || creating) return;
+    setCreateError("");
+    setCreating(true);
     try {
       const edadMeses = getAgeMonths(birthDate);
       const pesoKg = getWeight();
@@ -189,6 +190,8 @@ export function NewDogClient({ userId }: Props) {
 
       if (dogError || !newDog) {
         console.error("Error al crear perro:", dogError);
+        setCreateError(dogError?.message || "No se pudo crear el perro. Inténtalo de nuevo.");
+        setCreating(false);
         return;
       }
       const dogId = (newDog as { id: string }).id;
@@ -224,6 +227,8 @@ export function NewDogClient({ userId }: Props) {
       router.push(`/guau/app/perfil/perro/${dogId}/editar`);
     } catch (err) {
       console.error("Error al crear perro:", err);
+      setCreateError(err instanceof Error ? err.message : "Error inesperado al crear el perro.");
+      setCreating(false);
     }
   };
 
@@ -622,9 +627,14 @@ export function NewDogClient({ userId }: Props) {
             </p>
           </div>
 
-          <button onClick={handleCreate}
-            className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-3.5 text-sm font-bold transition-all active:scale-[0.98] shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2">
-            <PawPrint className="w-4 h-4" /> Crear Perro
+          {createError && (
+            <p className="text-xs text-danger-600 text-center bg-danger-50 rounded-xl py-2 px-3">{createError}</p>
+          )}
+
+          <button onClick={handleCreate} disabled={creating}
+            className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white py-3.5 text-sm font-bold transition-all active:scale-[0.98] shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2 disabled:opacity-60">
+            {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <PawPrint className="w-4 h-4" />}
+            {creating ? "Creando..." : "Crear Perro"}
           </button>
         </>
       )}

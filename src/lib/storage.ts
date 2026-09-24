@@ -134,6 +134,68 @@ export async function uploadDocumentPhoto(file: File, vehicleId: string): Promis
   return urlData.publicUrl;
 }
 
+/** Kids Club: subir un recurso (lámina, portada, dibujo del niño) por archivo. */
+export async function uploadKidsAsset(file: File, userId: string): Promise<string | null> {
+  const supabase = createClient();
+  let blob: Blob = file;
+  try {
+    blob = await compressImage(file);
+  } catch {
+    blob = file;
+  }
+  const contentType = blob.type || file.type || "image/jpeg";
+  const ext = contentType.includes("pdf")
+    ? "pdf"
+    : contentType.includes("png")
+      ? "png"
+      : contentType.includes("webp")
+        ? "webp"
+        : "jpg";
+  const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+  const { data, error } = await supabase.storage
+    .from("kids-assets")
+    .upload(fileName, blob, { upsert: true, contentType });
+
+  if (error) {
+    console.error("Upload kids asset error:", error.message);
+    return null;
+  }
+
+  const { data: urlData } = supabase.storage.from("kids-assets").getPublicUrl(data.path);
+  return urlData.publicUrl;
+}
+
+/** Kids Club: subir un dibujo/coloreado creado en canvas (dataURL → bucket). */
+export async function uploadKidsDataUrl(
+  dataUrl: string,
+  userId: string,
+  prefix = "dibujo",
+): Promise<string | null> {
+  const supabase = createClient();
+  const base64 = dataUrl.split(",")[1];
+  const byteString = atob(base64);
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+  const isPng = dataUrl.startsWith("data:image/png");
+  const blob = new Blob([ab], { type: isPng ? "image/png" : "image/jpeg" });
+
+  const ext = isPng ? "png" : "jpg";
+  const fileName = `${userId}/${prefix}-${Date.now()}.${ext}`;
+  const { data, error } = await supabase.storage
+    .from("kids-assets")
+    .upload(fileName, blob, { upsert: true, contentType: blob.type });
+
+  if (error) {
+    console.error("Upload kids dataUrl error:", error.message);
+    return null;
+  }
+
+  const { data: urlData } = supabase.storage.from("kids-assets").getPublicUrl(data.path);
+  return urlData.publicUrl;
+}
+
 /** Foto del taller/contacto (Guantera → Directorio). Subida por archivo. */
 export async function uploadContactPhoto(file: File, vehicleId: string): Promise<string | null> {
   const supabase = createClient();

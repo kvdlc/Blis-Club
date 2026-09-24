@@ -25,7 +25,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (!user) redirect("/");
 
-  // Trial check
+  // Trial check (no redirigir desde las páginas de pago, evita bucle infinito)
+  const hdrs = await headers();
+  const currentPath = hdrs.get("x-pathname") || "";
+  const isPaywallRoute =
+    currentPath.startsWith("/guau/app/suscripcion") ||
+    currentPath.startsWith("/guau/app/checkout");
   const trial = await checkTrialServer(supabase, user.id, "guau");
   const pathname = (await headers()).get("x-pathname") || "";
   if (trial.isExpired && !pathname.includes("/suscripcion")) redirect("/guau/app/suscripcion");

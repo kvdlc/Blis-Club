@@ -73,7 +73,9 @@ const DIET_LABELS: Record<string, string> = {
 
 const SIZE_LABELS: Record<string, string> = {
   miniatura: "Miniatura",
+  pequena: "Pequeño",
   pequeno: "Pequeño",
+  mediana: "Mediano",
   mediano: "Mediano",
   grande: "Grande",
   gigante: "Gigante",
@@ -187,9 +189,10 @@ export default function DogShowcaseProfile({
   const edadTexto = getEdadTexto(dog.edad_meses);
   const waText = encodeURIComponent(`🐾 Perfil de ${dog.nombre}\n\n${dog.raza} · ${edadTexto} · ${dog.peso_kg} kg\n\n${shortUrl}`);
 
-  const bestCircuit = agilitySessions.length > 0
-    ? Math.min(...agilitySessions.filter((s) => s.circuit_time_seconds).map((s) => s.circuit_time_seconds!))
-    : null;
+  const circuitTimes = agilitySessions
+    .map((s) => s.circuit_time_seconds)
+    .filter((t): t is number => typeof t === "number" && t > 0);
+  const bestCircuit = circuitTimes.length > 0 ? Math.min(...circuitTimes) : null;
 
   const cleanRuns = agilitySessions.filter((s) => s.clean_run).length;
   const weightInitial = weightHistory.length > 0 ? weightHistory[weightHistory.length - 1].peso_kg : null;

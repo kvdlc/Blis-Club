@@ -76,7 +76,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
   });
   const [weightDisplay, setWeightDisplay] = useState(String(dog.peso_kg).replace(".", ","));
   const [objective, setObjective] = useState(dog.objetivo_principal ?? "");
-  const [breedImage, setBreedImage] = useState(dog.foto_url || (dog as any).breed_image_url || "");
+  const [breedImage, setBreedImage] = useState((dog as any).breed_image_url || "");
   const [tamano, setTamano] = useState(dog.tamano || "");
 
   // Auto-detect size from breed
@@ -200,6 +200,19 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
     }
   };
 
+  // Recalcular la etapa de vida cuando cambian edad, raza o tamaño
+  useEffect(() => {
+    if (!mounted) return;
+    const defaults = getFeedingDefaults({
+      raza: breed,
+      peso_kg: getWeightNumber(),
+      edad_meses: getAgeMonths(birthDate),
+      tamano_guardado: tamano || null,
+    });
+    setLifeStage(defaults.life_stage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [breed, birthDate, tamano, mounted]);
+
   const handleSaveFeeding = async () => {
     setSavingFeeding(true);
     setSaveError("");
@@ -207,24 +220,18 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
       dog_id: dog.id, activity_level: activity, allergies, medical_conditions: conditions,
       feeding_pct: feedingPct, diet_type: dietType, kibble_recipe_id: kibbleRecipeId,
     };
-    console.log("[EditDog] Saving metabolic profile:", payload);
     const { error } = await supabase.from("dog_metabolic_profiles").upsert(payload, { onConflict: "dog_id" });
     if (error) {
-      console.warn("[EditDog] First attempt failed:", error.message);
       // Retry without diet_type
       delete payload.diet_type;
       const { error: e2 } = await supabase.from("dog_metabolic_profiles").upsert(payload, { onConflict: "dog_id" });
       if (e2) {
-        console.error("[EditDog] Both attempts failed:", e2.message);
+        console.error("[EditDog] No se pudo guardar el perfil metabólico:", e2.message);
         setSaveError(e2.message);
         setSavingFeeding(false);
         return;
       }
-      console.log("[EditDog] Saved without diet_type");
     }
-    // Verify: read back to confirm
-    const { data: verify } = await supabase.from("dog_metabolic_profiles").select("diet_type, feeding_pct").eq("dog_id", dog.id).maybeSingle();
-    console.log("[EditDog] Verify after save:", verify);
 
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
@@ -267,7 +274,7 @@ export function EditDogClient({ dog, metabolicProfile, mealSlots, userId, croque
       autoSave();
     }, 800);
     return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
-  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, activity, allergies, conditions]);
+  }, [name, breed, birthDate, weightDisplay, objective, photo, breedImage, tamano, activity, allergies, conditions]);
 
   const filteredBreeds = breedSearch.trim()
     ? BREEDS.filter((b) => b.toLowerCase().includes(breedSearch.toLowerCase()))

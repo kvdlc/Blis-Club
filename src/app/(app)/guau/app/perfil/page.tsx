@@ -27,7 +27,7 @@ export default async function PerfilPage() {
     supabase.from("user_badges").select("*, badges(*)").eq("user_id", user.id),
     supabase.from("weekly_challenges").select("*").order("fecha_inicio", { ascending: false }).limit(5),
     supabase.from("user_challenges").select("*").eq("user_id", user.id),
-    supabase.from("subscriptions").select("*, plans(*)").eq("user_id", user.id).maybeSingle(),
+    supabase.from("subscriptions").select("*, plans(*)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("user_rewards").select("*").eq("user_id", user.id).maybeSingle(),
   ]);
 
