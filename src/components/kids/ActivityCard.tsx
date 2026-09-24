@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Heart, Star, Sparkles, BookOpen } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { categoryMeta, DIFFICULTY_LABEL, type KidsActivity } from "@/lib/kids";
+import { ActivityCover } from "./ActivityCover";
 
 const GRADIENTS: Record<string, string> = {
   colorear: "from-red-300 to-rose-400",
@@ -46,23 +47,14 @@ export function ActivityCard({
     setBusy(false);
   };
 
-  const gradient = GRADIENTS[activity.category_slug] ?? "from-orange-300 to-amber-400";
-  const firstPage = Array.isArray(activity.data?.pages) ? activity.data.pages.find((p: any) => p?.image_url)?.image_url : null;
-  const coverSrc = firstPage || activity.cover_url;
-
   return (
     <Link
       href={`/kids/app/actividad/${activity.id}`}
       className="kids-card group relative flex flex-col overflow-hidden transition-transform hover:-translate-y-1 active:scale-[0.98]"
     >
       {/* Cover */}
-      <div className={`relative flex h-32 items-center justify-center bg-gradient-to-br ${gradient} overflow-hidden p-2`}>
-        {coverSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={coverSrc} alt={activity.title} className="h-full w-full rounded-xl bg-white object-contain shadow-sm" />
-        ) : (
-          <span className="text-3xl font-black text-white/90">{activity.title.charAt(0).toUpperCase()}</span>
-        )}
+      <div className="relative h-32 overflow-hidden">
+        <ActivityCover activity={activity} />
         <button
           onClick={toggleFav}
           aria-label="Favorito"

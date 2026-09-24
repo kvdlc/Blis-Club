@@ -99,8 +99,11 @@ export default async function DescargarPage() {
                 <div key={`${it.kind}-${it.id}`} className="kids-card flex flex-col overflow-hidden">
                   <a href={`${it.downloadHref}?inline=1`} target="_blank" rel="noopener noreferrer" className="relative flex h-36 items-center justify-center overflow-hidden bg-gradient-to-br from-violet-200 via-fuchsia-200 to-sky-200 p-2">
                     {it.cover_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={it.cover_url} alt={it.title} className="h-full w-full rounded-lg bg-white object-contain shadow-sm" />
+                      <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg bg-white shadow-[0_6px_16px_-6px_rgba(0,0,0,0.35)]">
+                        <span className="absolute left-0 top-0 h-full w-1.5" style={{ backgroundColor: catColor }} />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={it.cover_url} alt={it.title} className="h-full w-full object-contain p-1.5" />
+                      </div>
                     ) : (
                       <BookOpen className="h-10 w-10 text-white/80" />
                     )}
