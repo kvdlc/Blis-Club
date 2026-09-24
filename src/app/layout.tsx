@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Quicksand, Nunito } from "next/font/google";
+import { Quicksand, Nunito, Baloo_2 } from "next/font/google";
 import "./globals.css";
 
 const quicksand = Quicksand({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-quicksand" });
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "700", "900"], variable: "--font-nunito" });
+const baloo = Baloo_2({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-baloo" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.blis.club"),
@@ -25,7 +26,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body className={`antialiased bg-app-gradient text-zinc-900 min-h-screen ${quicksand.variable} ${nunito.variable}`}>
+      <body className={`antialiased bg-app-gradient text-zinc-900 min-h-screen ${quicksand.variable} ${nunito.variable} ${baloo.variable}`}>
         {children}
       </body>
     </html>

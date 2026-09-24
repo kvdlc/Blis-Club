@@ -30,7 +30,7 @@ export default async function KidsAppLayout({ children }: { children: React.Reac
   if (trial.isExpired && !isPaywallRoute) redirect("/kids/app/suscripcion");
 
   return (
-    <div className="min-h-screen md:pl-[var(--kids-nav-w,15rem)] transition-[padding] duration-200 overflow-x-hidden">
+    <div className="min-h-screen md:pl-[var(--kids-nav-w,15rem)] transition-[padding] duration-200 overflow-x-hidden" style={{ fontFamily: "var(--font-baloo)" }}>
       <KidsMagicBackground />
       <ReferralTracker />
       <KidsNav />

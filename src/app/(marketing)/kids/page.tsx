@@ -122,7 +122,7 @@ export default async function KidsSitePage() {
   const catCount = cats.length || 6;
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden" style={{ fontFamily: "var(--font-baloo)" }}>
       <KidsMagicBackground />
 
       {/* NAV */}
@@ -134,7 +134,7 @@ export default async function KidsSitePage() {
             </div>
             <div className="leading-tight">
               <p className="text-[10px] font-bold uppercase tracking-widest text-violet-600">Blis Club</p>
-              <p className="text-base font-black text-zinc-800" style={{ fontFamily: "var(--font-quicksand)" }}>Kids Club</p>
+              <p className="text-base font-black text-zinc-800">Kids Club</p>
             </div>
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-bold text-zinc-600 md:flex">
@@ -152,41 +152,57 @@ export default async function KidsSitePage() {
       </header>
 
       {/* HERO */}
-      <section className="relative z-10 mx-auto max-w-5xl px-5 pb-10 pt-14 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-xs font-bold text-violet-700 shadow-sm backdrop-blur">
-          <Sparkles className="h-3.5 w-3.5" /> Material nuevo cada semana · {actCount ?? 0}+ actividades
-        </div>
-        <h1 className="mt-6 text-4xl font-black leading-[1.05] text-zinc-900 sm:text-6xl" style={{ fontFamily: "var(--font-quicksand)" }}>
-          La biblioteca que
-          <span className="block bg-gradient-to-r from-violet-600 via-fuchsia-500 to-sky-500 bg-clip-text text-transparent">
-            nunca se acaba
-          </span>
-        </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-base text-zinc-600 sm:text-lg">
-          Colorear, crucigramas, laberintos, sopa de letras, unir puntos y cuentos con voz.
-          Deja de comprar cuadernos que se acaban en una tarde: aquí tienes <strong>actividades ilimitadas</strong> para toda la infancia de tus hijos.
-        </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <a href="#precio" className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-7 py-4 text-base font-black text-white shadow-lg transition-transform hover:scale-105">
-            Empezar ahora <ArrowRight className="h-5 w-5" />
-          </a>
-          <Link href="/kids/webg" className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-base font-black text-violet-700 shadow-md transition-transform hover:scale-105">
-            Prueba gratis
-          </Link>
-        </div>
-        <div className="mt-7 flex flex-wrap items-center justify-center gap-5 text-sm font-semibold text-zinc-500">
-          <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /> 4.9/5 en satisfacción</span>
-          <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-emerald-500" /> Sin anuncios</span>
-          <span className="inline-flex items-center gap-1.5"><Heart className="h-4 w-4 text-rose-500" /> {catCount} tipos de actividades</span>
-        </div>
+      <section className="relative z-10 w-full px-4 pb-12 pt-10 sm:px-6 lg:px-10">
+        <div className="mx-auto grid w-full max-w-[1500px] items-center gap-10 lg:grid-cols-2 lg:gap-6">
+          <div className="text-center lg:pr-6 lg:text-left">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-xs font-bold text-violet-700 shadow-sm backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5" /> Material nuevo cada semana · {actCount ?? 0}+ actividades
+            </div>
+            <h1 className="mt-5 text-4xl font-extrabold leading-[1.02] text-zinc-900 sm:text-6xl lg:text-7xl">
+              La biblioteca que
+              <span className="block bg-gradient-to-r from-violet-600 via-fuchsia-500 to-sky-500 bg-clip-text text-transparent">
+                nunca se acaba
+              </span>
+            </h1>
+            <p className="mx-auto mt-5 max-w-xl text-base font-semibold text-zinc-600 sm:text-lg lg:mx-0">
+              Colorear, crucigramas, laberintos, sopa de letras, unir puntos y cuentos con voz.
+              Deja de comprar cuadernos que se acaban en una tarde: aquí tienes <strong>actividades ilimitadas</strong> para toda la infancia de tus hijos.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+              <a href="#precio" className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-7 py-4 text-base font-extrabold text-white shadow-lg transition-transform hover:scale-105">
+                Empezar ahora <ArrowRight className="h-5 w-5" />
+              </a>
+              <Link href="/kids/webg" className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-base font-extrabold text-violet-700 shadow-md transition-transform hover:scale-105">
+                Prueba gratis
+              </Link>
+            </div>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-5 text-sm font-semibold text-zinc-500 lg:justify-start">
+              <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /> 4.9/5 en satisfacción</span>
+              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-emerald-500" /> Sin anuncios</span>
+              <span className="inline-flex items-center gap-1.5"><Heart className="h-4 w-4 text-rose-500" /> {catCount} tipos de actividades</span>
+            </div>
+          </div>
 
-        {WEB_IMAGES.hero && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={WEB_IMAGES.hero} alt="Familia disfrutando de Kids Club" className="mx-auto mt-10 w-full max-w-3xl rounded-[2rem] shadow-2xl" />
-        )}
+          <div className="relative">
+            <div className="absolute -left-8 -top-8 hidden h-44 w-44 rounded-full bg-fuchsia-300/40 blur-3xl lg:block" />
+            <div className="absolute -bottom-8 -right-6 hidden h-48 w-48 rounded-full bg-sky-300/40 blur-3xl lg:block" />
+            {WEB_IMAGES.hero && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={WEB_IMAGES.hero}
+                alt="Familia disfrutando de Kids Club"
+                className="relative aspect-square w-full rounded-[2.5rem] object-cover shadow-2xl lg:aspect-[4/5]"
+              />
+            )}
+            <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-2xl bg-white/95 px-4 py-2 shadow-lg backdrop-blur lg:left-8">
+              <ShieldCheck className="h-5 w-5 text-emerald-500" />
+              <span className="text-xs font-black text-zinc-700">Espacio seguro para niños</span>
+            </div>
+          </div>
+        </div>
 
         {cats.length > 0 && (
-          <div className="mt-10 grid grid-cols-3 gap-3 sm:grid-cols-6">
+          <div className="mx-auto mt-12 grid w-full max-w-[1500px] grid-cols-3 gap-3 sm:grid-cols-6">
             {cats.map((c) => (
               <div key={c.id} className="kids-card overflow-hidden">
                 <div className="aspect-square bg-white">
@@ -213,7 +229,7 @@ export default async function KidsSitePage() {
             { v: "4.9★", l: "Padres felices" },
           ].map((s) => (
             <div key={s.l} className="text-center">
-              <p className="text-3xl font-black text-magic" style={{ fontFamily: "var(--font-quicksand)" }}>{s.v}</p>
+              <p className="text-3xl font-black text-magic">{s.v}</p>
               <p className="text-xs font-bold text-zinc-500">{s.l}</p>
             </div>
           ))}
@@ -222,7 +238,7 @@ export default async function KidsSitePage() {
 
       {/* PAIN POINTS */}
       <section className="relative z-10 mx-auto max-w-5xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           ¿Te suena familiar?
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-center text-zinc-500">
@@ -231,7 +247,7 @@ export default async function KidsSitePage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {PAINS.map((p, i) => (
             <div key={p.title} className="kids-card overflow-hidden">
-              <div className="h-44 w-full overflow-hidden bg-rose-50">
+              <div className="aspect-square w-full overflow-hidden bg-rose-50">
                 {PAIN_IMGS[i] && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={PAIN_IMGS[i]} alt="" className="h-full w-full object-cover" />
@@ -259,7 +275,7 @@ export default async function KidsSitePage() {
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
                 <BadgeCheck className="h-3.5 w-3.5" /> La solución
               </span>
-              <h2 className="mt-4 text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+              <h2 className="mt-4 text-2xl font-black text-zinc-900 sm:text-3xl">
                 Una sola suscripción. Toda la infancia.
               </h2>
               <p className="mt-3 text-zinc-600">
@@ -274,7 +290,7 @@ export default async function KidsSitePage() {
                 ))}
               </ul>
             </div>
-            <div className="overflow-hidden rounded-3xl shadow-lg">
+            <div className="aspect-square overflow-hidden rounded-3xl shadow-lg">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={WEB_IMAGES.fix_library} alt="Biblioteca mágica de Kids Club" className="h-full w-full object-cover" />
             </div>
@@ -282,9 +298,40 @@ export default async function KidsSitePage() {
         </div>
       </section>
 
+      {/* BEFORE / AFTER */}
+      <section className="relative z-10 mx-auto max-w-5xl px-5 py-12">
+        <h2 className="text-center text-2xl font-extrabold text-zinc-900 sm:text-3xl">
+          Antes y después de Kids Club
+        </h2>
+        <div className="mt-8 grid gap-5 sm:grid-cols-2">
+          <div className="kids-card overflow-hidden">
+            <div className="relative aspect-square w-full overflow-hidden bg-rose-50">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={WEB_IMAGES.pain_time} alt="Antes" className="h-full w-full object-cover" />
+              <span className="absolute left-3 top-3 rounded-full bg-rose-500 px-3 py-1 text-xs font-black text-white shadow">Antes</span>
+            </div>
+            <div className="p-5">
+              <h3 className="text-lg font-extrabold text-zinc-800">Papeles, gastos y estrés</h3>
+              <p className="mt-1 text-sm text-zinc-600">Cuadernos que se acaban, mesa llena de impresiones y niños que se aburren al rato.</p>
+            </div>
+          </div>
+          <div className="kids-card overflow-hidden">
+            <div className="relative aspect-square w-full overflow-hidden bg-emerald-50">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={WEB_IMAGES.fix_story} alt="Después" className="h-full w-full object-cover" />
+              <span className="absolute left-3 top-3 rounded-full bg-emerald-500 px-3 py-1 text-xs font-black text-white shadow">Después</span>
+            </div>
+            <div className="p-5">
+              <h3 className="text-lg font-extrabold text-zinc-800">Tranquilidad y diversión sin fin</h3>
+              <p className="mt-1 text-sm text-zinc-600">Una biblioteca mágica con actividades ilimitadas, sin volver a comprar nada.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* SOLUTION IN ACTION */}
       <section className="relative z-10 mx-auto max-w-6xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           La solución, en el día a día
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-center text-zinc-500">
@@ -297,7 +344,7 @@ export default async function KidsSitePage() {
             { img: WEB_IMAGES.fix_story, t: "Cuentos con voz", d: "Momentos tranquilos leyendo juntos, incluso antes de leer solos." },
           ].map((c) => (
             <div key={c.t} className="kids-card overflow-hidden">
-              <div className="h-44 w-full overflow-hidden bg-violet-50">
+              <div className="aspect-square w-full overflow-hidden bg-violet-50">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={c.img} alt="" className="h-full w-full object-cover" />
               </div>
@@ -312,7 +359,7 @@ export default async function KidsSitePage() {
 
       {/* CONTENT / CATEGORIES */}
       <section id="contenido" className="relative z-10 mx-auto max-w-6xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           Todo lo que van a encontrar
         </h2>
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -338,7 +385,7 @@ export default async function KidsSitePage() {
 
       {/* FEATURES */}
       <section id="beneficios" className="relative z-10 mx-auto max-w-6xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           Todo lo que incluye
         </h2>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -356,7 +403,7 @@ export default async function KidsSitePage() {
 
       {/* GALLERY */}
       <section className="relative z-10 mx-auto max-w-6xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           Míralo en acción
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-center text-zinc-500">
@@ -396,7 +443,7 @@ export default async function KidsSitePage() {
 
       {/* AGES */}
       <section className="relative z-10 mx-auto max-w-6xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           Para cada edad
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-center text-zinc-500">
@@ -418,7 +465,7 @@ export default async function KidsSitePage() {
 
       {/* LEARNING */}
       <section className="relative z-10 mx-auto max-w-6xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           Aprender jugando (de verdad)
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-center text-zinc-500">
@@ -441,7 +488,7 @@ export default async function KidsSitePage() {
 
       {/* HOW IT WORKS */}
       <section id="como" className="relative z-10 mx-auto max-w-5xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           Así de fácil
         </h2>
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -469,7 +516,7 @@ export default async function KidsSitePage() {
 
       {/* COMPARISON */}
       <section className="relative z-10 mx-auto max-w-3xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           Cuadernos de tienda vs. Kids Club
         </h2>
         <div className="kids-card mt-8 overflow-hidden">
@@ -490,7 +537,7 @@ export default async function KidsSitePage() {
 
       {/* TESTIMONIALS */}
       <section className="relative z-10 mx-auto max-w-6xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           Familias que ya juegan con Kids Club
         </h2>
         <div className="mt-8 flex gap-4 overflow-x-auto pb-4 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">
@@ -514,9 +561,29 @@ export default async function KidsSitePage() {
         </div>
       </section>
 
+      {/* RESULTS */}
+      <section className="relative z-10 mx-auto max-w-5xl px-5 py-12">
+        <h2 className="text-center text-2xl font-extrabold text-zinc-900 sm:text-3xl">
+          Números que hablan
+        </h2>
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            { v: `${actCount ?? 0}+`, l: "Actividades y láminas" },
+            { v: "50", l: "Páginas por libro" },
+            { v: "0", l: "Cuadernos que comprar" },
+            { v: "4.9★", l: "Padres satisfechos" },
+          ].map((s) => (
+            <div key={s.l} className="kids-card p-6 text-center">
+              <p className="text-3xl font-extrabold text-magic sm:text-4xl">{s.v}</p>
+              <p className="mt-1 text-xs font-bold text-zinc-500">{s.l}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* PRICING */}
       <section id="precio" className="relative z-10 mx-auto max-w-md px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           Un precio. Todo incluido.
         </h2>
         <div className="kids-card mt-8 overflow-hidden">
@@ -570,7 +637,7 @@ export default async function KidsSitePage() {
           <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-xs font-black text-white">
             <Clock className="h-3.5 w-3.5" /> Oferta por tiempo limitado
           </span>
-          <h2 className="mt-4 text-2xl font-black text-white sm:text-4xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+          <h2 className="mt-4 text-2xl font-black text-white sm:text-4xl">
             El precio de lanzamiento sube pronto
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-sm text-white/90 sm:text-base">
@@ -602,7 +669,7 @@ export default async function KidsSitePage() {
 
       {/* FAQ */}
       <section id="faq" className="relative z-10 mx-auto max-w-2xl px-5 py-12">
-        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl">
           Preguntas frecuentes
         </h2>
         <div className="mt-8 space-y-3">
@@ -622,7 +689,7 @@ export default async function KidsSitePage() {
       <section className="relative z-10 mx-auto max-w-4xl px-5 pb-16">
         <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-violet-600 via-fuchsia-600 to-sky-600 p-8 text-center shadow-xl sm:p-12">
           <Wand2 className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 text-white/15" />
-          <h2 className="text-2xl font-black text-white sm:text-4xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+          <h2 className="text-2xl font-black text-white sm:text-4xl">
             Dale a tus hijos una biblioteca infinita
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm text-white/90 sm:text-base">
