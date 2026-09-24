@@ -10,6 +10,10 @@ import {
   Check, X, Clock, Wallet, Frown, BatteryLow, Smartphone, Users, Download, Wand2, Gift, Crown, BadgeCheck, CreditCard,
   Hand, Brain, Languages, Target, Home as HomeIcon, Compass,
 } from "lucide-react";
+import { WEB_IMAGES } from "@/lib/kids/web-images";
+
+const PAIN_IMGS = [WEB_IMAGES.pain_books, WEB_IMAGES.pain_bored, WEB_IMAGES.pain_screen, WEB_IMAGES.pain_time];
+const AVATARS = [WEB_IMAGES.avatar1, WEB_IMAGES.avatar2, WEB_IMAGES.avatar3, WEB_IMAGES.avatar4];
 
 export const metadata: Metadata = {
   title: "Kids Club · La biblioteca infinita para tus hijos",
@@ -176,6 +180,11 @@ export default async function KidsSitePage() {
           <span className="inline-flex items-center gap-1.5"><Heart className="h-4 w-4 text-rose-500" /> {catCount} tipos de actividades</span>
         </div>
 
+        {WEB_IMAGES.hero && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={WEB_IMAGES.hero} alt="Familia disfrutando de Kids Club" className="mx-auto mt-10 w-full max-w-3xl rounded-[2rem] shadow-2xl" />
+        )}
+
         {cats.length > 0 && (
           <div className="mt-10 grid grid-cols-3 gap-3 sm:grid-cols-6">
             {cats.map((c) => (
@@ -220,14 +229,22 @@ export default async function KidsSitePage() {
           Sabemos lo que es tener niños en casa. Esto lo viven todos los padres.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {PAINS.map((p) => (
-            <div key={p.title} className="kids-card flex items-start gap-4 p-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-500">
-                <p.icon className="h-6 w-6" />
+          {PAINS.map((p, i) => (
+            <div key={p.title} className="kids-card overflow-hidden">
+              <div className="h-44 w-full overflow-hidden bg-rose-50">
+                {PAIN_IMGS[i] && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={PAIN_IMGS[i]} alt="" className="h-full w-full object-cover" />
+                )}
               </div>
-              <div>
-                <h3 className="text-base font-black text-zinc-800">{p.title}</h3>
-                <p className="mt-1 text-sm text-zinc-600">{p.text}</p>
+              <div className="flex items-start gap-4 p-5">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-500">
+                  <p.icon className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-zinc-800">{p.title}</h3>
+                  <p className="mt-1 text-sm text-zinc-600">{p.text}</p>
+                </div>
               </div>
             </div>
           ))}
@@ -257,14 +274,39 @@ export default async function KidsSitePage() {
                 ))}
               </ul>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {[Palette, Puzzle, BookOpen, Printer].map((I, i) => (
-                <div key={i} className="flex aspect-square items-center justify-center rounded-3xl bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-600">
-                  <I className="h-10 w-10" />
-                </div>
-              ))}
+            <div className="overflow-hidden rounded-3xl shadow-lg">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={WEB_IMAGES.fix_library} alt="Biblioteca mágica de Kids Club" className="h-full w-full object-cover" />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* SOLUTION IN ACTION */}
+      <section className="relative z-10 mx-auto max-w-6xl px-5 py-12">
+        <h2 className="text-center text-2xl font-black text-zinc-900 sm:text-3xl" style={{ fontFamily: "var(--font-quicksand)" }}>
+          La solución, en el día a día
+        </h2>
+        <p className="mx-auto mt-3 max-w-xl text-center text-zinc-500">
+          Tres formas de usarlo hoy mismo, sin comprar nada más.
+        </p>
+        <div className="mt-8 grid gap-5 sm:grid-cols-3">
+          {[
+            { img: WEB_IMAGES.fix_print, t: "Imprime en un clic", d: "Descarga el PDF y pintan a mano, sin volver a la papelería." },
+            { img: WEB_IMAGES.fix_puzzle, t: "Juega en la pantalla", d: "Colorear, crucigramas y laberintos directo en el tablet, sin desorden." },
+            { img: WEB_IMAGES.fix_story, t: "Cuentos con voz", d: "Momentos tranquilos leyendo juntos, incluso antes de leer solos." },
+          ].map((c) => (
+            <div key={c.t} className="kids-card overflow-hidden">
+              <div className="h-44 w-full overflow-hidden bg-violet-50">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={c.img} alt="" className="h-full w-full object-cover" />
+              </div>
+              <div className="p-5">
+                <h3 className="text-lg font-black text-zinc-800">{c.t}</h3>
+                <p className="mt-1 text-sm text-zinc-600">{c.d}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -452,13 +494,21 @@ export default async function KidsSitePage() {
           Familias que ya juegan con Kids Club
         </h2>
         <div className="mt-8 flex gap-4 overflow-x-auto pb-4 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">
-          {TESTIMONIALS.map((t) => (
+          {TESTIMONIALS.map((t, i) => (
             <div key={t.name} className="kids-card w-[260px] shrink-0 p-5 sm:w-auto">
-              <div className="flex gap-0.5">
-                {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />)}
+              <div className="flex items-center gap-3">
+                {AVATARS[i] && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={AVATARS[i]} alt={t.name} className="h-12 w-12 rounded-full object-cover ring-2 ring-white" />
+                )}
+                <div>
+                  <p className="text-sm font-black text-zinc-700">{t.name}</p>
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, s) => <Star key={s} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
+                  </div>
+                </div>
               </div>
               <p className="mt-3 text-sm text-zinc-700">“{t.text}”</p>
-              <p className="mt-3 text-xs font-black text-zinc-500">— {t.name}</p>
             </div>
           ))}
         </div>
